@@ -9,6 +9,7 @@ namespace NewBase
 		IDXGISwapChain** SwapChain;
 		HWND Hwnd;
 		WNDPROC WndProc;
+		std::int64_t** ScriptGlobals;
 	};
 
 	struct Pointers : PointerData

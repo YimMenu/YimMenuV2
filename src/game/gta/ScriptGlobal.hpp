@@ -14,12 +14,12 @@ namespace NewBase
             m_Index(idx)
         {}
         
-        constexpr ScriptGlobal at(std::ptrdiff_t offset) const
+        constexpr ScriptGlobal At(std::ptrdiff_t offset) const
         {
             return m_Index + offset;
         }
 
-        constexpr ScriptGlobal at(std::ptrdiff_t offset, std::size_t size) const
+        constexpr ScriptGlobal At(std::ptrdiff_t offset, std::size_t size) const
         {
             return m_Index + 1 + offset * size;
         }

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-namespace NewBase
+namespace YimMenu
 {
 #define ADD_COLOR_TO_STREAM(color) "\x1b[" << int(color) << "m"
 #define RESET_STREAM_COLOR "\x1b[0m"

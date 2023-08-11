@@ -6,7 +6,7 @@
 #include <backends/imgui_impl_win32.h>
 #include <imgui.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	Renderer::Renderer()
 	{

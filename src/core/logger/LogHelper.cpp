@@ -2,7 +2,7 @@
 
 #include "LogSink.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	void LogHelper::Destroy()
 	{

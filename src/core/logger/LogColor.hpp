@@ -1,6 +1,6 @@
 #pragma once
 
-namespace NewBase
+namespace YimMenu
 {
 	enum class LogColor
 	{

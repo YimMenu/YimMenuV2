@@ -3,7 +3,7 @@
 #include "menu/Menu.hpp"
 #include "core/renderer/Renderer.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	GUI::GUI() :
 		m_IsOpen(false)

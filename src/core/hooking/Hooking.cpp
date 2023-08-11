@@ -6,7 +6,7 @@
 #include "game/hooks/Hooks.hpp"
 #include "game/pointers/Pointers.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	Hooking::Hooking()
 	{

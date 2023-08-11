@@ -1,6 +1,6 @@
 #include "BytePatch.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
     BytePatch::~BytePatch()
     {

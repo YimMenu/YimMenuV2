@@ -2,13 +2,14 @@
 #include <d3d11.h>
 #include <windows.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	struct PointerData
 	{
 		IDXGISwapChain** SwapChain;
 		HWND Hwnd;
 		WNDPROC WndProc;
+		std::int64_t** ScriptGlobals;
 	};
 
 	struct Pointers : PointerData
@@ -16,5 +17,5 @@ namespace NewBase
 		bool Init();
 	};
 
-	inline NewBase::Pointers Pointers;
+	inline YimMenu::Pointers Pointers;
 }

@@ -6,7 +6,7 @@
 #include <map>
 #include <windows.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	using DXCallback              = std::function<void()>;
 	using WindowProcedureCallback = std::function<void(HWND, UINT, WPARAM, LPARAM)>;

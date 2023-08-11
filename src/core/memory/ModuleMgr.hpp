@@ -2,7 +2,7 @@
 #include "Module.hpp"
 #include "common.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	using joaat_t = std::uint32_t;
 
@@ -31,5 +31,5 @@ namespace NewBase
 		std::unordered_map<std::uint32_t, std::unique_ptr<Module>> m_CachedModules;
 	};
 
-	inline NewBase::ModuleMgr ModuleMgr;
+	inline YimMenu::ModuleMgr ModuleMgr;
 }

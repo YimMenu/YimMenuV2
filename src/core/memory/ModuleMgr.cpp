@@ -2,7 +2,7 @@
 
 #include "util/Joaat.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	Module* ModuleMgr::Get(const std::string_view name)
 	{

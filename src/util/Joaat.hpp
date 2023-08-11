@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace NewBase
+namespace YimMenu
 {
 	using joaat_t = std::uint32_t;
 

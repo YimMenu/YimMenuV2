@@ -75,7 +75,20 @@
         "span": "cpp",
         "unordered_map": "cpp",
         "xhash": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "any": "cpp",
+        "csignal": "cpp",
+        "cstdarg": "cpp",
+        "future": "cpp",
+        "map": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp",
+        "xtree": "cpp"
     },
     "C_Cpp.default.configurationProvider": "maxmitti.cmake-tools-fork"
 }

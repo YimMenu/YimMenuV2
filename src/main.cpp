@@ -7,14 +7,14 @@
 #include "game/pointers/Pointers.hpp"
 
 
-namespace NewBase
+namespace YimMenu
 {
 	DWORD Main(void*)
 	{
 		const auto documents = std::filesystem::path(std::getenv("USERPROFILE")) / "Documents";
 		FileMgr::Init(documents / "HellBase");
 
-		LogHelper::Init("henlo", FileMgr::GetProjectFile("./cout.log").Path());
+		LogHelper::Init("henlo", FileMgr::GetProjectFile("./cout.log"));
 
 		if (!ModuleMgr.LoadModules())
 			goto unload;
@@ -44,7 +44,7 @@ namespace NewBase
 
 BOOL WINAPI DllMain(HINSTANCE dllInstance, DWORD reason, void*)
 {
-	using namespace NewBase;
+	using namespace YimMenu;
 
 	DisableThreadLibraryCalls(dllInstance);
 

@@ -1,6 +1,6 @@
 #include "BaseObj.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
     BaseObj::BaseObj(const std::filesystem::path& path) :
         m_Path(path)

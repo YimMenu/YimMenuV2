@@ -1,7 +1,7 @@
 #pragma once
 #include <string_view>
 
-namespace NewBase
+namespace YimMenu
 {
 	class BaseHook
 	{

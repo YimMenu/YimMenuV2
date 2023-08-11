@@ -7,7 +7,7 @@
 #include "game/pointers/Pointers.hpp"
 
 
-namespace NewBase
+namespace YimMenu
 {
 	DWORD Main(void*)
 	{
@@ -44,7 +44,7 @@ namespace NewBase
 
 BOOL WINAPI DllMain(HINSTANCE dllInstance, DWORD reason, void*)
 {
-	using namespace NewBase;
+	using namespace YimMenu;
 
 	DisableThreadLibraryCalls(dllInstance);
 

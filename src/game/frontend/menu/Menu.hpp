@@ -1,7 +1,7 @@
 #pragma once
 #include "game/frontend/GUI.hpp"
 
-namespace NewBase::Menu
+namespace YimMenu::Menu
 {
 	extern void Main();
 }

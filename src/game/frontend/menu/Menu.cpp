@@ -1,6 +1,6 @@
 #include "Menu.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	void Menu::Main()
 	{

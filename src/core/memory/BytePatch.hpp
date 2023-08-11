@@ -3,7 +3,7 @@
 #include <span>
 #include <vector>
 
-namespace NewBase
+namespace YimMenu
 {
     template<typename T>
     concept SpanCompatibleType = requires(T a)

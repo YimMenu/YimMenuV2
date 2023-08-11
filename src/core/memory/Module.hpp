@@ -4,7 +4,7 @@
 
 #include <winternl.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	class Module
 	{

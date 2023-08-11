@@ -5,7 +5,7 @@
 #include "core/memory/PatternScanner.hpp"
 #include "util/Joaat.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	bool Pointers::Init()
 	{

@@ -3,7 +3,7 @@
 #include "memory/Module.hpp"
 #include "memory/PointerCalculator.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	template<typename T = int*>
 	class IATHook : public BaseHook

@@ -3,7 +3,7 @@
 
 #include <string_view>
 
-namespace NewBase
+namespace YimMenu
 {
 	template<std::size_t N>
 	struct Signature

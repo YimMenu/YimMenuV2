@@ -4,7 +4,7 @@
 
 #include <future>
 
-namespace NewBase
+namespace YimMenu
 {
 	PatternScanner::PatternScanner(const Module* module) :
 	    m_Module(module),

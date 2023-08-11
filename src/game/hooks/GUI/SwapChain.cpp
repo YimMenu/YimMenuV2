@@ -2,7 +2,7 @@
 #include "core/renderer/Renderer.hpp"
 #include "game/hooks/Hooks.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	HRESULT SwapChain::Present(IDXGISwapChain* that, UINT syncInterval, UINT flags)
 	{

@@ -1,7 +1,7 @@
 #pragma once
 #include <MinHook.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	class MinHook
 	{

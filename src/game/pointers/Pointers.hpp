@@ -2,7 +2,7 @@
 #include <d3d11.h>
 #include <windows.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	struct PointerData
 	{
@@ -17,5 +17,5 @@ namespace NewBase
 		bool Init();
 	};
 
-	inline NewBase::Pointers Pointers;
+	inline YimMenu::Pointers Pointers;
 }

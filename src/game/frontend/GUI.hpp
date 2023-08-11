@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
 
-namespace NewBase
+namespace YimMenu
 {
 	class GUI final
 	{

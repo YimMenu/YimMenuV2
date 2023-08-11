@@ -1,7 +1,7 @@
 #pragma once
 #include "MinHook.hpp"
 
-namespace NewBase
+namespace YimMenu
 {
 	class Hooking
 	{

@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace NewBase
+namespace YimMenu
 {
 	class PointerCalculator final
 	{

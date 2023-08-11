@@ -14,7 +14,7 @@ namespace NewBase
 		const auto documents = std::filesystem::path(std::getenv("USERPROFILE")) / "Documents";
 		FileMgr::Init(documents / "HellBase");
 
-		LogHelper::Init("henlo", FileMgr::GetProjectFile("./cout.log").Path());
+		LogHelper::Init("henlo", FileMgr::GetProjectFile("./cout.log"));
 
 		if (!ModuleMgr.LoadModules())
 			goto unload;

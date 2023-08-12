@@ -31,9 +31,20 @@ namespace YimMenu
 
 		constexpr auto debugTrap = Pattern<"48 83 EC 28 33 C9 FF 15 ? ? ? ? 45 33 C9">("DebugTrap");
 		scanner.Add(debugTrap, [this](PointerCalculator ptr) {
-			BytePatch::Make(ptr.As<void*>(), std::to_array({ 0xC3, 0x90, 0x90, 0x90 }))->Apply();
+			BytePatch::Make(ptr.As<void*>(), std::to_array({0xC3, 0x90, 0x90, 0x90}))->Apply();
 
 			UnhookWindowsHookEx(*ptr.Add(45).Rip().As<HHOOK*>());
+		});
+
+		constexpr auto nativeHandlersPtrn = Pattern<"48 8D 0D ? ? ? ? 48 8B 14 FA E8 ? ? ? ? 48 85 C0 75 0A">("NativeHandlers");
+		scanner.Add(nativeHandlersPtrn, [this](PointerCalculator ptr) {
+			NativeRegistrationTable = ptr.Add(3).Rip().As<void*>();
+			GetNativeHandler        = ptr.Add(12).Rip().As<Functions::GetNativeHandler>();
+		});
+
+		constexpr auto fixVectorsPtrn = Pattern<"83 79 18 00 48 8B D1 74 4A FF 4A 18 48 63 4A 18 48 8D 41 04 48 8B 4C CA">("FixVectors");
+		scanner.Add(fixVectorsPtrn, [this](PointerCalculator ptr) {
+			FixVectors = ptr.As<Functions::FixVectors>();
 		});
 
 		if (!scanner.Scan())

@@ -7,6 +7,7 @@ include(cmake/async-logger.cmake)
 include(cmake/imgui.cmake)
 include(cmake/json.cmake)
 include(cmake/minhook.cmake)
+include(cmake/gtav-classes.cmake)
 
 # source
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
@@ -25,6 +26,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${SRC_DIR}"
     "${imgui_SOURCE_DIR}"
     "${minhook_SOURCE_DIR}/include"    
+    "${gtav_classes_SOURCE_DIR}"
 )
 
 message(STATUS "Setting up linked libraries")

@@ -4,8 +4,8 @@
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
 #include "game/frontend/GUI.hpp"
+#include "game/gta/Natives.hpp"
 #include "game/pointers/Pointers.hpp"
-
 
 namespace YimMenu
 {
@@ -28,6 +28,7 @@ namespace YimMenu
 		while (g_Running)
 		{
 			std::this_thread::sleep_for(100ms);
+			LOG(INFO) << ENTITY::GET_ENTITY_HEALTH(PLAYER::PLAYER_PED_ID());
 		}
 
 	unload:

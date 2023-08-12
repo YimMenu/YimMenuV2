@@ -8,7 +8,7 @@ crossmap_hash_list = []
 class Arg:
     def __init__(self, name: str, type: str):
         self.name = name
-        self.type = type.replace("BOOL", "bool")
+        self.type = type.replace("BOOL", "bool").replace("Any*", "void*")
 
     def __str__(self) -> str:
         return str(self.type) + " " + str(self.name)
@@ -19,7 +19,7 @@ class NativeFunc:
         self.name = name
         self.hash = hash
         self.args: list[Arg] = []
-        self.return_type = return_type.replace("BOOL", "bool")
+        self.return_type = return_type.replace("BOOL", "bool").replace("Any*", "void*")
         self.native_index = -1
 
         for arg in args:
@@ -37,7 +37,7 @@ class NativeFunc:
             param_decl = param_decl[:-2]
             param_pass = param_pass[:-2]
         
-        return f"FORCEINLINE {self.return_type} {self.name}({param_decl}) {{ return YimMenu::NativeInvoker::Invoke<{self.native_index}, {self.return_type}>({param_pass}); }}"
+        return f"FORCEINLINE constexpr {self.return_type} {self.name}({param_decl}) {{ return YimMenu::NativeInvoker::Invoke<{self.native_index}, {self.return_type}>({param_pass}); }}"
 
 class CrossmapEntry:
     def __init__(self, translated_hash: int):

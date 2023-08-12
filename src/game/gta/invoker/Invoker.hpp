@@ -37,6 +37,7 @@ namespace YimMenu
 		template<int index, bool fix_vectors>
 		constexpr void EndCall()
 		{
+			// TODO: try to get rid of this
 			if (!m_AreHandlersCached)
 				CacheHandlers();
 

@@ -1,6 +1,9 @@
 include(FetchContent)
 
 message(STATUS "Setting up AsyncLogger")
+
+set(USE_FMT ON CACHE INTERNAL "")
+
 FetchContent_Declare(
     AsyncLogger
     GIT_REPOSITORY https://github.com/Yimura/AsyncLogger.git

@@ -2,7 +2,7 @@
 
 #include <AsyncLogger/Logger.hpp>
 #include <MinHook.h>
-#include <Windows.h>
+#include <windows.h>
 #include <array>
 #include <atomic>
 #include <chrono>

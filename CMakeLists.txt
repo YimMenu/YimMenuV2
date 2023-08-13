@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20.x)
 
+include(cmake/crosscompile.cmake)
+
 project(NewBase VERSION 0.0.1 DESCRIPTION "A new base using new C++ features optimised for speed and ease of use")
 
 # libs
@@ -30,4 +32,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 message(STATUS "Setting up linked libraries")
-target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json fmt d3dcompiler dwmapi)

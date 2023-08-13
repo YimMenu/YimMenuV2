@@ -40,5 +40,7 @@ namespace YimMenu
 			m_IsOpen = !m_IsOpen;
 			ToggleMouse();
 		}
+		if(msg == WM_KEYUP)
+			LOG(INFO) << "WNDPROC " << wparam;
 	}
 }

@@ -1,0 +1,60 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  ci_mingw:
+      runs-on: ubuntu-latest
+      container: ghcr.io/yimmenu/yimmenu:latest
+      name: CI MinGW
+      steps:
+        - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+        - uses: actions/checkout@v3
+
+        - name: Check CMake version
+          run: cmake --version
+
+        - name: Generate CMake project
+          run: cmake -DVERSION=1.3.4 -DCMAKE_BUILD_TYPE:STRING=Release -S. -Bbuild -DCROSSCOMPILE:BOOL=TRUE -DUSE_GCC:BOOL=TRUE -GNinja
+
+        - name: Build 64bit release DLL
+          run: cmake --build build --config Release
+
+        - name: Rename DLL to libNewBase-dev-{GITHUB_SHA}.dll
+          run: mv libNewBase.dll libNewBase-dev-${{github.sha}}.dll
+          working-directory: build/
+
+        - name: Upload Artifact
+          uses: actions/upload-artifact@v3
+          with:
+            name: binary-MinGW
+            path: build/libNewBase-dev-*.dll
+
+  ci_msvc:
+    runs-on: windows-latest
+    name: CI MSVC
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check CMake version
+        run: cmake --version
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Generate CMake project
+        run: cmake -S. -Bbuild -G "Visual Studio 17 2022" -DCMAKE_CONFIGURATION_TYPES=Release
+
+      - name: Build 64bit release DLL
+        run: cmake --build build --config Release --target ALL_BUILD
+
+      - name: Rename DLL to NewBase-dev-{GITHUB_SHA}.dll
+        run: ren NewBase.dll NewBase-dev-${{github.sha}}.dll
+        working-directory: build/Release/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary-MSVC
+          path: build/Release/NewBase-dev-*.dll

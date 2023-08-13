@@ -12,5 +12,5 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(AsyncLogger)
 
-target_compile_definitions(AsyncLogger PRIVATE USE_FMT) # Why?
+target_compile_definitions(AsyncLogger PUBLIC USE_FMT) # Why?
 set_property(TARGET AsyncLogger PROPERTY CXX_STANDARD 23)

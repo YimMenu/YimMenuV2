@@ -90,10 +90,5 @@
         "variant": "cpp",
         "xtree": "cpp"
     },
-    "C_Cpp.default.configurationProvider": "maxmitti.cmake-tools-fork",
-    "cmake.configureArgs": [
-        "-DCROSSCOMPILE:BOOL=TRUE",
-        "-DUSE_GCC:BOOL=TRUE",
-        "-DUSE_CLANG:BOOL=FALSE"
-    ],
+    "C_Cpp.default.configurationProvider": "maxmitti.cmake-tools-fork"
 }

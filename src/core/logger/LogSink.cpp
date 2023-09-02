@@ -1,8 +1,7 @@
 #include "LogSink.hpp"
 
 #include "LogColor.hpp"
-#include <fmt/core.h>
-#include <fmt/chrono.h>
+#include <format>
 
 namespace YimMenu
 {
@@ -29,7 +28,7 @@ namespace YimMenu
 	{
 		std::stringstream out;
 
-		const auto timestamp = fmt::format("{0:%H:%M:%S}", msg->Timestamp());
+		const auto timestamp = std::format("{0:%H:%M:%S}", msg->Timestamp());
 		const auto& location = msg->Location();
 		const auto level     = msg->Level();
 		const auto color     = LogSink::GetColor(level);
@@ -46,7 +45,7 @@ namespace YimMenu
 	{
 		std::stringstream out;
 
-		const auto timestamp = fmt::format("{0:%H:%M:%S}", msg->Timestamp());
+		const auto timestamp = std::format("{0:%H:%M:%S}", msg->Timestamp());
 		const auto& location = msg->Location();
 		const auto level     = msg->Level();
 		const auto file      = std::filesystem::path(location.file_name()).filename().string();

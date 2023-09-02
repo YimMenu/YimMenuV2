@@ -21,9 +21,7 @@ if(CROSSCOMPILE)
     set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
     set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-    add_compile_options(
-        "$<$<COMPILE_LANGUAGE:ASM_MASM>:-win64${ASM_MASM_FLAGS}>"
-    )
+    add_compile_options("$<$<COMPILE_LANGUAGE:ASM_MASM>:-win64${ASM_MASM_FLAGS}>")
     add_link_options(-static)
     add_compile_definitions(CROSSCOMPILING)
 

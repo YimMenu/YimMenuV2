@@ -27,9 +27,9 @@ message(STATUS "Setting up include directories.")
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${SRC_DIR}"
     "${imgui_SOURCE_DIR}"
-    "${minhook_SOURCE_DIR}/include"    
+    "${minhook_SOURCE_DIR}/include"
     "${gtav_classes_SOURCE_DIR}"
 )
 
 message(STATUS "Setting up linked libraries")
-target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json fmt d3dcompiler dwmapi)
+target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json d3dcompiler dwmapi)

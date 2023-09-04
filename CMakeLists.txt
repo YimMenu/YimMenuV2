@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20.x)
 
+include(cmake/crosscompile.cmake)
+
 project(NewBase VERSION 0.0.1 DESCRIPTION "A new base using new C++ features optimised for speed and ease of use")
 
 # libs
@@ -25,9 +27,9 @@ message(STATUS "Setting up include directories.")
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${SRC_DIR}"
     "${imgui_SOURCE_DIR}"
-    "${minhook_SOURCE_DIR}/include"    
+    "${minhook_SOURCE_DIR}/include"
     "${gtav_classes_SOURCE_DIR}"
 )
 
 message(STATUS "Setting up linked libraries")
-target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json d3dcompiler dwmapi)

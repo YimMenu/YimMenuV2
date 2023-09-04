@@ -1,6 +1,7 @@
 #include "LogSink.hpp"
 
 #include "LogColor.hpp"
+#include <format>
 
 namespace YimMenu
 {

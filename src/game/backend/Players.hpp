@@ -8,9 +8,14 @@ namespace YimMenu
 	{
 		std::unordered_map<uint8_t, Player> m_Players{};
 		std::unordered_map<uint8_t, PlayerData> m_PlayerDatas{};
-		Player m_SelectedPlayer = Player((uint8_t)0);
+		Player m_SelectedPlayer{};
 
 	public:
+		static void Init()
+		{
+			GetInstance().InitImpl();
+		}
+
 		static void OnPlayerJoin(CNetGamePlayer* player)
 		{
 			GetInstance().OnPlayerJoinImpl(player);
@@ -62,7 +67,7 @@ namespace YimMenu
 
 			if (players.empty())
 			{
-				return Player((uint8_t)0);
+				return Player();
 			}
 
 			uint8_t random = static_cast<uint8_t>(rand() % players.size());
@@ -71,13 +76,13 @@ namespace YimMenu
 		}
 
 	private:
-		Players();
-
 		static Players& GetInstance()
 		{
 			static Players Instance;
 			return Instance;
 		}
+
+		void InitImpl();
 
 		void OnPlayerJoinImpl(CNetGamePlayer* player);
 		void OnPlayerLeaveImpl(CNetGamePlayer* player);

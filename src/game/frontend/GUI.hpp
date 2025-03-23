@@ -36,8 +36,15 @@ namespace YimMenu
 			return ImGui::GetIO().WantTextInput;
 		}
 
+		static void RunScript()
+		{
+			GetInstance().RunScriptImpl();
+		}
+
 	private:
 		void WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+
+		void RunScriptImpl();
 
 		static void ToggleMouse();
 		static GUI& GetInstance()

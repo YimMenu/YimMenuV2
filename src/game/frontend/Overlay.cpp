@@ -26,7 +26,7 @@ namespace YimMenu
 		ImGui::Begin("##overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
 
 		if (Features::_OverlayShowFPS.GetState())
-			ImGui::Text("FPS: %d", (int)(1 / MISC::GET_SYSTEM_TIME_STEP()));
+			ImGui::Text("FPS: %d", (int)(ImGui::GetIO().Framerate));
 
 		ImGui::PopFont();
 		ImGui::PopStyleColor();

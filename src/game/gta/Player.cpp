@@ -185,6 +185,7 @@ namespace YimMenu
 	void Player::SetWantedLevel(int level)
 	{
 		PLAYER::SET_PLAYER_WANTED_LEVEL(GetId(), level, false);
+		PLAYER::SET_PLAYER_WANTED_LEVEL_NOW(GetId(), false);
 	}
 
 	void Player::SetVisibleLocally(bool visible)

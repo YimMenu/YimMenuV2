@@ -12,7 +12,6 @@ namespace YimMenu
 	class LogHelper final
 	{
 	public:
-		~LogHelper()                           = default;
 		LogHelper(const LogHelper&)            = delete;
 		LogHelper(LogHelper&&)                 = delete;
 		LogHelper& operator=(const LogHelper&) = delete;
@@ -25,6 +24,7 @@ namespace YimMenu
 
 	private:
 		LogHelper(){};
+		~LogHelper();
 
 		static LogHelper& GetInstance()
 		{

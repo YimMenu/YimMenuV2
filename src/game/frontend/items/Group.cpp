@@ -28,6 +28,9 @@ namespace YimMenu
 		ImGui::BeginGroup();
 		for (auto& item : m_Items)
 		{
+			if (!item->CanDraw())
+				continue;
+
 			item->Draw();
 			item_count++;
 

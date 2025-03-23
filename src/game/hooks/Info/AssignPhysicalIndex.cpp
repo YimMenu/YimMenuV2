@@ -11,7 +11,6 @@ namespace YimMenu::Hooks
 
 		if (index != 255)
 		{
-			auto _ = Players::GetRandom(); // we have to initialize the player mgr before this or the game crashes for some reason
 			BaseHook::Get<Info::AssignPhysicalIndex, DetourHook<decltype(&Info::AssignPhysicalIndex)>>()->Original()(mgr, player, index);
 			Players::OnPlayerJoin(player);
 		}

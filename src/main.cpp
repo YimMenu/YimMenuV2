@@ -9,6 +9,7 @@
 #include "core/hooking/Hooking.hpp"
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
+#include "game/backend/Players.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/NativeHooks.hpp"
 #include "game/frontend/GUI.hpp"
@@ -35,6 +36,8 @@ namespace YimMenu
 		if (!Renderer::Init())
 			goto EARLY_UNLOAD;
 
+		Players::Init();
+
 		Hooking::Init();
 
 		ScriptMgr::Init();
@@ -44,6 +47,7 @@ namespace YimMenu
 
 		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
 		FiberPool::Init(5);
 		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
@@ -63,6 +67,7 @@ namespace YimMenu
 		Hooking::Destroy();
 
 EARLY_UNLOAD:
+		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();
 

@@ -55,9 +55,8 @@ namespace YimMenu
 				    //ImGui::EndDisabled();
 
 				    UIManager::Draw();
-
-				    ImGui::End();
 			    }
+			    ImGui::End();
 
 			    ImGui::PopStyleColor();
 			    ImGui::PopFont();

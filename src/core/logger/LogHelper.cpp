@@ -4,6 +4,12 @@
 
 namespace YimMenu
 {
+	LogHelper::~LogHelper()
+	{
+		if (g_Running)
+			GetInstance().DestroyImpl();
+	}
+
 	void LogHelper::Destroy()
 	{
 		GetInstance().DestroyImpl();

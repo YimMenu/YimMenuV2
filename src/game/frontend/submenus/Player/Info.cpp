@@ -59,7 +59,7 @@ namespace YimMenu::Submenus
 
 				ImGui::Text("RID:");
 				ImGui::SameLine();
-				if (ImGui::Button(std::to_string(rid1).c_str()))
+				if (ImGui::SmallButton(std::to_string(rid1).c_str()))
 				{
 					ImGui::SetClipboardText(std::to_string(rid1).c_str());
 				}
@@ -71,7 +71,7 @@ namespace YimMenu::Submenus
 
 				ImGui::Text("IP Address:");
 				ImGui::SameLine();
-				if (ImGui::Button(addr2.c_str()))
+				if (ImGui::SmallButton(addr2.c_str()))
 				{
 					ImGui::SetClipboardText(addr2.c_str());
 				}

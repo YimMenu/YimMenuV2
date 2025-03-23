@@ -114,6 +114,7 @@ namespace YimMenu
 	public:
 		explicit ConditionalItem(joaat_t bool_cmd_id, std::shared_ptr<UIItem> to_draw, bool negate = false);
 		void Draw() override;
+		bool CanDraw() override;
 
 	private:
 		BoolCommand* m_Condition;

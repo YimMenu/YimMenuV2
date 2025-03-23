@@ -5,7 +5,7 @@
 
 namespace YimMenu
 {
-	Players::Players()
+	void Players::InitImpl()
 	{
 		for (uint8_t idx = 0; idx < 32u; idx++)
 		{

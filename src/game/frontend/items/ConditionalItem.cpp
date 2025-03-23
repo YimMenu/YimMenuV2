@@ -23,4 +23,9 @@ namespace YimMenu
 		if (m_Condition->GetState() ^ m_Negate)
 			m_Item->Draw();
 	}
+
+	bool ConditionalItem::CanDraw()
+	{
+		return m_Condition->GetState() ^ m_Negate;
+	}
 }

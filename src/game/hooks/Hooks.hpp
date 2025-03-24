@@ -13,6 +13,11 @@ namespace rage
 	class datBitBuffer;
 }
 
+namespace YimMenu
+{
+	class Player;
+}
+
 namespace YimMenu::Hooks
 {
 	namespace SwapChain
@@ -45,6 +50,8 @@ namespace YimMenu::Hooks
 	namespace Network
 	{
 		extern void ReceiveNetMessage(void* a1, rage::netConnectionManager* mgr, rage::netEvent* event);
+		extern void ReceiveEvent(YimMenu::Player& player, uint16_t event_id, uint32_t event_index, uint32_t event_handled_bitset, rage::datBitBuffer& buffer);
+		extern bool HandleScriptedGameEvent(YimMenu::Player& player, int64_t* args, uint32_t args_size);
 	}
 
 	namespace Window

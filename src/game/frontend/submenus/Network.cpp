@@ -20,7 +20,7 @@ namespace YimMenu::Submenus
 
 		teleportGroup->AddItem(std::make_shared<CommandItem>("bringall"_J, "Bring All"));
 		auto customPlayerTp = std::make_shared<Group>("", 1);
-		customPlayerTp->AddItem(std::make_shared<Vector3CommandItem>("playertpcoord"_J, "##tpcoord"));
+		customPlayerTp->AddItem(std::make_shared<Vector3CommandItem>("playertpcoord"_J, ""));
 		customPlayerTp->AddItem(std::make_shared<CommandItem>("tpplayertocoordall"_J, "Teleport Everyone"));
 		teleportGroup->AddItem(customPlayerTp);
 

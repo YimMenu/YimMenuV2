@@ -164,6 +164,17 @@ namespace YimMenu
 			ReceiveNetMessage = ptr.Add(0xD).Add(1).Rip().As<PVOID>();
 		});
 
+		constexpr auto netEventMgrPtrn = Pattern<"4C 8B 05 ? ? ? ? 44 0F B7 CA">("NetEventMgr");
+		scanner.Add(netEventMgrPtrn, [this](PointerCalculator ptr) {
+			NetEventMgr = ptr.Add(3).Rip().As<rage::netEventMgr**>();
+		});
+
+		constexpr auto sendEventAckPtrn = Pattern<"84 C0 75 ? 89 EE 49 8D AD">("SendEventAck");
+		scanner.Add(sendEventAckPtrn, [this](PointerCalculator ptr) {
+			EventAck = ptr.Sub(4).Rip().As<Functions::EventAck>();
+			SendEventAck = ptr.Add(0x13).Add(1).Rip().As<Functions::SendEventAck>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

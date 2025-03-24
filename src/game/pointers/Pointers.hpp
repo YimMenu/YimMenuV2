@@ -13,6 +13,7 @@ namespace rage
 	class netSyncTree;
 	class netObject;
 	class netConnectionManager;
+	class netEventMgr;
 }
 class CPedFactory;
 class CNetGamePlayer;
@@ -33,6 +34,8 @@ namespace YimMenu
 		using QueuePacket = void(*)(rage::netConnectionManager* mgr, int msg_id, void* data, int size, int flags, std::uint16_t* out_seq_id);
 		using GetNetObjectById = rage::netObject* (*)(uint16_t id);
 		using RequestControl = void(*)(rage::netObject* object);
+		using EventAck = bool(*)(uintptr_t data, CNetGamePlayer* target_player, uint32_t event_index, uint32_t event_handled_bitset);
+		using SendEventAck = void(*)(rage::netEventMgr* event_manager, CNetGamePlayer* source_player);
 	}
 
 	struct PointerData
@@ -69,6 +72,9 @@ namespace YimMenu
 		Functions::RequestControl RequestControl;
 		std::uint8_t* SpectatePatch; // used to patch the code that prevents you from spawning network objects when spectating
 		PVOID ReceiveNetMessage;
+		rage::netEventMgr** NetEventMgr;
+		Functions::EventAck EventAck;
+		Functions::SendEventAck SendEventAck;
 	};
 
 	struct Pointers : PointerData

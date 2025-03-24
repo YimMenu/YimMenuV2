@@ -1,5 +1,5 @@
 #pragma once
-enum SeatPositions
+enum class SeatPositions
 {
 	SEAT_DRIVER        = -1,
 	SEAT_PASSENGER     = 0,
@@ -7,7 +7,7 @@ enum SeatPositions
 	SEAT_BACKPASSENGER = 2
 };
 
-enum WheelTypes
+enum class WheelTypes
 {
 	WHEEL_TYPE_STOCK = -1,
 	WHEEL_TYPE_SPORT,
@@ -25,7 +25,7 @@ enum WheelTypes
 	WHEEL_TYPE_TRACK
 };
 
-enum VehicleWeapons
+enum class VehicleWeapons
 {
 	VEHICLE_WEAPON_AKULA_BARRAGE         = 0x880D14F2,
 	VEHICLE_WEAPON_AKULA_MINIGUN         = 0x19B95679,
@@ -145,7 +145,7 @@ enum VehicleWeapons
 	VEHICLE_WEAPON_WATER_CANNON          = 0x67D18297
 };
 
-enum TunerTypes
+enum class TunerTypes
 {
 	WHEEL_TUNER_STOCK = -1,
 	WHEEL_TUNER_COSMO,
@@ -174,7 +174,7 @@ enum TunerTypes
 	WHEEL_TUNER_RALLYMASTER
 };
 
-enum HighEndWheels
+enum class HighEndWheels
 {
 	WHEEL_HIGHEND_STOCK = -1,
 	WHEEL_HIGHEND_SHADOW,
@@ -199,7 +199,7 @@ enum HighEndWheels
 	WHEEL_HIGHEND_CARBONSRACER
 };
 
-enum LowriderWheels
+enum class LowriderWheels
 {
 	WHEEL_LOWRIDER_STOCK = -1,
 	WHEEL_LOWRIDER_FLARE,
@@ -219,7 +219,7 @@ enum LowriderWheels
 	WHEEL_LOWRIDER_GOOCH,
 };
 
-enum MuscleWheels
+enum class MuscleWheels
 {
 	WHEEL_MUSCLE_STOCK = -1,
 	WHEEL_MUSCLE_CLASSICFIVE,
@@ -242,7 +242,7 @@ enum MuscleWheels
 	WHEEL_MUSCLE_MERCENARY
 };
 
-enum OffroadWheels
+enum class OffroadWheels
 {
 	WHEEL_OFFROAD_STOCK = -1,
 	WHEEL_OFFROAD_RAIDER,
@@ -257,7 +257,7 @@ enum OffroadWheels
 	WHEEL_OFFROAD_MILSPECSTEELIE
 };
 
-enum SportWheels
+enum class SportWheels
 {
 	WHEEL_SPORT_STOCK = -1,
 	WHEEL_SPORT_INFERNO,
@@ -286,7 +286,7 @@ enum SportWheels
 	WHEEL_SPORT_SLITSIX
 };
 
-enum SUVWheels
+enum class SUVWheels
 {
 	WHEEL_SUV_STOCK = -1,
 	WHEEL_SUV_VIP,
@@ -310,7 +310,7 @@ enum SUVWheels
 	WHEEL_SUV_CUTTER
 };
 
-enum BikeWheels
+enum class BikeWheels
 {
 	WHEEL_BIKE_STOCK = -1,
 	WHEEL_BIKE_SPEEDWAY,
@@ -328,7 +328,7 @@ enum BikeWheels
 	WHEEL_BIKE_LOOPS
 };
 
-enum VehicleModType
+enum class VehicleModType
 {
 	MOD_SPOILERS,
 	MOD_FRONTBUMPER,
@@ -382,7 +382,7 @@ enum VehicleModType
 	MOD_LIGHTBAR,
 };
 
-enum CustomVehicleModType
+enum class CustomVehicleModType
 {
 	MOD_MODEL_HASH = -100,
 
@@ -448,7 +448,7 @@ enum CustomVehicleModType
 
 static const char* mod_names[] = {"MOD_SPOILERS", "MOD_FRONTBUMPER", "MOD_REARBUMPER", "MOD_SIDESKIRT", "MOD_EXHAUST", "MOD_FRAME", "MOD_GRILLE", "MOD_HOOD", "MOD_FENDER", "MOD_RIGHTFENDER", "MOD_ROOF", "MOD_ENGINE", "MOD_BRAKES", "MOD_TRANSMISSION", "MOD_HORNS", "MOD_SUSPENSION", "MOD_ARMOR", "", "MOD_TURBO", "", "MOD_TIRESMOKE", "", "MOD_XENONHEADLIGHTS", "MOD_FRONTWHEEL", "MOD_REARWHEEL", "MOD_PLATEHOLDER", "MOD_VANITYPLATES", "MOD_TRIMDESIGN", "MOD_ORNAMENTS", "MOD_DASHBOARD", "MOD_DIALDESIGN", "MOD_DOORSPEAKERS", "MOD_SEATS", "MOD_STEERINGWHEELS", "MOD_COLUMNSHIFTERLEVERS", "MOD_PLAQUES", "MOD_SPEAKERS", "MOD_TRUNK", "MOD_HYDRAULICS", "MOD_ENGINEBLOCK", "MOD_AIRFILTER", "MOD_STRUTS", "MOD_ARCHCOVER", "MOD_AERIALS", "MOD_TRIM", "MOD_TANK", "MOD_WINDOWS", "", "MOD_LIVERY"};
 
-enum VehicleModHorns
+enum class VehicleModHorns
 {
 	HORN_STOCK = -1,
 	HORN_TRUCK,
@@ -511,7 +511,7 @@ enum VehicleModHorns
 	HORN_HIGH_SHORT
 };
 
-enum VehicleAddonLevel
+enum class VehicleAddonLevel
 {
 	MOD_INDEX_OFF = -1,
 	MOD_INDEX_ONE, //To determine mod index, look at the mod menu in LSC, the first item is MOD_INDEX_ONE. Count down to the item you want. Stock counts as OFF.
@@ -525,7 +525,7 @@ enum VehicleAddonLevel
 	MOD_INDEX_NINE
 };
 
-enum NeonLightLocations
+enum class NeonLightLocations
 {
 	NEON_LEFT,
 	NEON_RIGHT,
@@ -533,12 +533,12 @@ enum NeonLightLocations
 	NEON_BACK
 };
 
-enum VehicleColorsChrome
+enum class VehicleColorsChrome
 {
 	COLOR_CHROME = 120
 };
 
-enum VehicleColorsClassic
+enum class VehicleColorsClassic
 {
 	COLOR_CLASSIC_BLACK            = 0,
 	COLOR_CLASSIC_CARBON_BLACK     = 147,
@@ -629,7 +629,7 @@ enum VehicleColorsClassic
 	COLOR_CLASSIC_SECRET_GOLD      = 160
 };
 
-enum VehicleColorsMatte
+enum class VehicleColorsMatte
 {
 	COLOR_MATTE_BLACK           = 12,
 	COLOR_MATTE_GRAY            = 13,
@@ -654,7 +654,7 @@ enum VehicleColorsMatte
 	COLOR_MATTE_BROWN           = 129
 };
 
-enum VehicleColorsMetals
+enum class VehicleColorsMetals
 {
 	COLOR_METALS_BRUSHED_STEEL       = 117,
 	COLOR_METALS_BRUSHED_BLACK_STEEL = 118,
@@ -663,7 +663,7 @@ enum VehicleColorsMetals
 	COLOR_METALS_BRUSHED_GOLD        = 159
 };
 
-enum VehicleColorsUtil
+enum class VehicleColorsUtil
 {
 	COLOR_UTIL_BLACK          = 15,
 	COLOR_UTIL_BLACK_POLY     = 16,
@@ -689,7 +689,7 @@ enum VehicleColorsUtil
 	COLOR_UTIL_OFF_WHITE      = 122
 };
 
-enum VehicleColorsWorn
+enum class VehicleColorsWorn
 {
 	COLOR_WORN_BLACK            = 21,
 	COLOR_WORN_GRAPHITE         = 22,
@@ -719,7 +719,7 @@ enum VehicleColorsWorn
 	COLOR_WORN_OLIVE_ARMY_GREEN = 133
 };
 
-enum PlateTextIndexs
+enum class PlateTextIndexs
 {
 	PLATE_BLUEONWHITE1,
 	PLATE_YELLOWONBLACK,
@@ -736,7 +736,7 @@ enum PlateTextIndexs
 	PLATE_SPRUNK,
 };
 
-enum WindowTints //m8 do you even int tint?
+enum class WindowTints //m8 do you even int tint?
 {
 	WINDOWTINT_NONE,
 	WINDOWTINT_BLACK,
@@ -747,7 +747,7 @@ enum WindowTints //m8 do you even int tint?
 	WINDOWTINT_GREEN
 };
 
-enum HeadlightColors
+enum class HeadlightColors
 {
 	XENON_DEFAULT = -1,
 	XENON_WHITE,

@@ -1,13 +1,13 @@
-#include "Vehicle.hpp"
+#include "World.hpp"
 #include <game/frontend/items/Items.hpp>
 
 namespace YimMenu::Submenus
 {
-	Vehicle::Vehicle() :
-	    Submenu::Submenu("Vehicle")
+	World::World() :
+	    Submenu::Submenu("World")
 	{
-		auto mainGroup = std::make_shared<Category>("Main");
-		auto spawnGroup = std::make_shared<Group>("Spawn");
+		auto mainGroup = std::make_shared<Category>("Spawners");
+		auto spawnGroup = std::make_shared<Group>("Vehicle");
 
 		spawnGroup->AddItem(std::make_shared<StringCommandItem>("vehmodelname"_J));
 		spawnGroup->AddItem(std::make_shared<BoolCommandItem>("spawninvehicle"_J));

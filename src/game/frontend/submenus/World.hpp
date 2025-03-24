@@ -3,9 +3,9 @@
 
 namespace YimMenu::Submenus
 {
-	class Vehicle : public Submenu
+	class World : public Submenu
 	{
 	public:
-		Vehicle();
+		World();
 	};
 }

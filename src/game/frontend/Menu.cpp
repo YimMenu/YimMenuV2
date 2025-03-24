@@ -13,7 +13,7 @@
 #include "submenus/Players.hpp"
 #include "submenus/Settings.hpp"
 #include "submenus/Debug.hpp"
-#include "submenus/Vehicle.hpp"
+#include "submenus/World.hpp"
 
 namespace YimMenu
 {
@@ -22,7 +22,7 @@ namespace YimMenu
 		// Arguably the only place this file should be edited at for more menus
 		UIManager::AddSubmenu(std::make_shared<Submenus::Self>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Teleport>());
-		UIManager::AddSubmenu(std::make_shared<Submenus::Vehicle>());
+		UIManager::AddSubmenu(std::make_shared<Submenus::World>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Network>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Players>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Settings>());

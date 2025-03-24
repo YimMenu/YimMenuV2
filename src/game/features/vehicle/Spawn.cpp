@@ -3,7 +3,7 @@
 #include "game/gta/Natives.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/commands/BoolCommand.hpp"
-#include "game/gta/VehicleValues.hpp"
+#include "game/gta/data/VehicleValues.hpp"
 
 namespace YimMenu::Features
 {
@@ -28,30 +28,8 @@ namespace YimMenu::Features
 
 			if (STREAMING::IS_MODEL_IN_CDIMAGE(modelHash))
 			{
-				STREAMING::REQUEST_MODEL(modelHash);
-
-				while (!STREAMING::HAS_MODEL_LOADED(modelHash)) {
-					ScriptMgr::Yield();
-				}
-
-				auto veh = VEHICLE::CREATE_VEHICLE(modelHash,
-				    Self::GetPed().GetPosition().x + 10,
-				    Self::GetPed().GetPosition().y,
-				    Self::GetPed().GetPosition().z,
-				    0,
-				    true,
-				    true,
-					true
-				);
-
-				VEHICLE::SET_VEHICLE_ENGINE_ON(veh, true, true, true);
-				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh, false);
-
-				DECORATOR::DECOR_SET_INT(veh, "MPBitset", 1);
-
-				ScriptMgr::Yield();
-
-				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(modelHash);
+				rage::fvector3 coords = Self::GetPed().GetPosition();
+				auto veh              = Vehicle::Create(modelHash, coords, Self::GetPed().GetHeading()).GetHandle();
 
 				if (_SpawnInVehicle.GetState())
 				{
@@ -62,7 +40,7 @@ namespace YimMenu::Features
 				{
 					VEHICLE::SET_VEHICLE_MOD_KIT(veh, 0);
 				
-					for (int t = MOD_SPOILERS; t < MOD_LIGHTBAR; t++) {
+					for (int t = (int)VehicleModType::MOD_SPOILERS; t < (int)VehicleModType::MOD_LIGHTBAR; t++) {
 						VEHICLE::SET_VEHICLE_MOD(veh, t, VEHICLE::GET_NUM_VEHICLE_MODS(veh, t) - 1, false);
 					}
 

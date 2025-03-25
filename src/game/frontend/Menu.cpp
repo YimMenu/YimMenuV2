@@ -14,13 +14,16 @@
 #include "submenus/Settings.hpp"
 #include "submenus/Debug.hpp"
 #include "submenus/World.hpp"
-
+#include "submenus/Vehicle.hpp"
+#include "submenus/Weapon.hpp"
 namespace YimMenu
 {
 	void Menu::Init()
 	{
 		// Arguably the only place this file should be edited at for more menus
 		UIManager::AddSubmenu(std::make_shared<Submenus::Self>());
+		UIManager::AddSubmenu(std::make_shared<Submenus::Weapon>());
+		UIManager::AddSubmenu(std::make_shared<Submenus::Vehicle>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Teleport>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::World>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Network>());

@@ -70,6 +70,7 @@ namespace YimMenu::Submenus
 		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
 		
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
+		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));
 
 		vehicle->AddItem(vehicleGlobalsGroup);
 		vehicle->AddItem(vehicleMiscGroup);

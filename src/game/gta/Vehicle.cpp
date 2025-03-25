@@ -87,6 +87,9 @@ namespace YimMenu
 
 	void Vehicle::Upgrade()
 	{
+		ENTITY_ASSERT_VALID();
+		ENTITY_ASSERT_CONTROL();
+
 		auto veh = GetHandle();
 
 		VEHICLE::SET_VEHICLE_MOD_KIT(veh, 0);
@@ -101,6 +104,9 @@ namespace YimMenu
 
 	void Vehicle::SetPlateText(const std::string text)
 	{
+		ENTITY_ASSERT_VALID();
+		ENTITY_ASSERT_CONTROL();
+
 		if (text.length() > 8)
 		{
 			return;

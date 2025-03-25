@@ -31,9 +31,9 @@ namespace YimMenu
 			}
 		}
 
-		*Pointers.SpectatePatch = 0xEB;
+		Pointers.SpectatePatch->Apply();
 		auto veh = Vehicle(VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, heading, true, false, false));
-		*Pointers.SpectatePatch = 0x74;
+		Pointers.SpectatePatch->Restore();
 
 		if (!veh)
 		{

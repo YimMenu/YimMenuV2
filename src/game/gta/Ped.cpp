@@ -31,9 +31,9 @@ namespace YimMenu
 			}
 		}
 
-		*Pointers.SpectatePatch = 0xEB;
+		Pointers.SpectatePatch->Apply();
 		auto ped = Ped(PED::CREATE_PED(0, model, coords.x, coords.y, coords.z, heading, true, 0));
-		*Pointers.SpectatePatch = 0x74;
+		Pointers.SpectatePatch->Restore();
 
 		if (!ped)
 		{

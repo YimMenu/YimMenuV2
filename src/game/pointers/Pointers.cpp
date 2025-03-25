@@ -42,6 +42,12 @@ namespace YimMenu
 			ScreenResY = ptr.Add(0x1E).Add(4).Rip().As<std::uint32_t*>();
 		});
 
+		constexpr auto versionPtrn = Pattern<"4C 8D 0D ? ? ? ? 48 8D 5C 24 ? 48 89 D9 48 89 FA">("Version");
+		scanner.Add(versionPtrn, [this](PointerCalculator ptr) {
+			GameVersion   = ptr.Add(3).Rip().As<const char*>();
+			OnlineVersion = ptr.Add(0x47).Add(3).Rip().As<const char*>();
+		});
+
 		constexpr auto scriptThreadsPtrn = Pattern<"48 8B 05 ? ? ? ? 48 89 34 F8 48 FF C7 48 39 FB 75 97">("ScriptThreads");
 		scanner.Add(scriptThreadsPtrn, [this](PointerCalculator ptr) {
 			ScriptThreads = ptr.Add(3).Rip().As<rage::atArray<rage::scrThread*>*>();
@@ -161,7 +167,17 @@ namespace YimMenu
 
 		constexpr auto spectatePatchPtrn = Pattern<"74 26 66 83 FF 0D 77 20 0F B7 C7">("SpectatePatch");
 		scanner.Add(spectatePatchPtrn, [this](PointerCalculator ptr) {
-			SpectatePatch = ptr.As<std::uint8_t*>();
+			SpectatePatch = BytePatch::Make(ptr.As<std::uint8_t*>(), 0xEB).get();
+		});
+
+		constexpr auto modelSpawnBypassPtrn = Pattern<"E8 ? ? ? ? 48 8B 78 48">("ModelSpawnBypass");
+		scanner.Add(modelSpawnBypassPtrn, [this](PointerCalculator ptr) {
+			BytePatch::Make(ptr.Add(1).Rip().Add(0x2B).As<std::uint8_t*>(), 0xEB)->Apply();
+		});//Maybe it would be better to use this?
+
+		constexpr auto worldModelSpawnBypassPtrn = Pattern<"4C 8B 2C 01 4D 85 ED 0F 84 ? ? ? ?">("WorldModelSpawnBypass");
+		scanner.Add(worldModelSpawnBypassPtrn, [this](PointerCalculator ptr) {
+			WorldModelSpawnBypass = BytePatch::Make(ptr.Add(4).As<PVOID>(), std::vector<byte>{0xEB, 0x12, 0x90}).get();
 		});
 
 		constexpr auto receiveNetMessagePtrn = Pattern<"48 81 C1 00 03 00 00 4C 89 E2">("ReceiveNetMessage");

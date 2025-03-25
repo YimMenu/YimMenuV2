@@ -30,9 +30,11 @@ namespace YimMenu
 			}
 		}
 
-		*Pointers.SpectatePatch = 0xEB;
+		Pointers.SpectatePatch->Apply();
+		Pointers.WorldModelSpawnBypass->Apply();
 		auto obj = Object(OBJECT::CREATE_OBJECT(model, coords.x, coords.y, coords.z, true, false, true));
-		*Pointers.SpectatePatch = 0x74;
+		Pointers.WorldModelSpawnBypass->Restore();
+		Pointers.SpectatePatch->Restore();
 
 		if (!obj)
 		{

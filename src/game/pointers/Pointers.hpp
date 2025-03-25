@@ -3,6 +3,7 @@
 #include <dxgi1_4.h>
 #include <windows.h>
 #include "types/script/scrNativeHandler.hpp"
+#include "core/memory/BytePatch.hpp"
 
 namespace rage
 {
@@ -34,6 +35,7 @@ namespace YimMenu
 		using QueuePacket = void(*)(rage::netConnectionManager* mgr, int msg_id, void* data, int size, int flags, std::uint16_t* out_seq_id);
 		using GetNetObjectById = rage::netObject* (*)(uint16_t id);
 		using RequestControl = void(*)(rage::netObject* object);
+		using TriggerScriptEvent = void(*)(int event_group, int64_t* args, int arg_count, int player_bits);
 		using EventAck = bool(*)(uintptr_t data, CNetGamePlayer* target_player, uint32_t event_index, uint32_t event_handled_bitset);
 		using SendEventAck = void(*)(rage::netEventMgr* event_manager, CNetGamePlayer* source_player);
 	}
@@ -46,6 +48,8 @@ namespace YimMenu
 		PVOID WndProc;
 		std::uint32_t* ScreenResX;
 		std::uint32_t* ScreenResY;
+		const char* GameVersion;
+		const char* OnlineVersion;
 		rage::atArray<rage::scrThread*>* ScriptThreads;
 		PVOID InitNativeTables;
 		std::int64_t** ScriptGlobals;
@@ -71,7 +75,9 @@ namespace YimMenu
 		Functions::QueuePacket QueuePacket;
 		Functions::GetNetObjectById GetNetObjectById;	
 		Functions::RequestControl RequestControl;
-		std::uint8_t* SpectatePatch; // used to patch the code that prevents you from spawning network objects when spectating
+		Functions::TriggerScriptEvent TriggerScriptEvent;
+		BytePatch* SpectatePatch; // used to patch the code that prevents you from spawning network objects when spectating
+		BytePatch* WorldModelSpawnBypass;
 		PVOID ReceiveNetMessage;
 		rage::netEventMgr** NetEventMgr;
 		Functions::EventAck EventAck;

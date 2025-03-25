@@ -165,11 +165,6 @@ namespace YimMenu
 			RequestControl = ptr.Add(5).Add(1).Rip().As<Functions::RequestControl>();
 		});
 
-		constexpr auto triggerScriptEventPtrn = Pattern<"41 57 41 56 56 57 55 53 48 81 EC ? ? ? ? 44 89 C3 49 89 D6 41 89 CF">("TriggerScriptEvent");
-		scanner.Add(triggerScriptEventPtrn, [this](PointerCalculator ptr) {
-			TriggerScriptEvent = ptr.As<Functions::TriggerScriptEvent>();
-		});
-
 		constexpr auto spectatePatchPtrn = Pattern<"74 26 66 83 FF 0D 77 20 0F B7 C7">("SpectatePatch");
 		scanner.Add(spectatePatchPtrn, [this](PointerCalculator ptr) {
 			SpectatePatch = BytePatch::Make(ptr.As<std::uint8_t*>(), 0xEB).get();

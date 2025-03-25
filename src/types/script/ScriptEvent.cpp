@@ -3,6 +3,5 @@
 
 void SCRIPT_EVENT::SendImpl(int size)
 {
-	YimMenu::Pointers.TriggerScriptEvent(1, (int64_t*)this, size / sizeof(std::uint64_t), PlayerBits);
-	//SCRIPT::_SEND_TU_SCRIPT_EVENT_NEW(1, this, size / sizeof(std::uint64_t), PlayerBits, EventIndex);
+	SCRIPT::_SEND_TU_SCRIPT_EVENT_NEW(1, this, size / sizeof(std::uint64_t), PlayerBits, EventIndex);
 }

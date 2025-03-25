@@ -2,6 +2,7 @@
 #include "Natives.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/pointers/Pointers.hpp"
+#include "game/gta/data/VehicleValues.hpp"
 
 namespace YimMenu
 {
@@ -82,5 +83,19 @@ namespace YimMenu
 		ENTITY_ASSERT_VALID();
 
 		return VEHICLE::GET_VEHICLE_ESTIMATED_MAX_SPEED(GetHandle());
+	}
+
+	void Vehicle::Upgrade()
+	{
+		auto veh = GetHandle();
+
+		VEHICLE::SET_VEHICLE_MOD_KIT(veh, 0);
+
+		for (int t = (int)VehicleModType::MOD_SPOILERS; t < (int)VehicleModType::MOD_LIGHTBAR; t++)
+		{
+			VEHICLE::SET_VEHICLE_MOD(veh, t, VEHICLE::GET_NUM_VEHICLE_MODS(veh, t) - 1, false);
+		}
+
+		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
 	}
 }

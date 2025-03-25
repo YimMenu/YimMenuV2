@@ -18,5 +18,7 @@ namespace YimMenu
 
 		// speed
 		float GetMaxSpeed();
+
+		void Upgrade();
 	};
 }

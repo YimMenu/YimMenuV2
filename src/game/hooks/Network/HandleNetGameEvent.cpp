@@ -15,6 +15,8 @@ namespace YimMenu::Hooks
 			Pointers.SendEventAck(event_mgr, source_player);
 			Pointers.EventAck((intptr_t)event_mgr + 0x2C408 + 0x778LL * source_player->m_PlayerIndex, target_player, event_index, event_handled_bits);
 		}
+
+		*reinterpret_cast<std::uint32_t*>(0x118LL * event_index + (uint64_t)event_mgr + 4 * source_player->m_PlayerIndex + 0x458) = event_handled_bits;
 	}
 
 	static bool HandleNetGameEvent(Player& player, uint16_t event_id, rage::datBitBuffer& buffer)

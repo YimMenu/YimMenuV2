@@ -98,4 +98,15 @@ namespace YimMenu
 
 		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
 	}
+
+	void Vehicle::SetPlateText(const std::string text)
+	{
+		if (text.length() > 8)
+		{
+			return;
+		}
+
+		const char* cstr = text.c_str();
+		VEHICLE::SET_VEHICLE_NUMBER_PLATE_TEXT(GetHandle(), cstr);
+	}
 }

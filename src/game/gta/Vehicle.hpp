@@ -20,5 +20,6 @@ namespace YimMenu
 		float GetMaxSpeed();
 
 		void Upgrade();
+		void SetPlateText(const std::string text);
 	};
 }

@@ -28,6 +28,11 @@ namespace YimMenu::Hooks
 		extern HRESULT ResizeBuffers(IDXGISwapChain* that, UINT bufferCount, UINT width, UINT height, DXGI_FORMAT newFormat, UINT swapChainFlags);
 	}
 
+	namespace Anticheat
+	{
+		extern void QueueDependency(__int64 a1);
+	}
+
 	namespace Info
 	{
 		extern void AssignPhysicalIndex(CNetworkPlayerMgr* mgr, CNetGamePlayer* player, std::uint8_t index);

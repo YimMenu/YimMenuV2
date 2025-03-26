@@ -167,17 +167,17 @@ namespace YimMenu
 
 		constexpr auto spectatePatchPtrn = Pattern<"74 26 66 83 FF 0D 77 20 0F B7 C7">("SpectatePatch");
 		scanner.Add(spectatePatchPtrn, [this](PointerCalculator ptr) {
-			SpectatePatch = BytePatch::Make(ptr.As<std::uint8_t*>(), 0xEB).get();
+			SpectatePatch = BytePatches::Add(ptr.As<std::uint8_t*>(), 0xEB);
 		});
 
 		constexpr auto modelSpawnBypassPtrn = Pattern<"E8 ? ? ? ? 48 8B 78 48">("ModelSpawnBypass");
 		scanner.Add(modelSpawnBypassPtrn, [this](PointerCalculator ptr) {
-			BytePatch::Make(ptr.Add(1).Rip().Add(0x2B).As<std::uint8_t*>(), 0xEB)->Apply();
-		});//Maybe it would be better to use this?
+			ModelSpawnBypass = BytePatches::Add(ptr.Add(1).Rip().Add(0x2B).As<std::uint8_t*>(), 0xEB);
+		});
 
 		constexpr auto worldModelSpawnBypassPtrn = Pattern<"4C 8B 2C 01 4D 85 ED 0F 84 ? ? ? ?">("WorldModelSpawnBypass");
 		scanner.Add(worldModelSpawnBypassPtrn, [this](PointerCalculator ptr) {
-			WorldModelSpawnBypass = BytePatch::Make(ptr.Add(4).As<PVOID>(), std::vector<byte>{0xEB, 0x12, 0x90}).get();
+			WorldModelSpawnBypass = BytePatches::Add(ptr.Add(4).As<void*>(), std::vector<std::uint8_t>{0xEB, 0x12, 0x90});
 		});
 
 		constexpr auto receiveNetMessagePtrn = Pattern<"48 81 C1 00 03 00 00 4C 89 E2">("ReceiveNetMessage");
@@ -194,6 +194,12 @@ namespace YimMenu
 		scanner.Add(sendEventAckPtrn, [this](PointerCalculator ptr) {
 			EventAck = ptr.Sub(4).Rip().As<Functions::EventAck>();
 			SendEventAck = ptr.Add(0x13).Add(1).Rip().As<Functions::SendEventAck>();
+		});
+
+		constexpr auto queueDependencyPtrn = Pattern<"0F 29 46 50 48 8D 05">("QueueDependency&SigScanMemory");
+		scanner.Add(queueDependencyPtrn, [this](PointerCalculator ptr) {
+			QueueDependency = ptr.Add(0x71).Add(1).Rip().As<PVOID>();
+			SigScanMemory = ptr.Add(4).Add(3).Rip().As<PVOID>();
 		});
 
 		if (!scanner.Scan())

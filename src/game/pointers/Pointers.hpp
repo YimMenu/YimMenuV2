@@ -3,7 +3,7 @@
 #include <dxgi1_4.h>
 #include <windows.h>
 #include "types/script/scrNativeHandler.hpp"
-#include "core/memory/BytePatch.hpp"
+#include "core/memory/BytePatches.hpp"
 
 namespace rage
 {
@@ -74,12 +74,15 @@ namespace YimMenu
 		Functions::QueuePacket QueuePacket;
 		Functions::GetNetObjectById GetNetObjectById;	
 		Functions::RequestControl RequestControl;
-		BytePatch* SpectatePatch; // used to patch the code that prevents you from spawning network objects when spectating
-		BytePatch* WorldModelSpawnBypass;
+		BytePatch ModelSpawnBypass;
+		BytePatch SpectatePatch; // used to patch the code that prevents you from spawning network objects when spectating
+		BytePatch WorldModelSpawnBypass;
 		PVOID ReceiveNetMessage;
 		rage::netEventMgr** NetEventMgr;
 		Functions::EventAck EventAck;
 		Functions::SendEventAck SendEventAck;
+		PVOID QueueDependency;
+		PVOID SigScanMemory;
 	};
 
 	struct Pointers : PointerData

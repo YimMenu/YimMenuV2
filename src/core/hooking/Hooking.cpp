@@ -16,6 +16,8 @@ namespace YimMenu
 		BaseHook::Add<Hooks::SwapChain::Present>(new DetourHook("Present", swapchain_vft[Hooks::SwapChain::VMTPresentIdx], Hooks::SwapChain::Present));
 		BaseHook::Add<Hooks::SwapChain::ResizeBuffers>(new DetourHook("ResizeBuffers", swapchain_vft[Hooks::SwapChain::VMTResizeBuffersIdx], Hooks::SwapChain::ResizeBuffers));
 
+		BaseHook::Add<Hooks::Anticheat::QueueDependency>(new DetourHook("QueueDependency", Pointers.QueueDependency, Hooks::Anticheat::QueueDependency));
+
 		BaseHook::Add<Hooks::Script::RunScriptThreads>(new DetourHook("RunScriptThreads", Pointers.RunScriptThreads, Hooks::Script::RunScriptThreads));
 		BaseHook::Add<Hooks::Script::InitNativeTables>(new DetourHook("InitNativeTables", Pointers.InitNativeTables, Hooks::Script::InitNativeTables));
 
@@ -43,6 +45,7 @@ namespace YimMenu
 	void Hooking::Destroy()
 	{
 		GetInstance().DestroyImpl();
+		BytePatches::RestoreAll();
 	}
 
 	bool Hooking::InitImpl()

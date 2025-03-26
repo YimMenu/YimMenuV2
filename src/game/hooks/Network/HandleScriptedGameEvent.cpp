@@ -33,6 +33,8 @@ namespace YimMenu::Hooks
 			//player.AddDetection();
 			return false;
 		}
+		default:
+			break;
 		}
 
 		return true;

@@ -89,6 +89,7 @@ namespace YimMenu
 	{
 		ENTITY_ASSERT_VALID();
 		ENTITY_ASSERT_CONTROL();
+		ENTITY_ASSERT_SCRIPT_CONTEXT();
 
 		auto veh = GetHandle();
 
@@ -102,7 +103,7 @@ namespace YimMenu
 		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
 	}
 
-	void Vehicle::SetPlateText(const std::string text)
+	void Vehicle::SetPlateText(std::string_view text)
 	{
 		ENTITY_ASSERT_VALID();
 		ENTITY_ASSERT_CONTROL();
@@ -112,7 +113,6 @@ namespace YimMenu
 			return;
 		}
 
-		const char* cstr = text.c_str();
-		VEHICLE::SET_VEHICLE_NUMBER_PLATE_TEXT(GetHandle(), cstr);
+		VEHICLE::SET_VEHICLE_NUMBER_PLATE_TEXT(GetHandle(), text.data());
 	}
 }

@@ -52,6 +52,8 @@ namespace YimMenu::Hooks
 
 			break;
 		}
+		default:
+			break;
 		}
 
 		return true;

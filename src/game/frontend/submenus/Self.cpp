@@ -55,6 +55,7 @@ namespace YimMenu::Submenus
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteammo"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteclip"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("rapidfire"_J));
+		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteparachutes"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<CommandItem>("giveallweapons"_J));
 
 		weapons->AddItem(weaponsGlobalsGroup);
@@ -68,7 +69,8 @@ namespace YimMenu::Submenus
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("keepfixed"_J, "Keep Fixed"));
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("hornboost"_J));
 		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
-		
+		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
+
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));
 

@@ -39,7 +39,7 @@ namespace YimMenu::Features
 
 				if (_SpawnInVehicle.GetState())
 				{
-					PED::SET_PED_INTO_VEHICLE(Self::GetPed().GetHandle(), vehHandle, -1);
+					PED::SET_PED_INTO_VEHICLE(Self::GetPed().GetHandle(), vehHandle, (int)SeatPositions::SEAT_DRIVER);
 				}
 
 				if (_SpawnWithMaximumUpgrades.GetState())

@@ -22,13 +22,16 @@ namespace YimMenu::Submenus
 		auto vehicleGlobalsGroup = std::make_shared<Group>("Globals");
 		auto vehicleMiscGroup    = std::make_shared<Group>("Misc");
 
+		
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("vehiclegodmode"_J, "Godmode"));
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("keepfixed"_J, "Keep Fixed"));
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("hornboost"_J));
 		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
+		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
 
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
-
+		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));
+		
 		vehicleaddons->AddItem(vehicleGlobalsGroup);
 		vehicleaddons->AddItem(vehicleMiscGroup);
 		AddCategory(std::move(vehicleaddons));

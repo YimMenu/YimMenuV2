@@ -13,9 +13,11 @@ namespace YimMenu
 
 		static Ped Create(uint32_t model, rage::fvector3 coords, float heading = 0.0f);
 
-		// info
+		// vehicles
 		Vehicle GetVehicle();
+		Vehicle GetLastVehicle(); // only returns a valid handle if the ped isn't already in a vehicle
 		std::uint16_t GetVehicleObjectId(); // works even if the vehicle isn't cloned
+		void SetInVehicle(Vehicle veh, int seat = -1);
 
 		// ragdoll
 		bool GetRagdoll();
@@ -50,5 +52,6 @@ namespace YimMenu
 		void GiveWeapon(std::uint32_t hash, bool equip = false);
 		void RemoveWeapon(std::uint32_t hash);
 		std::uint32_t GetCurrentWeapon();
+		bool HasWeapon(std::uint32_t hash);
 	};
 }

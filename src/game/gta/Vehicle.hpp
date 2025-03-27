@@ -14,13 +14,16 @@ namespace YimMenu
 
 		// gears
 		int GetGear();
-		float GetRevRatio(); // doesn't work
+		float GetRevRatio();
 
 		// speed
 		float GetMaxSpeed();
 
+		// mods
 		void Upgrade();
-
 		void SetPlateText(std::string_view text);
+
+		// seats
+		bool IsSeatFree(int seat);
 	};
 }

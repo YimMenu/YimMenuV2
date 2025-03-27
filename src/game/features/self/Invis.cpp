@@ -3,6 +3,8 @@
 
 namespace YimMenu::Features
 {
+	static BoolCommand _LocallyVisible{"localvis", "Locally Visible", "Be locally visible while remaining invisible to other players"};
+
 	class Invis : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
@@ -12,7 +14,10 @@ namespace YimMenu::Features
 			if (Self::GetPed())
 			{
 				Self::GetPed().SetVisible(false);
-				Self::GetPlayer().SetVisibleLocally(true);
+				if (_LocallyVisible.GetState())
+					Self::GetPlayer().SetVisibleLocally(true);
+				else
+					Self::GetPlayer().SetVisibleLocally(false);
 			}
 		}
 

@@ -10,25 +10,15 @@ namespace YimMenu::Features
 
 		virtual void OnTick() override
 		{
-			if (auto player = Self::GetPlayer())
-			{
-				PLAYER::SET_PLAYER_HAS_RESERVE_PARACHUTE(player.GetId());
-			}
+			PLAYER::SET_PLAYER_HAS_RESERVE_PARACHUTE(Self::GetPlayer().GetId());
 
 			if (auto ped = Self::GetPed())
 			{
-				if (!WEAPON::HAS_PED_GOT_WEAPON(ped.GetHandle(), "GADGET_PARACHUTE"_J, false))
-				{
-					WEAPON::GIVE_DELAYED_WEAPON_TO_PED(ped.GetHandle(), "GADGET_PARACHUTE"_J, 1, false);
-				}
+				if (!ped.HasWeapon("GADGET_PARACHUTE"_J))
+					ped.GiveWeapon("GADGET_PARACHUTE"_J);
 			}
-		}
-
-		virtual void OnDisable() override
-		{
-
 		}
 	};
 
-	static InfiniteParachutes _InfiniteParachutes{"infiniteparachutes", "Infinite Parachutes", "Always have a parachute."};
+	static InfiniteParachutes _InfiniteParachutes{"infiniteparachutes", "Infinite Parachutes", "Always have a parachute"};
 };

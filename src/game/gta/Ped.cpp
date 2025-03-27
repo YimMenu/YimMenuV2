@@ -58,6 +58,14 @@ namespace YimMenu
 		return Vehicle(PED::GET_VEHICLE_PED_IS_USING(GetHandle()));
 	}
 
+	Vehicle Ped::GetLastVehicle()
+	{
+		ENTITY_ASSERT_VALID();
+		if (PED::IS_PED_IN_ANY_VEHICLE(GetHandle(), false))
+			return nullptr;
+		return Vehicle(PED::GET_VEHICLE_PED_IS_IN(GetHandle(), true));
+	}
+
 	std::uint16_t Ped::GetVehicleObjectId()
 	{
 		ENTITY_ASSERT_VALID();
@@ -65,6 +73,14 @@ namespace YimMenu
 			return 0;
 
 		return *reinterpret_cast<std::uint16_t*>(reinterpret_cast<__int64>(GetNetworkObject()) + 0x3D8);
+	}
+
+	void Ped::SetInVehicle(Vehicle veh, int seat)
+	{
+		ENTITY_ASSERT_VALID();
+		ENTITY_ASSERT_CONTROL();
+
+		PED::SET_PED_INTO_VEHICLE(GetHandle(), veh.GetHandle(), seat);
 	}
 
 	bool Ped::GetRagdoll()
@@ -184,5 +200,12 @@ namespace YimMenu
 		std::uint32_t weapon;
 		WEAPON::GET_CURRENT_PED_WEAPON(GetHandle(), &weapon, 0);
 		return weapon;
+	}
+
+	bool Ped::HasWeapon(std::uint32_t hash)
+	{
+		ENTITY_ASSERT_VALID();
+
+		return WEAPON::HAS_PED_GOT_WEAPON(GetHandle(), hash, false);
 	}
 }

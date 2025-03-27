@@ -115,4 +115,11 @@ namespace YimMenu
 
 		VEHICLE::SET_VEHICLE_NUMBER_PLATE_TEXT(GetHandle(), text.data());
 	}
+
+	bool Vehicle::IsSeatFree(int seat)
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::IS_VEHICLE_SEAT_FREE(GetHandle(), seat, true);
+	}
 }

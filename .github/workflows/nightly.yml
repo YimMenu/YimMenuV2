@@ -119,7 +119,7 @@ jobs:
             }
 
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: binary
 

@@ -21,6 +21,7 @@ class CNetGamePlayer;
 class CEntity;
 class CNetworkObjectMgr;
 class CNetworkPlayerMgr;
+class PoolEncryption;
 
 namespace YimMenu
 {

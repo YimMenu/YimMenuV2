@@ -6,6 +6,6 @@ namespace YimMenu::Submenus
 	World::World() :
 	    Submenu::Submenu("World")
 	{
-		
+        
 	}
 };

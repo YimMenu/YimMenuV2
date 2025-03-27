@@ -17,7 +17,7 @@ namespace YimMenu::Submenus
 		spawnGroup->AddItem(std::make_shared<ConditionalItem>("usecustomlicenseplate"_J, std::make_shared<StringCommandItem>("customlicenseplate"_J)));
 		spawnGroup->AddItem(std::make_shared<CommandItem>("spawnvehicle"_J));
 
-		modsGroup->AddItem(std::make_shared<BoolCommandItem>("lsccustomsbypass"_J));
+		spawnGroup->AddItem(std::make_shared<BoolCommandItem>("lsccustomsbypass"_J));
 
 		mainGroup->AddItem(spawnGroup);
 

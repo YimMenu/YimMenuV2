@@ -1,6 +1,7 @@
 #include "core/commands/LoopedCommand.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/backend/Self.hpp"
+#include "types/ped/PedConfigFlag.hpp"
 
 namespace YimMenu::Features
 {
@@ -13,18 +14,20 @@ namespace YimMenu::Features
 
 		virtual void OnTick() override
 		{
-			auto handle = Self::GetPed().GetHandle();
-
-			PED::SET_PED_CONFIG_FLAG(handle, 32, false);
-			PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(handle, VEHICLE_KNOCK_OFF_NEVER);
+			if (auto ped = Self::GetPed())
+			{
+				ped.SetConfigFlag(PedConfigFlag::WillFlyThroughWindscreen, false);
+				PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(Self::GetPed().GetHandle(), VEHICLE_KNOCK_OFF_NEVER);
+			}
 		}
 
 		virtual void OnDisable() override
 		{
-			auto handle = Self::GetPed().GetHandle();
-
-			PED::SET_PED_CONFIG_FLAG(handle, 32, true);
-			PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(handle, VEHICLE_KNOCK_OFF_DEFAULT);
+			if (auto ped = Self::GetPed())
+			{
+				ped.SetConfigFlag(PedConfigFlag::WillFlyThroughWindscreen, true);
+				PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(Self::GetPed().GetHandle(), VEHICLE_KNOCK_OFF_DEFAULT);
+			}
 		}
 	};
 

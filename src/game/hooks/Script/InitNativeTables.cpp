@@ -1,5 +1,6 @@
 #include "core/hooking/DetourHook.hpp"
 #include "game/backend/NativeHooks.hpp"
+#include "game/backend/ScriptPatches.hpp"
 #include "game/hooks/Hooks.hpp"
 
 namespace YimMenu::Hooks
@@ -10,6 +11,7 @@ namespace YimMenu::Hooks
 		if (g_Running)
 		{
 			NativeHooks::RegisterProgram(program);
+			ScriptPatches::RegisterProgram(program);
 		}
 	}
 }

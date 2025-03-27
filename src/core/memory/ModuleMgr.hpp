@@ -26,9 +26,10 @@ namespace YimMenu
 		 * @return false If the peb or peb->Ldr pointer were invalid. 
 		 */
 		bool LoadModules();
+		std::unordered_multimap<std::uint32_t, std::unique_ptr<Module>>& GetModules();
 
 	private:
-		std::unordered_map<std::uint32_t, std::unique_ptr<Module>> m_CachedModules;
+		std::unordered_multimap<std::uint32_t, std::unique_ptr<Module>> m_CachedModules;
 	};
 
 	inline YimMenu::ModuleMgr ModuleMgr;

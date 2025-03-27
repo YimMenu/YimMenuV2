@@ -83,6 +83,12 @@ namespace YimMenu
 		Functions::SendEventAck SendEventAck;
 		PVOID QueueDependency;
 		PVOID SigScanMemory;
+		PVOID ScriptVM;
+		PVOID PrepareMetricForSending;
+		int* BERestartStatus;
+		bool* NeedsBERestart;
+		bool* IsBEBanned;
+		BytePatch BattlEyeStatusUpdatePatch;
 	};
 
 	struct Pointers : PointerData

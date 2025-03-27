@@ -46,4 +46,9 @@ namespace YimMenu
 
 		return true;
 	}
+
+	std::unordered_multimap<std::uint32_t, std::unique_ptr<Module>>& ModuleMgr::GetModules()
+	{
+		return m_CachedModules;
+	}
 }

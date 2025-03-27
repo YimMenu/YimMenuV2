@@ -2,9 +2,10 @@
 #include "Entity.hpp"
 #include "Vehicle.hpp"
 
+enum class PedConfigFlag : std::uint32_t;
+
 namespace YimMenu
 {
-	enum class PedConfigFlag : std::uint32_t;
 	class Ped : public Entity
 	{
 	public:

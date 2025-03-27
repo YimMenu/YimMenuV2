@@ -202,6 +202,28 @@ namespace YimMenu
 			SigScanMemory = ptr.Add(4).Add(3).Rip().As<PVOID>();
 		});
 
+		constexpr auto scriptVMPtrn = Pattern<"49 63 41 1C">("ScriptVM");
+		scanner.Add(scriptVMPtrn, [this](PointerCalculator ptr) {
+			ScriptVM = ptr.Sub(0x24).As<PVOID>();
+		});
+
+		constexpr auto prepareMetricForSendingPtrn = Pattern<"48 89 F9 FF 50 20 48 8D 15">("PrepareMetricForSending");
+		scanner.Add(prepareMetricForSendingPtrn, [this](PointerCalculator ptr) {
+			PrepareMetricForSending = ptr.Sub(0x26).As<PVOID>();
+		});
+
+		constexpr auto beDataPtrn = Pattern<"48 C7 05 ? ? ? ? 00 00 00 00 E8 ? ? ? ? 48 89 C1 E8 ? ? ? ? E8 ? ? ? ? BD 0A 00 00 00">("BEData");
+		scanner.Add(beDataPtrn, [this](PointerCalculator ptr) {
+			BERestartStatus = ptr.Add(3).Rip().Add(8).Add(4).As<int*>();
+			NeedsBERestart  = ptr.Add(3).Rip().Add(8).Add(4).Add(8).As<bool*>();
+			IsBEBanned      = ptr.Add(3).Rip().Add(8).Add(4).Add(8).Add(4).As<bool*>();
+		});
+
+		constexpr auto battlEyeStatusUpdatePatchPtrn = Pattern<"80 B9 92 0A 00 00 01">("BattlEyeStatusUpdatePatch");
+		scanner.Add(battlEyeStatusUpdatePatchPtrn, [this](PointerCalculator ptr) {
+			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.Sub(0x26).As<std::uint8_t*>(), 0xC3);
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

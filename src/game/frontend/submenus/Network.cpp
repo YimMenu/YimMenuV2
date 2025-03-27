@@ -35,6 +35,8 @@ namespace YimMenu::Submenus
 		toxicGroup->AddItem(std::make_shared<CommandItem>("ceokickall"_J, "CEO Kick All"));
 
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("fastjoin"_J));
+		enhancements->AddItem(std::make_shared<BoolCommandItem>("disabledeathbarriers"_J));
+		enhancements->AddItem(std::make_shared<BoolCommandItem>("despawnbypass"_J)); // move this somewhere else?
 
 		session->AddItem(bountyGroup);
 		session->AddItem(trollGroup);

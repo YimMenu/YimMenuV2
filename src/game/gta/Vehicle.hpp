@@ -25,5 +25,10 @@ namespace YimMenu
 
 		// seats
 		bool IsSeatFree(int seat);
+
+		// rocket boost
+		bool SupportsBoost();
+		bool IsBoostActive();
+		void SetBoostCharge(int percentage = 100);
 	};
 }

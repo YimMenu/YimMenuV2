@@ -6,7 +6,9 @@ namespace YimMenu::Submenus
 	World::World() :
 	    Submenu::Submenu("World")
 	{
-		auto mainGroup = std::make_shared<Category>("Spawners");
+		auto spawnersGroup = std::make_shared<Category>("Spawners");
+		auto iplsGroup     = std::make_shared<Category>("IPLs");
+
 		auto spawnGroup = std::make_shared<Group>("Vehicle");
 		auto modsGroup  = std::make_shared<Group>("Modifications");
 
@@ -19,9 +21,15 @@ namespace YimMenu::Submenus
 
 		modsGroup->AddItem(std::make_shared<BoolCommandItem>("lsccustomsbypass"_J));
 
-		mainGroup->AddItem(spawnGroup);
-		mainGroup->AddItem(modsGroup); 
+		spawnersGroup->AddItem(spawnGroup);
+		spawnersGroup->AddItem(modsGroup);
 
-		AddCategory(std::move(mainGroup));
+		iplsGroup->AddItem(std::make_shared<ListCommandItem>("iplselector"_J));
+		iplsGroup->AddItem(std::make_shared<CommandItem>("loadipl"_J));
+		iplsGroup->AddItem(std::make_shared<CommandItem>("unloadipl"_J));
+		iplsGroup->AddItem(std::make_shared<CommandItem>("ipltp"_J));
+
+		AddCategory(std::move(spawnersGroup));
+		AddCategory(std::move(iplsGroup));
 	}
 };

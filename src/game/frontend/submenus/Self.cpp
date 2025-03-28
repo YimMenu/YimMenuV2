@@ -2,6 +2,7 @@
 
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "game/features/vehicle/GiveVehicleReward.hpp"
 
 namespace YimMenu::Features
 {
@@ -71,6 +72,16 @@ namespace YimMenu::Submenus
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("hornboost"_J));
 		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
 		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
+
+		vehicleGlobalsGroup->AddItem(std::make_unique<ImGuiItem>([] {
+			if (ImGui::Button("Claim Current Vehicle as PV"))
+			{
+				if (GiveVehicleReward::IsSafeToRunScript())
+				{
+					GiveVehicleReward::SetShouldRunScript(true);
+				}
+			}
+		}));
 
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));

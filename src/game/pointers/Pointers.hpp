@@ -38,6 +38,7 @@ namespace YimMenu
 		using RequestControl = void(*)(rage::netObject* object);
 		using EventAck = bool(*)(uintptr_t data, CNetGamePlayer* target_player, uint32_t event_index, uint32_t event_handled_bitset);
 		using SendEventAck = void(*)(rage::netEventMgr* event_manager, CNetGamePlayer* source_player);
+		using ScriptVM = int (*)(uint64_t* stack, int64_t** scr_globals, rage::scrProgram* program, void* ctx);
 	}
 
 	struct PointerData
@@ -84,7 +85,7 @@ namespace YimMenu
 		Functions::SendEventAck SendEventAck;
 		PVOID QueueDependency;
 		PVOID SigScanMemory;
-		PVOID ScriptVM;
+		Functions::ScriptVM ScriptVM;
 		PVOID PrepareMetricForSending;
 		int* BERestartStatus;
 		bool* NeedsBERestart;

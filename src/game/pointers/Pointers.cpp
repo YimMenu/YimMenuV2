@@ -204,7 +204,7 @@ namespace YimMenu
 
 		constexpr auto scriptVMPtrn = Pattern<"49 63 41 1C">("ScriptVM");
 		scanner.Add(scriptVMPtrn, [this](PointerCalculator ptr) {
-			ScriptVM = ptr.Sub(0x24).As<PVOID>();
+			ScriptVM = ptr.Sub(0x24).As<Functions::ScriptVM>();
 		});
 
 		constexpr auto prepareMetricForSendingPtrn = Pattern<"48 89 F9 FF 50 20 48 8D 15">("PrepareMetricForSending");

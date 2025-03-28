@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <type_traits>
+#include <types/script/scrThread.hpp>
 
 namespace YimMenu
 {
@@ -25,12 +26,11 @@ namespace YimMenu
 
         }
 
-        // TODO: Uncomment when GTAV-Classes have been added
-        // constexpr ScriptLocal(rage::scrThread* thread, std::size_t index) :
-        //     ScriptLocal(thread->m_stack, index)
-        // {
+        constexpr ScriptLocal(rage::scrThread* thread, std::size_t index) :
+             ScriptLocal(thread->m_Stack, index)
+        {
 
-        // }
+        }
 
         constexpr ScriptLocal At(std::ptrdiff_t offset) const
         {
@@ -64,6 +64,8 @@ namespace YimMenu
 		{
 			return *static_cast<std::add_pointer_t<std::remove_reference_t<T>>>(Get());
 		}
+
+        bool CanAccess() const;
 
     private:
         void* Get() const;

@@ -65,9 +65,4 @@ namespace YimMenu
 			}
 		}
 	};
-
-	namespace ScriptFunctions
-	{
-		inline ScriptFunction GiveVehicleReward("GVR", "am_mp_vehicle_reward"_J, "2D 0C 1E 00 00");
-	}
 }

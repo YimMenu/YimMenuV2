@@ -11,6 +11,7 @@
 #include "submenus/Teleport.hpp"
 #include "submenus/Network.hpp"
 #include "submenus/Players.hpp"
+#include "submenus/Recovery.hpp"
 #include "submenus/Settings.hpp"
 #include "submenus/Debug.hpp"
 #include "submenus/World.hpp"
@@ -25,6 +26,7 @@ namespace YimMenu
 		UIManager::AddSubmenu(std::make_shared<Submenus::World>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Network>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Players>());
+		UIManager::AddSubmenu(std::make_shared<Submenus::Recovery>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Settings>());
 		UIManager::AddSubmenu(std::make_shared<Submenus::Debug>());
 

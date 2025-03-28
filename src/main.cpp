@@ -15,7 +15,7 @@
 #include "game/backend/NativeHooks.hpp"
 #include "game/frontend/GUI.hpp"
 #include "game/pointers/Pointers.hpp"
-#include "game/features/vehicle/GiveVehicleReward.hpp"
+#include "game/features/recovery/GiveVehicleReward.hpp"
 
 namespace YimMenu
 {

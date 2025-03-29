@@ -7,7 +7,6 @@ class CPedAttachDataNode : CSyncDataNodeInfrequent
 {
 public:
     rage::fvector3 m_Offset; //0x00C0
-    char pad_00CC[4]; //0x00CC
     rage::fvector4 m_Orientation; //0x00D0
     uint16_t m_AttachedTo; //0x00E0
     uint16_t m_AttachmentBone; //0x00E2
@@ -17,4 +16,4 @@ public:
     bool m_IsAttached; //0x00F0
     bool unk_00F1; //0x00F1
 };
-static_assert(sizeof(CPedAttachDataNode) == 0xF8);
+static_assert(sizeof(CPedAttachDataNode) == 0x100);

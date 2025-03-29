@@ -1,4 +1,6 @@
 #pragma once
+#include "vector.hpp"
+
 #include <cstdint>
 
 namespace rage
@@ -447,6 +449,74 @@ namespace rage
 				ReadArrayBytes(string, len);
 				string[len - 1] = 0;
 			}
+		}
+
+		float ReadFloat(int size, float divisor)
+		{
+			int integer = Read<int>(size);
+
+			float max = (1 << size) - 1;
+			return ((float)integer / max) * divisor;
+		}
+
+		void WriteFloat(int size, float divisor, float value)
+		{
+			float max   = (1 << size) - 1;
+			int integer = (int)((value / divisor) * max);
+
+			Write<int>(integer, size);
+		}
+
+		float ReadSignedFloat(int size, float divisor)
+		{
+			int integer = Read<int>(size, true);
+
+			float max = (1 << (size - 1)) - 1;
+			return ((float)integer / max) * divisor;
+		}
+
+		void WriteSignedFloat(int size, float divisor, float value)
+		{
+			float max   = (1 << (size - 1)) - 1;
+			int integer = (int)((value / divisor) * max);
+
+			Write<int>(integer, size, true);
+		}
+
+		rage::fvector3 ReadPosition(int size)
+		{
+			rage::fvector3 pos;
+
+			pos.x = ReadSignedFloat(size, 27648.0f);
+			pos.y = ReadSignedFloat(size, 27648.0f);
+			pos.z = ReadFloat(size, 4416.0f) - 1700.0f;
+
+			return pos;
+		}
+
+		void WritePosition(int size, rage::fvector3& pos)
+		{
+			WriteSignedFloat(size, 27648.0f, pos.x);
+			WriteSignedFloat(size, 27648.0f, pos.y);
+			WriteFloat(size, 4416.0f, pos.z + 1700.0f);
+		}
+
+		rage::fvector3 ReadVector3(int size, float divisor)
+		{
+			rage::fvector3 vec;
+
+			vec.x = ReadSignedFloat(size, divisor);
+			vec.y = ReadSignedFloat(size, divisor);
+			vec.z = ReadSignedFloat(size, divisor);
+
+			return vec;
+		}
+
+		void WriteVector3(int size, float divisor, rage::fvector3& vec)
+		{
+			WriteSignedFloat(size, divisor, vec.x);
+			WriteSignedFloat(size, divisor, vec.y);
+			WriteSignedFloat(size, divisor, vec.z);
 		}
 
 	public:

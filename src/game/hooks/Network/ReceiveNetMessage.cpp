@@ -83,7 +83,7 @@ namespace YimMenu::Hooks
 				rage::datBitBuffer event_buffer(event_data, sizeof(event_data), true);
 				event_buffer.m_MaxBit = event_data_size + 1;
 
-				ReceiveEvent(player, event_id, event_index, event_handled_bits, event_buffer);
+				ReceiveNetGameEvent(player, event_id, event_index, event_handled_bits, event_buffer);
 
 				remaining -= (int)buffer.m_BitsRead - bits_read;
 			}

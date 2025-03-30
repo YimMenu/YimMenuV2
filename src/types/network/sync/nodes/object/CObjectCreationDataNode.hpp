@@ -1,45 +1,45 @@
 #pragma once
-#include "types/rage/vector.hpp"
 #include "types/network/sync/CProjectBaseSyncDataNode.hpp"
+#include "types/rage/vector.hpp"
 
-// TODO: verify if this is right
+struct ObjectCreationTelemetry
+{
+	uint32_t unk_0000;     //0x0000 "et"
+	uint32_t m_ScriptHash; //0x0004 "es"
+	uint32_t unk_0008;     //0x0008 "ep"
+	bool unk_000C;         //0x000C "ec"
+	bool m_HasData;        //0x000D
+};
+
 class CObjectCreationDataNode : CProjectBaseSyncDataNode
 {
 public:
-	uint32_t unk_00C0; //0x00C0
-	uint32_t unk_00C4; //0x00C4
-	uint32_t unk_00C8; //0x00C8
-	bool unk_00CC;
-	bool unk_00CD;
-	uint16_t unk_00D0; //0x00D0
-	char pad_0xC2[14]; //0x00D2
-	rage::fvector4 m_ObjectOrientation; //0x00E0
-	char pad_00E0[30]; //0x00F0
-	rage::fvector3 m_ObjectPosition; //0x0110
-	char pad_010C[4]; //0x011C
-	rage::fvector3 m_DummyPosition; //0x011E
-	char pad_011A[16]; //0x012C
-	rage::fvector3 m_ScriptGrabPosition; //0x0140
-	char pad_013C[8]; //0x013C
-	float m_ScriptGrabRadius; //0x0148
-	uint32_t m_CreatedBy; //0x014C
-	uint32_t m_Model; //0x0150
-	uint32_t m_FragGroupIndex; //0x0154
-	uint32_t m_OwnershipToken; //0x0158
-	uint32_t unk_015C; //0x015C
-
-	// everything after this is probably wrong
-	bool m_NoReassign; //0x0160
-	bool unk_0161; //0x0161
-	bool m_PlayerWantsControl; //0x0162
-	bool m_HasInitPhysics; //0x0163
-	bool m_ScriptGrabbedFromWorld; //0x0164
-	bool m_IsFragObject; //0x0165
-	bool m_IsBroken; //0x0166
-	bool m_HasExploded; //0x0167
-	bool m_KeepRegistered; //0x0168
-	bool unk_0169; //0x0169
-	bool unk_016A; //0x016A
-	bool unk_016B; //0x016B
-}; //Size: 0x016C
+	ObjectCreationTelemetry m_TelemetryData; //0x00C0 -- netObject + 0x270
+	uint16_t unk_00D0;                       //0x00D0
+	char pad_0xC2[14];                       //0x00D2
+	rage::fvector4 m_ObjectOrientation[4];   //0x00E0
+	rage::fvector3 m_DummyPosition;          //0x0120
+	rage::fvector3 m_ObjectPosition;         //0x0130
+	rage::fvector3 m_ScriptGrabPosition;     //0x0140
+	char pad_0150[8];                        //0x0150
+	float m_ScriptGrabRadius;                //0x0158
+	uint32_t m_CreatedBy;                    //0x015C
+	uint32_t m_Model;                        //0x0160
+	uint32_t m_FragGroupIndex;               //0x0164
+	uint32_t m_OwnershipToken;               //0x0168
+	uint32_t unk_016C;                       //0x016C
+	bool m_NoReassign;                       //0x0170
+	bool unk_0171;                           //0x0171
+	bool m_PlayerWantsControl;               //0x0172
+	bool m_HasInitPhysics;                   //0x0173
+	bool m_ScriptGrabbedFromWorld;           //0x0174
+	bool m_IsFragObject;                     //0x0175
+	bool m_IsBroken;                         //0x0176
+	bool unk_0177;                           //0x0177
+	bool m_HasExploded;                      //0x0178
+	bool m_KeepRegistered;                   //0x0179
+	bool unk_017A;                           //0x017A
+	bool unk_017B;                           //0x017B
+	bool unk_017C;                           //0x017C
+}; //Size: 0x0180
 static_assert(sizeof(CObjectCreationDataNode) == 0x180);

@@ -14,6 +14,7 @@ namespace rage
 	class netSyncTree;
 	class netObject;
 	class netConnectionManager;
+	class netArrayMgr;
 	class netEventMgr;
 }
 class CPedFactory;
@@ -91,6 +92,9 @@ namespace YimMenu
 		bool* NeedsBERestart;
 		bool* IsBEBanned;
 		BytePatch BattlEyeStatusUpdatePatch;
+		PVOID WriteNetArrayData;
+		BytePatch NetArrayCachedDataPatch;
+		rage::netArrayMgr** NetArrayMgr;
 	};
 
 	struct Pointers : PointerData

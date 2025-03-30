@@ -62,12 +62,10 @@ namespace YimMenu
 		int GetWantedLevel();
 		void SetWantedLevel(int level); // only works for local player for now
 
-#if 0
 		// backend/data store (should be refactored?)
 		PlayerData& GetData();
-		bool IsModder();
-		void AddDetection(Detection det);
-#endif
+		// bool IsModder();
+		// void AddDetection(Detection det);
 
 		// visibility
 		void SetVisibleLocally(bool visible);

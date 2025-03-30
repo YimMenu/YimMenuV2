@@ -17,7 +17,7 @@ public:
     uint16_t m_EntityStandingOn; //0x00D0
     char pad_00D2[12]; //0x00D2
     rage::fvector3 m_StandingOnEntityOffset; //0x00E0
-    char pad_00EC[4]; //0x00EC
+    char pad_00F0[4]; //0x00F0
     uint32_t m_StealthNoise; //0x00F4
-}; //Size: 0x00F8
-static_assert(sizeof(CPlayerSectorPosNode) == 0xF8);
+}; //Size: 0x0100
+static_assert(sizeof(CPlayerSectorPosNode) == 0x100);

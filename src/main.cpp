@@ -11,6 +11,7 @@
 #include "core/renderer/Renderer.hpp"
 #include "game/backend/AnticheatBypass.hpp"
 #include "game/backend/Players.hpp"
+#include "game/backend/SavedLocations.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/NativeHooks.hpp"
 #include "game/frontend/GUI.hpp"
@@ -27,6 +28,7 @@ namespace YimMenu
 		LogHelper::Init("YimMenuV2", FileMgr::GetProjectFile("./cout.log"));
 
 		g_HotkeySystem.RegisterCommands();
+		SavedLocations::FetchSavedLocations();
 		Settings::Initialize(FileMgr::GetProjectFile("./settings.json"));
 
 		if (!ModuleMgr.LoadModules())

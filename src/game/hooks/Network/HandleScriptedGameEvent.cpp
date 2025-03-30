@@ -1,13 +1,15 @@
 #include "game/backend/Self.hpp"
 #include "game/hooks/Hooks.hpp"
 #include "game/pointers/Pointers.hpp"
+#include "types/network/netGameEvent.hpp"
+#include "types/script/globals/GPBD_FM_3.hpp"
 #include "types/script/ScriptEvent.hpp"
 
 namespace YimMenu::Hooks
 {
-	bool Network::HandleScriptedGameEvent(YimMenu::Player& player, int64_t* args, uint32_t args_size)
+	bool Network::HandleScriptedGameEvent(Player player, CScriptedGameEvent& event)
 	{
-		SCRIPT_EVENT* script_event = reinterpret_cast<SCRIPT_EVENT*>(args);
+		SCRIPT_EVENT* script_event = reinterpret_cast<SCRIPT_EVENT*>(event.m_Args);
 
 		switch (static_cast<ScriptEventIndex>(script_event->GetEventIndex()))
 		{
@@ -15,7 +17,7 @@ namespace YimMenu::Hooks
 		{
 			SCRIPT_EVENT_BOUNTY* bounty = static_cast<SCRIPT_EVENT_BOUNTY*>(script_event);
 
-			if (args_size != SCRIPT_EVENT_BOUNTY::GetSize())
+			if (event.m_ArgsSize != SCRIPT_EVENT_BOUNTY::GetSize())
 			{
 				//player.AddDetection();
 				return false;
@@ -32,6 +34,15 @@ namespace YimMenu::Hooks
 		{
 			//player.AddDetection();
 			return false;
+		}
+		case ScriptEventIndex::CeoKick:
+		{
+			if (player.GetId() != GPBD_FM_3::Get()->Entries[Self::GetPlayer().GetId()].BossGoon.Boss)
+			{
+				return false;
+			}
+
+			break;
 		}
 		default:
 			break;

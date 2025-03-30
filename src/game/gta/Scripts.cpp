@@ -5,8 +5,11 @@
 #include "types/script/GtaThread.hpp"
 #include "types/script/scrProgram.hpp"
 #include "types/script/CGameScriptHandler.hpp"
+#include "types/script/CGameScriptHandlerNetComponent.hpp"
 #include "types/script/CGameScriptId.hpp"
 #include "types/script/globals/GlobalPlayerBD.hpp"
+#include "game/gta/Packet.hpp"
+#include "game/backend/Players.hpp"
 #include "game/backend/Self.hpp"
 #include "core/memory/Pattern.hpp"
 
@@ -74,6 +77,7 @@ namespace YimMenu::Scripts
 		}
 	}
 
+	// we need this because modifying player broadcast data before they are registered causes the default values (when a new player joins) to be changed as well
 	bool SafeToModifyFreemodeBroadcastGlobals()
 	{
 		if (!*Pointers.IsSessionStarted)
@@ -106,5 +110,27 @@ namespace YimMenu::Scripts
 		}
 
 		return std::nullopt;
+  }
+
+	void ForceScriptHost(rage::scrThread* thread)
+	{
+		if (auto net_component = reinterpret_cast<GtaThread*>(thread)->m_NetComponent)
+		{
+			if (net_component->IsLocalPlayerHost())
+				return;
+
+			net_component->DoHostMigration(Self::GetPlayer().GetHandle(), net_component->m_HostToken + 1, false);
+
+			Packet pkt;
+			pkt.WriteMessageHeader(rage::netMessage::Type::ScriptVerifyHostAck);
+			net_component->m_ScriptHandler->GetId()->Serialize(&pkt.GetBuffer());
+			pkt.GetBuffer().Write<bool>(true, 1);
+			pkt.GetBuffer().Write<bool>(true, 1);
+			pkt.GetBuffer().Write<std::uint16_t>(net_component->m_HostToken, 16);
+
+			for (auto& player : Players::GetPlayers())
+				if (!player.second.IsLocal())
+					pkt.Send(player.second.GetMessageId());
+		}
 	}
 }

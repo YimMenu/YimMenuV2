@@ -3,7 +3,7 @@
 
 namespace YimMenu::Features
 {
-//from https://github.com/TCRoid/YimMenu-Lua-RS-Missions/
+	// from https://github.com/TCRoid/YimMenu-Lua-RS-Missions/
 	class LSCCustomsBypass : public BoolCommand
 	{
 		using BoolCommand::BoolCommand;
@@ -40,5 +40,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	static LSCCustomsBypass _LSCCustomsBypass{"lsccustomsbypass", "Remove LSC Restrictions", "Removes Los Santos Customs vehicle modification restrictions", false};
+	static LSCCustomsBypass _LSCCustomsBypass{"lsccustomsbypass", "Remove LSC Restrictions", "Removes Los Santos Customs vehicle modification restrictions"};
 }

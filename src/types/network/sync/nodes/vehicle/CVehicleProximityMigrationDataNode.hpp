@@ -10,7 +10,7 @@ public:
 	int16_t m_Occupants[16];
 	char pad[16];
 	bool m_OverridePosition;
-	alignas(16) rage::fvector3 m_Position;
+	rage::fvector3 m_Position;
 	std::int32_t m_VelocityX;
 	std::int32_t m_VelocityY;
 	std::int32_t m_VelocityZ;

@@ -11,7 +11,8 @@ namespace YimMenu
 	{
 		INT,
 		FLOAT,
-		BOOL
+		BOOL,
+		INT64
 	};
 
 	struct VariableAppendage

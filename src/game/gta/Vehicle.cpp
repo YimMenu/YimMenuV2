@@ -122,4 +122,27 @@ namespace YimMenu
 
 		return VEHICLE::IS_VEHICLE_SEAT_FREE(GetHandle(), seat, true);
 	}
+
+	bool Vehicle::SupportsBoost()
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::GET_HAS_ROCKET_BOOST(GetHandle());
+	}
+
+	bool Vehicle::IsBoostActive()
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::IS_ROCKET_BOOST_ACTIVE(GetHandle());
+	}
+
+	void Vehicle::SetBoostCharge(int percentage)
+	{
+		ENTITY_ASSERT_VALID();
+		if (!SupportsBoost())
+			return;
+
+		VEHICLE::SET_ROCKET_BOOST_FILL(GetHandle(), percentage);
+	}
 }

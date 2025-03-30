@@ -9,6 +9,7 @@
 #include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/NodeHooks.hpp"
+#include "game/backend/Players.hpp"
 #include "game/gta/Vehicle.hpp"
 #include "types/network/sync/nodes/vehicle/CVehicleProximityMigrationDataNode.hpp"
 
@@ -204,6 +205,14 @@ namespace YimMenu
 	{
 		PLAYER::SET_PLAYER_WANTED_LEVEL(GetId(), level, false);
 		PLAYER::SET_PLAYER_WANTED_LEVEL_NOW(GetId(), false);
+	}
+
+	PlayerData& Player::GetData()
+	{
+		static PlayerData empty_data;
+		if (IsValid())
+			return Players::GetPlayerData(GetId());
+		return empty_data;
 	}
 
 	void Player::SetVisibleLocally(bool visible)

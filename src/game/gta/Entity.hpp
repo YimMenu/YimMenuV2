@@ -114,6 +114,7 @@ namespace YimMenu
 
 		// networking
 		bool IsNetworked();
+		bool IsRemote();
 		bool HasControl();
 		rage::netObject* GetNetworkObject();
 		

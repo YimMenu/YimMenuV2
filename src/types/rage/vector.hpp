@@ -24,13 +24,11 @@ namespace rage
 	};
 
 	// atVector<float, 3>?
-	class vector3
+	class alignas(16) vector3
 	{
 	public:
 		float x, y, z;
 
-	private:
-		int _PAD; // because alignof doesn't work
 	public:
 		constexpr vector3(float x, float y, float z) :
 		    x(x),

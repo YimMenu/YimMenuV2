@@ -151,5 +151,22 @@ struct SCRIPT_EVENT_KICK_FROM_CEO : public SCRIPT_EVENT
 };
 static_assert(sizeof(SCRIPT_EVENT_KICK_FROM_CEO) == 3 * 8);
 
+struct SCRIPT_EVENT_SEND_TO_INTERIOR : public SCRIPT_EVENT
+{
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_SEND_TO_INTERIOR, InteriorControl);
+
+	SCR_INT Interior;
+	PLAYER_INDEX Owner;
+	SCR_BOOL GoonsOnly;
+	SCR_BOOL EnterOwnerInterior;
+	SCR_VEC3 Position;
+	SCR_BOOL PAD_0010;
+	SCR_INT InstanceId;
+	SCR_INT PAD_0012;
+	SCR_INT Distance;
+	SCR_BOOL PAD_0014;
+	SCR_INT SubInstanceId;
+};
+static_assert(sizeof(SCRIPT_EVENT_SEND_TO_INTERIOR) == 16 * 8);
 
 #undef REGISTER_SCRIPT_EVENT

@@ -42,16 +42,14 @@ namespace YimMenu
 		int GetPlayer();
 
 		// weapons
+		void GiveWeapon(std::uint32_t hash, bool equip = false);
+		void RemoveWeapon(std::uint32_t hash);
+		std::uint32_t GetCurrentWeapon();
+		bool HasWeapon(std::uint32_t hash);
 		void SetInfiniteAmmo(bool infinite);
 		void SetInfiniteClip(bool infinite);
 
 		// teleport
 		void TeleportTo(const rage::fvector3& pos); // similar to SetPosition, but handles vehicles correctly
-
-		// weapons
-		void GiveWeapon(std::uint32_t hash, bool equip = false);
-		void RemoveWeapon(std::uint32_t hash);
-		std::uint32_t GetCurrentWeapon();
-		bool HasWeapon(std::uint32_t hash);
 	};
 }

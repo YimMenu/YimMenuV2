@@ -281,6 +281,14 @@ namespace YimMenu
 		return GetNetworkObject() != nullptr;
 	}
 
+	bool Entity::IsRemote()
+	{
+		if (!IsNetworked())
+			return false;
+
+		return GetNetworkObject()->m_IsRemote;
+	}
+
 	rage::netObject* Entity::GetNetworkObject()
 	{
 		if (!IsValid())

@@ -23,5 +23,5 @@ public:
     bool unk_0114; //0x0114
     bool unk_0115; //0x0115
     bool m_IsCargoVehicle; //0x0116
-}; //Size: 0x0118
-static_assert(sizeof(CPhysicalAttachDataNode) == 0x118);
+}; //Size: 0x0120
+static_assert(sizeof(CPhysicalAttachDataNode) == 0x120);

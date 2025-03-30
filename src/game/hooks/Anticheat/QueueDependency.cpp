@@ -39,10 +39,10 @@ namespace YimMenu::Hooks
 	{
 		auto f1 = *reinterpret_cast<void**>(a1 + 0x60);
 		auto f2 = *reinterpret_cast<void**>(a1 + 0x100);
-		auto f3 = *reinterpret_cast<void**>(a1 + 0x1D0);
+		auto f3 = *reinterpret_cast<void**>(a1 + 0x1A0);
 
 		if (!f1)
-			BaseHook::Get<Anticheat::QueueDependency, DetourHook<decltype(&Anticheat::QueueDependency)>>()->Original()(a1);
+			return BaseHook::Get<Anticheat::QueueDependency, DetourHook<decltype(&Anticheat::QueueDependency)>>()->Original()(a1);
 
 		if (f1 == Pointers.SigScanMemory)
 		{

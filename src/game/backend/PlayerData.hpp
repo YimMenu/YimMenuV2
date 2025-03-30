@@ -7,6 +7,6 @@ namespace YimMenu
 	class PlayerData
 	{
 	public:
-		// nothing yet?
+		bool m_RunFreemodeStateKick{};
 	};
 }

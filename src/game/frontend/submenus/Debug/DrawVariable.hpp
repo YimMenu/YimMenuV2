@@ -32,6 +32,12 @@ namespace YimMenu
 			ImGui::InputFloat("Value", static_cast<float*>(value));
 			break;
 		}
+		case VariableType::INT64:
+		{
+			ImGui::SetNextItemWidth(200.f);
+			ImGui::InputScalar("Value", ImGuiDataType_S64, static_cast<std::int64_t*>(value));
+			break;
+		}
 		}
 	}
 
@@ -60,6 +66,11 @@ namespace YimMenu
 			ImGui::Selectable(std::to_string(*static_cast<float*>(value)).c_str(), false, ImGuiSelectableFlags_Disabled);
 			break;
 		}
+		case VariableType::INT64:
+		{
+			ImGui::Selectable(std::to_string(*static_cast<std::int64_t*>(value)).c_str(), false, ImGuiSelectableFlags_Disabled);
+			break;
+		}
 		}
 	}
 
@@ -69,7 +80,7 @@ namespace YimMenu
 		ImGui::InputScalar("Index", ImGuiDataType_U32, &var.base);
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(100.0f);
-		ImGui::Combo("##var_type", (int*)&var.type, "Int\0Float\0Bool");
+		ImGui::Combo("##var_type", (int*)&var.type, "Int\0Float\0Bool\0Int64\0");
 
 		for (int i = 0; i < var.appendages.size(); i++)
 		{

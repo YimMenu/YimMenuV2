@@ -11,6 +11,8 @@ namespace YimMenu::Submenus
 		auto shopping = std::make_shared<Category>("Shopping");
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
 
+		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
+
 		vehiclesGroup->AddItem(std::make_unique<ImGuiItem>([] {
 			if (ImGui::Button("Save This Vehicle as Personal Vehicle"))
 			{

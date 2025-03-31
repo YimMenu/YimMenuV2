@@ -111,5 +111,9 @@ namespace Data
 	    "WEAPON_TACTICALRIFLE"_J,
 	    "WEAPON_EMPLAUNCHER"_J,
 	    "WEAPON_HEAVYRIFLE"_J,
+	    "WEAPON_STUNROD"_J, 
+	    "weapon_acidpackage"_J, 
+	    "weapon_fertilizercan"_J,
+	    "WEAPON_STRICKLER"_J,
 	});
 }

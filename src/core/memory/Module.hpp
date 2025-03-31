@@ -38,7 +38,6 @@ namespace YimMenu
 
 		bool Valid() const;
 
-	private:
 		IMAGE_NT_HEADERS* GetNtHeader() const;
 
 	private:

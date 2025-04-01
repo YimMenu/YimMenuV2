@@ -31,6 +31,7 @@ namespace YimMenu
 					m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
 					m_StartedByUs               = false;
 				}
+				m_Thread          = nullptr;
 				m_ShouldRunScript = false;
 				continue;
 			}
@@ -65,7 +66,7 @@ namespace YimMenu
 
 			if (auto VehicleRewardData = VEHICLE_REWARD_DATA::Get(m_Thread))
 			{
-				auto VehicleMenuData = ScriptLocal(m_Thread, 176).As<PINT>(); // TO-DO: add struct for this?
+				auto VehicleMenuData = ScriptLocal(m_Thread, 176).As<int*>(); // TO-DO: add struct for this?
 				if (giveVehicleReward.Call<bool>(Self::GetVehicle().GetHandle(), VehicleMenuData, &VehicleRewardData->TransactionStatus, &VehicleRewardData->Garage, &VehicleRewardData->GarageOffset, &VehicleRewardData->ControlStatus, false, true, true, false, 0, -1))
 				{
 					if (VehicleRewardData->ControlStatus != 3)
@@ -74,12 +75,13 @@ namespace YimMenu
 						VehicleRewardData->Garage            = 0;
 						VehicleRewardData->GarageOffset      = 0;
 						VehicleRewardData->ControlStatus     = 0;
-						m_ShouldRunScript                    = false;
 						if (m_StartedByUs)
 						{
 							m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
 							m_StartedByUs               = false;
 						}
+						m_Thread          = nullptr;
+						m_ShouldRunScript = false;
 					}
 				}
 			}

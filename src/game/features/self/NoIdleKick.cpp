@@ -14,7 +14,7 @@ namespace YimMenu::Features
 		{
 			for (auto tunable : m_TunableHashes)
 			{
-				if (auto tunablePtr = Tunables::GetTunable<PINT>(tunable))
+				if (auto tunablePtr = Tunables::GetTunable(tunable).As<int*>())
 				{
 					*tunablePtr = INT_MAX;
 				}
@@ -25,10 +25,10 @@ namespace YimMenu::Features
 		{
 			for (int i = 0; i < m_DefaultValues.size(); i++)
 			{
-				if (auto tunablePtr = Tunables::GetTunable<PINT>(m_TunableHashes.at(i)))
+				if (auto tunablePtr = Tunables::GetTunable(m_TunableHashes[i]).As<int*>())
 				{
 					// TO-DO: Add methods for getting the default script value and cloud value to the Tunables class
-					*tunablePtr = m_DefaultValues.at(i);
+					*tunablePtr = m_DefaultValues[i];
 				}
 			}
 		}

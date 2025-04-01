@@ -11,12 +11,10 @@ namespace YimMenu::Features
 
 		bool EnsureScaleformLoaded()
 		{
-			if (m_ScaleformHandle && GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(m_ScaleformHandle))
+			if (GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(m_ScaleformHandle) && GRAPHICS::HAS_SCALEFORM_MOVIE_FILENAME_LOADED("DRAG_RACE"))
 				return true;
 
-			if (!m_ScaleformHandle)
-				m_ScaleformHandle = GRAPHICS::REQUEST_SCALEFORM_MOVIE("DRAG_RACE");
-
+			m_ScaleformHandle = GRAPHICS::REQUEST_SCALEFORM_MOVIE("DRAG_RACE");
 			return false;
 		}
 
@@ -49,7 +47,7 @@ namespace YimMenu::Features
 			GRAPHICS::END_TEXT_COMMAND_SCALEFORM_STRING();
 			GRAPHICS::END_SCALEFORM_MOVIE_METHOD();
 			GRAPHICS::BEGIN_SCALEFORM_MOVIE_METHOD(m_ScaleformHandle, "SET_METER_VALUE");
-			GRAPHICS::SCALEFORM_MOVIE_METHOD_ADD_PARAM_FLOAT(veh.GetSpeed() / veh.GetMaxSpeed());
+			GRAPHICS::SCALEFORM_MOVIE_METHOD_ADD_PARAM_FLOAT(veh.GetRevRatio());
 			GRAPHICS::END_SCALEFORM_MOVIE_METHOD();
 			GRAPHICS::BEGIN_SCALEFORM_MOVIE_METHOD(m_ScaleformHandle, "SET_OUTER_GOAL");
 			GRAPHICS::SCALEFORM_MOVIE_METHOD_ADD_PARAM_FLOAT(-1.0f);
@@ -71,7 +69,9 @@ namespace YimMenu::Features
 
 		virtual void OnDisable() override
 		{
-			GRAPHICS::SET_SCALEFORM_MOVIE_AS_NO_LONGER_NEEDED(&m_ScaleformHandle);
+			if (GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(m_ScaleformHandle) && GRAPHICS::HAS_SCALEFORM_MOVIE_FILENAME_LOADED("DRAG_RACE"))
+				GRAPHICS::SET_SCALEFORM_MOVIE_AS_NO_LONGER_NEEDED(&m_ScaleformHandle);
+
 			m_ScaleformHandle = 0;
 		}
 	};

@@ -1,5 +1,10 @@
 #pragma once
 
+namespace rage
+{
+	class scrThread;
+}
+
 namespace YimMenu
 {
 	class GiveVehicleReward
@@ -13,6 +18,8 @@ namespace YimMenu
 		void RunScriptImpl();
 
 		bool m_ShouldRunScript = false;
+		bool m_StartedByUs     = false;
+		rage::scrThread* m_Thread;
 
 	public:
 		static bool IsSafeToRunScript();

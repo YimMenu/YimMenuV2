@@ -12,43 +12,73 @@ namespace YimMenu
 
 	bool GiveVehicleReward::IsSafeToRunScript()
 	{
-		return Self::GetVehicle().IsValid() && *Pointers.IsSessionStarted && SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("AM_MP_VEHICLE_REWARD"_J) > 0;
+		return Self::GetVehicle().IsValid() && *Pointers.IsSessionStarted;
 	}
 
 	void GiveVehicleReward::RunScriptImpl()
 	{
 		while (g_Running)
 		{
-			if (m_ShouldRunScript)
+			ScriptMgr::Yield();
+
+			if (!m_ShouldRunScript)
+				continue;
+
+			if (!IsSafeToRunScript())
 			{
-				if (IsSafeToRunScript())
+				if (m_StartedByUs && m_Thread)
 				{
-					if (auto thread = Scripts::FindScriptThread("AM_MP_VEHICLE_REWARD"_J))
+					m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
+					m_StartedByUs               = false;
+				}
+				m_ShouldRunScript = false;
+			}
+
+			if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("AM_MP_VEHICLE_REWARD"_J) == 0)
+			{
+				SCRIPT::REQUEST_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J);
+				if (SCRIPT::HAS_SCRIPT_WITH_NAME_HASH_LOADED("AM_MP_VEHICLE_REWARD"_J))
+				{
+					int id   = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J, 2050);
+					m_Thread = Scripts::FindScriptThreadByID(id);
+					if (m_Thread)
+						m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
+					SCRIPT::SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED("AM_MP_VEHICLE_REWARD"_J);
+					m_StartedByUs = true;
+				}
+				else
+				{
+					continue;
+				}
+			}
+			else
+			{
+				m_Thread = Scripts::FindScriptThread("AM_MP_VEHICLE_REWARD"_J);
+			}
+
+			if (m_Thread)
+			{
+				if (auto VehicleRewardData = VEHICLE_REWARD_DATA::Get(m_Thread))
+				{
+					auto VehicleMenuData = ScriptLocal(m_Thread, 176).As<PINT>(); // TO-DO: add struct for this?
+					if (giveVehicleReward.Call<bool>(Self::GetVehicle().GetHandle(), VehicleMenuData, &VehicleRewardData->TransactionStatus, &VehicleRewardData->Garage, &VehicleRewardData->GarageOffset, &VehicleRewardData->ControlStatus, false, true, true, false, 0, -1))
 					{
-						if (auto VehicleRewardData = VEHICLE_REWARD_DATA::Get(thread))
+						if (VehicleRewardData->ControlStatus != 3)
 						{
-							auto VehicleMenuData = ScriptLocal(thread, 176).As<PINT>(); // TO-DO: add struct for this?
-							if (giveVehicleReward.Call<bool>(Self::GetVehicle().GetHandle(), VehicleMenuData, &VehicleRewardData->TransactionStatus, &VehicleRewardData->Garage, &VehicleRewardData->GarageOffset, &VehicleRewardData->ControlStatus, false, true, true, false, 0, -1))
+							VehicleRewardData->TransactionStatus = 0;
+							VehicleRewardData->Garage            = 0;
+							VehicleRewardData->GarageOffset      = 0;
+							VehicleRewardData->ControlStatus     = 0;
+							m_ShouldRunScript                    = false;
+							if (m_StartedByUs)
 							{
-								if (VehicleRewardData->ControlStatus != 3)
-								{
-									VehicleRewardData->TransactionStatus = 0;
-									VehicleRewardData->Garage            = 0;
-									VehicleRewardData->GarageOffset      = 0;
-									VehicleRewardData->ControlStatus     = 0;
-									m_ShouldRunScript                    = false;
-								}
+								m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
+								m_StartedByUs               = false;
 							}
 						}
 					}
 				}
-				else
-				{
-					m_ShouldRunScript = false;
-				}
 			}
-
-			ScriptMgr::Yield();
 		}
 	}
 }

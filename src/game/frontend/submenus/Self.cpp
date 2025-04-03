@@ -24,6 +24,7 @@ namespace YimMenu::Submenus
 		movementGroup->AddItem(std::make_shared<ConditionalItem>("invis"_J, std::make_shared<BoolCommandItem>("localvis"_J)));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("otr"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noragdoll"_J));
+		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noidlekick"_J));
 
 		auto clearWanted = std::make_shared<Group>("", 1);
 		clearWanted->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, std::make_shared<CommandItem>("clearwanted"_J), true));

@@ -28,6 +28,19 @@ namespace YimMenu::Scripts
 		return nullptr;
 	}
 
+	rage::scrThread* FindScriptThreadByID(std::uint32_t id)
+	{
+		for (auto& thread : *Pointers.ScriptThreads)
+		{
+			if (thread && thread->m_Context.m_ThreadId == id)
+			{
+				return thread;
+			}
+		}
+
+		return nullptr;
+	}
+
 	rage::scrProgram* FindScriptProgram(joaat_t hash)
 	{
 		for (int i = 0; i < 176; i++)

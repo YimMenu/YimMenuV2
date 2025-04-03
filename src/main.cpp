@@ -14,6 +14,7 @@
 #include "game/backend/SavedLocations.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/NativeHooks.hpp"
+#include "game/backend/Tunables.hpp"
 #include "game/frontend/GUI.hpp"
 #include "game/pointers/Pointers.hpp"
 #include "game/features/recovery/GiveVehicleReward.hpp"
@@ -50,6 +51,7 @@ namespace YimMenu
 		GUI::Init();
 
 		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
+		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
 		ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));

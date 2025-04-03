@@ -7,6 +7,19 @@
 
 namespace YimMenu::Submenus
 {
+	struct NormalizedStatInfo
+	{
+		std::string m_Name;
+		std::uint32_t m_NameHash;
+		bool m_Normalized = false;
+		sStatData* m_Data = nullptr;
+
+		bool IsValid()
+		{
+			return m_Data != nullptr;
+		}
+	};
+
 	union StatValue
 	{
 		float m_AsFloat;
@@ -15,6 +28,54 @@ namespace YimMenu::Submenus
 		std::uint64_t m_AsU64;
 		char m_AsString[12];
 	};
+
+	static NormalizedStatInfo GetNormalizedStatInfo(const char* name_str)
+	{
+		NormalizedStatInfo name{};
+		auto len = strlen(name_str);
+
+		// not sure why people do this
+		if (len > 1 && name_str[0] == '$')
+		{
+			name_str++;
+			len--;
+			name.m_Normalized = true;
+		}
+
+		name.m_Name = name_str;
+
+		if (len > 3 && tolower(name_str[0]) == 'm' && tolower(name_str[1]) == 'p' && tolower(name_str[2]) == 'x')
+		{
+			if (auto last_char = Pointers.StatsMgr->GetStat("MPPLY_LAST_MP_CHAR"_J))
+			{
+				name.m_Name[2] = '0' + last_char->GetInt();
+				name.m_Normalized = true;
+			}
+		}
+
+		name.m_NameHash = Joaat(name.m_Name);
+		name.m_Data = Pointers.StatsMgr->GetStat(name.m_NameHash);
+
+		if (name.m_Data == nullptr && len > 3 && (tolower(name_str[0]) != 'm' || tolower(name_str[1]) != 'p' || !(tolower(name_str[2]) == '0' || tolower(name_str[2]) == '1')))
+		{
+			// stat names without a character prefix
+			auto last_char = Pointers.StatsMgr->GetStat("MPPLY_LAST_MP_CHAR"_J);
+			auto char_index = last_char ? last_char->GetInt() : 0;
+			auto char_prefix = char_index == 0 ? "MP0_" : "MP1_";
+			auto new_hash = Joaat(char_prefix + name.m_Name);
+			auto new_stat = Pointers.StatsMgr->GetStat(new_hash);
+
+			if (new_stat)
+			{
+				name.m_Name = char_prefix + name.m_Name;
+				name.m_NameHash = new_hash;
+				name.m_Data = new_stat;
+				name.m_Normalized = true;
+			}
+		}
+
+		return name;
+	}
 
 	static void ReadStat(StatValue& value, sStatData* data)
 	{
@@ -115,35 +176,40 @@ namespace YimMenu::Submenus
 		auto menu = std::make_shared<Category>("Stat Editor");
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
-			static sStatData* current_stat;
+			static NormalizedStatInfo current_info;
 			static char stat_buf[48]{};
 			static StatValue value{};
 
 			ImGui::SetNextItemWidth(300.f);
 			if (ImGui::InputText("Name", stat_buf, sizeof(stat_buf)))
 			{
-				current_stat = Pointers.StatsMgr->GetStat(Joaat(stat_buf));
-				ReadStat(value, current_stat);
+				current_info = GetNormalizedStatInfo(stat_buf);
+				if (current_info.IsValid())
+					ReadStat(value, current_info.m_Data);
 			}
 
-			if (!current_stat)
+			if (!current_info.IsValid())
 				return ImGui::Text("Stat not found");
+			else if (current_info.m_Normalized)
+			{
+				ImGui::Text("Normalized name to: %s", current_info.m_Name.data());
+			}
 
-			bool can_edit = !current_stat->IsServerAuthoritative() || AnticheatBypass::IsFSLLoaded(); // TODO: a lot of false positives and negatives with this one
+			bool can_edit = !current_info.m_Data->IsServerAuthoritative() || AnticheatBypass::IsFSLLoaded(); // TODO: a lot of false positives and negatives with this one
 
-			RenderStatEditor(value, current_stat);
+			RenderStatEditor(value, current_info.m_Data);
 
 			if (ImGui::Button("Refresh"))
-				ReadStat(value, current_stat);
+				ReadStat(value, current_info.m_Data);
 			ImGui::SameLine();
 			ImGui::BeginDisabled(!can_edit);
 			if (ImGui::Button("Write"))
 				FiberPool::Push([] {
-					WriteStat(Joaat(stat_buf), value, current_stat);
+					WriteStat(Joaat(stat_buf), value, current_info.m_Data);
 				});
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 				FiberPool::Push([] {
-					WriteStat(Joaat(stat_buf), value, current_stat);
+					WriteStat(Joaat(stat_buf), value, current_info.m_Data);
 				});
 			if (!can_edit && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 				ImGui::SetTooltip("This stat should not be edited by the client. Right-click to force the write anyway");

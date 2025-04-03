@@ -156,7 +156,7 @@ namespace YimMenu::Hooks
 		}
 		case rage::netMessage::Type::BattlEyeCmd:
 		{
-			if (!AnticheatBypass::IsFSLLoaded())
+			if (!AnticheatBypass::IsFSLLoaded() && !AnticheatBypass::IsBattlEyeRunning())
 			{
 				char data[1028]{};
 				int size = buffer.Read<int>(11);

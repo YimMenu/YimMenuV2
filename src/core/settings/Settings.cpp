@@ -79,19 +79,29 @@ namespace YimMenu
 
 	void Settings::LoadComponentImpl(IStateSerializer* serializer)
 	{
-		LOG(VERBOSE) << "Loading component: " << serializer->GetSerializerComponentName();
-
-		if (!m_Json.contains(serializer->GetSerializerComponentName())
-		    || !m_Json[serializer->GetSerializerComponentName()].is_object())
+		if (!m_Json.contains(serializer->GetSerializerComponentName()) || !m_Json[serializer->GetSerializerComponentName()].is_object())
 			m_Json[serializer->GetSerializerComponentName()] = nlohmann::json::object();
 
-		serializer->LoadState(m_Json[serializer->GetSerializerComponentName()]);
+		try
+		{
+			serializer->LoadState(m_Json[serializer->GetSerializerComponentName()]);
+		}
+		catch (const std::exception& e)
+		{
+			LOGF(FATAL, "Failed to load component {}: {}", serializer->GetSerializerComponentName(), e.what());
+		}
 	}
 
 	void Settings::SaveComponentImpl(IStateSerializer* serializer)
 	{
-		//LOG(VERBOSE) << "Saving component: " << serializer->GetSerializerComponentName();
-		serializer->SaveState(m_Json[serializer->GetSerializerComponentName()]);
+		try
+		{
+			serializer->SaveState(m_Json[serializer->GetSerializerComponentName()]);
+		}
+		catch (const std::exception& e)
+		{
+			LOGF(FATAL, "Failed to save component {}: {}", serializer->GetSerializerComponentName(), e.what());
+		}
 	}
 
 	void Settings::Reset()
@@ -99,7 +109,7 @@ namespace YimMenu
 		std::ofstream file(m_SettingsFile, std::ios::out | std::ios::trunc);
 		file << "{}" << std::endl;
 		file.close();
-		m_Json            = "{}";
+		m_Json = "{}";
 		m_InitialLoadDone = true;
 	}
 

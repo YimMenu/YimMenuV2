@@ -14,6 +14,6 @@ public:
 	std::int32_t m_VelocityX;
 	std::int32_t m_VelocityY;
 	std::int32_t m_VelocityZ;
-	char pad3[352];
-}; //Size: 0x0180
-static_assert(sizeof(CVehicleProximityMigrationDataNode) == 0x290);
+	char pad3[116];
+};
+static_assert(sizeof(CVehicleProximityMigrationDataNode) == 0x1A0);

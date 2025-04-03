@@ -1,25 +1,26 @@
 #pragma once
-#include <cstdint>
-#include "netsync/CProjectBaseSyncDataNode.hpp"
-#include "netsync/nodes/physical/CPhysicalHealthDataNode.hpp"
+#include "types/network/sync/CProjectBaseSyncDataNode.hpp"
+#include "types/network/sync/nodes/physical/CPhysicalHealthDataNode.hpp"
 
-#pragma pack(push, 8)
+#include <cstdint>
+
 class CHeliHealthDataNode : CPhysicalHealthDataNode // intentionally private since the physical health node fields aren't serialized
 {
 public:
-	char m_pad[0x10]; // 0xF0
-	uint32_t m_main_rotor_health;
-	uint32_t m_rear_rotor_health;
-	bool m_can_tail_boom_break_off;
-	bool m_is_tail_boom_broken;
-	bool m_unk;
-	bool m_disable_explode_from_body_damage;
-	uint32_t m_body_health;
-	uint32_t m_petrol_tank_health;
-	uint32_t m_engine_health;
-	float m_unk_deformation_level;
-	float m_unk2_deformation_level;
-	float m_unk3_deformation_level;
+	void* m_CommonDataOpsVFT;  //0x00E0 NodeCommonDataOperations
+	void* m_CommonDataOpsNode; //0x00E8
+
+	uint32_t m_MainRotorHealth;          //0x00F0
+	uint32_t m_RearRotorHealth;          //0x00F4
+	bool m_CanTailBoomBreakOff;          //0x00F8
+	bool m_IsTailBoomBroken;             //0x00F9
+	bool m_Unk;                          //0x00FA
+	bool m_DisableExplodeFromBodyDamage; //0x00FB
+	uint32_t m_BodyHealth;               //0x00FC
+	uint32_t m_PetrolTankHealth;         //0x0100
+	uint32_t m_EngineHealth;             //0x0104
+	float m_UnkDeformationLevel;         //0x0108
+	float m_Unk2DeformationLevel;        //0x010C
+	float m_Unk3DeformationLevel;        //0x0110
 };
 static_assert(sizeof(CHeliHealthDataNode) == 0x118);
-#pragma pack(pop)

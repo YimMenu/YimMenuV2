@@ -4,9 +4,7 @@
 class CPedOrientationDataNode : CSyncDataNodeFrequent
 {
 public:
-	bool m_HasDesiredHeadingX; //000C1
-	bool m_HasDesiredHeadingY; //000C2
-	float m_DesiredHeadingX;   //0x00C4
-	float m_DesiredHeadingY;   //0x00C8
+	float m_Heading;        //0x00C0
+	float m_DesiredHeading; //0x00C4
 };
-static_assert(sizeof(CPedOrientationDataNode) == 0xD0);
+static_assert(sizeof(CPedOrientationDataNode) == 0xC8);

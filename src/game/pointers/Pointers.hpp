@@ -41,6 +41,7 @@ namespace YimMenu
 		using EventAck = bool(*)(uintptr_t data, CNetGamePlayer* target_player, uint32_t event_index, uint32_t event_handled_bitset);
 		using SendEventAck = void(*)(rage::netEventMgr* event_manager, CNetGamePlayer* source_player);
 		using ScriptVM = int (*)(uint64_t* stack, int64_t** scr_globals, rage::scrProgram* program, void* ctx);
+		using GetPackedStatData = void(*)(int index, int* row, bool* is_bool, bool* unk);
 	}
 
 	struct PointerData
@@ -97,6 +98,7 @@ namespace YimMenu
 		BytePatch NetArrayCachedDataPatch;
 		rage::netArrayMgr** NetArrayMgr;
 		CStatsMgr* StatsMgr;
+		Functions::GetPackedStatData GetPackedStatData;
 	};
 
 	struct Pointers : PointerData

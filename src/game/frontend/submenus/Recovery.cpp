@@ -10,6 +10,7 @@ namespace YimMenu::Submenus
 	{
 		auto shopping = std::make_shared<Category>("Shopping");
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
+		auto moneyMethodsGroup = std::make_shared<Group>("Money Methods");
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
 
@@ -23,7 +24,10 @@ namespace YimMenu::Submenus
 			}
 		}));
 
+		moneyMethodsGroup->AddItem(std::make_shared<BoolCommandItem>("nightclubsafeloop"_J));
+
 		shopping->AddItem(vehiclesGroup);
+		shopping->AddItem(moneyMethodsGroup);
 		AddCategory(std::move(shopping));
 		AddCategory(BuildStatEditorMenu());
 	}

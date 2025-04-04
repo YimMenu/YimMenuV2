@@ -7,7 +7,7 @@
 
 namespace YimMenu::Submenus
 {
-	struct NormalizedStatInfo
+	struct StatInfo
 	{
 		std::string m_Name;
 		std::uint32_t m_NameHash;
@@ -20,6 +20,18 @@ namespace YimMenu::Submenus
 		}
 	};
 
+	struct PackedStatInfo
+	{
+		int m_Index;
+		bool m_IsBoolStat;
+		bool m_IsValid;
+
+		bool IsValid()
+		{
+			return m_IsValid;
+		}
+	};
+
 	union StatValue
 	{
 		float m_AsFloat;
@@ -29,9 +41,9 @@ namespace YimMenu::Submenus
 		char m_AsString[12];
 	};
 
-	static NormalizedStatInfo GetNormalizedStatInfo(const char* name_str)
+	static StatInfo GetStatInfo(const char* name_str)
 	{
-		NormalizedStatInfo name{};
+		StatInfo name{};
 		auto len = strlen(name_str);
 
 		// not sure why people do this
@@ -171,19 +183,61 @@ namespace YimMenu::Submenus
 		}
 	}
 
+	static PackedStatInfo GetPackedStatInfo(int index)
+	{
+		PackedStatInfo info{};
+		int row;
+		bool unk;
+
+		info.m_Index = index;
+		Pointers.GetPackedStatData(index, &row, &info.m_IsBoolStat, &unk);
+
+		if (row != 0 || index <= 191)
+			info.m_IsValid = true;
+
+		return info;
+	}
+
+	static void ReadPackedStat(StatValue& value, const PackedStatInfo& info)
+	{
+		if (info.m_IsBoolStat)
+			value.m_AsBool = STATS::GET_PACKED_STAT_BOOL_CODE(info.m_Index, -1);
+		else
+			value.m_AsInt = STATS::GET_PACKED_STAT_BOOL_CODE(info.m_Index, -1);
+	}
+
+	static void WritePackedStat(const StatValue& value, const PackedStatInfo& info)
+	{
+		if (info.m_IsBoolStat)
+			STATS::SET_PACKED_STAT_BOOL_CODE(info.m_Index, value.m_AsBool, -1);
+		else
+			STATS::SET_PACKED_STAT_INT_CODE(info.m_Index, value.m_AsInt, -1);
+	}
+
+	static bool RenderPackedStatEditor(StatValue& value, const PackedStatInfo& info)
+	{
+		ImGui::SetNextItemWidth(150.f);
+		if (info.m_IsBoolStat) 
+			return ImGui::Checkbox("Value##packed", &value.m_AsBool);
+		else
+			return ImGui::InputScalar("Value##packed", ImGuiDataType_U8, &value.m_AsInt);
+	}
+
 	std::shared_ptr<Category> BuildStatEditorMenu()
 	{
 		auto menu = std::make_shared<Category>("Stat Editor");
+		auto normal = std::make_shared<Group>("Regular");
+		auto packed = std::make_shared<Group>("Packed");
 
-		menu->AddItem(std::make_unique<ImGuiItem>([] {
-			static NormalizedStatInfo current_info;
+		normal->AddItem(std::make_unique<ImGuiItem>([] {
+			static StatInfo current_info;
 			static char stat_buf[48]{};
 			static StatValue value{};
 
 			ImGui::SetNextItemWidth(300.f);
 			if (ImGui::InputText("Name", stat_buf, sizeof(stat_buf)))
 			{
-				current_info = GetNormalizedStatInfo(stat_buf);
+				current_info = GetStatInfo(stat_buf);
 				if (current_info.IsValid())
 					ReadStat(value, current_info.m_Data);
 			}
@@ -205,17 +259,47 @@ namespace YimMenu::Submenus
 			ImGui::BeginDisabled(!can_edit);
 			if (ImGui::Button("Write"))
 				FiberPool::Push([] {
-					WriteStat(Joaat(stat_buf), value, current_info.m_Data);
+					WriteStat(current_info.m_NameHash, value, current_info.m_Data);
 				});
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 				FiberPool::Push([] {
-					WriteStat(Joaat(stat_buf), value, current_info.m_Data);
+					WriteStat(current_info.m_NameHash, value, current_info.m_Data);
 				});
 			if (!can_edit && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 				ImGui::SetTooltip("This stat should not be edited by the client. Right-click to force the write anyway");
 			ImGui::EndDisabled();
 		}));
 
+		packed->AddItem(std::make_unique<ImGuiItem>([] {
+			// TODO: improve packed stat editor
+			static PackedStatInfo current_info{0, false, true};
+			static StatValue value{};
+	
+			ImGui::SetNextItemWidth(200.f);
+			if (ImGui::InputInt("Index", &current_info.m_Index))
+			{
+				current_info = GetPackedStatInfo(current_info.m_Index);
+				if (current_info.IsValid())
+					ReadPackedStat(value, current_info);
+			}
+
+			if (!current_info.IsValid())
+				return ImGui::Text("Index not valid");
+
+			RenderPackedStatEditor(value, current_info);
+
+			if (ImGui::Button("Refresh"))
+				ReadPackedStat(value, current_info);
+			ImGui::SameLine();
+			if (ImGui::Button("Write"))
+				FiberPool::Push([] {
+					WritePackedStat(value, current_info);
+				});
+		}));
+
+
+		menu->AddItem(std::move(normal));
+		menu->AddItem(std::move(packed));
 		return menu;
 	}
 }

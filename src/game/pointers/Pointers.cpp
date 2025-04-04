@@ -240,6 +240,11 @@ namespace YimMenu
 			StatsMgr = ptr.Add(4).Add(3).Rip().As<CStatsMgr*>();
 		});
 
+		constexpr auto getPackedStatDataPtrn = Pattern<"8D 81 37 FE FF FF">("GetPackedStatData");
+		scanner.Add(getPackedStatDataPtrn, [this](PointerCalculator ptr) {
+			GetPackedStatData = ptr.Sub(0xE).As<Functions::GetPackedStatData>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

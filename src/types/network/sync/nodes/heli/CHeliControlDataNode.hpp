@@ -1,25 +1,26 @@
 #pragma once
-#include <cstdint>
-#include "netsync/CProjectBaseSyncDataNode.hpp"
-#include "netsync/nodes/vehicle/CVehicleControlDataNode.hpp"
+#include "types/network/sync/CProjectBaseSyncDataNode.hpp"
+#include "types/network/sync/nodes/vehicle/CVehicleControlDataNode.hpp"
 
-#pragma pack(push, 8)
+#include <cstdint>
+
 class CHeliControlDataNode : CVehicleControlDataNode
 {
 public:
-	char m_pad[0x10];                   // 0x130
-	float m_yaw_control;                // 0x140
-	float m_pitch_control;              // 0x144
-	float m_roll_control;               // 0x148
-	float m_throttle_control;           // 0x14C
-	bool m_engine_off;                  // 0x150
-	int m_landing_gear_state;           // 0x154
-	bool m_has_landing_gear;            // 0x158
-	bool m_has_vehicle_task;            // 0x159
-	bool m_is_thruster_model;           // 0x15A
-	float m_thruster_side_rcs_throttle; // 0x15C
-	float m_thruster_throttle;          // 0x160
-	bool m_unk8;                        // 0x164
+	void* m_CommonDataOpsVFT;  //0x0130 NodeCommonDataOperations
+	void* m_CommonDataOpsNode; //0x0138
+
+	float m_YawControl;              //0x0140
+	float m_PitchControl;            //0x0144
+	float m_RollControl;             //0x0148
+	float m_ThrottleControl;         //0x014C
+	bool m_EngineOff;                //0x0150
+	int m_LandingGearState;          //0x0154
+	bool m_HasLandingGear;           //0x0158
+	bool m_HasVehicleTask;           //0x0159
+	bool m_IsThrusterModel;          //0x015A
+	float m_ThrusterSideRcsThrottle; //0x015C
+	float m_ThrusterThrottle;        //0x0160
+	bool m_Unk8;                     //0x0164
 };
 static_assert(sizeof(CHeliControlDataNode) == 0x168);
-#pragma pack(pop)

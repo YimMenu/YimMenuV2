@@ -7,8 +7,8 @@ namespace YimMenu::Features
 	{
 		using LoopedCommand::LoopedCommand;
 
-		const std::vector<joaat_t> m_TunableHashes = {"IDLEKICK_WARNING1"_J, "IDLEKICK_WARNING2"_J, "IDLEKICK_WARNING3"_J, "IDLEKICK_KICK"_J, "ConstrainedKick_Warning1"_J, "ConstrainedKick_Warning2"_J, "ConstrainedKick_Warning3"_J, "ConstrainedKick_Kick"_J};
-		const std::vector<int> m_DefaultValues = {120000, 300000, 600000, 900000, 30000, 60000, 90000, 120000};
+		static constexpr std::array m_TunableHashes = {"IDLEKICK_WARNING1"_J, "IDLEKICK_WARNING2"_J, "IDLEKICK_WARNING3"_J, "IDLEKICK_KICK"_J, "ConstrainedKick_Warning1"_J, "ConstrainedKick_Warning2"_J, "ConstrainedKick_Warning3"_J, "ConstrainedKick_Kick"_J};
+		static constexpr std::array m_DefaultValues = {120000, 300000, 600000, 900000, 30000, 60000, 90000, 120000};
 
 		virtual void OnTick() override
 		{

@@ -1,13 +1,10 @@
 #pragma once
 #include "types/network/sync/CProjectBaseSyncDataNode.hpp"
+#include "types/rage/vector.hpp"
 
-#if 0
-#pragma pack(push, 4)
 class CEntityOrientationDataNode : CSyncDataNodeFrequent
 {
 public:
-    rage::fmatrix44 m_eulers;
-}; //Size: 0x00EC
+	rage::matrix44 m_Eulers;
+}; //Size: 0x0100
 static_assert(sizeof(CEntityOrientationDataNode) == 0x100);
-#pragma pack(pop)
-#endif

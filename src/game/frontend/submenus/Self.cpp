@@ -37,7 +37,8 @@ namespace YimMenu::Submenus
 		wantedGroup->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, setWanted, true));
 
 		toolsGroup->AddItem(std::make_shared<CommandItem>("suicide"_J));
-
+		toolsGroup->AddItem(std::make_shared<CommandItem>("SkipCutscene"_J));
+		
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superrun"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superjump"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("noclip"_J));

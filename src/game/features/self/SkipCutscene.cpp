@@ -14,5 +14,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	static SkipCutscene _SkipCutscene{"SkipCutscene", "SKIP_CUTSCENE", "SKIP_CUTSCENE_DESC"};
+	static SkipCutscene _SkipCutscene{"SkipCutscene", "SKIP CUTSCENE", "Skip the Stpid Cutscene"};
 }

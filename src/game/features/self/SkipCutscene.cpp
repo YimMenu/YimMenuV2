@@ -1,10 +1,10 @@
 #include "core/commands/Command.hpp"
 #include "game/backend/Self.hpp"
-#include <game/gta/Natives.hpp>
+#include "game/gta/Natives.hpp"
 
 namespace YimMenu::Features
 {
-	class skip_cutscene : public Command
+	class SkipCutscene : public Command
 	{
 		using Command::Command;
 
@@ -14,5 +14,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	static skip_cutscene _skip_cutscene{"SkipCutscene", "SKIP_CUTSCENE", "SKIP_CUTSCENE_DESC"}; //static skip_cutscene _skip_cutscene{"SkipCutscene", "SKIP_CUTSCENE", "SKIP_CUTSCENE_DESC", 0};
+	static SkipCutscene _SkipCutscene{"SkipCutscene", "SKIP_CUTSCENE", "SKIP_CUTSCENE_DESC"};
 }

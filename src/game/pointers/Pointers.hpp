@@ -16,6 +16,8 @@ namespace rage
 	class netConnectionManager;
 	class netArrayMgr;
 	class netEventMgr;
+	class netCatalog;
+	class netCatalogBaseItem;
 }
 class CPedFactory;
 class CNetGamePlayer;
@@ -42,6 +44,7 @@ namespace YimMenu
 		using SendEventAck = void(*)(rage::netEventMgr* event_manager, CNetGamePlayer* source_player);
 		using ScriptVM = int (*)(uint64_t* stack, int64_t** scr_globals, rage::scrProgram* program, void* ctx);
 		using GetPackedStatData = void(*)(int index, int* row, bool* is_bool, bool* unk);
+		using GetCatalogItem = rage::netCatalogBaseItem*(*)(rage::netCatalog* catalog, std::uint32_t* hash);
 	}
 
 	struct PointerData
@@ -99,6 +102,8 @@ namespace YimMenu
 		rage::netArrayMgr** NetArrayMgr;
 		CStatsMgr* StatsMgr;
 		Functions::GetPackedStatData GetPackedStatData;
+		rage::netCatalog* NetCatalog;
+		Functions::GetCatalogItem GetCatalogItem;
 	};
 
 	struct Pointers : PointerData

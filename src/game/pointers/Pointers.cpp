@@ -245,6 +245,12 @@ namespace YimMenu
 			GetPackedStatData = ptr.Sub(0xE).As<Functions::GetPackedStatData>();
 		});
 
+		constexpr auto getCatalogItemPtrn = Pattern<"0F 82 55 FF FF FF 44 89 7C 24 30">("NetCatalog&GetCatalogItem");
+		scanner.Add(getCatalogItemPtrn, [this](PointerCalculator ptr) {
+			NetCatalog = ptr.Add(0xB).Add(3).Rip().As<rage::netCatalog*>();
+			GetCatalogItem = ptr.Add(0x17).Add(1).Rip().As<Functions::GetCatalogItem>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

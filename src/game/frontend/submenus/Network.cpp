@@ -37,7 +37,7 @@ namespace YimMenu::Submenus
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("fastjoin"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("disabledeathbarriers"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("despawnbypass"_J)); // move this somewhere else?
-
+	
 		session->AddItem(bountyGroup);
 		session->AddItem(trollGroup);
 		session->AddItem(teleportGroup);

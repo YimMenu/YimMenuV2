@@ -230,6 +230,9 @@ namespace YimMenu::Submenus
 		auto packed = std::make_shared<Group>("Packed");
 
 		normal->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!NativeInvoker::AreHandlersCached())
+				return ImGui::TextDisabled("Natives not cached yet");
+
 			static StatInfo current_info;
 			static char stat_buf[48]{};
 			static StatValue value{};
@@ -243,7 +246,7 @@ namespace YimMenu::Submenus
 			}
 
 			if (!current_info.IsValid())
-				return ImGui::Text("Stat not found");
+				return ImGui::TextDisabled("Stat not found");
 			else if (current_info.m_Normalized)
 			{
 				ImGui::Text("Normalized name to: %s", current_info.m_Name.data());
@@ -271,6 +274,9 @@ namespace YimMenu::Submenus
 		}));
 
 		packed->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!NativeInvoker::AreHandlersCached())
+				return ImGui::TextDisabled("Natives not cached yet");
+
 			// TODO: improve packed stat editor
 			static PackedStatInfo current_info{0, false, true};
 			static StatValue value{};
@@ -284,14 +290,14 @@ namespace YimMenu::Submenus
 			}
 
 			if (!current_info.IsValid())
-				return ImGui::Text("Index not valid");
+				return ImGui::TextDisabled("Index not valid");
 
 			RenderPackedStatEditor(value, current_info);
 
-			if (ImGui::Button("Refresh"))
+			if (ImGui::Button("Refresh##packed"))
 				ReadPackedStat(value, current_info);
 			ImGui::SameLine();
-			if (ImGui::Button("Write"))
+			if (ImGui::Button("Write##packed"))
 				FiberPool::Push([] {
 					WritePackedStat(value, current_info);
 				});

@@ -1,4 +1,5 @@
 #include "core/commands/Command.hpp"
+#include "core/commands/LoopedCommand.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
@@ -57,5 +58,21 @@ namespace YimMenu::Features
 		}
 	};
 
+	class AutoTpToWaypoint : public LoopedCommand
+	{
+		using LoopedCommand::LoopedCommand;
+
+		virtual void OnTick() override
+		{
+			if (HUD::IS_WAYPOINT_ACTIVE())
+			{
+				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
+				ResolveZCoordinate(coords);
+				Self::GetPed().TeleportTo(coords);
+			}
+		}
+	};
+
 	static TpToWaypoint _TpToWaypoint{"tptowaypoint", "Teleport to Waypoint", "Teleports you to the waypoint"};
+	static AutoTpToWaypoint _AutoTpToWaypoint{"autotptowaypoint", "Auto Teleport to Waypoint", "Automatically teleports you to the waypoint"};
 }

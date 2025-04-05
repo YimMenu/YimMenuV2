@@ -37,6 +37,7 @@ namespace YimMenu::Hooks
 		extern void QueueDependency(__int64 a1);
 		extern bool PrepareMetricForSending(rage::JsonSerializer* ser, void* a2, void* a3, rage::rlMetric* metric);
 		extern BOOL GetThreadContext(HANDLE hThread, LPCONTEXT lpContext);
+		extern void HttpStartRequest(void* request);
 	}
 
 	namespace Info

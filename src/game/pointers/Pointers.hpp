@@ -108,6 +108,7 @@ namespace YimMenu
 		Functions::GetCatalogItem GetCatalogItem;
 		void** TransactionMgr;
 		Functions::GetActiveBasket GetActiveBasket;
+		PVOID HttpStartRequest;
 	};
 
 	struct Pointers : PointerData

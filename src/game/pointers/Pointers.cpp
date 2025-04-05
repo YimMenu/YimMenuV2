@@ -251,6 +251,16 @@ namespace YimMenu
 			GetCatalogItem = ptr.Add(0x17).Add(1).Rip().As<Functions::GetCatalogItem>();
 		});
 
+		constexpr auto transactionMgrPtrn = Pattern<"48 8B 05 ? ? ? ? 80 78 39 00 74 2D">("TransactionMgr");
+		scanner.Add(transactionMgrPtrn, [this](PointerCalculator ptr) {
+			TransactionMgr = ptr.Add(3).Rip().As<void**>();
+		});
+
+		constexpr auto getActiveBasketPtrn = Pattern<"48 8B 40 10 81 7B 0C AE A0 A9 04">("GetActiveBasket");
+		scanner.Add(getActiveBasketPtrn, [this](PointerCalculator ptr) {
+			GetActiveBasket = ptr.Sub(0x39).As<Functions::GetActiveBasket>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

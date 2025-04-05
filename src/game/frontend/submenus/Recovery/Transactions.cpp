@@ -7,6 +7,7 @@
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/pointers/Pointers.hpp"
+#include "types/netshop/CNetShopTransaction.hpp"
 #include "types/netshop/netCatalogBaseItem.hpp"
 
 namespace YimMenu::Submenus
@@ -180,17 +181,22 @@ namespace YimMenu::Submenus
 	static void ProcessTransaction(const TransactionInfo& info)
 	{
 		FiberPool::Push([&info] {
-			int txn_id{};
+			int txn_id{-1};
 			bool txn_failed{false};
+			CNetShopTransaction* txn{nullptr};
 
 			// set up transaction
 			Scripts::RunAsScript(Scripts::FindScriptThread("shop_controller"_J), [&] {
 				if (info.m_Type == TransactionInfo::Type::BASKET)
 				{
+					if (NETSHOPPING::NET_GAMESERVER_BASKET_IS_ACTIVE())
+						NETSHOPPING::NET_GAMESERVER_BASKET_END();
+
 					if (!NETSHOPPING::NET_GAMESERVER_BASKET_START(&txn_id, info.m_Category.m_Hash, info.m_Action.m_Hash, 4))
 					{
 						Notifications::Show("Transactions", "Failed to create basket", NotificationType::Error);
 						txn_failed = true;
+						NETSHOPPING::NET_GAMESERVER_BASKET_END();
 						return;
 					}
 
@@ -232,6 +238,11 @@ namespace YimMenu::Submenus
 					}
 				}
 
+				if (info.m_Type == TransactionInfo::Type::BASKET)
+				{
+					txn = Pointers.GetActiveBasket(*Pointers.TransactionMgr, &txn_id); // TODO: add support for services too
+				}
+
 				if (!NETSHOPPING::NET_GAMESERVER_CHECKOUT_START(txn_id))
 				{
 					Notifications::Show("Transactions", "Failed to begin checkout", NotificationType::Error);
@@ -240,7 +251,20 @@ namespace YimMenu::Submenus
 				}
 			});
 
-			// TODO: now listen for txn events to see if it actually succeeded
+			if (txn->m_Running)
+			{
+				while (txn->m_Status == 0 || txn->m_Status == 1)
+					ScriptMgr::Yield();
+
+				if (txn->m_Status == 3)
+				{
+					Notifications::Show("Transactions", "Transaction complete", NotificationType::Success);
+				}
+				else
+				{
+					Notifications::Show("Transactions", "Transaction failed", NotificationType::Error);
+				}
+			}
 		});
 	}
 

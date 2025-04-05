@@ -26,6 +26,7 @@ class CNetworkObjectMgr;
 class CNetworkPlayerMgr;
 class PoolEncryption;
 class CStatsMgr;
+class CNetShopTransaction;
 
 namespace YimMenu
 {
@@ -45,6 +46,7 @@ namespace YimMenu
 		using ScriptVM = int (*)(uint64_t* stack, int64_t** scr_globals, rage::scrProgram* program, void* ctx);
 		using GetPackedStatData = void(*)(int index, int* row, bool* is_bool, bool* unk);
 		using GetCatalogItem = rage::netCatalogBaseItem*(*)(rage::netCatalog* catalog, std::uint32_t* hash);
+		using GetActiveBasket = CNetShopTransaction*(*)(void* mgr, int* out_txn_id);
 	}
 
 	struct PointerData
@@ -104,6 +106,8 @@ namespace YimMenu
 		Functions::GetPackedStatData GetPackedStatData;
 		rage::netCatalog* NetCatalog;
 		Functions::GetCatalogItem GetCatalogItem;
+		void** TransactionMgr;
+		Functions::GetActiveBasket GetActiveBasket;
 	};
 
 	struct Pointers : PointerData

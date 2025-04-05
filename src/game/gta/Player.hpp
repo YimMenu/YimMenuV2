@@ -79,7 +79,7 @@ namespace YimMenu
 		/// <param name="coords">The position to teleport to</param>
 		void TeleportTo(const rage::fvector3& coords);
 
-		
+		int GetMaxArmour();
 
 		bool operator==(Player other);
 

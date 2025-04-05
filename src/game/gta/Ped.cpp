@@ -208,4 +208,31 @@ namespace YimMenu
 
 		return WEAPON::HAS_PED_GOT_WEAPON(GetHandle(), hash, false);
 	}
+
+	int Ped::GetArmour()
+	{
+		ENTITY_ASSERT_VALID();
+		return PED::GET_PED_ARMOUR(GetHandle());
+	}
+
+	void Ped::SetArmour(int amount)
+	{
+		ENTITY_ASSERT_VALID();
+		PED::SET_PED_ARMOUR(GetHandle(), amount);
+	}
+
+	void Ped::Clear()
+	{
+		ENTITY_ASSERT_VALID();
+		PED::CLEAR_PED_BLOOD_DAMAGE(GetHandle());
+		PED::CLEAR_PED_WETNESS(GetHandle());
+		PED::CLEAR_PED_ENV_DIRT(GetHandle());
+		PED::RESET_PED_VISIBLE_DAMAGE(GetHandle());
+	}
+
+	void Ped::SetMaxTimeUnderwater(int time)
+	{
+		ENTITY_ASSERT_VALID();
+		PED::SET_PED_MAX_TIME_UNDERWATER(GetHandle(), time);
+	}
 }

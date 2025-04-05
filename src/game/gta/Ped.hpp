@@ -51,5 +51,13 @@ namespace YimMenu
 
 		// teleport
 		void TeleportTo(const rage::fvector3& pos); // similar to SetPosition, but handles vehicles correctly
+
+		// armour
+		int GetArmour();
+		void SetArmour(int amount);
+
+		// misc
+		void Clear();
+		void SetMaxTimeUnderwater(int time);
 	};
 }

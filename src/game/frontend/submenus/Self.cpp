@@ -25,6 +25,7 @@ namespace YimMenu::Submenus
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("otr"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noragdoll"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noidlekick"_J));
+		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("unlimitedoxygen"_J));
 
 		auto clearWanted = std::make_shared<Group>("", 1);
 		clearWanted->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, std::make_shared<CommandItem>("clearwanted"_J), true));
@@ -38,6 +39,9 @@ namespace YimMenu::Submenus
 
 		toolsGroup->AddItem(std::make_shared<CommandItem>("skipcutscene"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("suicide"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("heal"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("clear"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
 		
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superrun"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superjump"_J));

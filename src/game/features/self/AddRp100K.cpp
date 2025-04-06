@@ -1,7 +1,6 @@
 #include "core/commands/Command.hpp"
-#include "game/backend/Self.hpp"
-#include "game/frontend//submenus/Recovery/StatEditor.hpp"
-#include "game/gta/Stats.hpp"
+#include "game/gta/StatsEditor.hpp"
+#include "game/backend/AnticheatBypass.hpp"
 
 namespace YimMenu::Features
 {
@@ -12,8 +11,11 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			int current_rp = YimMenu::Submenus::GetStatInt("CHAR_XP_FM");
-			YimMenu::Submenus::SetStatInt("CHAR_XP_FM", current_rp + 100000);
+			if (AnticheatBypass::IsFSLLoaded())
+			{
+				int current_rp = StatsEditor::GetStatInt("CHAR_XP_FM");
+				StatsEditor::SetStatInt("CHAR_XP_FM", current_rp + 100000);
+			}
 		}
 	};
 	static AddRp100K _AddRp{"addrp100k", "Add 100k RP", "Add 100.000 RP (Don't use it to much)."};

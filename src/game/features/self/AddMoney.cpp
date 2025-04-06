@@ -1,7 +1,6 @@
 #include "core/commands/Command.hpp"
-#include "game/backend/Self.hpp"
-#include "game/frontend//submenus/Recovery/StatEditor.hpp"
-#include "game/gta/Stats.hpp"
+#include "game/gta/StatsEditor.hpp"
+#include "game/backend/AnticheatBypass.hpp"
 
 namespace YimMenu::Features
 {
@@ -12,8 +11,11 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			int current_money = YimMenu::Submenus::GetStatInt("BANK_BALANCE");
-			YimMenu::Submenus::SetStatInt("BANK_BALANCE", current_money + 10000000);
+			if (AnticheatBypass::IsFSLLoaded())
+			{
+				int current_money = StatsEditor::GetStatInt("BANK_BALANCE");
+				StatsEditor::SetStatInt("BANK_BALANCE", current_money + 10000000);
+			}
 		}
 	};
 	static AddMoney _AddMoney{"addmoney", "Add 10M $", "Add 10.000.000^$ (Don't use it to much)."};

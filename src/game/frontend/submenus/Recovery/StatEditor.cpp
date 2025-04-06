@@ -223,29 +223,6 @@ namespace YimMenu::Submenus
 			return ImGui::InputScalar("Value##packed", ImGuiDataType_U8, &value.m_AsInt);
 	}
 
-	bool SetStatInt(const std::string& name, int value)
-	{
-		auto stat = GetStatInfo(name.c_str());
-		if (!stat.IsValid())
-			return false;
-
-		StatValue val{};
-		val.m_AsInt = value;
-		WriteStat(stat.m_NameHash, val, stat.m_Data);
-		return true;
-	}
-
-	int GetStatInt(const std::string& name)
-	{
-		auto stat = GetStatInfo(name.c_str());
-		if (!stat.IsValid())
-			return 0;
-
-		StatValue val{};
-		ReadStat(val, stat.m_Data);
-		return val.m_AsInt;
-	}
-
 	std::shared_ptr<Category> BuildStatEditorMenu()
 	{
 		auto menu = std::make_shared<Category>("Stat Editor");

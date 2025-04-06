@@ -9,7 +9,6 @@ namespace YimMenu::Stats
 	};
 
 	extern int GetCharIndex();
-	extern void ConvertMPX(std::string& statName);
 
 	extern void SetInt(std::string statName, int value);
 	extern void SetBool(std::string statName, bool value);

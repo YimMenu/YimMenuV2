@@ -221,7 +221,7 @@ namespace YimMenu
 		PED::SET_PED_ARMOUR(GetHandle(), amount);
 	}
 
-	void Ped::Clear()
+	void Ped::ClearDamage()
 	{
 		ENTITY_ASSERT_VALID();
 		PED::CLEAR_PED_BLOOD_DAMAGE(GetHandle());

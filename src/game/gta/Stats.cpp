@@ -1,6 +1,16 @@
 #include "Stats.hpp"
 #include "game/gta/Natives.hpp"
 
+namespace
+{
+	void ConvertMPX(std::string& statName)
+	{
+		std::transform(statName.begin(), statName.end(), statName.begin(), ::tolower);
+		if (statName.substr(0, 3) == "mpx")
+			statName[2] = YimMenu::Stats::GetCharIndex() + '0';
+	}
+}
+
 namespace YimMenu::Stats
 {
 	int GetCharIndex()
@@ -8,13 +18,6 @@ namespace YimMenu::Stats
 		int index{};
 		STATS::STAT_GET_INT("MPPLY_LAST_MP_CHAR"_J, &index, -1);
 		return index;
-	}
-
-	void ConvertMPX(std::string& statName)
-	{
-		std::transform(statName.begin(), statName.end(), statName.begin(), ::tolower);
-		if (statName.substr(0, 3) == "mpx")
-			statName[2] = GetCharIndex() + '0';
 	}
 
 	void SetInt(std::string statName, int value)

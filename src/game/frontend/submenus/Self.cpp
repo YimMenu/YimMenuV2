@@ -40,7 +40,7 @@ namespace YimMenu::Submenus
 		toolsGroup->AddItem(std::make_shared<CommandItem>("skipcutscene"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("suicide"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("heal"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("clear"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("cleardamage"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
 		
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superrun"_J));

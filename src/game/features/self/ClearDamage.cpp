@@ -3,15 +3,15 @@
 
 namespace YimMenu::Features
 {
-	class Clear : Command
+	class ClearDamage : Command
 	{
 		using Command::Command;
 
 		virtual void OnCall() override
 		{
-			Self::GetPed().Clear();
+			Self::GetPed().ClearDamage();
 		}
 	};
 
-	static Clear _Clear{"clear", "Clear", "Clears all the dirt and blood on you."};
+	static ClearDamage _ClearDamage{"cleardamage", "Clear Damage", "Clears all the dirt and blood on you."};
 }

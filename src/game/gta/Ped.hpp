@@ -57,7 +57,7 @@ namespace YimMenu
 		void SetArmour(int amount);
 
 		// misc
-		void Clear();
+		void ClearDamage();
 		void SetMaxTimeUnderwater(int time);
 	};
 }

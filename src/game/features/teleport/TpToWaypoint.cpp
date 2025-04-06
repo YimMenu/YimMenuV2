@@ -1,5 +1,6 @@
 #include "core/commands/Command.hpp"
 #include "core/commands/LoopedCommand.hpp"
+#include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
@@ -64,12 +65,18 @@ namespace YimMenu::Features
 
 		virtual void OnTick() override
 		{
-			if (HUD::IS_WAYPOINT_ACTIVE())
-			{
-				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
-				ResolveZCoordinate(coords);
-				Self::GetPed().TeleportTo(coords);
-			}
+			FiberPool::Push([] {
+				if (!Self::GetPed())
+					return;
+
+				if (HUD::IS_WAYPOINT_ACTIVE())
+				{
+					auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
+					ResolveZCoordinate(coords);
+					Self::GetPed().TeleportTo(coords);
+				}
+				ScriptMgr::Yield();
+			});
 		}
 	};
 

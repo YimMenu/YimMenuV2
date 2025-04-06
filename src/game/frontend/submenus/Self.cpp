@@ -42,7 +42,9 @@ namespace YimMenu::Submenus
 		toolsGroup->AddItem(std::make_shared<CommandItem>("heal"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("cleardamage"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("addrp"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("addrp10k"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("addrp100k"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("addmoney"_J));
 		
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superrun"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superjump"_J));

@@ -5,7 +5,7 @@
 
 namespace YimMenu::Features
 {
-	class AddRp : public Command
+	class AddRp10K : public Command
 	{
 		using Command::Command;
 
@@ -13,8 +13,8 @@ namespace YimMenu::Features
 		virtual void OnCall() override
 		{
 			int current_rp = YimMenu::Submenus::GetStatInt("CHAR_XP_FM");
-			YimMenu::Submenus::SetStatInt("CHAR_XP_FM", current_rp + 100000);
+			YimMenu::Submenus::SetStatInt("CHAR_XP_FM", current_rp + 10000);
 		}
 	};
-	static AddRp _AddRp{"addrp", "Add 10k RP", "Add 10.000 RP."};
+	static AddRp10K _AddRp{"addrp10k", "Add 10k RP", "Add 10.000 RP."};
 }

@@ -12,9 +12,9 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			int current_rp = YimMenu::Submenus::GetStatInt("BANK_BALANCE");
-			YimMenu::Submenus::SetStatInt("BANK_BALANCE", current_rp + 10000000);
+			int current_money = YimMenu::Submenus::GetStatInt("BANK_BALANCE");
+			YimMenu::Submenus::SetStatInt("BANK_BALANCE", current_money + 10000000);
 		}
 	};
-	static AddMoney _AddMoney{"addmoney", "Add 10M $", "Add 10.000.000^$."};
+	static AddMoney _AddMoney{"addmoney", "Add 10M $", "Add 10.000.000^$ (Don't use it to much)."};
 }

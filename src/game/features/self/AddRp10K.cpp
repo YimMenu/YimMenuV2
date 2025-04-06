@@ -16,5 +16,5 @@ namespace YimMenu::Features
 			YimMenu::Submenus::SetStatInt("CHAR_XP_FM", current_rp + 10000);
 		}
 	};
-	static AddRp10K _AddRp{"addrp10k", "Add 10k RP", "Add 10.000 RP."};
+	static AddRp10K _AddRp{"addrp10k", "Add 10k RP", "Add 10.000 RP (Don't use it to much)."};
 }

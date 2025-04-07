@@ -43,6 +43,8 @@ namespace YimMenu::Submenus
 		toolsGroup->AddItem(std::make_shared<CommandItem>("cleardamage"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
 		
+		movementGroup->AddItem(std::make_shared<BoolCommandItem>("standonvehicles"_J));
+		movementGroup->AddItem(std::make_shared<BoolCommandItem>("disableactionmode"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superrun"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superjump"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("noclip"_J));
@@ -82,6 +84,7 @@ namespace YimMenu::Submenus
 
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
 		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));
+		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("allowhatsinvehicles"_J));
 
 		vehicle->AddItem(vehicleGlobalsGroup);
 		vehicle->AddItem(vehicleMiscGroup);

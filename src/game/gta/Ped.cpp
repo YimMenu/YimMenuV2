@@ -94,6 +94,8 @@ namespace YimMenu
 		ENTITY_ASSERT_VALID();
 		ENTITY_ASSERT_CONTROL();
 		PED::SET_PED_CAN_RAGDOLL(GetHandle(), enabled);
+		PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(GetHandle(), enabled ? 1 : 0);
+		PLAYER::SET_PLAYER_FALL_DISTANCE_TO_TRIGGER_RAGDOLL_OVERRIDE(PLAYER::PLAYER_ID(), enabled ? -1.0f : 1000.0f);
 	}
 
 	rage::fvector3 Ped::GetBonePosition(int bone)

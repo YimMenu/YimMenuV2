@@ -65,18 +65,20 @@ namespace YimMenu::Features
 
 		virtual void OnTick() override
 		{
-			FiberPool::Push([] {
-				if (!Self::GetPed())
-					return;
+			if (!Self::GetPed())
+				return;
 
-				if (HUD::IS_WAYPOINT_ACTIVE())
-				{
-					auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
-					ResolveZCoordinate(coords);
-					Self::GetPed().TeleportTo(coords);
-				}
-				ScriptMgr::Yield();
-			});
+			if (HUD::IS_WAYPOINT_ACTIVE())
+			{
+				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
+				FiberPool::Push([coords] {
+					auto new_coords{coords};
+					ResolveZCoordinate(new_coords);
+					Self::GetPed().TeleportTo(new_coords);
+					ScriptMgr::Yield();
+				});
+				HUD::SET_WAYPOINT_OFF();
+			}
 		}
 	};
 

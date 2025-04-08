@@ -25,8 +25,8 @@ namespace YimMenu::Submenus
 				}
 			}
 		}));
-		heistGroup->AddItem(std::make_shared<CommandItem>("cayopericosetup"_J));
-		heistGroup->AddItem(std::make_shared<CommandItem>("cayopericocooldown"_J));
+		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayosetup"_J));
+		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayocooldown"_J));
 
 		shopping->AddItem(vehiclesGroup);
 		heist->AddItem(heistGroup);

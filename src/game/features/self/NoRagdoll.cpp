@@ -13,6 +13,7 @@ namespace YimMenu::Features
 				return;
 			
 			Self::GetPed().SetRagdoll(false);
+			Self::GetPlayer().SetFallDistanceOverride(99999.0f);
 		}
 
 		virtual void OnDisable() override
@@ -21,6 +22,7 @@ namespace YimMenu::Features
 				return;
 
 			Self::GetPed().SetRagdoll(true);
+			Self::GetPlayer().SetFallDistanceOverride(0.0f);
 		}
 	};
 

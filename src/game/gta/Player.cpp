@@ -337,6 +337,11 @@ namespace YimMenu
 		});
 	}
 
+	void Player::SetFallDistanceOverride(float override)
+	{
+		PLAYER::SET_PLAYER_FALL_DISTANCE_TO_TRIGGER_RAGDOLL_OVERRIDE(GetId(), override);
+	}
+
 	int Player::GetMaxArmour()
 	{
 		return PLAYER::GET_PLAYER_MAX_ARMOUR(GetId()); // Not checking IsValid to let GetId return 0 in SP

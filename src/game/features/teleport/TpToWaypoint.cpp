@@ -1,4 +1,6 @@
 #include "core/commands/Command.hpp"
+#include "core/commands/LoopedCommand.hpp"
+#include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
@@ -57,5 +59,29 @@ namespace YimMenu::Features
 		}
 	};
 
+	class AutoTpToWaypoint : public LoopedCommand
+	{
+		using LoopedCommand::LoopedCommand;
+
+		virtual void OnTick() override
+		{
+			if (!Self::GetPed())
+				return;
+
+			if (HUD::IS_WAYPOINT_ACTIVE())
+			{
+				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
+				FiberPool::Push([coords] {
+					auto new_coords{coords};
+					ResolveZCoordinate(new_coords);
+					Self::GetPed().TeleportTo(new_coords);
+					ScriptMgr::Yield();
+				});
+				HUD::SET_WAYPOINT_OFF();
+			}
+		}
+	};
+
 	static TpToWaypoint _TpToWaypoint{"tptowaypoint", "Teleport to Waypoint", "Teleports you to the waypoint"};
+	static AutoTpToWaypoint _AutoTpToWaypoint{"autotptowaypoint", "Auto Teleport to Waypoint", "Automatically teleports you to the waypoint"};
 }

@@ -78,6 +78,8 @@ namespace YimMenu
 		/// </summary>
 		/// <param name="coords">The position to teleport to</param>
 		void TeleportTo(const rage::fvector3& coords);
+		
+		void SetFallDistanceOverride(float override);
 
 		int GetMaxArmour();
 

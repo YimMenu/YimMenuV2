@@ -1,5 +1,7 @@
 #include "Network.hpp"
+#include "core/backend/FiberPool.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "game/gta/Network.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -8,11 +10,28 @@ namespace YimMenu::Submenus
 	{
 		// TODO: this needs a rework
 		auto session = std::make_shared<Category>("Session");
+		auto joinGroup = std::make_shared<Group>("Join");
 		auto bountyGroup = std::make_shared<Group>("Bounty", 1);
 		auto toxicGroup = std::make_shared<Group>("Toxic");
 		auto teleportGroup = std::make_shared<Group>("Teleport");
 		auto trollGroup = std::make_shared<Group>("Troll");
 		auto enhancements = std::make_shared<Group>("Enhancements");
+
+		auto joinSession = std::make_shared<Group>("", 1);
+		joinSession->AddItem(std::make_shared<ListCommandItem>("joinsessiontype"_J, "Session Type"));
+		joinSession->AddItem(std::make_shared<CommandItem>("joinsession"_J, "Join##session"));
+
+		joinGroup->AddItem(joinSession);
+		joinGroup->AddItem(std::make_shared<ImGuiItem>([] {
+			static std::uint64_t rockstar_id{};
+			ImGui::SetNextItemWidth(150.0f);
+			ImGui::InputScalar("Rockstar Id", ImGuiDataType_U64, &rockstar_id);
+			ImGui::SameLine();
+			if (ImGui::Button("Join##rid"))
+				FiberPool::Push([] {
+					YimMenu::Network::JoinRockstarId(rockstar_id);
+				});
+		}));
 
 		bountyGroup->AddItem(std::make_shared<IntCommandItem>("bountyamount"_J, "Amount"));
 		bountyGroup->AddItem(std::make_shared<BoolCommandItem>("anonymousbounty"_J, "Anonymous"));
@@ -37,7 +56,9 @@ namespace YimMenu::Submenus
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("fastjoin"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("disabledeathbarriers"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("despawnbypass"_J)); // move this somewhere else?
+		enhancements->AddItem(std::make_shared<BoolCommandItem>("bypasscasinogeoblock"_J));
 	
+		session->AddItem(joinGroup);
 		session->AddItem(bountyGroup);
 		session->AddItem(trollGroup);
 		session->AddItem(teleportGroup);

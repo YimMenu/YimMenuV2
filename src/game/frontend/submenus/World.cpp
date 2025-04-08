@@ -9,7 +9,6 @@ namespace YimMenu::Submenus
 		auto main          = std::make_shared<Category>("Main");
 		auto spawnersGroup = std::make_shared<Category>("Spawners");
 		auto iplsGroup     = std::make_shared<Category>("IPLs");
-
 	
 		auto killPeds = std::make_shared<Group>("Kill", 1);
 		killPeds->AddItem(std::make_shared<CommandItem>("killallpeds"_J));
@@ -23,9 +22,15 @@ namespace YimMenu::Submenus
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringvehs"_J));
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringobjs"_J));
 		
+		auto weatherOpts = std::make_shared<Group>("Weather", 1);
+		weatherOpts->AddItem(std::make_shared<ListCommandItem>("weather"_J));
+		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));
+		weatherOpts->AddItem(std::make_shared<BoolCommandItem>("forceweather"_J));
+
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));
 		main->AddItem(std::move(bringOpts));
+		main->AddItem(std::move(weatherOpts));
 
 		auto spawnGroup = std::make_shared<Group>("Vehicle");
 		auto modsGroup  = std::make_shared<Group>("Modifications");	

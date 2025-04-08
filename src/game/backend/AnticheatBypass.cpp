@@ -24,7 +24,7 @@ namespace YimMenu
 		{
 			return ctx->SetReturnValue(FALSE);
 		}
-		return ctx->SetReturnValue(NETSHOPPING::NET_GAMESERVER_BEGIN_SERVICE(ctx->GetArg<int*>(0), ctx->GetArg<Hash>(1), ctx->GetArg<Hash>(2), ctx->GetArg<Hash>(3), ctx->GetArg<int>(4), ctx->GetArg<int>(5)));
+		return NativeInvoker::GetNativeHandler(NativeIndex::NET_GAMESERVER_BEGIN_SERVICE)(ctx);
 	}
 
 	void AnticheatBypass::RunScriptImpl()

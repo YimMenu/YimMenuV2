@@ -20,6 +20,10 @@ namespace rage
 	class netCatalogBaseItem;
 	class fwBasePool;
 	class fwVehiclePool;
+	class rlSessionInfo;
+	class rlGamerHandle;
+	class rlTaskStatus;
+	class rlSessionByGamerTaskResult;
 }
 class CPedFactory;
 class CNetGamePlayer;
@@ -29,6 +33,7 @@ class CNetworkPlayerMgr;
 class PoolEncryption;
 class CStatsMgr;
 class CNetShopTransaction;
+class CNetworkSession;
 
 namespace YimMenu
 {
@@ -49,6 +54,8 @@ namespace YimMenu
 		using GetPackedStatData = void(*)(int index, int* row, bool* is_bool, bool* unk);
 		using GetCatalogItem = rage::netCatalogBaseItem*(*)(rage::netCatalog* catalog, std::uint32_t* hash);
 		using GetActiveBasket = CNetShopTransaction*(*)(void* mgr, int* out_txn_id);
+		using JoinSessionByInfo = bool (*)(CNetworkSession* network, rage::rlSessionInfo* info, int unk, int flags, rage::rlGamerHandle* handles, int num_handles);
+		using GetSessionByGamerHandle = bool (*)(int profile_index, rage::rlGamerHandle* handles, int num_handles, rage::rlSessionByGamerTaskResult* results, int num_results, bool* success, rage::rlTaskStatus* state);
 	}
 
 	struct PointerData
@@ -114,6 +121,9 @@ namespace YimMenu
 		PoolEncryption* ObjectPool;
 		rage::fwVehiclePool*** VehiclePool;
 		PVOID HttpStartRequest;
+		CNetworkSession** NetworkSession;
+		Functions::JoinSessionByInfo JoinSessionByInfo;
+		Functions::GetSessionByGamerHandle GetSessionByGamerHandle;
 	};
 
 	struct Pointers : PointerData

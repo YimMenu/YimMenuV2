@@ -359,10 +359,18 @@ namespace YimMenu::Submenus
 		}
 	}
 
-	static void PrintWarningMessage(std::string_view message)
+	static void SetTransactionError(std::string_view message)
 	{
 		ImGui::SameLine();
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::Colors::Red.Value);
+		ImGui::Text("%s", message.data());
+		ImGui::PopStyleColor();
+	}
+
+	static void SetTransactionWarning(std::string_view message)
+	{
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::Colors::Yellow.Value);
 		ImGui::Text("%s", message.data());
 		ImGui::PopStyleColor();
 	}
@@ -396,7 +404,7 @@ namespace YimMenu::Submenus
 
 		if (!item.m_IsValid && !empty)
 		{
-			PrintWarningMessage("Item not found!");
+			SetTransactionError("Item not found!");
 			is_valid = false;
 			return false;
 		}
@@ -404,17 +412,24 @@ namespace YimMenu::Submenus
 		// TODO: maybe not check this every tick?
 		if (BANNED_ITEM_HASHES.contains(item.m_Hash))
 		{
-			PrintWarningMessage("This item has been blocked for your safety");
+			SetTransactionError("This item has been blocked for your safety");
 			is_valid = false;
 			return false;
 		}
 
-		// TODO: is this really needed? useful? could we abuse more without this check?
 		if (validate_category && !IsPriceModifier(item.m_IntendedCategory) && item.m_IntendedCategory != info.m_Category.m_Hash && !empty)
 		{
-			PrintWarningMessage(std::format("Item category {} does not match txn category {}", CategoryNameFromHash(item.m_IntendedCategory), info.m_Category.m_Name));
-			is_valid = false;
-			return false;
+			if (info.m_Type == TransactionInfo::Type::SERVICE)
+			{
+				SetTransactionError(std::format("Item category {} does not match txn category {}", CategoryNameFromHash(item.m_IntendedCategory), info.m_Category.m_Name));
+				is_valid = false;
+				return false;
+			}
+			else
+			{
+				SetTransactionWarning(std::format("Item category {} does not match txn category {}", CategoryNameFromHash(item.m_IntendedCategory), info.m_Category.m_Name));
+			}
+
 		}
 
 		return modified;
@@ -481,7 +496,7 @@ namespace YimMenu::Submenus
 			ImGui::InputInt("Price", &info.m_Service.m_Price);
 			if (info.m_Service.m_Price > info.m_Service.m_Item.m_IntendedPrice && info.m_Action.m_Hash == "NET_SHOP_ACTION_EARN"_J)
 			{
-				PrintWarningMessage(std::format("Item price exceeds maximum allowed ({})", info.m_Service.m_Item.m_IntendedPrice));
+				SetTransactionError(std::format("Item price exceeds maximum allowed ({})", info.m_Service.m_Item.m_IntendedPrice));
 				txn_valid = false;
 			}
 		}

@@ -12,9 +12,6 @@ namespace YimMenu::Features
 			Stats::SetInt("MPX_H4_TARGET_POSIX", 1659643454);
 			Stats::SetInt("MPX_H4_COOLDOWN", 0);
 			Stats::SetInt("MPX_H4_COOLDOWN_HARD", 0);
-			Stats::SetInt("MPX_H4_TARGET_POSIX", 1659429119);
-			Stats::SetInt("MPX_H4_COOLDOWN", 0);
-			Stats::SetInt("MPX_H4_COOLDOWN_HARD", 0);
 		}
 	};
 

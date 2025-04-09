@@ -12,10 +12,23 @@ include(cmake/minhook.cmake)
 
 # source
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
-file(GLOB_RECURSE SRC_FILES
-    "${SRC_DIR}/**.hpp"
-    "${SRC_DIR}/**.cpp"    
-)
+
+function(GroupSourcesAndCollect curdir outputVar)
+    file(GLOB children RELATIVE ${CMAKE_SOURCE_DIR}/${curdir} ${CMAKE_SOURCE_DIR}/${curdir}/*)
+    foreach(child ${children})
+        if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${curdir}/${child})
+            GroupSourcesAndCollect(${curdir}/${child} ${outputVar})
+        else()
+            list(APPEND ${outputVar} ${CMAKE_SOURCE_DIR}/${curdir}/${child})
+            string(REPLACE "/" "\\" groupname ${curdir})
+            source_group(${groupname} FILES ${CMAKE_SOURCE_DIR}/${curdir}/${child})
+        endif()
+    endforeach()
+    set(${outputVar} ${${outputVar}} PARENT_SCOPE)
+endfunction()
+
+set(SRC_FILES)
+GroupSourcesAndCollect(src SRC_FILES)
 
 add_library(${PROJECT_NAME} MODULE ${SRC_FILES})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)

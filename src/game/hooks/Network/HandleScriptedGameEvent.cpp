@@ -44,6 +44,24 @@ namespace YimMenu::Hooks
 
 			break;
 		}
+		case ScriptEventIndex::InteriorControl:
+		{
+			SCRIPT_EVENT_SEND_TO_INTERIOR* interior_control = static_cast<SCRIPT_EVENT_SEND_TO_INTERIOR*>(script_event);
+
+			if (interior_control->Interior < 0 || interior_control->Interior > 175) // the upper bound will change after an update
+			{
+				// null function kick
+				return false;
+			}
+
+			if (!interior_control->GoonsOnly)
+			{
+				// send to interior
+				return false;
+			}
+
+			break;
+		}
 		default:
 			break;
 		}

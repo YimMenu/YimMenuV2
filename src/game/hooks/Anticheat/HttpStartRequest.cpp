@@ -11,13 +11,11 @@ namespace YimMenu::Hooks
 		const char** host_ptr = reinterpret_cast<const char**>(req_ptr + 0x18F8);
 		const char* path      = *reinterpret_cast<const char**>(req_ptr + 0x1900);
 
-		if (path && strstr(path, "Bonus"))
+		if (path && strstr(path, "GameTransactions.asmx/Bonus"))
 		{
 			*const_cast<const char**>(host_ptr) = "0.0.0.0";
 			LOG(WARNING) << "Blocked Bonus Report";
-			return BaseHook::Get<Anticheat::HttpStartRequest, DetourHook<decltype(&Anticheat::HttpStartRequest)>>()->Original()(request);
 		}
-
 
 		return BaseHook::Get<Anticheat::HttpStartRequest, DetourHook<decltype(&Anticheat::HttpStartRequest)>>()->Original()(request);
 	}

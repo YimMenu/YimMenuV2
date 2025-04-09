@@ -11,8 +11,10 @@ namespace YimMenu::Submenus
 	{
 		auto shopping = std::make_shared<Category>("Shopping");
 		auto heist = std::make_shared<Category>("Heists");
+		auto nightClub = std::make_shared<Category>("Nightclub");
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
 		auto heistGroup = std::make_shared<Group>("Heist");
+		auto nightClubGroup = std::make_shared<Group>("NightclubSafe");
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
 
@@ -28,10 +30,14 @@ namespace YimMenu::Submenus
 		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayosetup"_J));
 		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayocooldown"_J));
 
+		nightClubGroup->AddItem(std::make_shared<BoolCommandItem>("nightclubsafe"_J));
+
 		shopping->AddItem(vehiclesGroup);
 		heist->AddItem(heistGroup);
+		nightClub->AddItem(nightClubGroup);
 		AddCategory(std::move(shopping));
 		AddCategory(std::move(heist));
+		AddCategory(std::move(nightClub));
 		AddCategory(BuildStatEditorMenu());
 		AddCategory(BuildTransactionsMenu());
 	}

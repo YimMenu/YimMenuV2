@@ -13,9 +13,9 @@ namespace YimMenu::Submenus
 		auto heist = std::make_shared<Category>("Heists");
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
 		auto heistGroup = std::make_shared<Group>("Heist");
+		auto accountGroup = std::make_shared<Group>("Account");
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
-
 		vehiclesGroup->AddItem(std::make_unique<ImGuiItem>([] {
 			if (ImGui::Button("Save This Vehicle as Personal Vehicle"))
 			{
@@ -27,8 +27,9 @@ namespace YimMenu::Submenus
 		}));
 		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayosetup"_J));
 		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayocooldown"_J));
-
+		accountGroup->AddItem(std::make_shared<CommandItem>("unlockall"_J));
 		shopping->AddItem(vehiclesGroup);
+		shopping->AddItem(accountGroup); // Add the account group to the shopping category
 		heist->AddItem(heistGroup);
 		AddCategory(std::move(shopping));
 		AddCategory(std::move(heist));

@@ -303,6 +303,11 @@ namespace YimMenu
 			GetSessionByGamerHandle = ptr.Sub(0x4A).Add(1).Rip().As<Functions::GetSessionByGamerHandle>();
 		});
 
+		constexpr auto networkTimePtrn = Pattern<"89 05 ? ? ? ? 80 3D ? ? ? ? ? 0F 84 ? ? ? ? E9">("NetworkTime");
+		scanner.Add(networkTimePtrn, [this](PointerCalculator ptr) {
+			NetworkTime = ptr.Add(2).Rip().As<std::uint32_t*>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

@@ -76,7 +76,9 @@ enum class ScriptEventIndex
 	TriggerCEORaid         = -1906536929,
 
 	StartScriptBegin   = -366707054,
-	StartScriptProceed = 1757622014
+	StartScriptProceed = 1757622014,
+
+	RequestRandomEvent = -126218586
 };
 
 struct SCRIPT_EVENT
@@ -168,5 +170,16 @@ struct SCRIPT_EVENT_SEND_TO_INTERIOR : public SCRIPT_EVENT
 	SCR_INT SubInstanceId;
 };
 static_assert(sizeof(SCRIPT_EVENT_SEND_TO_INTERIOR) == 16 * 8);
+
+struct SCRIPT_EVENT_REQUEST_RANDOM_EVENT : public SCRIPT_EVENT
+{
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_REQUEST_RANDOM_EVENT, RequestRandomEvent);
+
+	SCR_INT FMMCType;
+	SCR_INT Variation;
+	SCR_INT Subvariation;
+	SCR_INT PlayersToSend;
+};
+static_assert(sizeof(SCRIPT_EVENT_REQUEST_RANDOM_EVENT) == 7 * 8);
 
 #undef REGISTER_SCRIPT_EVENT

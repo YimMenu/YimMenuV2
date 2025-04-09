@@ -11,7 +11,11 @@ namespace YimMenu
 	{
 		if (m_Applied || !g_Running)
 			return;
+		unsigned long old_protect;
+		unsigned long temp;
+		VirtualProtect(m_Address, m_Size, PAGE_EXECUTE_READWRITE, &old_protect);
 		memcpy(m_Address, m_Value.get(), m_Size);
+		VirtualProtect(m_Address, m_Size, old_protect, &temp);
 		m_Applied = true;
 	}
 
@@ -19,7 +23,11 @@ namespace YimMenu
 	{
 		if (!m_Applied)
 			return;
+		unsigned long old_protect;
+		unsigned long temp;
+		VirtualProtect(m_Address, m_Size, PAGE_EXECUTE_READWRITE, &old_protect);
 		memcpy(m_Address, m_OriginalBytes.get(), m_Size);
+		VirtualProtect(m_Address, m_Size, old_protect, &temp);
 		m_Applied = false;
 	}
 

@@ -12,6 +12,7 @@
 #include "game/backend/AnticheatBypass.hpp"
 #include "game/backend/Players.hpp"
 #include "game/backend/SavedLocations.hpp"
+#include "game/backend/SavedPlayers.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/NativeHooks.hpp"
 #include "game/backend/Tunables.hpp"
@@ -59,6 +60,10 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GiveVehicleReward::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
+
+		if (!Pointers.LateInit())
+			LOG(WARNING) << "Socialclub patterns failed to load";
 
 		Notifications::Show("YimMenuV2", "Loaded succesfully", NotificationType::Success);
 

@@ -64,7 +64,7 @@ namespace YimMenu
 
 		// backend/data store (should be refactored?)
 		PlayerData& GetData();
-		// bool IsModder();
+		bool IsModder();
 		// void AddDetection(Detection det);
 
 		// visibility

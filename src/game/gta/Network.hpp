@@ -25,4 +25,5 @@ namespace YimMenu::Network
 	void LaunchJoinType(JoinType to_launch);
 	void JoinSessionInfo(rage::rlSessionInfo* info);
 	void JoinRockstarId(std::uint64_t id);
+	std::optional<std::uint64_t> ResolveRockstarId(std::string_view name);
 }

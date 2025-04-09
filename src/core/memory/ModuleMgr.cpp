@@ -20,6 +20,8 @@ namespace YimMenu
 
 	bool ModuleMgr::LoadModules()
 	{
+		m_CachedModules.clear();
+
 		const auto peb = reinterpret_cast<PPEB>(NtCurrentTeb()->ProcessEnvironmentBlock);
 		if (!peb)
 			return false;

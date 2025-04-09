@@ -13,7 +13,7 @@ namespace rage
 		atArray() :
 		    m_Data(nullptr),
 		    m_Size(0),
-		    m_Count(0)
+		    m_Capacity(0)
 		{
 		}
 
@@ -37,9 +37,9 @@ namespace rage
 			return m_Size;
 		}
 
-		std::uint16_t count() const
+		std::uint16_t capacity() const
 		{
-			return m_Count;
+			return m_Capacity;
 		}
 
 		T& operator[](std::uint16_t index) const
@@ -59,10 +59,10 @@ namespace rage
 			return false;
 		}
 
-	private:
+	public:
 		T* m_Data;
 		std::uint16_t m_Size;
-		std::uint16_t m_Count;
+		std::uint16_t m_Capacity; // includes items allocated due to reservations and alignment
 	};
 	static_assert(sizeof(rage::atArray<std::uint32_t>) == 0x10, "rage::atArray is not properly sized");
 }

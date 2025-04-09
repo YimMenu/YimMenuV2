@@ -24,7 +24,7 @@ namespace YimMenu::Submenus
 		if (player.IsHost())
 			tags.push_back({"HOST", ImGui::Colors::DeepSkyBlue});
 
-		if (false)
+		if (player.IsModder())
 			tags.push_back({"MOD", ImGui::Colors::DeepPink});
 
 		if (player.GetPed() && player.GetPed().IsInvincible())

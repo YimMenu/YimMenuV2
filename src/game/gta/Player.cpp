@@ -215,6 +215,11 @@ namespace YimMenu
 		return empty_data;
 	}
 
+	bool Player::IsModder()
+	{
+		return GetData().m_IsModder;
+	}
+
 	void Player::SetVisibleLocally(bool visible)
 	{
 		if (!IsValid())

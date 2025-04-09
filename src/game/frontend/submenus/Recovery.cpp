@@ -10,10 +10,11 @@ namespace YimMenu::Submenus
 	    Submenu::Submenu("Recovery")
 	{
 		auto shopping = std::make_shared<Category>("Shopping");
-		auto heist = std::make_shared<Category>("Heists");
+		auto missions = std::make_shared<Category>("Missions");
 		auto nightClub = std::make_shared<Category>("Nightclub");
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
-		auto heistGroup = std::make_shared<Group>("Heist");
+		auto generalGroup = std::make_shared<Group>("General");
+		auto cayoPericoGroup = std::make_shared<Group>("Cayo Perico");
 		auto nightClubGroup = std::make_shared<Group>("NightclubSafe");
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
@@ -27,15 +28,21 @@ namespace YimMenu::Submenus
 				}
 			}
 		}));
-		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayosetup"_J));
-		heistGroup->AddItem(std::make_shared<CommandItem>("skipcayocooldown"_J));
+
+		generalGroup->AddItem(std::make_shared<CommandItem>("playallmissionssolo"_J));
+
+		cayoPericoGroup->AddItem(std::make_shared<CommandItem>("skipcayosetup"_J));
+		cayoPericoGroup->AddItem(std::make_shared<CommandItem>("skipcayocooldown"_J));
 
 		nightClubGroup->AddItem(std::make_shared<BoolCommandItem>("nightclubsafe"_J));
 
 		shopping->AddItem(vehiclesGroup);
-		heist->AddItem(heistGroup);
+
 		nightClub->AddItem(nightClubGroup);
+		missions->AddItem(generalGroup);
+		missions->AddItem(cayoPericoGroup);
 		AddCategory(std::move(shopping));
+		AddCategory(std::move(missions));
 		AddCategory(std::move(heist));
 		AddCategory(std::move(nightClub));
 		AddCategory(BuildStatEditorMenu());

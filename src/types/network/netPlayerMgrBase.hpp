@@ -27,10 +27,15 @@ namespace rage
 		CNetGamePlayer* m_LocalPlayer;                  // 0xF0
 		char pad_00F8[144];                             // 0xF8
 		CNetGamePlayer* m_Players[32];                  // 0x188
-		uint16_t m_PlayerLimit;                         // 0x288
-		char pad_028A[10];                              // 0x28A
-		uint16_t m_PlayerCount;                         // 0x294
-		char pad_0296[1626];                            // 0x296
+		uint32_t m_MaxPlayers;                          // 0x288
+		char pad_028C[4];                               // 0x28C
+		int m_UnloadedPlayerCount;                      // 0x290 seems like the inverse of the below thing
+		int m_LoadedPlayerCount;                        // 0x294
+		int m_LoadedNonLocalPlayerCount;                // 0x298 
+		int m_PhysicalPlayerCount;                      // 0x29C
+		int m_LocalPhysicalPlayerCount;                 // 0x2A0 lol? should always be one
+		int m_NonLocalPhysicalPlayerCount;              // 0x2A4
+		char pad_0296[1608];                            // 0x296
 	};
 	static_assert(sizeof(netPlayerMgrBase) == 0x8F0);
 }

@@ -13,6 +13,8 @@ namespace YimMenu
 	{
 		joaat_t m_Script;
 		const SimplePattern m_Pattern;
+		std::int32_t m_Offset;
+		bool m_Rip;
 		std::uint32_t m_PC;
 		std::string m_Name;
 
@@ -24,8 +26,13 @@ namespace YimMenu
 			*reinterpret_cast<std::remove_cv_t<std::remove_reference_t<Arg>>*>(reinterpret_cast<std::uint64_t*>(stack) + (stackPtr++)) = std::forward<Arg>(value);
 		}
 
+		std::uint32_t ReadThreeByte(std::uint8_t* arr)
+		{
+			return arr[0] + (arr[1] << 8) + (arr[2] << 16);
+		}
+
 	public:
-		ScriptFunction(const std::string& name, const joaat_t script, const SimplePattern& pattern);
+		ScriptFunction(const std::string& name, const joaat_t script, const SimplePattern& pattern, std::int32_t offset = 0, bool rip = false);
 
 		template<typename Ret, typename... Args>
 		Ret Call(Args... args)

@@ -3,6 +3,7 @@
 #include "core/frontend/Notifications.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "game/backend/Players.hpp"
+#include "game/backend/SavedPlayers.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
 #include "types/network/CNetGamePlayer.hpp"
@@ -76,6 +77,9 @@ namespace YimMenu::Submenus
 					ImGui::SetClipboardText(addr2.c_str());
 				}
 
+				if (ImGui::Button("Add to Saved"))
+					SavedPlayers::GetPlayerData(Players::GetSelected());
+				ImGui::SameLine();
 				if (ImGui::Button("View SC Profile"))
 					FiberPool::Push([] {
 						uint64_t handle[13];

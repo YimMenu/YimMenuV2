@@ -3,11 +3,6 @@
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
 
-namespace YimMenu::Features
-{
-	// BoolCommand _RecoveryEnabled("recoveryenabled", "Recovery Enabled", "Is the recovery feature enabled");
-}
-
 namespace YimMenu::Submenus
 {
 	Self::Self() :

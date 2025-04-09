@@ -203,7 +203,7 @@ namespace YimMenu::Submenus
 		if (info.m_IsBoolStat)
 			value.m_AsBool = STATS::GET_PACKED_STAT_BOOL_CODE(info.m_Index, -1);
 		else
-			value.m_AsInt = STATS::GET_PACKED_STAT_BOOL_CODE(info.m_Index, -1);
+			value.m_AsInt = STATS::GET_PACKED_STAT_INT_CODE(info.m_Index, -1);
 	}
 
 	static void WritePackedStat(const StatValue& value, const PackedStatInfo& info)
@@ -224,8 +224,6 @@ namespace YimMenu::Submenus
 
 			if (info.m_IsBoolStat)
 				STATS::SET_PACKED_STAT_BOOL_CODE(info.m_Index, static_cast<bool>(value), -1);
-			else
-				STATS::SET_PACKED_STAT_INT_CODE(info.m_Index, value, -1);
 		}
 	}
 

@@ -111,6 +111,8 @@ namespace YimMenu
 	void Menu::SetupFonts()
 	{
 		auto& IO = ImGui::GetIO();
+		IO.IniFilename = NULL;
+		IO.LogFilename = NULL;
 		ImFontConfig FontCfg{};
 		FontCfg.FontDataOwnedByAtlas = false;
 

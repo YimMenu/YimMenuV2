@@ -30,10 +30,11 @@ namespace rage
 		}
 
 		char pad_0008[8];                                //0x0008
-		CNonPhysicalPlayerData* m_NonPhysicalPlayer;     //0x0010
-		char pad_0018[0x40];                             //0x0018
-		uint32_t m_MessageId;                            //0x0048
-		char pad_004C[4];                                //0x004C
+		int64_t m_RockstarId;                            //0x0010
+		char pad_0018[0x38];                             //0x0018
+		CNonPhysicalPlayerData* m_NonPhysicalPlayer;     //0x0050
+		uint32_t m_MessageId;                            //0x0058
+		char pad_005C[4];                                //0x005C
 		uint8_t m_ActiveIndex;                           //0x0060
 		uint8_t m_PlayerIndex;                           //0x0061
 		char pad_0062[0x6E];                             //0x0062

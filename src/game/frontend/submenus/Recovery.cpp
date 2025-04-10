@@ -1,18 +1,21 @@
 #include "Recovery.hpp"
-#include "game/frontend/items/Items.hpp"
-#include "game/features/recovery/GiveVehicleReward.hpp"
+
+#include "Recovery/LevelEditor.hpp"
 #include "Recovery/StatEditor.hpp"
 #include "Recovery/Transactions.hpp"
+#include "Recovery/UnlockEditor.hpp"
+#include "game/features/recovery/GiveVehicleReward.hpp"
+#include "game/frontend/items/Items.hpp"
 
 namespace YimMenu::Submenus
 {
 	Recovery::Recovery() :
 	    Submenu::Submenu("Recovery")
 	{
-		auto shopping = std::make_shared<Category>("Shopping");
-		auto missions = std::make_shared<Category>("Missions");
-		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
-		auto generalGroup = std::make_shared<Group>("General");
+		auto shopping        = std::make_shared<Category>("Shopping");
+		auto missions        = std::make_shared<Category>("Missions");
+		auto vehiclesGroup   = std::make_shared<Group>("Vehicles");
+		auto generalGroup    = std::make_shared<Group>("General");
 		auto cayoPericoGroup = std::make_shared<Group>("Cayo Perico");
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
@@ -37,6 +40,8 @@ namespace YimMenu::Submenus
 		missions->AddItem(cayoPericoGroup);
 		AddCategory(std::move(shopping));
 		AddCategory(std::move(missions));
+		AddCategory(BuildLevelEditorMenu());
+		AddCategory(BuildUnlockEditorMenu());
 		AddCategory(BuildStatEditorMenu());
 		AddCategory(BuildTransactionsMenu());
 	}

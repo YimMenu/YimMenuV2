@@ -33,53 +33,45 @@ namespace YimMenu
 		SavedLocations::FetchSavedLocations();
 		Settings::Initialize(FileMgr::GetProjectFile("./settings.json"));
 
-		if (!ModuleMgr.LoadModules())
-			goto EARLY_UNLOAD;
+		if (ModuleMgr.LoadModules() && Pointers.Init() && Renderer::Init()) {
+			Players::Init();
 
-		if (!Pointers.Init())
-			goto EARLY_UNLOAD;
+			Hooking::Init();
 
-		if (!Renderer::Init())
-			goto EARLY_UNLOAD;
+			ScriptMgr::Init();
+			LOG(INFO) << "ScriptMgr initialized";
 
-		Players::Init();
+			GUI::Init();
 
-		Hooking::Init();
+			ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
+			ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
+			ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
+			ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
+			ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
+			FiberPool::Init(16);
+			ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
+			ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
+			ScriptMgr::AddScript(std::make_unique<Script>(&GiveVehicleReward::RunScript));
+			ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
 
-		ScriptMgr::Init();
-		LOG(INFO) << "ScriptMgr initialized";
+			if (!Pointers.LateInit())
+				LOG(WARNING) << "Socialclub patterns failed to load";
 
-		GUI::Init();
+			Notifications::Show("YimMenuV2", "Loaded succesfully", NotificationType::Success);
 
-		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
-		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
-		ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
-		FiberPool::Init(16);
-		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&GiveVehicleReward::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
+			while (g_Running)
+			{
+				Settings::Tick();
+				std::this_thread::yield();
+			}
 
-		if (!Pointers.LateInit())
-			LOG(WARNING) << "Socialclub patterns failed to load";
-
-		Notifications::Show("YimMenuV2", "Loaded succesfully", NotificationType::Success);
-
-		while (g_Running)
-		{
-			Settings::Tick();
-			std::this_thread::yield();
+			LOG(INFO) << "Unloading";
+			NativeHooks::Destroy();
+			FiberPool::Destroy();
+			ScriptMgr::Destroy();
+			Hooking::Destroy();
 		}
 
-		LOG(INFO) << "Unloading";
-		NativeHooks::Destroy();
-		FiberPool::Destroy();
-		ScriptMgr::Destroy();
-		Hooking::Destroy();
-
-EARLY_UNLOAD:
 		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();

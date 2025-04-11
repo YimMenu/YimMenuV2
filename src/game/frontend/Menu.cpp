@@ -1,5 +1,6 @@
 #include "Menu.hpp"
-
+#include "imgui.h"
+#include "imgui_internal.h"
 #include "core/commands/Commands.hpp"
 #include "core/frontend/manager/UIManager.hpp"
 #include "core/renderer/Renderer.hpp"
@@ -15,7 +16,7 @@
 #include "submenus/Settings.hpp"
 #include "submenus/Debug.hpp"
 #include "submenus/World.hpp"
-
+#include "core/filemgr/FileMgr.hpp"
 namespace YimMenu
 {
 	void Menu::Init()
@@ -39,7 +40,7 @@ namespace YimMenu
 			    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(ImColor(15, 15, 15)));
 
 			    ImGui::SetNextWindowSize(ImVec2((*Pointers.ScreenResX / 2.5), (*Pointers.ScreenResY / 2.5)), ImGuiCond_Once);
-			    if (ImGui::Begin("YimMenuV2", nullptr, ImGuiWindowFlags_NoDecoration))
+			    if (ImGui::Begin("YimMenuV2", nullptr, ImGuiWindowFlags_NoDecoration&~ImGuiWindowFlags_NoResize))
 			    {
 				    //ImGui::BeginDisabled(*Pointers.IsSessionStarted);
 				    if (ImGui::Button("Unload", ImVec2(120, 0)))
@@ -110,9 +111,11 @@ namespace YimMenu
 
 	void Menu::SetupFonts()
 	{
-		auto& IO = ImGui::GetIO();
-		IO.IniFilename = NULL;
-		IO.LogFilename = NULL;
+		auto& IO         = ImGui::GetIO();
+		auto file_path   = std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "imgui.ini";
+		std::string path = file_path.string();
+		IO.IniFilename   = path.c_str();
+		IO.LogFilename   = NULL;
 		ImFontConfig FontCfg{};
 		FontCfg.FontDataOwnedByAtlas = false;
 

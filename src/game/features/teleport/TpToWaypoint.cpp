@@ -50,12 +50,12 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			if (!HUD::IS_WAYPOINT_ACTIVE())
-				Notifications::Show("Teleport", "No waypoint set", NotificationType::Warning);
-
-			auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
-			ResolveZCoordinate(coords);
-			Self::GetPed().TeleportTo(coords);
+			if (HUD::IS_WAYPOINT_ACTIVE())
+			{
+				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
+				ResolveZCoordinate(coords);
+				Self::GetPed().TeleportTo(coords);
+			}
 		}
 	};
 

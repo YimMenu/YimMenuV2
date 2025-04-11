@@ -36,7 +36,7 @@ namespace YimMenu
 	{
 		const auto size_minus_one = ida_sig.size() - 1;
 		m_Bytes.reserve(size_minus_one / 2);
-		for (size_t i = 0; i != size_minus_one; ++i)
+		for (size_t i = 0; i < size_minus_one; ++i)
 		{
 			if (ida_sig[i] == ' ')
 				continue;
@@ -47,11 +47,14 @@ namespace YimMenu
 				if (c1 && c2)
 				{
 					m_Bytes.emplace_back(static_cast<uint8_t>((*c1 * 0x10) + *c2));
+					i++;
 				}
 			}
 			else
 			{
 				m_Bytes.push_back({});
+				if (ida_sig[i + 1] == '?')
+					i++;
 			}
 		}
 	}

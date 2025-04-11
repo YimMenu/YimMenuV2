@@ -1,8 +1,10 @@
 #include "Network.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/frontend/Notifications.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "game/frontend/submenus/Network/SavedPlayers.hpp"
 #include "game/gta/Network.hpp"
+#include "game/frontend/submenus/network/RandomEvents.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -25,6 +27,24 @@ namespace YimMenu::Submenus
 		joinGroup->AddItem(joinSession);
 		joinGroup->AddItem(std::make_shared<ImGuiItem>([] {
 			static std::uint64_t rockstar_id{};
+			static char name_buf[24]{};
+
+			ImGui::SetNextItemWidth(150.0f);
+			ImGui::InputText("Username", name_buf, sizeof(name_buf));
+			ImGui::SameLine();
+			if (ImGui::Button("Join##username"))
+				FiberPool::Push([] {
+					auto rid = YimMenu::Network::ResolveRockstarId(name_buf);
+					if (rid)
+					{
+						YimMenu::Network::JoinRockstarId(*rid);
+					}
+					else
+					{
+						Notifications::Show("Joiner", "Failed to get RID from username", NotificationType::Error);
+					}
+				});
+
 			ImGui::SetNextItemWidth(150.0f);
 			ImGui::InputScalar("Rockstar Id", ImGuiDataType_U64, &rockstar_id);
 			ImGui::SameLine();
@@ -77,5 +97,6 @@ namespace YimMenu::Submenus
 		AddCategory(std::move(session));
 		AddCategory(std::move(spoofing));
 		AddCategory(std::move(BuildSavedPlayersMenu()));
+		AddCategory(BuildRandomEventsMenu());
 	}
 }

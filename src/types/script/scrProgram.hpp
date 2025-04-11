@@ -45,7 +45,7 @@ namespace rage
 			if (page < num)
 			{
 				if (page == num - 1)
-					return m_CodeSize & 0x3FFF;
+					return (m_CodeSize & 0x3FFF);
 				return 0x4000;
 			}
 
@@ -54,13 +54,7 @@ namespace rage
 
 		std::uint32_t GetFullCodeSize() const
 		{
-			auto numPages = GetNumCodePages();
-			if (!numPages)
-				return 0;
-			if (numPages == 1)
-				--numPages;
-
-			return (numPages * 0x4000) + (m_CodeSize & 0x3FFF);
+			return m_CodeSize;
 		}
 
 		std::uint8_t* GetCodePage(std::uint32_t page) const

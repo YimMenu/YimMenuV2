@@ -10,7 +10,7 @@ namespace YimMenu
 		static constexpr auto AUTO_REFRESH_TIME = 3min;
 
 		std::unordered_map<std::uint64_t, SavedPlayerData> m_SavedPlayers;
-		std::mutex m_FetchPlayerInfoMutex;
+		bool m_FetchingPlayerInfo;
 		std::filesystem::path m_PlayersFile;
 		std::chrono::system_clock::time_point m_LastPlayerInfoFetch;
 
@@ -23,6 +23,7 @@ namespace YimMenu
 		void FetchPlayerInfoImpl(bool tracked_only = false);
 		SavedPlayerData* GetPlayerDataImpl(std::uint64_t id);
 		SavedPlayerData* GetPlayerDataImpl(Player player, bool create = true);
+		void AddPlayerDataImpl(std::uint64_t id, std::string_view username);
 		void UpdateRockstarIdImpl(std::uint64_t id, std::uint64_t new_id);
 		void RemovePlayerDataImpl(std::uint64_t id);
 		void LoadImpl();
@@ -54,6 +55,11 @@ namespace YimMenu
 		static SavedPlayerData* GetPlayerData(Player player, bool create = true)
 		{
 			return GetInstance().GetPlayerDataImpl(player, create);
+		}
+
+		static void AddPlayerData(std::uint64_t id, std::string_view username)
+		{
+			GetInstance().AddPlayerDataImpl(id, username);
 		}
 
 		// TODO: this cannot be safely called outside the saved players frontend menu. Invalidates all SavedPlayerData pointers due to potential map reallocation

@@ -2,6 +2,20 @@
 #include "../Timer.hpp"
 #include "../types.hpp"
 
+enum class eRaceRoundType
+{
+	NOT_SELECTED = -1,
+	FINISH_FIRST,
+	MOST_POINTS,
+	FASTEST_TIME
+};
+
+enum class eRaceFinalRoundType
+{
+	NOT_SELECTED,
+	HEAD_TO_HEAD
+};
+
 enum class eRandomEventClientState
 {
 	INACTIVE,
@@ -36,7 +50,9 @@ struct ROUND_DATA
 	SCR_INT CashEarned; // 10
 	uint64_t PAD_0011[2]; // 11
 	SCR_INT APEarned; // 13
-	uint64_t PAD_0014[3]; // 14 (added in b3258)
+	SCR_INT Duration; // 14
+	alignas(8) eRaceRoundType RaceRoundType; // 15
+	alignas(8) eRaceFinalRoundType RaceFinalRoundType; // 16
 };
 static_assert(sizeof(ROUND_DATA) == 17 * 8);
 
@@ -46,7 +62,7 @@ struct GANGOPS_DATA
 	SCR_ARRAY<uint64_t, 4> PlayerIndexes; // 1
 	SCR_ARRAY<uint64_t, 4> PlayerRoles; // 6
 	SCR_ARRAY<uint64_t, 4> ArePlayersReady; // 11
-	SCR_ARRAY<uint64_t, 5> PlayerCuts; // 16 (not sure why this is 5)
+	SCR_ARRAY<uint64_t, 5> PlayerCuts; // 16
 	SCR_INT HighlightedPlayer; // 22
 	SCR_INT GangopsFlowMissionProgBitset; // 23
 	SCR_INT GangopsFMMissionProgBitset; // 24

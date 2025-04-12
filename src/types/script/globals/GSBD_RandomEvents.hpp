@@ -16,7 +16,7 @@ enum class eRandomEventState
 	CLEANUP
 };
 
-enum class eRandomEventBitset
+enum class eRandomEventFlags
 {
 	TRIGGERED_BY_CLIENT,
 	FORCE_LAUNCH,
@@ -36,7 +36,7 @@ struct RANDOM_EVENTS_DATA
 {
 	alignas(8) eRandomEventState State; // 0
 	TIMER TimerState; // 1
-	SCR_ARRAY<SCR_BITSET<eRandomEventBitset>, 1> Bitset; // 3
+	SCR_ARRAY<SCR_BITSET<eRandomEventFlags>, 1> Flags; // 3
 	SCR_INT Variation; // 5
 	SCR_INT Subvariation; // 6
 	RANDOM_EVENTS_RESERVATION_DATA ReservationData; // 7

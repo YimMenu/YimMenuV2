@@ -73,9 +73,4 @@ namespace YimMenu::Hooks
 	{
 		extern LRESULT WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
 	}
-
-	namespace Features
-	{
-		extern void FormatInt(int64_t integer, char* str, size_t strSize, bool insertCommas);
-	}
 }

@@ -135,6 +135,7 @@ namespace YimMenu
 		Functions::GetPresenceAttributes GetPresenceAttributes;
 		Functions::GetAvatars GetAvatars;
 		std::uint32_t* NetworkTime;
+		PVOID FormatInt;
 	};
 
 	struct Pointers : PointerData

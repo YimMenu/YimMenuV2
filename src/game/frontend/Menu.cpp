@@ -113,7 +113,7 @@ namespace YimMenu
 	{
 		auto& IO         = ImGui::GetIO();
 		auto file_path   = std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "imgui.ini";
-		std::string path = file_path.string();
+		static auto path = file_path.string();
 		IO.IniFilename   = path.c_str();
 		IO.LogFilename   = NULL;
 		ImFontConfig FontCfg{};

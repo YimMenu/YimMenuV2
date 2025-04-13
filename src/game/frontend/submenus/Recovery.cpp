@@ -1,6 +1,7 @@
 #include "Recovery.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "game/features/recovery/GiveVehicleReward.hpp"
+#include "game/features/self/UnlockAllChameleonsColors.cpp"
 #include "Recovery/StatEditor.hpp"
 #include "Recovery/Transactions.hpp"
 

@@ -162,6 +162,7 @@ namespace YimMenu::Submenus
 					switch (GSBDRandomEvents->EventData[event].State)
 					{
 					case eRandomEventState::INACTIVE:
+					case eRandomEventState::CLEANUP:
 						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 						break;
 					case eRandomEventState::AVAILABLE:

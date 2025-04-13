@@ -7,6 +7,7 @@
 #include "core/filemgr/FileMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "core/hooking/Hooking.hpp"
+#include "core/hooking/CallHook.hpp"
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
 #include "game/backend/AnticheatBypass.hpp"
@@ -78,6 +79,7 @@ namespace YimMenu
 		FiberPool::Destroy();
 		ScriptMgr::Destroy();
 		Hooking::Destroy();
+		CallSiteHook::Destroy();
 
 EARLY_UNLOAD:
 		g_Running = false;

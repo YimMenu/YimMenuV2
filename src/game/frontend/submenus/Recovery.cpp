@@ -11,10 +11,14 @@ namespace YimMenu::Submenus
 	{
 		auto shopping = std::make_shared<Category>("Shopping");
 		auto missions = std::make_shared<Category>("Missions");
+		auto unlockalls = std::make_shared<Category>("Recoverys");
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
 		auto generalGroup = std::make_shared<Group>("General");
 		auto cayoPericoGroup = std::make_shared<Group>("Cayo Perico");
+		auto Recoveryss      = std::make_shared<Group>("Recovery");
 
+		Recoveryss->AddItem(std::make_shared<CommandItem>("UnlockChameleons"_J));
+		
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
 
 		vehiclesGroup->AddItem(std::make_unique<ImGuiItem>([] {
@@ -36,6 +40,8 @@ namespace YimMenu::Submenus
 		shopping->AddItem(vehiclesGroup);
 		missions->AddItem(generalGroup);
 		missions->AddItem(cayoPericoGroup);
+		unlockalls->AddItem(Recoveryss);
+		AddCategory(std::move(unlockalls));
 		AddCategory(std::move(shopping));
 		AddCategory(std::move(missions));
 		AddCategory(BuildStatEditorMenu());

@@ -18,4 +18,9 @@ namespace YimMenu::Math
 
 		return rage::fvector3{static_cast<float>(-sin(z) * num), static_cast<float>(cos(z) * num), static_cast<float>(sin(x))};
 	}
+
+	inline float DistanceBetweenVectors(rage::fvector3 a, rage::fvector3 b)
+	{
+		return (float)sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2) + pow((a.z - b.z), 2));
+	}
 }

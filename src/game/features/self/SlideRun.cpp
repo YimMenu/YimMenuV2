@@ -4,7 +4,7 @@
 
 namespace YimMenu::Features
 {
-	class SuperRun : public LoopedCommand
+	class SlideRun : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
 
@@ -21,5 +21,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	static SuperRun _Superrun{"superrun", "Super Run", "Run faster than normal"};
+	static SlideRun _SlideRun{"sliderun", "Sliding Run", "your Player will Sliding like Flash"};
 }

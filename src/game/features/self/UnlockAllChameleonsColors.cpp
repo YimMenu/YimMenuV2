@@ -9,7 +9,7 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			Stats::SetInt("MPPLY_XMASLIVERIES0", 1);
+			Stats::SetInt("MPPLY_XMASLIVERIES0", -1);
 			Stats::SetInt("MPPLY_XMASLIVERIES1", 1);
 			Stats::SetInt("MPPLY_XMASLIVERIES2", 1);
 			Stats::SetInt("MPPLY_XMASLIVERIES3", 1);

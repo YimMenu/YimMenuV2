@@ -259,7 +259,7 @@ namespace YimMenu
 		auto timeLeft     = GSBD_RandomEvents::Get()->EventData[event].TimerState.GetRemainingTimeStr(availability);
 		if (state != eRandomEventState::INACTIVE && coords != Vector3(0.0f, 0.0f, 0.0f))
 		{
-			float distance          = Math::DistanceBetweenVectors(Self::GetPed().GetPosition(), coords);
+			float distance          = Self::GetPed().GetPosition().GetDistance(coords);
 			float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
 			std::string unit        = (distance < 1000.0f) ? "m" : "km";
 			std::string text        = std::format("{}\n{:.2f}{} {}", randomEventNames[event], formattedDistance, unit, (state == eRandomEventState::AVAILABLE ? timeLeft : ""));

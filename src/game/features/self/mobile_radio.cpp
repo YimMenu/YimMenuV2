@@ -4,7 +4,7 @@
 
 namespace YimMenu::Features
 {
-	class mobile_radio : public LoopedCommand
+	class MobileRadio : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
 
@@ -22,5 +22,5 @@ namespace YimMenu::Features
 		    }
 	};
 
-	static mobile_radio _mobile_radio{"mobileradio", "MOBILE_RADIO", "Play GTA V Radio without vehicle Press Q the choose your Radio the hear"};
+	static MobileRadio _MobileRadio{"mobileradio", "MOBILE_RADIO", "Play GTA V Radio without vehicle Press Q the choose your Radio the hear"};
 }

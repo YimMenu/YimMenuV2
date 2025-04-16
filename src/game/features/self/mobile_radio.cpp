@@ -22,5 +22,5 @@ namespace YimMenu::Features
 		    }
 	};
 
-	static MobileRadio _MobileRadio{"mobileradio", "MOBILE_RADIO", "Play GTA V Radio without vehicle Press Q the choose your Radio the hear"};
+	static MobileRadio _MobileRadio{"mobileradio", "MOBILE_RADIO", "Allows you to listen to any radio station on foot with Hotkey Q"};
 }

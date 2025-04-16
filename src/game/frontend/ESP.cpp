@@ -13,7 +13,6 @@
 #include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/invoker/Invoker.hpp"
 #include "game/gta/Natives.hpp"
-#include "game/gta/Stopwatch.hpp"
 #include "types/script/globals/GPBD_FM_2.hpp"
 #include "types/script/globals/GSBD_RandomEvents.hpp"
 #include "types/script/locals/FMRandomEvents.hpp"
@@ -257,7 +256,7 @@ namespace YimMenu
 		auto range        = GSBD_RandomEvents::Get()->EventData[event].TriggerRange;
 		auto timer        = GSBD_RandomEvents::Get()->EventData[event].TimerState;
 		auto availability = RANDOM_EVENTS_FREEMODE_DATA::Get(Scripts::FindScriptThread("freemode"_J))->EventData[event].AvailableTime;
-		auto timeLeft     = Stopwatch::GetRemainingTimeStr(timer, availability);
+		auto timeLeft     = GSBD_RandomEvents::Get()->EventData[event].TimerState.GetRemainingTimeStr(availability);
 		if (state != eRandomEventState::INACTIVE && coords != Vector3(0.0f, 0.0f, 0.0f))
 		{
 			float distance          = Math::DistanceBetweenVectors(Self::GetPed().GetPosition(), coords);

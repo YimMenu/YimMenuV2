@@ -80,11 +80,6 @@ namespace YimMenu
 			GetInstance().OnScriptVMLeaveImpl(program);
 		}
 
-		static void RunScript()
-		{
-			GetInstance().RunScriptImpl();
-		}
-
 	private:
 		ScriptPatches();
 		~ScriptPatches();
@@ -101,8 +96,6 @@ namespace YimMenu
 		void OnScriptVMEnterImpl(rage::scrProgram* program);
 		void OnScriptVMLeaveImpl(rage::scrProgram* program);
 		Data* GetDataImpl(joaat_t script);
-
-		void RunScriptImpl();
 
 		std::vector<std::shared_ptr<Patch>> m_Patches;
 		std::unordered_map<joaat_t, std::unique_ptr<Data>> m_Datas;

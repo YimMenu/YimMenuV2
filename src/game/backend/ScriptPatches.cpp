@@ -1,6 +1,5 @@
 #include "ScriptPatches.hpp"
 
-#include "game/gta/data/RandomEvents.hpp"
 #include "game/pointers/Pointers.hpp"
 
 #include "types/script/scrProgram.hpp"
@@ -266,19 +265,5 @@ namespace YimMenu
 	{
 		m_Patches.clear();
 		m_Datas.clear();
-	}
-
-	void ScriptPatches::RunScriptImpl()
-	{
-		std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
-
-		if (sendUpdateRECoordsTSECooldownPatches.empty())
-		{
-			for (int event = 0; event < 21; event++)
-				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], "43 88 13 2E 00 01", 0, {0x71, 0x00, 0x00}));
-		}
-
-		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)
-			patch->Enable();
 	}
 }

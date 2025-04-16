@@ -4,8 +4,8 @@
 #include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/Tunables.hpp"
+#include "game/backend/ScriptPatches.hpp"
 #include "game/gta/data/RandomEvents.hpp"
-#include "game/gta/Stopwatch.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "game/pointers/Pointers.hpp"
@@ -46,6 +46,7 @@ namespace YimMenu::Submenus
 		MAX_EVENTS
 	};
 
+	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
 	static ScriptFunction getNumFMMCVariations("GetNumFMMCVariations", "freemode"_J, "5D ? ? ? 01 72 02 39 04", 1, true);
 	static GPBD_FM_2* GPBDFM2                          = nullptr;
 	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
@@ -62,9 +63,9 @@ namespace YimMenu::Submenus
 		switch (GSBDRandomEvents->EventData[selectedEvent].State)
 		{
 		case eRandomEventState::INACTIVE:
-			return "Inactive - launching in " + Stopwatch::GetRemainingTimeStr(GSBDRandomEvents->EventData[selectedEvent].TimerState, FMRandomEvents->EventData[selectedEvent].InactiveTime);
+			return "Inactive - launching in " + GSBDRandomEvents->EventData[selectedEvent].TimerState.GetRemainingTimeStr(FMRandomEvents->EventData[selectedEvent].InactiveTime);
 		case eRandomEventState::AVAILABLE:
-			return "Available - deactivating in " + Stopwatch::GetRemainingTimeStr(GSBDRandomEvents->EventData[selectedEvent].TimerState, FMRandomEvents->EventData[selectedEvent].AvailableTime);
+			return "Available - deactivating in " + GSBDRandomEvents->EventData[selectedEvent].TimerState.GetRemainingTimeStr(FMRandomEvents->EventData[selectedEvent].AvailableTime);
 		case eRandomEventState::ACTIVE:
 			return "Active";
 		case eRandomEventState::CLEANUP:
@@ -111,6 +112,15 @@ namespace YimMenu::Submenus
 
 	std::shared_ptr<Category> BuildRandomEventsMenu()
 	{
+		if (sendUpdateRECoordsTSECooldownPatches.empty())
+		{
+			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
+				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], "43 88 13 2E 00 01", 0, {0x71, 0x00, 0x00}));
+		}
+
+		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)
+			patch->Enable();
+
 		auto menu     = std::make_shared<Category>("Random Events");
 		auto settings = std::make_shared<Group>("Settings");
 

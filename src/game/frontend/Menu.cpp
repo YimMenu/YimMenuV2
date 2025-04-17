@@ -1,22 +1,23 @@
 #include "Menu.hpp"
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "core/commands/Commands.hpp"
-#include "core/frontend/manager/UIManager.hpp"
-#include "core/renderer/Renderer.hpp"
+
 #include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
+#include "core/commands/Commands.hpp"
+#include "core/filemgr/FileMgr.hpp"
+#include "core/frontend/manager/UIManager.hpp"
+#include "core/renderer/Renderer.hpp"
 #include "game/frontend/fonts/Fonts.hpp"
 #include "game/pointers/Pointers.hpp"
-#include "submenus/Self.hpp"
-#include "submenus/Teleport.hpp"
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "submenus/Debug.hpp"
 #include "submenus/Network.hpp"
 #include "submenus/Players.hpp"
 #include "submenus/Recovery.hpp"
+#include "submenus/Self.hpp"
 #include "submenus/Settings.hpp"
-#include "submenus/Debug.hpp"
+#include "submenus/Teleport.hpp"
 #include "submenus/World.hpp"
-#include "core/filemgr/FileMgr.hpp"
 namespace YimMenu
 {
 	void Menu::Init()
@@ -45,17 +46,8 @@ namespace YimMenu
 				    //ImGui::BeginDisabled(*Pointers.IsSessionStarted);
 				    if (ImGui::Button("Unload", ImVec2(120, 0)))
 				    {
-					    if (true)
-					    {
-						    FiberPool::Push([] {
-							    Commands::Shutdown();
-							    g_Running = false;
-						    });
-					    }
-					    else
-					    {
-						    g_Running = false;
-					    }
+					    // Set running flag to false to trigger main thread shutdown
+					    g_Running = false;
 				    }
 				    //ImGui::EndDisabled();
 

@@ -42,15 +42,24 @@ namespace YimMenu
 		DestroyImpl();
 	}
 
-	bool Hooking::Init()
+	void Hooking::Init()
 	{
-		return GetInstance().InitImpl();
+		MH_Initialize();
+
+		Hooking::HookNatives();
+		Hooking::HookScripts();
+
+		MH_EnableHook(MH_ALL_HOOKS);
 	}
 
 	void Hooking::Destroy()
 	{
-		GetInstance().DestroyImpl();
-		BytePatches::RestoreAll();
+		MH_DisableHook(MH_ALL_HOOKS);
+
+		Hooking::UnhookNatives();
+		Hooking::UnhookScripts();
+
+		MH_Uninitialize();
 	}
 
 	bool Hooking::InitImpl()

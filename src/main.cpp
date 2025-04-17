@@ -1,25 +1,25 @@
 #include "common.hpp"
-#include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/backend/ScriptMgr.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/HotkeySystem.hpp"
-#include "core/settings/Settings.hpp"
 #include "core/filemgr/FileMgr.hpp"
 #include "core/frontend/Notifications.hpp"
-#include "core/hooking/Hooking.hpp"
 #include "core/hooking/CallHook.hpp"
+#include "core/hooking/Hooking.hpp"
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
+#include "core/settings/Settings.hpp"
 #include "game/backend/AnticheatBypass.hpp"
+#include "game/backend/NativeHooks.hpp"
 #include "game/backend/Players.hpp"
 #include "game/backend/SavedLocations.hpp"
 #include "game/backend/SavedPlayers.hpp"
 #include "game/backend/Self.hpp"
-#include "game/backend/NativeHooks.hpp"
 #include "game/backend/Tunables.hpp"
+#include "game/features/recovery/GiveVehicleReward.hpp"
 #include "game/frontend/GUI.hpp"
 #include "game/pointers/Pointers.hpp"
-#include "game/features/recovery/GiveVehicleReward.hpp"
 
 namespace YimMenu
 {
@@ -40,24 +40,26 @@ namespace YimMenu
 		if (!Pointers.Init())
 			goto EARLY_UNLOAD;
 
-		if (!Renderer::Init())
-			goto EARLY_UNLOAD;
-
-		Players::Init();
-
-		Hooking::Init();
-
 		ScriptMgr::Init();
 		LOG(INFO) << "ScriptMgr initialized";
 
+		if (!Renderer::Init())
+			goto EARLY_UNLOAD;
+
 		GUI::Init();
 
-		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
-		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
+		Players::Init();
+		Hooking::Init();
+
+		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // Runs Once
+		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript));    // Runs Once
+
 		ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
+
 		FiberPool::Init(16);
+
 		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GiveVehicleReward::RunScript));
@@ -81,7 +83,7 @@ namespace YimMenu
 		Hooking::Destroy();
 		CallSiteHook::Destroy();
 
-EARLY_UNLOAD:
+	EARLY_UNLOAD:
 		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();

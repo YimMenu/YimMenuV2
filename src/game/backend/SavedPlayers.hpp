@@ -10,7 +10,7 @@ namespace YimMenu
 		static constexpr auto AUTO_REFRESH_TIME = 3min;
 
 		std::unordered_map<std::uint64_t, SavedPlayerData> m_SavedPlayers;
-		std::mutex m_FetchPlayerInfoMutex;
+		bool m_FetchingPlayerInfo;
 		std::filesystem::path m_PlayersFile;
 		std::chrono::system_clock::time_point m_LastPlayerInfoFetch;
 

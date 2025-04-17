@@ -308,6 +308,16 @@ namespace YimMenu
 			NetworkTime = ptr.Add(2).Rip().As<std::uint32_t*>();
 		});
 
+		constexpr auto formatIntCaller1Ptrn = Pattern<"48 89 35 ? ? ? ? 48 8B 74 24">("FormatIntCaller1");
+		scanner.Add(formatIntCaller1Ptrn, [this](PointerCalculator ptr) {
+			FormatIntCaller1 = ptr.Add(0x5D).As<PVOID>();
+		});
+
+		constexpr auto formatIntCaller2Ptrn = Pattern<"48 B8 20 73 69 7A 65 3D 27 32 48 89 84 24">("FormatIntCaller2");
+		scanner.Add(formatIntCaller2Ptrn, [this](PointerCalculator ptr) {
+			FormatIntCaller2 = ptr.Sub(0x11).As<PVOID>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

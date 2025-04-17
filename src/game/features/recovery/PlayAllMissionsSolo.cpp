@@ -1,11 +1,12 @@
-#include "core/commands/BoolCommand.hpp"
+#include "core/commands/LoopedCommand.hpp"
 #include "game/backend/ScriptPatches.hpp"
+#include "game/gta/Natives.hpp"
 
 namespace YimMenu::Features
 {
-	class PlayAllMissionsSolo : public BoolCommand
+	class PlayAllMissionsSolo : public LoopedCommand
 	{
-		using BoolCommand::BoolCommand;
+		using LoopedCommand::LoopedCommand;
 
 		ScriptPatch m_CanLaunchJobPatch{};
 		ScriptPatch m_MissionRequestPatch1{}; // TODO: do we need these patches?
@@ -14,20 +15,26 @@ namespace YimMenu::Features
 		ScriptPatch m_MissionRequestPatch4{};
 		ScriptPatch m_PlayerCountWatchdogPatch1{};
 		ScriptPatch m_PlayerCountWatchdogPatch2{};
-		ScriptPatch m_HeistTeamsPatch{};
+		ScriptPatch m_HeistTeamsPatch1{};
+		ScriptPatch m_HeistTeamsPatch2{};
 		ScriptPatch m_ShouldFailMissionPatch1{}; // god I hate this function
 		std::vector<ScriptPatch> m_ShouldFailMissionPatches{};
 		ScriptPatch m_ShouldFailMissionPatch2{};
-		ScriptPatch m_EnsureMissionPassedPatch{}; 
+		ScriptPatch m_ShouldFailMissionPatch3{};
+		ScriptPatch m_NotEnoughTeamsPatch{};
+		ScriptPatch m_IsTeamValidPatch{}; // TODO: probably has many unintended side effects
+		ScriptPatch m_EnsureMissionPassedPatch{};
+		ScriptPatch m_ProcessPhoneHackingPatch{}; 
 
 		virtual void OnEnable() override
 		{
 			if (!m_CanLaunchJobPatch)
 			{
-				m_CanLaunchJobPatch = ScriptPatches::AddPatch("fmmc_launcher"_J, "2D 05 0C 00 00 71", 5, {0x72, 0x2E, 0x05, 0x01});
+				m_CanLaunchJobPatch = ScriptPatches::AddPatch("fmmc_launcher"_J, "2D 05 0C 00 00 71", 5, {0x72, 0x2E, 0x05, 0x01}); // the main patch that bypasses the not enough players alert
 			}
 			m_CanLaunchJobPatch->Enable();
 
+			// these patches allow the mission request system to launch fm_mission_controller with insufficent players
 			if (!m_MissionRequestPatch1)
 			{
 				m_MissionRequestPatch1 = ScriptPatches::AddPatch("freemode"_J, "38 00 72 5D ? ? ? 38 00 5D ? ? ? 2E 02 00 38 00 38 01", 0, std::vector<std::uint8_t>(14, 0x0));
@@ -54,7 +61,7 @@ namespace YimMenu::Features
 
 			if (!m_PlayerCountWatchdogPatch1)
 			{
-				m_PlayerCountWatchdogPatch1 = ScriptPatches::AddPatch("fmmc_launcher"_J, "2D 02 09 00 00 25 A4", 5, {0x71, 0x2E, 0x02, 0x01});
+				m_PlayerCountWatchdogPatch1 = ScriptPatches::AddPatch("fmmc_launcher"_J, "2D 02 09 00 00 25 A4", 5, {0x71, 0x2E, 0x02, 0x01}); // instant kick if this check fails
 			}
 			m_PlayerCountWatchdogPatch1->Enable();
 
@@ -64,11 +71,17 @@ namespace YimMenu::Features
 			}
 			m_PlayerCountWatchdogPatch2->Enable();
 
-			if (!m_HeistTeamsPatch)
+			if (!m_HeistTeamsPatch1)
 			{
-				m_HeistTeamsPatch = ScriptPatches::AddPatch("fmmc_launcher"_J, "47 ? ? 5B 7B 00 38 04", 0, {0x2B, 0x2B, 0x00, 0x55});
+				m_HeistTeamsPatch1 = ScriptPatches::AddPatch("fmmc_launcher"_J, "47 ? ? 5B 7B 00 38 04", 0, {0x2B, 0x2B, 0x00, 0x55}); // TODO: doesn't work for doomsday heist
 			}
-			m_HeistTeamsPatch->Enable();
+			m_HeistTeamsPatch1->Enable();
+	
+			if (!m_HeistTeamsPatch2)
+			{
+				m_HeistTeamsPatch2 = ScriptPatches::AddPatch("fmmc_launcher"_J, "2D 01 05 00 00 25 5D", 5, {0x72, 0x2E, 0x01, 0x01});
+			}
+			m_HeistTeamsPatch2->Enable();
 
 			if (!m_ShouldFailMissionPatch1)
 			{
@@ -79,6 +92,7 @@ namespace YimMenu::Features
 			if (m_ShouldFailMissionPatches.empty())
 			{
 				// TODO: this is a very bad idea that can break anytime
+				// for some reason, Rockstar thought it's a good idea to copy-paste the same failure check in four different branches, "just in case"
 				for (int i = 0; i < 4; i++)
 					m_ShouldFailMissionPatches.push_back(ScriptPatches::AddPatch("fm_mission_controller"_J, "38 02 5D ? ? ? 71 09 2A 56 07 00 71 5D ? ? ? 06 1F 56", 0, {0x71, 0x00, 0x00, 0x00, 0x00, 0x00}));
 			}
@@ -88,15 +102,50 @@ namespace YimMenu::Features
 
 			if (!m_ShouldFailMissionPatch2)
 			{
-				m_ShouldFailMissionPatch2 = ScriptPatches::AddPatch("fm_mission_controller"_J, "56 07 00 38 02 5D ? ? ? 20 56 BC 01", 0, {0x2B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2B, 0x71});
+				m_ShouldFailMissionPatch2 = ScriptPatches::AddPatch("fm_mission_controller"_J, "56 07 00 38 02 5D ? ? ? 20 56 BC 01", 0, {0x2B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2B, 0x71}); // some heist check, more or less same as above
 			}
 			m_ShouldFailMissionPatch2->Enable();
+
+			if (!m_ShouldFailMissionPatch3)
+			{
+				m_ShouldFailMissionPatch3 = ScriptPatches::AddPatch("fm_mission_controller"_J, "50 ? ? 78 82 06 1F 56 2E 01", 0, {0x00, 0x00, 0x00, 0x00, 0x72});
+			}
+			m_ShouldFailMissionPatch3->Enable();
+
+			if (!m_NotEnoughTeamsPatch)
+			{
+				m_NotEnoughTeamsPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, "2D 00 02 00 00 61 ? ? ? 47 ? ? 72 57 04 00 72 2E 00 01 4F", 5, {0x71, 0x2E, 0x00, 0x01});
+			}
+			m_NotEnoughTeamsPatch->Enable();
+
+			if (!m_IsTeamValidPatch)
+			{
+				m_IsTeamValidPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, "2D 01 03 00 00 38 00 71 57 1D 00", 5, {0x72, 0x2E, 0x01, 0x01});
+			}
+			m_IsTeamValidPatch->Enable();
 			
 			if (!m_EnsureMissionPassedPatch)
 			{
-				m_EnsureMissionPassedPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, "55 C8 FF 61", 3, {0x2E, 0x00, 0x00});
+				m_EnsureMissionPassedPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, "55 C8 FF 61", 3, {0x2E, 0x00, 0x00}); // the game does one final check to ensure all players exist before the mission is passed
 			}
 			m_EnsureMissionPassedPatch->Enable();
+
+			if (!m_ProcessPhoneHackingPatch)
+			{
+				m_ProcessPhoneHackingPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, "58 13 00 38 00 4F ? ? 48", 0, {0x2B, 0x00, 0x00}); 
+			}
+		}
+
+		virtual void OnTick() override
+		{
+			if (m_ProcessPhoneHackingPatch)
+			{
+				// the patch transfers the hacking minigame from the passenger to the driver, so we only want it applied when we're playing solo
+				if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("fm_mission_controller"_J) && NETWORK::NETWORK_GET_TOTAL_NUM_PLAYERS() == 1)
+					m_ProcessPhoneHackingPatch->Enable();
+				else
+					m_ProcessPhoneHackingPatch->Disable();
+			}
 		}
 
 		virtual void OnDisable() override
@@ -136,9 +185,14 @@ namespace YimMenu::Features
 				m_PlayerCountWatchdogPatch2->Disable();
 			}
 
-			if (m_HeistTeamsPatch)
+			if (m_HeistTeamsPatch1)
 			{
-				m_HeistTeamsPatch->Disable();
+				m_HeistTeamsPatch1->Disable();
+			}
+
+			if (m_HeistTeamsPatch2)
+			{
+				m_HeistTeamsPatch2->Disable();
 			}
 
 			if (m_ShouldFailMissionPatch1)
@@ -154,9 +208,29 @@ namespace YimMenu::Features
 				m_ShouldFailMissionPatch2->Disable();
 			}
 
+			if (m_ShouldFailMissionPatch3)
+			{
+				m_ShouldFailMissionPatch3->Disable();
+			}
+
+			if (m_NotEnoughTeamsPatch)
+			{
+				m_NotEnoughTeamsPatch->Disable();
+			}
+
+			if (m_IsTeamValidPatch)
+			{
+				m_IsTeamValidPatch->Disable();
+			}
+
 			if (m_EnsureMissionPassedPatch)
 			{
 				m_EnsureMissionPassedPatch->Disable();
+			}
+
+			if (m_ProcessPhoneHackingPatch)
+			{
+				m_ProcessPhoneHackingPatch->Disable();
 			}
 		}
 	};

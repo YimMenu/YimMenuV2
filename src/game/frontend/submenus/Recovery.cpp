@@ -31,7 +31,8 @@ namespace YimMenu::Submenus
 			}
 		}));
 
-		generalGroup->AddItem(std::make_shared<CommandItem>("playallmissionssolo"_J));
+		generalGroup->AddItem(std::make_shared<BoolCommandItem>("playallmissionssolo"_J));
+		generalGroup->AddItem(std::make_shared<CommandItem>("forcelaunchheist"_J));
 
 		cayoPericoGroup->AddItem(std::make_shared<CommandItem>("skipcayosetup"_J));
 		cayoPericoGroup->AddItem(std::make_shared<CommandItem>("skipcayocooldown"_J));

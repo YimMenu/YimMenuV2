@@ -64,6 +64,7 @@ enum class ScriptEventIndex
 	TSECommand          = 800157557, // CnCTG_IN_BF
 	TSECommandRotateCam = 225624744, // != 29) && f
 	TSECommandSound     = 385726943,
+	TSECommandLaunchHeist = 1733306780, // HEIST_NOTE_3 in fmmc_launcher
 
 	Notification             = -642704387,
 	NotificationMoneyBanked  = 94410750,   // TICK_TC_BANK
@@ -181,5 +182,18 @@ struct SCRIPT_EVENT_REQUEST_RANDOM_EVENT : public SCRIPT_EVENT
 	SCR_INT PlayersToSend;
 };
 static_assert(sizeof(SCRIPT_EVENT_REQUEST_RANDOM_EVENT) == 7 * 8);
+
+struct SCRIPT_EVENT_COMMAND : public SCRIPT_EVENT
+{
+	enum class eCommand
+	{
+		LaunchHeist = 1733306780
+	};
+
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_COMMAND, TSECommand);
+
+	eCommand Command;
+	SCR_INT RandomNumber; // it's fine if we don't set this
+};
 
 #undef REGISTER_SCRIPT_EVENT

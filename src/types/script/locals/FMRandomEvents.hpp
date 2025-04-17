@@ -7,7 +7,7 @@ namespace rage
 	class scrThread;
 }
 
-enum class eRandomEventFlags
+enum class eRandomEventFMFlags
 {
 	RESTART = 2,
 	DISABLE_DISTANCE_CHECK = 4
@@ -22,7 +22,7 @@ struct RANDOM_EVENTS_LOCAL_DATA
 	SCR_INT AvailablePtr; // 5
 	SCR_INT InactiveTime; // 6
 	SCR_INT AvailableTime; // 7
-	SCR_BITSET<eRandomEventFlags> Flags; // 8
+	SCR_BITSET<eRandomEventFMFlags> Flags; // 8
 	TIMER LastTriggerAttempt; // 9
 	SCR_INT UNK_0011; // 11 (unused, ranges from 0 to 4)
 };

@@ -55,7 +55,6 @@ namespace YimMenu
 
 	SavedPlayers::~SavedPlayers()
 	{
-		m_FetchPlayerInfoMutex.unlock();
 	}
 
 	void SavedPlayers::UpdateFetchedData(SavedPlayerData& saved_data, const FetchedPlayerData& fetched_data)
@@ -141,13 +140,16 @@ namespace YimMenu
 
 	void SavedPlayers::FetchPlayerInfoImpl(bool tracked_only)
 	{
-		std::lock_guard guard(m_FetchPlayerInfoMutex);
+		if (m_FetchingPlayerInfo)
+			return;
 
 		if (!Pointers.GetPresenceAttributes)
 		{
 			LOG(WARNING) << "Socialclub.dll not loaded, cannot fetch player info";
 			return;
 		}
+
+		m_FetchingPlayerInfo = true;
 
 		std::vector<std::vector<rage::rlScGamerHandle>> player_buckets;
 		int current_bucket_idx = 0;
@@ -241,6 +243,8 @@ namespace YimMenu
 				// failed, do something here?
 				LOG(WARNING) << "Failed to start get presence attributes task";
 			}
+
+			m_FetchingPlayerInfo = false;
 		}
 	}
 

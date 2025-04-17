@@ -167,9 +167,8 @@ namespace YimMenu::Submenus
 				g_SelectedPlayer = nullptr;
 				g_SelectedRid = 0;
 			}
-
-			ImGui::EndChild();
 		}
+		ImGui::EndChild();
 	}
 
 	static void RenderSavedPlayers()

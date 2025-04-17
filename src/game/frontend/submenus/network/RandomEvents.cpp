@@ -4,6 +4,8 @@
 #include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/Tunables.hpp"
+#include "game/backend/ScriptPatches.hpp"
+#include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "game/pointers/Pointers.hpp"
@@ -44,103 +46,8 @@ namespace YimMenu::Submenus
 		MAX_EVENTS
 	};
 
-	static constexpr std::array randomEventNames = {
-		"Drug Vehicle",
-		"Movie Props",
-		"Sleeping Guard",
-		"Exotic Exports",
-		"The Slashers",
-		"Phantom Car",
-		"Sightseeing",
-		"Smuggler Trail",
-		"Cerberus Surprise",
-		"Smuggler Plane",
-		"Crime Scene",
-		"Metal Detector",
-		"Finders Keepers",
-		"Shop Robbery",
-		"The Gooch",
-		"Weazel Plaza Shootout",
-		"Armored Truck",
-		"Possessed Animals",
-		"Ghosts Exposed",
-		"Happy Holidays Hauler",
-		"Community Outreach"
-	};
-
-	static constexpr std::array randomEventScripts = {
-		"fm_content_drug_vehicle"_J,
-		"fm_content_movie_props"_J,
-		"fm_content_golden_gun"_J,
-		"fm_content_vehicle_list"_J,
-		"fm_content_slasher"_J,
-		"fm_content_phantom_car"_J,
-		"fm_content_sightseeing"_J,
-		"fm_content_smuggler_trail"_J,
-		"fm_content_cerberus"_J,
-		"fm_content_smuggler_plane"_J,
-		"fm_content_crime_scene"_J,
-		"fm_content_metal_detector"_J,
-		"fm_content_convoy"_J,
-		"fm_content_robbery"_J,
-		"fm_content_xmas_mugger"_J,
-		"fm_content_bank_shootout"_J,
-		"fm_content_armoured_truck"_J,
-		"fm_content_possessed_animals"_J,
-		"fm_content_ghosthunt"_J,
-		"fm_content_xmas_truck"_J,
-		"fm_content_community_outreach"_J
-	};
-
-	static constexpr std::array randomEventCooldowns = {
-		"SUM22_RE_DRUG_VEHICLE_INACTIVE_TIME"_J,
-		"SUM22_RE_MOVIE_PROPS_INACTIVE_TIME"_J,
-		"SUM22_RE_GOLDEN_GUN_INACTIVE_TIME"_J,
-		"SUM22_RE_VEHICLE_LIST_INACTIVE_TIME"_J,
-		"STANDARDCONTROLLERVOLUME_COOLDOWN"_J,
-		"STANDARDTARGETTINGTIME_COOLDOWN"_J,
-		"SSP2_COOLDOWN"_J,
-		"SUM22_RE_SMUGGLER_TRAIL_INACTIVE_TIME"_J,
-		"NC_SOURCE_TRUCK_COOLDOWN"_J,
-		"SUM22_RE_SMUGGLER_PLANE_INACTIVE_TIME"_J,
-		"SUM22_RE_CRIME_SCENE_INACTIVE_TIME"_J,
-		"SUM22_RE_METAL_DETECTOR_INACTIVE_TIME"_J,
-		"XM22_RE_GANG_CONVOY_INACTIVE_TIME"_J,
-		"XM22_RE_ROBBERY_INACTIVE_TIME"_J,
-		"STANDARD_KEYBIND_COOLDOWN"_J,
-		"XM22_RE_BANK_SHOOTOUT_INACTIVE_TIME"_J,
-		(joaat_t)NULL,
-		"STANDARDCONTROLLERVOLUME_COOLDOWN"_J,
-		"SUM23_RE_GHOSTHUNT_INACTIVE_TIME"_J,
-		"XMAS_TRUCK_INACTIVE_TIME"_J,
-		"RE_COMMUNITY_OUTREACH_INACTIVE_TIME"_J
-	};
-
-	static constexpr std::array randomEventAvailabilities = {
-		"SUM22_RE_DRUG_VEHICLE_AVAILABLE_TIME"_J,
-		"SUM22_RE_MOVIE_PROPS_AVAILABLE_TIME"_J,
-		"SUM22_RE_GOLDEN_GUN_AVAILABLE_TIME"_J,
-		"SUM22_RE_VEHICLE_LIST_AVAILABLE_TIME"_J,
-		"STANDARDCONTROLLERVOLUME_AVAILABILITY"_J,
-		"STANDARDTARGETTINGTIME_AVAILABILITY"_J,
-		"SSP2_AVAILABILITY"_J,
-		"SUM22_RE_SMUGGLER_TRAIL_AVAILABLE_TIME"_J,
-		"NC_SOURCE_TRUCK_AVAILABILITY"_J,
-		"SUM22_RE_SMUGGLER_PLANE_AVAILABLE_TIME"_J,
-		"SUM22_RE_CRIME_SCENE_AVAILABLE_TIME"_J,
-		"SUM22_RE_METAL_DETECTOR_AVAILABLE_TIME"_J,
-		"XM22_RE_GANG_CONVOY_AVAILABLE_TIME"_J,
-		"XM22_RE_ROBBERY_AVAILABLE_TIME"_J,
-		"STANDARD_KEYBIND_AVAILABILITY"_J,
-		"XM22_RE_BANK_SHOOTOUT_AVAILABLE_TIME"_J,
-		(joaat_t)NULL,
-		"STANDARDCONTROLLERVOLUME_AVAILABILITY"_J,
-		"SUM23_RE_GHOSTHUNT_AVAILABLE_TIME"_J,
-		"XMAS_TRUCK_AVAILABLE_TIME"_J,
-		"RE_COMMUNITY_OUTREACH_AVAILABLE_TIME"_J
-	};
-
-	static ScriptFunction getNumFMMCVariations("GNFMMCV", "freemode"_J, "5D ? ? ? 01 72 02 39 04", 1, true);
+	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
+	static ScriptFunction getNumFMMCVariations("GetNumFMMCVariations", "freemode"_J, "5D ? ? ? 01 72 02 39 04", 1, true);
 	static GPBD_FM_2* GPBDFM2                          = nullptr;
 	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
 	static RANDOM_EVENTS_FREEMODE_DATA* FMRandomEvents = nullptr;
@@ -151,29 +58,14 @@ namespace YimMenu::Submenus
 	static int setAvailability                         = 900000;
 	static bool applyInMinutes                         = false;
 
-	static std::string GetEventTimeLeftStr(int eventTime, int timer)
-	{
-		int timePassed   = (*Pointers.NetworkTime - timer) < 0 ? -(*Pointers.NetworkTime - timer) : (*Pointers.NetworkTime - timer);
-		int diff         = (eventTime - timePassed);
-		int totalSeconds = diff / 1000;
-		int hours        = totalSeconds / 3600;
-		int minutes      = (totalSeconds % 3600) / 60;
-		int seconds      = totalSeconds % 60;
-
-		if (hours < 1)
-			return std::format("{:02}:{:02}", minutes, seconds);
-		else
-			return std::format("{:02}:{:02}:{:02}", hours, minutes, seconds);
-	}
-
 	static std::string GetEventStateString()
 	{
 		switch (GSBDRandomEvents->EventData[selectedEvent].State)
 		{
 		case eRandomEventState::INACTIVE:
-			return "Inactive - launching in " + GetEventTimeLeftStr(FMRandomEvents->EventData[selectedEvent].InactiveTime, GSBDRandomEvents->EventData[selectedEvent].TimerState.Time);
+			return "Inactive - launching in " + GSBDRandomEvents->EventData[selectedEvent].TimerState.GetRemainingTimeStr(FMRandomEvents->EventData[selectedEvent].InactiveTime);
 		case eRandomEventState::AVAILABLE:
-			return "Available - deactivating in " + GetEventTimeLeftStr(FMRandomEvents->EventData[selectedEvent].AvailableTime, GSBDRandomEvents->EventData[selectedEvent].TimerState.Time);
+			return "Available - deactivating in " + GSBDRandomEvents->EventData[selectedEvent].TimerState.GetRemainingTimeStr(FMRandomEvents->EventData[selectedEvent].AvailableTime);
 		case eRandomEventState::ACTIVE:
 			return "Active";
 		case eRandomEventState::CLEANUP:
@@ -220,7 +112,17 @@ namespace YimMenu::Submenus
 
 	std::shared_ptr<Category> BuildRandomEventsMenu()
 	{
-		auto menu = std::make_shared<Category>("Random Events");
+		if (sendUpdateRECoordsTSECooldownPatches.empty())
+		{
+			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
+				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], "43 88 13 2E 00 01", 0, {0x71, 0x00, 0x00}));
+		}
+
+		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)
+			patch->Enable();
+
+		auto menu     = std::make_shared<Category>("Random Events");
+		auto settings = std::make_shared<Group>("Settings");
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
 			GPBDFM2          = GPBD_FM_2::Get();
@@ -308,6 +210,8 @@ namespace YimMenu::Submenus
 					}
 				});
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Requires freemode script host.");
 
 			ImGui::SameLine();
 
@@ -320,8 +224,26 @@ namespace YimMenu::Submenus
 					}
 					else if (GSBDRandomEvents->EventData[selectedEvent].State == eRandomEventState::ACTIVE)
 					{
-						ScriptFunction terminateFMContentScript("TFMCS", randomEventScripts[(int)selectedEvent], "2D 01 05 00 00 5D");
-						terminateFMContentScript.Call<void>(false); // Is it ok to do this when we're not host?
+						if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
+						{
+							if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
+							{
+								if (NetComponent->IsLocalPlayerHost())
+								{
+									ScriptFunction setFMContentScriptServerState("SetFMContentScriptServerState", randomEventScripts[(int)selectedEvent], "5D ? ? ? 55 2E 00 5D", 1, true);
+									setFMContentScriptServerState.Call<void>(3);
+								}
+								else
+								{
+									ScriptFunction setFMContentScriptClientState("SetFMContentScriptClientState", randomEventScripts[(int)selectedEvent], "5D ? ? ? 55 08 00 74", 1, true);
+									setFMContentScriptClientState.Call<void>(3);
+								}
+							}
+						}
+						else
+						{
+							Notifications::Show("Random Events", "Event script is not active. Are you a participant?", NotificationType::Error);
+						}
 					}
 					else
 					{
@@ -399,6 +321,8 @@ namespace YimMenu::Submenus
 				int value = applyInMinutes ? (setCooldown * 60000) : setCooldown;
 				FMRandomEvents->EventData[selectedEvent].InactiveTime = value;
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Requires freemode script host.");
 
 			ImGui::InputInt("##availability", &setAvailability);
 			ImGui::SameLine();
@@ -407,10 +331,15 @@ namespace YimMenu::Submenus
 				int value = applyInMinutes ? (setAvailability * 60000) : setAvailability;
 				FMRandomEvents->EventData[selectedEvent].AvailableTime = value;
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Requires freemode script host.");
 
 			ImGui::Checkbox("Apply in Minutes", &applyInMinutes);
 		}));
 
+		settings->AddItem(std::make_shared<BoolCommandItem>("esprandomevents"_J));
+
+		menu->AddItem(std::move(settings));
 		return menu;
 	}
 }

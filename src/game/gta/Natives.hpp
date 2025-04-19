@@ -13432,10 +13432,10 @@ namespace WEAPON
 	FORCEINLINE constexpr void SET_PED_INFINITE_AMMO(Ped ped, BOOL toggle, Hash weaponHash) { return YimMenu::NativeInvoker::Invoke<6565, void, false>(ped, toggle, weaponHash); }
 	FORCEINLINE constexpr void SET_PED_INFINITE_AMMO_CLIP(Ped ped, BOOL toggle) { return YimMenu::NativeInvoker::Invoke<6566, void, false>(ped, toggle); }
 	FORCEINLINE constexpr void SET_PED_STUN_GUN_FINITE_AMMO(Any p0, Any p1) { return YimMenu::NativeInvoker::Invoke<6567, void, false>(p0, p1); }
-	FORCEINLINE constexpr void GIVE_WEAPON_TO_PED(Ped ped, Hash weaponHash, int ammoCount, BOOL isHidden, BOOL bForceInHand) { return YimMenu::NativeInvoker::Invoke<6568, void, false>(ped, weaponHash, ammoCount, isHidden, bForceInHand); }
+	FORCEINLINE constexpr void GIVE_WEAPON_TO_PED(Ped ped, Hash weaponHash, int ammoCount, BOOL isHidden, BOOL bForceInHand) { return YimMenu::NativeInvoker::Invoke<6568, void, false>(ped, weaponHash, ammoCount, isHidden, bForceInHand); }//--------
 	FORCEINLINE constexpr void GIVE_DELAYED_WEAPON_TO_PED(Ped ped, Hash weaponHash, int ammoCount, BOOL bForceInHand) { return YimMenu::NativeInvoker::Invoke<6569, void, false>(ped, weaponHash, ammoCount, bForceInHand); }
-	FORCEINLINE constexpr void REMOVE_ALL_PED_WEAPONS(Ped ped, BOOL p1) { return YimMenu::NativeInvoker::Invoke<6570, void, false>(ped, p1); }
-	FORCEINLINE constexpr void REMOVE_WEAPON_FROM_PED(Ped ped, Hash weaponHash) { return YimMenu::NativeInvoker::Invoke<6571, void, false>(ped, weaponHash); }
+	FORCEINLINE constexpr void REMOVE_ALL_PED_WEAPONS(Ped ped, BOOL p1) { return YimMenu::NativeInvoker::Invoke<6570, void, false>(ped, p1); }//---------
+	FORCEINLINE constexpr void REMOVE_WEAPON_FROM_PED(Ped ped, Hash weaponHash) { return YimMenu::NativeInvoker::Invoke<6571, void, false>(ped, weaponHash); }//-------
 	FORCEINLINE constexpr void HIDE_PED_WEAPON_FOR_SCRIPTED_CUTSCENE(Ped ped, BOOL toggle) { return YimMenu::NativeInvoker::Invoke<6572, void, false>(ped, toggle); }
 	FORCEINLINE constexpr void SET_PED_CURRENT_WEAPON_VISIBLE(Ped ped, BOOL visible, BOOL deselectWeapon, BOOL p3, BOOL p4) { return YimMenu::NativeInvoker::Invoke<6573, void, false>(ped, visible, deselectWeapon, p3, p4); }
 	FORCEINLINE constexpr void SET_PED_DROPS_WEAPONS_WHEN_DEAD(Ped ped, BOOL toggle) { return YimMenu::NativeInvoker::Invoke<6574, void, false>(ped, toggle); }

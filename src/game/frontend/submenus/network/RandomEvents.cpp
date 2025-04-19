@@ -3,13 +3,9 @@
 #include "core/backend/ScriptMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
-#include "game/backend/Tunables.hpp"
-#include "game/backend/ScriptPatches.hpp"
-#include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "game/pointers/Pointers.hpp"
-#include "types/script/globals/GPBD_FM_2.hpp"
 #include "types/script/globals/GSBD_RandomEvents.hpp"
 #include "types/script/locals/FMRandomEvents.hpp"
 #include "types/script/ScriptEvent.hpp"
@@ -46,26 +42,84 @@ namespace YimMenu::Submenus
 		MAX_EVENTS
 	};
 
-	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
-	static ScriptFunction getNumFMMCVariations("GetNumFMMCVariations", "freemode"_J, "5D ? ? ? 01 72 02 39 04", 1, true);
-	static GPBD_FM_2* GPBDFM2                          = nullptr;
+	static constexpr std::array randomEventNames = {
+		"Drug Vehicle",
+		"Movie Props",
+		"Sleeping Guard",
+		"Exotic Exports",
+		"The Slashers",
+		"Phantom Car",
+		"Sightseeing",
+		"Smuggler Trail",
+		"Cerberus Surprise",
+		"Smuggler Plane",
+		"Crime Scene",
+		"Metal Detector",
+		"Finders Keepers",
+		"Shop Robbery",
+		"The Gooch",
+		"Weazel Plaza Shootout",
+		"Armored Truck",
+		"Possessed Animals",
+		"Ghosts Exposed",
+		"Happy Holidays Hauler",
+		"Community Outreach"
+	};
+
+	static constexpr std::array RandomEventScripts = {
+		"fm_content_drug_vehicle"_J,
+		"fm_content_movie_props"_J,
+		"fm_content_golden_gun"_J,
+		"fm_content_vehicle_list"_J,
+		"fm_content_slasher"_J,
+		"fm_content_phantom_car"_J,
+		"fm_content_sightseeing"_J,
+		"fm_content_smuggler_trail"_J,
+		"fm_content_cerberus"_J,
+		"fm_content_smuggler_plane"_J,
+		"fm_content_crime_scene"_J,
+		"fm_content_metal_detector"_J,
+		"fm_content_convoy"_J,
+		"fm_content_robbery"_J,
+		"fm_content_xmas_mugger"_J,
+		"fm_content_bank_shootout"_J,
+		"fm_content_armoured_truck"_J,
+		"fm_content_possessed_animals"_J,
+		"fm_content_ghosthunt"_J,
+		"fm_content_xmas_truck"_J,
+		"fm_content_community_outreach"_J
+	};
+
+	static YimMenu::ScriptFunction getNumFMMCVariations("GMFV", "freemode"_J, "5D ? ? ? 01 72 02 39 04", 1, true);
 	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
 	static RANDOM_EVENTS_FREEMODE_DATA* FMRandomEvents = nullptr;
 	static eRandomEvent selectedEvent                  = DRUG_VEHICLE;
 	static int selectedSubvariation                    = 0;
-	static int numSubvariations                        = 29;
-	static int setCooldown                             = 1800000;
-	static int setAvailability                         = 900000;
-	static bool applyInMinutes                         = false;
+	static int numSubVariations                        = 30;
+
+	std::string GetEventTimeLeftStr(int eventTime, int timer)
+	{
+		int timePassed   = (*Pointers.NetworkTime - timer) < 0 ? -(*Pointers.NetworkTime - timer) : (*Pointers.NetworkTime - timer);
+		int diff         = (eventTime - timePassed);
+		int totalSeconds = diff / 1000;
+		int hours        = totalSeconds / 3600;
+		int minutes      = (totalSeconds % 3600) / 60;
+		int seconds      = totalSeconds % 60;
+
+		if (hours < 1)
+			return std::format("{:02}:{:02}", minutes, seconds);
+		else
+			return std::format("{:02}:{:02}:{:02}", hours, minutes, seconds);
+	}
 
 	static std::string GetEventStateString()
 	{
 		switch (GSBDRandomEvents->EventData[selectedEvent].State)
 		{
 		case eRandomEventState::INACTIVE:
-			return "Inactive - launching in " + GSBDRandomEvents->EventData[selectedEvent].TimerState.GetRemainingTimeStr(FMRandomEvents->EventData[selectedEvent].InactiveTime);
+			return "Inactive - launching in " + GetEventTimeLeftStr(FMRandomEvents->EventData[selectedEvent].InactiveTime, GSBDRandomEvents->EventData[selectedEvent].TimerState.Time);
 		case eRandomEventState::AVAILABLE:
-			return "Available - deactivating in " + GSBDRandomEvents->EventData[selectedEvent].TimerState.GetRemainingTimeStr(FMRandomEvents->EventData[selectedEvent].AvailableTime);
+			return "Available - deactivating in " + GetEventTimeLeftStr(FMRandomEvents->EventData[selectedEvent].AvailableTime, GSBDRandomEvents->EventData[selectedEvent].TimerState.Time);
 		case eRandomEventState::ACTIVE:
 			return "Active";
 		case eRandomEventState::CLEANUP:
@@ -75,63 +129,20 @@ namespace YimMenu::Submenus
 		return "N/A";
 	}
 
-	static int GetNumLocallyActiveEvents()
-	{
-		int numEvents{};
-
-		for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
-		{
-			if (GPBDFM2->Entries[Self::GetPlayer().GetId()].RandomEventsClientData.EventData[event].State != eRandomEventClientState::INACTIVE)
-				numEvents++;
-		}
-
-		return numEvents;
-	}
-
-	static void ResetEventTunables(eRandomEvent event)
-	{
-		if (event == ARMOURED_TRUCK) // It doesn't have tunables
-		{
-			setCooldown     = *ScriptGlobal(262145).At(33719).As<int*>();
-			setAvailability = *ScriptGlobal(262145).At(33720).As<int*>();
-		}
-		else
-		{
-			// Phantom Car's cooldown is actually 2147483647ms if STANDARDTARGETTINGTIME is not enabled
-			setCooldown     = *Tunables::GetTunable(randomEventCooldowns[event]).As<int*>();
-			setAvailability = *Tunables::GetTunable(randomEventAvailabilities[event]).As<int*>();
-		}
-	}
-
-	static void OnComboChange()
-	{
-		selectedSubvariation = 0;
-		numSubvariations     = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
-		ResetEventTunables(selectedEvent);
-	}
-
 	std::shared_ptr<Category> BuildRandomEventsMenu()
 	{
-		if (sendUpdateRECoordsTSECooldownPatches.empty())
-		{
-			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
-				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], "43 88 13 2E 00 01", 0, {0x71, 0x00, 0x00}));
-		}
-
-		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)
-			patch->Enable();
-
-		auto menu     = std::make_shared<Category>("Random Events");
-		auto settings = std::make_shared<Group>("Settings");
+		auto menu = std::make_shared<Category>("Random Events");
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
-			GPBDFM2          = GPBD_FM_2::Get();
-			GSBDRandomEvents = GSBD_RandomEvents::Get();
-			if (!GPBDFM2 || !GSBDRandomEvents)
-				return ImGui::Text("Freemode global block is not loaded.");
+			GSBDRandomEvents = nullptr;
+			FMRandomEvents   = nullptr;
 
-			if (GPBDFM2->Entries[Self::GetPlayer().GetId()].RandomEventsClientData.InitState != eRandomEventClientInitState::INITIALIZED)
-				return ImGui::Text("Random Events are not initialized.");
+			GSBDRandomEvents = GSBD_RandomEvents::Get();
+			if (!GSBDRandomEvents)
+				return ImGui::Text("Freemode global block is not loaded yet.");
+
+			if (GSBDRandomEvents->InitState != eRandomEventInitState::INITIALIZED)
+				return ImGui::Text("Random Events are not initialized yet.");
 
 			if (auto freemode = Scripts::FindScriptThread("freemode"_J))
 			{
@@ -165,8 +176,8 @@ namespace YimMenu::Submenus
 					if (ImGui::Selectable(randomEventNames[event], event == selectedEvent))
 					{
 						FiberPool::Push([event] {
-							selectedEvent = (eRandomEvent)event;
-							OnComboChange();
+							selectedEvent    = (eRandomEvent)event;
+							numSubVariations = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
 						});
 					}
 
@@ -176,17 +187,10 @@ namespace YimMenu::Submenus
 				ImGui::EndCombo();
 			}
 
-			if (ImGui::InputInt(std::format("Select Location (0-{})", numSubvariations).c_str(), &selectedSubvariation))
+			if (ImGui::InputInt(std::format("Select Location (0-{})", numSubVariations).c_str(), &selectedSubvariation))
 			{
-				selectedSubvariation = std::clamp(selectedSubvariation, 0, numSubvariations);
+				selectedSubvariation = std::clamp(selectedSubvariation, 0, numSubVariations);
 			}
-
-			int numActiveEvents = GetNumLocallyActiveEvents();
-			int maxActiveEvents = *Tunables::GetTunable("FMREMAXACTIVATEDEVENTS"_J).As<int*>();
-			if (numActiveEvents >= maxActiveEvents)
-				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Active Events: %d/%d", numActiveEvents, maxActiveEvents);
-			else
-				ImGui::Text("Active Events: %d/%d", numActiveEvents, maxActiveEvents);
 
 			if (ImGui::Button("Launch Event"))
 			{
@@ -211,7 +215,9 @@ namespace YimMenu::Submenus
 				});
 			}
 			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("Requires freemode script host.");
+			{
+				ImGui::SetTooltip("Force launches the event.");
+			}
 
 			ImGui::SameLine();
 
@@ -224,32 +230,18 @@ namespace YimMenu::Submenus
 					}
 					else if (GSBDRandomEvents->EventData[selectedEvent].State == eRandomEventState::ACTIVE)
 					{
-						if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
-						{
-							if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
-							{
-								if (NetComponent->IsLocalPlayerHost())
-								{
-									ScriptFunction setFMContentScriptServerState("SetFMContentScriptServerState", randomEventScripts[(int)selectedEvent], "5D ? ? ? 55 2E 00 5D", 1, true);
-									setFMContentScriptServerState.Call<void>(3);
-								}
-								else
-								{
-									ScriptFunction setFMContentScriptClientState("SetFMContentScriptClientState", randomEventScripts[(int)selectedEvent], "5D ? ? ? 55 08 00 74", 1, true);
-									setFMContentScriptClientState.Call<void>(3);
-								}
-							}
-						}
-						else
-						{
-							Notifications::Show("Random Events", "Event script is not active. Are you a participant?", NotificationType::Error);
-						}
+						ScriptFunction terminateFMContentScript("TFMCS", RandomEventScripts[(int)selectedEvent], "2D 01 05 00 00 5D ? ? ?");
+						terminateFMContentScript.Call<void>(false); // Is it ok to do this when we're not host?
 					}
 					else
 					{
 						Notifications::Show("Random Events", "Event is not active.", NotificationType::Error);
 					}
 				});
+			}
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetTooltip("Terminates the event.");
 			}
 
 			ImGui::SameLine();
@@ -275,10 +267,14 @@ namespace YimMenu::Submenus
 					}
 				});
 			}
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetTooltip("Teleports to the event.");
+			}
 
 			if (GSBDRandomEvents->EventData[selectedEvent].State == eRandomEventState::ACTIVE)
 			{
-				if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
+				if (auto eventThread = Scripts::FindScriptThread(RandomEventScripts[(int)selectedEvent]))
 				{
 					if (auto netComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
 					{
@@ -300,46 +296,10 @@ namespace YimMenu::Submenus
 			}
 
 			ImGui::Text("State: %s", GetEventStateString().c_str());
-			if (GSBDRandomEvents->EventData[selectedEvent].State == eRandomEventState::INACTIVE)
-			{
-				ImGui::Text("Location: N/A");
-				ImGui::Text("Trigger Range: N/A");
-			}
-			else
-			{
-				ImGui::Text("Location: %d", GSBDRandomEvents->EventData[selectedEvent].Subvariation);
-				ImGui::Text("Trigger Range: %.2f", GSBDRandomEvents->EventData[selectedEvent].TriggerRange); // Default value is 400, it will be updated once the event switches to the available state
-			}
-
-			// We should probably put this into a separate group, but I just don't want to do the same safety checks before rendering it
-			ImGui::SeparatorText("Cooldown & Availability");
-
-			ImGui::InputInt("##cooldown", &setCooldown);
-			ImGui::SameLine();
-			if (ImGui::Button("Set Cooldown"))
-			{
-				int value = applyInMinutes ? (setCooldown * 60000) : setCooldown;
-				FMRandomEvents->EventData[selectedEvent].InactiveTime = value;
-			}
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("Requires freemode script host.");
-
-			ImGui::InputInt("##availability", &setAvailability);
-			ImGui::SameLine();
-			if (ImGui::Button("Set Availability"))
-			{
-				int value = applyInMinutes ? (setAvailability * 60000) : setAvailability;
-				FMRandomEvents->EventData[selectedEvent].AvailableTime = value;
-			}
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("Requires freemode script host.");
-
-			ImGui::Checkbox("Apply in Minutes", &applyInMinutes);
+			ImGui::Text("Location: %d", GSBDRandomEvents->EventData[selectedEvent].Subvariation);
+			ImGui::Text("Trigger Range: %.2f", GSBDRandomEvents->EventData[selectedEvent].TriggerRange); // Default value is 400, it will be updated once the event switches to the available state
 		}));
 
-		settings->AddItem(std::make_shared<BoolCommandItem>("esprandomevents"_J));
-
-		menu->AddItem(std::move(settings));
 		return menu;
 	}
 }

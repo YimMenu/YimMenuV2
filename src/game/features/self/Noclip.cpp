@@ -58,7 +58,10 @@ namespace YimMenu::Features
 				vel.x += _NoclipSpeed.GetState();
 
 			auto rot = CAM::GET_GAMEPLAY_CAM_ROT(2);
-			ent.SetRotation({0.0f, rot.y, rot.z});
+			//ent.SetRotation({0.0f, rot.y, rot.z});
+
+			ent.SetRotation({rot.x, rot.y, rot.z});//pp
+
 			ent.SetCollision(false);
 
 			if (vel.x == 0.f && vel.y == 0.f && vel.z == 0.f)

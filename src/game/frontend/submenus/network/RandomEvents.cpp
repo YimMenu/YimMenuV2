@@ -8,7 +8,7 @@
 #include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
-#include "game/pointers/Pointers.hpp"
+#include "game/pointers/ScriptPointers.hpp"
 #include "types/script/globals/GPBD_FM_2.hpp"
 #include "types/script/globals/GSBD_RandomEvents.hpp"
 #include "types/script/locals/FMRandomEvents.hpp"
@@ -47,7 +47,7 @@ namespace YimMenu::Submenus
 	};
 
 	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
-	static ScriptFunction getNumFMMCVariations("GetNumFMMCVariations", "freemode"_J, "5D ? ? ? 01 72 02 39 04", 1, true);
+	static ScriptFunction getNumFMMCVariations("GetNumFMMCVariations"_J, "freemode"_J);
 	static GPBD_FM_2* GPBDFM2                          = nullptr;
 	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
 	static RANDOM_EVENTS_FREEMODE_DATA* FMRandomEvents = nullptr;
@@ -108,6 +108,38 @@ namespace YimMenu::Submenus
 		selectedSubvariation = 0;
 		numSubvariations     = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
 		ResetEventTunables(selectedEvent);
+	}
+
+	static void KillActiveEvent()
+	{
+		if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
+		{
+			if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
+			{
+				if (auto eventProgram = Scripts::FindScriptProgram(randomEventScripts[(int)selectedEvent]))
+				{
+					// TO-DO: Cache these too?
+					if (NetComponent->IsLocalPlayerHost())
+					{
+						scrPtr scan{eventProgram};
+						auto pc = scan.Scan("5D ? ? ? 55 2E 00 5D").Add(1).Rip().As<std::uint32_t>();
+						ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent]);
+						setFMContentScriptServerState.Call<void>(pc, 3);
+					}
+					else
+					{
+						scrPtr scan{eventProgram};
+						auto pc = scan.Scan("5D ? ? ? 55 08 00 74").Add(1).Rip().As<std::uint32_t>();
+						ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent]);
+						setFMContentScriptClientState.Call<void>(pc, 3);
+					}
+				}
+			}
+		}
+		else
+		{
+			Notifications::Show("Random Events", "Event script is not active. Are you a participant?", NotificationType::Error);
+		}
 	}
 
 	std::shared_ptr<Category> BuildRandomEventsMenu()
@@ -224,26 +256,7 @@ namespace YimMenu::Submenus
 					}
 					else if (GSBDRandomEvents->EventData[selectedEvent].State == eRandomEventState::ACTIVE)
 					{
-						if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
-						{
-							if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
-							{
-								if (NetComponent->IsLocalPlayerHost())
-								{
-									ScriptFunction setFMContentScriptServerState("SetFMContentScriptServerState", randomEventScripts[(int)selectedEvent], "5D ? ? ? 55 2E 00 5D", 1, true);
-									setFMContentScriptServerState.Call<void>(3);
-								}
-								else
-								{
-									ScriptFunction setFMContentScriptClientState("SetFMContentScriptClientState", randomEventScripts[(int)selectedEvent], "5D ? ? ? 55 08 00 74", 1, true);
-									setFMContentScriptClientState.Call<void>(3);
-								}
-							}
-						}
-						else
-						{
-							Notifications::Show("Random Events", "Event script is not active. Are you a participant?", NotificationType::Error);
-						}
+						KillActiveEvent();
 					}
 					else
 					{

@@ -2,13 +2,14 @@
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
+#include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "game/gta/ScriptLocal.hpp"
 #include "types/script/locals/VehicleRewardData.hpp"
 
 namespace YimMenu
 {
-	static ScriptFunction giveVehicleReward("GiveVehicleReward", "AM_MP_VEHICLE_REWARD"_J, "2D 0C 1E 00 00");
+	static ScriptFunction giveVehicleReward("GiveVehicleReward"_J, "AM_MP_VEHICLE_REWARD"_J);
 
 	bool GiveVehicleReward::IsSafeToRunScript()
 	{

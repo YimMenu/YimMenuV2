@@ -6,7 +6,7 @@
 
 namespace YimMenu::Features
 {
-	static constexpr ControllerInputs controls[] = {ControllerInputs::INPUT_SPRINT, ControllerInputs::INPUT_MOVE_UP_ONLY, ControllerInputs::INPUT_MOVE_DOWN_ONLY, ControllerInputs::INPUT_MOVE_LEFT_ONLY, ControllerInputs::INPUT_MOVE_RIGHT_ONLY, ControllerInputs::INPUT_DUCK, ControllerInputs::INPUT_VEH_HORN};
+	static constexpr ControllerInputs controls[] = {ControllerInputs::INPUT_MOVE_LR, ControllerInputs::INPUT_MOVE_UD, ControllerInputs::INPUT_JUMP, ControllerInputs::INPUT_SPRINT, ControllerInputs::INPUT_DUCK};
 	static FloatCommand _NoclipSpeed{"noclipspeed", "Noclip Speed", "Features", 0.1f, 2.0f, 0.14f};
 
 	class Noclip : public LoopedCommand
@@ -42,7 +42,7 @@ namespace YimMenu::Features
 			if (PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_SPRINT))
 				vel.z += _NoclipSpeed.GetState() / 2;
 			// Left Control
-			if (PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_DUCK) || PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_VEH_HORN))
+			if (PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_DUCK))
 				vel.z -= _NoclipSpeed.GetState() / 2;
 			// Forward
 			if (PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_MOVE_UP_ONLY))
@@ -56,6 +56,8 @@ namespace YimMenu::Features
 			// Right
 			if (PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_MOVE_RIGHT_ONLY))
 				vel.x += _NoclipSpeed.GetState();
+			// Space
+			m_SpeedMultiplier = (PAD::IS_DISABLED_CONTROL_PRESSED(0, (int)ControllerInputs::INPUT_JUMP)) ? 30.0f : 10.0f;
 
 			auto rot = CAM::GET_GAMEPLAY_CAM_ROT(2);
 			ent.SetRotation({0.0f, rot.y, rot.z});
@@ -69,17 +71,11 @@ namespace YimMenu::Features
 			}
 			else
 			{
-				if (m_SpeedMultiplier < 20.f)
-					m_SpeedMultiplier += 0.07f;
-
 				ent.SetFrozen(false);
-				
 
-				{
-					const auto offset = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(ent.GetHandle(), vel.x * m_SpeedMultiplier, vel.y * m_SpeedMultiplier, vel.z * m_SpeedMultiplier);
-					ent.SetVelocity({});
-					ent.SetPosition({offset.x, offset.y, offset.z});
-				}
+				const auto offset = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(ent.GetHandle(), vel.x * m_SpeedMultiplier, vel.y * m_SpeedMultiplier, vel.z * m_SpeedMultiplier);
+				ent.SetVelocity({});
+				ent.SetPosition({offset.x, offset.y, offset.z});
 			}
 		}
 

@@ -8,7 +8,6 @@
 #include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
-#include "game/pointers/ScriptPointers.hpp"
 #include "types/script/globals/GPBD_FM_2.hpp"
 #include "types/script/globals/GSBD_RandomEvents.hpp"
 #include "types/script/locals/FMRandomEvents.hpp"
@@ -47,7 +46,6 @@ namespace YimMenu::Submenus
 	};
 
 	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
-	static ScriptFunction getNumFMMCVariations("GetNumFMMCVariations"_J, "freemode"_J);
 	static GPBD_FM_2* GPBDFM2                          = nullptr;
 	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
 	static RANDOM_EVENTS_FREEMODE_DATA* FMRandomEvents = nullptr;
@@ -105,8 +103,9 @@ namespace YimMenu::Submenus
 
 	static void OnComboChange()
 	{
-		selectedSubvariation = 0;
+		static ScriptFunction getNumFMMCVariations("freemode"_J, ScriptPointer("GetNumFMMCVariations", "5D ? ? ? 01 72 02 39 04").Add(1).Rip());
 		numSubvariations     = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
+		selectedSubvariation = 0;
 		ResetEventTunables(selectedEvent);
 	}
 
@@ -121,17 +120,15 @@ namespace YimMenu::Submenus
 					// TO-DO: Cache these too?
 					if (NetComponent->IsLocalPlayerHost())
 					{
-						scrPtr scan{eventProgram};
-						auto pc = scan.Scan("5D ? ? ? 55 2E 00 5D").Add(1).Rip().As<std::uint32_t>();
-						ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent]);
-						setFMContentScriptServerState.Call<void>(pc, 3);
+						std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);
+						ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
+						setFMContentScriptServerState.Call<void>(3);
 					}
 					else
 					{
-						scrPtr scan{eventProgram};
-						auto pc = scan.Scan("5D ? ? ? 55 08 00 74").Add(1).Rip().As<std::uint32_t>();
-						ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent]);
-						setFMContentScriptClientState.Call<void>(pc, 3);
+						std::string ptrName = "SetFMContentScriptClientState" + std::to_string(selectedEvent);
+						ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 08 00 74").Add(1).Rip());
+						setFMContentScriptClientState.Call<void>(3);
 					}
 				}
 			}
@@ -147,7 +144,10 @@ namespace YimMenu::Submenus
 		if (sendUpdateRECoordsTSECooldownPatches.empty())
 		{
 			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
-				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], "43 88 13 2E 00 01", 0, {0x71, 0x00, 0x00}));
+			{
+				std::string ptrName = "SendUpdateRECoordsTSECooldownPatch" + std::to_string(event);
+				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], ScriptPointer(ptrName, "43 88 13 2E 00 01"), {0x71, 0x00, 0x00}));
+			}
 		}
 
 		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)

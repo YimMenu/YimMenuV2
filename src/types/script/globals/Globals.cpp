@@ -1,4 +1,3 @@
-#include "GlobalPlayerBD.hpp"
 #include "GPBD_FM.hpp"
 #include "GPBD_FM_2.hpp"
 #include "GPBD_FM_3.hpp"
@@ -10,32 +9,31 @@
 #include "GSBD_FM_Events.hpp"
 #include "GSBD_Kicking.hpp"
 #include "GSBD_PropertyInstances.hpp"
-#include "g_AMC_playerBD.hpp"
 #include "GSBD_RandomEvents.hpp"
+#include "GlobalPlayerBD.hpp"
+#include "g_AMC_playerBD.hpp"
 #include "game/gta/ScriptGlobal.hpp"
-#include "game/pointers/ScriptPointers.hpp"
 
-#define DEFINE_GLOBAL_ACCESSOR(str, hash)                                 \
-	str* str::Get()                                                       \
-	{                                                                     \
-		auto address = YimMenu::ScriptPointers::GetPointer(hash);         \
-		auto glb     = YimMenu::ScriptGlobal(address);                    \
-		if (!address || !glb.CanAccess())                                 \
-			return nullptr;                                               \
-		return glb.As<str*>();                                            \
+#define DEFINE_GLOBAL_ACCESSOR(str, global)       \
+	str* str::Get()                               \
+	{                                             \
+		auto glb = YimMenu::ScriptGlobal(global); \
+		if (!glb.CanAccess())                     \
+			return nullptr;                       \
+		return glb.As<str*>();                    \
 	}
 
-DEFINE_GLOBAL_ACCESSOR(GlobalPlayerBD, "GlobalPlayerBD"_J);
-DEFINE_GLOBAL_ACCESSOR(GPBD_FM, "GPBD_FM"_J);
-DEFINE_GLOBAL_ACCESSOR(GPBD_FM_2, "GPBD_FM_2"_J);
-DEFINE_GLOBAL_ACCESSOR(GPBD_FM_3, "GPBD_FM_3"_J);
-DEFINE_GLOBAL_ACCESSOR(GPBD_Kicking, "GPBD_Kicking"_J);
-DEFINE_GLOBAL_ACCESSOR(GPBD_MissionName, "GPBD_MissionName"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD, "GSBD"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD_BlockB, "GSBD_BlockB"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD_FM, "GSBD_FM"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD_FM_Events, "GSBD_FM_Events"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD_Kicking, "GSBD_Kicking"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD_PropertyInstances, "GSBD_PropertyInstances"_J);
-DEFINE_GLOBAL_ACCESSOR(g_AMC_playerBD, "g_AMC_playerBD"_J);
-DEFINE_GLOBAL_ACCESSOR(GSBD_RandomEvents, "GSBD_RandomEvents"_J);
+DEFINE_GLOBAL_ACCESSOR(GlobalPlayerBD, 2657994);
+DEFINE_GLOBAL_ACCESSOR(GPBD_FM, 1845270);
+DEFINE_GLOBAL_ACCESSOR(GPBD_FM_2, 1882925);
+DEFINE_GLOBAL_ACCESSOR(GPBD_FM_3, 1887694);
+DEFINE_GLOBAL_ACCESSOR(GPBD_Kicking, 1874328);
+DEFINE_GLOBAL_ACCESSOR(GPBD_MissionName, 1873815);
+DEFINE_GLOBAL_ACCESSOR(GSBD, 2648917);
+DEFINE_GLOBAL_ACCESSOR(GSBD_BlockB, 2650415);
+DEFINE_GLOBAL_ACCESSOR(GSBD_FM, 1835557);
+DEFINE_GLOBAL_ACCESSOR(GSBD_FM_Events, 1917230);
+DEFINE_GLOBAL_ACCESSOR(GSBD_Kicking, 1877529);
+DEFINE_GLOBAL_ACCESSOR(GSBD_PropertyInstances, 1937699);
+DEFINE_GLOBAL_ACCESSOR(g_AMC_playerBD, 2699624);
+DEFINE_GLOBAL_ACCESSOR(GSBD_RandomEvents, 1882524);

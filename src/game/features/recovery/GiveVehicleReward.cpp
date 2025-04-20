@@ -9,8 +9,6 @@
 
 namespace YimMenu
 {
-	static ScriptFunction giveVehicleReward("GiveVehicleReward"_J, "AM_MP_VEHICLE_REWARD"_J);
-
 	bool GiveVehicleReward::IsSafeToRunScript()
 	{
 		return Self::GetVehicle().IsValid() && *Pointers.IsSessionStarted;
@@ -68,6 +66,7 @@ namespace YimMenu
 			if (auto VehicleRewardData = VEHICLE_REWARD_DATA::Get(m_Thread))
 			{
 				auto VehicleMenuData = ScriptLocal(m_Thread, 176).As<int*>(); // TO-DO: add struct for this?
+				static ScriptFunction giveVehicleReward("AM_MP_VEHICLE_REWARD"_J, ScriptPointer("GiveVehicleReward", "2D 0C 1E 00 00"));
 				if (giveVehicleReward.Call<bool>(Self::GetVehicle().GetHandle(), VehicleMenuData, &VehicleRewardData->TransactionStatus, &VehicleRewardData->Garage, &VehicleRewardData->GarageOffset, &VehicleRewardData->ControlStatus, false, true, true, false, 0, -1))
 				{
 					if (VehicleRewardData->ControlStatus != 3)

@@ -105,7 +105,7 @@ namespace YimMenu::Features
 			// ensure shop controller can't control the weather
 			if (!m_ShopControllerWeatherPatch)
 			{
-				m_ShopControllerWeatherPatch = ScriptPatches::AddPatch("shop_controller"_J, "2D 00 07 00 00 71 39 02 71", 5, {0x2E, 0x00, 0x00});
+				m_ShopControllerWeatherPatch = ScriptPatches::AddPatch("shop_controller"_J, ScriptPointer("ShopControllerWeatherPatch", "2D 00 07 00 00 71 39 02 71").Add(5), {0x2E, 0x00, 0x00});
 			}
 			m_ShopControllerWeatherPatch->Enable();	
 		}

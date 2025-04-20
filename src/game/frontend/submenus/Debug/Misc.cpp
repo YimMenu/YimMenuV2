@@ -18,7 +18,7 @@ namespace YimMenu::Submenus
 			if (ImGui::Button("fm_mission_controller DoTeamSwap"))
 			{
 				FiberPool::Push([] {
-					static ScriptFunction DoTeamSwap("DoTeamSwap"_J, "fm_mission_controller"_J);
+					static ScriptFunction DoTeamSwap("fm_mission_controller"_J, ScriptPointer("DoTeamSwap", "2D 02 04 00 00 38 00 50"));
 					DoTeamSwap.Call<void>(team, true);
 				});
 			}

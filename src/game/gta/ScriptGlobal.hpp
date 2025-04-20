@@ -42,5 +42,4 @@ namespace YimMenu
         void* Get() const;
 
     };
-    
 }

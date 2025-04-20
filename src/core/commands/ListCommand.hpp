@@ -18,6 +18,7 @@ namespace YimMenu
 		ListCommand(std::string name, std::string label, std::string description, std::vector<std::pair<int, const char*>> list, int def_val = 0);
 		int GetState();
 		void SetState(int state);
+		void SetList(std::vector<std::pair<int, const char*>> list);
 		std::vector<std::pair<int, const char*>>& GetList();
 	};
 }

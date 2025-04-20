@@ -2,6 +2,8 @@
 #include <cstddef>
 #include <type_traits>
 #include <types/script/scrThread.hpp>
+#include <core/util/Joaat.hpp>
+#include <src/game/gta/Scripts.hpp>
 
 namespace YimMenu
 {
@@ -31,6 +33,12 @@ namespace YimMenu
         {
 
         }
+
+        constexpr ScriptLocal(joaat_t script, std::size_t index) :
+		    ScriptLocal(Scripts::FindScriptThread(script)->m_Stack, index)
+		{
+
+		}
 
         constexpr ScriptLocal At(std::ptrdiff_t offset) const
         {

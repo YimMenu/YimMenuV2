@@ -38,6 +38,12 @@ namespace YimMenu
 		MarkDirty();
 	}
 
+	void ListCommand::SetList(std::vector<std::pair<int, const char*>> list)
+	{
+		m_List = std::move(list);
+		MarkDirty();
+	}
+
 	std::vector<std::pair<int, const char*>>& ListCommand::GetList()
 	{
 		return m_List;

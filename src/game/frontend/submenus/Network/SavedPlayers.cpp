@@ -1,6 +1,7 @@
 #include "SavedPlayers.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "core/frontend/widgets/imgui_colors.h"
+#include "core/frontend/Notifications.hpp"
 #include "game/backend/SavedPlayers.hpp"
 #include "game/gta/Network.hpp"
 #include "game/pointers/Pointers.hpp"
@@ -72,7 +73,7 @@ namespace YimMenu::Submenus
 		ImGui::SetNextItemWidth(200.f);
 		ImGui::InputTextWithHint("Search", "Search", g_NameToSearch, sizeof(g_NameToSearch));
 
-		if (ImGui::BeginListBox("###player-list", {180, static_cast<float>(*Pointers.ScreenResY - 700 - 38 * 4)}))
+		if (ImGui::BeginListBox("###player-list", {180, -100 /* static_cast<float>(*Pointers.ScreenResY - 700 - 38 * 4) */}))
 		{
 			auto& players = SavedPlayers::GetSavedPlayers();
 
@@ -108,7 +109,7 @@ namespace YimMenu::Submenus
 		if (!g_SelectedPlayer || g_SelectedRid == 0)
 			return;
 
-		if (ImGui::BeginChild("##player-editor", {500, static_cast<float>(*Pointers.ScreenResY - 688 - 38 * 4)}, 0, ImGuiWindowFlags_NoBackground))
+		if (ImGui::BeginChild("##player-editor", {500, -100 /* static_cast<float>(*Pointers.ScreenResY - 688 - 38 * 4) */}, 0, ImGuiWindowFlags_NoBackground))
 		{
 			ImGui::SetNextItemWidth(180.f);
 			if (ImGui::InputText("Name", g_SelectedPlayerName, sizeof(g_SelectedPlayerName)))
@@ -166,9 +167,8 @@ namespace YimMenu::Submenus
 				g_SelectedPlayer = nullptr;
 				g_SelectedRid = 0;
 			}
-
-			ImGui::EndChild();
 		}
+		ImGui::EndChild();
 	}
 
 	static void RenderSavedPlayers()
@@ -178,15 +178,41 @@ namespace YimMenu::Submenus
 		RenderPlayerEditor();
 	}
 
+	static void RenderAddNewPlayer()
+	{
+		static char name_buf[24]{};
+
+		ImGui::SetNextItemWidth(180.0f);
+		ImGui::InputText("Username", name_buf, sizeof(name_buf));
+		ImGui::SameLine();
+		if (ImGui::Button("Add"))
+			FiberPool::Push([] {
+				auto rid = YimMenu::Network::ResolveRockstarId(name_buf);
+				if (rid)
+				{
+					SavedPlayers::AddPlayerData(*rid, name_buf);
+				}
+				else
+				{
+					Notifications::Show("Saved Players", "Failed to get RID from username", NotificationType::Error);
+				}
+			});
+	}
+
 	std::shared_ptr<Category> BuildSavedPlayersMenu()
 	{
 		auto menu = std::make_shared<Category>("Saved Players");
 		auto players = std::make_shared<Group>("Players");
+		auto new_player = std::make_shared<Group>("New");
 		auto tracking = std::make_shared<Group>("Tracking");
 		auto notifications = std::make_shared<Group>("Notifications");
 
 		players->AddItem(std::make_shared<ImGuiItem>([] {
 			RenderSavedPlayers();
+		}));
+
+		new_player->AddItem(std::make_shared<ImGuiItem>([] {
+			RenderAddNewPlayer();
 		}));
 
 		notifications->AddItem(std::make_shared<BoolCommandItem>("playerdbnotifywhenjoinable"_J));
@@ -206,6 +232,7 @@ namespace YimMenu::Submenus
 		tracking->AddItem(std::make_shared<ConditionalItem>("playerdbnotify"_J, std::move(notifications)));
 
 		menu->AddItem(players);
+		menu->AddItem(new_player);
 		menu->AddItem(tracking);
 
 		return menu;

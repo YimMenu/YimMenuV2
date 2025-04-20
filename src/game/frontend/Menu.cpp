@@ -1,5 +1,6 @@
 #include "Menu.hpp"
-
+#include "imgui.h"
+#include "imgui_internal.h"
 #include "core/commands/Commands.hpp"
 #include "core/frontend/manager/UIManager.hpp"
 #include "core/renderer/Renderer.hpp"
@@ -15,7 +16,7 @@
 #include "submenus/Settings.hpp"
 #include "submenus/Debug.hpp"
 #include "submenus/World.hpp"
-
+#include "core/filemgr/FileMgr.hpp"
 namespace YimMenu
 {
 	void Menu::Init()
@@ -110,7 +111,11 @@ namespace YimMenu
 
 	void Menu::SetupFonts()
 	{
-		auto& IO = ImGui::GetIO();
+		auto& IO         = ImGui::GetIO();
+		auto file_path   = std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "imgui.ini";
+		static auto path = file_path.string();
+		IO.IniFilename   = path.c_str();
+		IO.LogFilename   = NULL;
 		ImFontConfig FontCfg{};
 		FontCfg.FontDataOwnedByAtlas = false;
 

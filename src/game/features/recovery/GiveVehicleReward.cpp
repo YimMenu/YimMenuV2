@@ -8,7 +8,7 @@
 
 namespace YimMenu
 {
-	static ScriptFunction giveVehicleReward("GVR", "AM_MP_VEHICLE_REWARD"_J, "2D 0C 1E 00 00");
+	static ScriptFunction giveVehicleReward("GiveVehicleReward", "AM_MP_VEHICLE_REWARD"_J, "2D 0C 1E 00 00");
 
 	bool GiveVehicleReward::IsSafeToRunScript()
 	{

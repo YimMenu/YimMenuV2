@@ -75,7 +75,6 @@ namespace YimMenu::Features
 					auto new_coords{coords};
 					ResolveZCoordinate(new_coords);
 					Self::GetPed().TeleportTo(new_coords);
-					ScriptMgr::Yield();
 				});
 				HUD::SET_WAYPOINT_OFF();
 			}

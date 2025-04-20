@@ -12,7 +12,7 @@ namespace YimMenu::Submenus
 		auto globalsGroup  = std::make_shared<Group>("Globals");
 		auto movementGroup = std::make_shared<Group>("Movement");
 		auto wantedGroup = std::make_shared<Group>("Wanted");
-		auto toolsGroup    = std::make_shared<Group>("Tools");
+		auto toolsGroup    = std::make_shared<Group>("Tools", 1);
 
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("godmode"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("invis"_J));
@@ -21,6 +21,7 @@ namespace YimMenu::Submenus
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noragdoll"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noidlekick"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("unlimitedoxygen"_J));
+		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("formatmoney"_J));
 
 		auto clearWanted = std::make_shared<Group>("", 1);
 		clearWanted->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, std::make_shared<CommandItem>("clearwanted"_J), true));

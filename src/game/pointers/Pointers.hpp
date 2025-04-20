@@ -27,6 +27,9 @@ namespace rage
 	class rlSessionByGamerTaskResult;
 	class rlQueryPresenceAttributesContext;
 	class rlScGamerHandle;
+	class rlQueryAccountsResult;
+	class rlGetAvatarsContext;
+	class rlGetAvatarsPlayerList;
 }
 class CPedFactory;
 class CNetGamePlayer;
@@ -60,6 +63,7 @@ namespace YimMenu
 		using JoinSessionByInfo = bool (*)(CNetworkSession* network, rage::rlSessionInfo* info, int unk, int flags, rage::rlGamerHandle* handles, int num_handles);
 		using GetSessionByGamerHandle = bool (*)(int profile_index, rage::rlGamerHandle* handles, int num_handles, rage::rlSessionByGamerTaskResult* results, int num_results, bool* success, rage::rlTaskStatus* state);
 		using GetPresenceAttributes = bool (*)(int profile_index, rage::rlScGamerHandle* handles, int num_handles, rage::rlQueryPresenceAttributesContext** contexts, int count, rage::rlScTaskStatus* state);
+		using GetAvatars = bool (*)(rage::rlGetAvatarsContext* context, rage::rlGetAvatarsPlayerList* players);
 	}
 
 	struct PointerData
@@ -129,6 +133,11 @@ namespace YimMenu
 		Functions::JoinSessionByInfo JoinSessionByInfo;
 		Functions::GetSessionByGamerHandle GetSessionByGamerHandle;
 		Functions::GetPresenceAttributes GetPresenceAttributes;
+		Functions::GetAvatars GetAvatars;
+		std::uint32_t* NetworkTime;
+		std::uint32_t* GameTimer;
+		PVOID FormatIntCaller1;
+		PVOID FormatIntCaller2;
 	};
 
 	struct Pointers : PointerData

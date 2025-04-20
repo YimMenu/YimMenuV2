@@ -10,8 +10,12 @@
 #include "game/gta/Pools.hpp"
 #include "game/gta/Scripts.hpp"
 //#include "game/gta/data/PedModels.hpp"
+#include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/invoker/Invoker.hpp"
 #include "game/gta/Natives.hpp"
+#include "types/script/globals/GPBD_FM_2.hpp"
+#include "types/script/globals/GSBD_RandomEvents.hpp"
+#include "types/script/locals/FMRandomEvents.hpp"
 
 namespace
 {
@@ -58,6 +62,9 @@ namespace YimMenu::Features
 	ColorCommand _HashColorPeds("hashcolorpeds", "Ped Hash Color", "Changes the color of the hash ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 	ColorCommand _DistanceColorPeds("distancecolorpeds", "Ped Distance Color", "Changes the color of the distance ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 	ColorCommand _SkeletonColorPeds("skeletoncolorpeds", "Ped Skeleton Color", "Changes the color of the skeleton ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
+
+	// Random Events
+	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?");
 }
 
 namespace YimMenu
@@ -75,42 +82,43 @@ namespace YimMenu
 	static ImVec4 Orange           = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
 	static ImVec4 Red              = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
 	static ImVec4 Blue             = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
+	static ImVec4 White            = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	static auto boneToScreen = [](rage::fvector3 bone) 
+	static auto worldToScreen = [](rage::fvector3 coords) 
 	{
 		float screen_x{}, screen_y{};
 
-		GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(bone.x, bone.y, bone.z, &screen_x, &screen_y);
+		GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(coords.x, coords.y, coords.z, &screen_x, &screen_y);
 
 		return ImVec2{screen_x * (*Pointers.ScreenResX), screen_y * (*Pointers.ScreenResY)};
 	};
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(headBone)), boneToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(neckBone)), boneToScreen(ped.GetBonePosition(leftShoulderBone)), color, 1.5f);
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(leftShoulderBone)), boneToScreen(ped.GetBonePosition(leftElbowBone)), color, 1.5f);
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(leftElbowBone)), boneToScreen(ped.GetBonePosition(leftHandBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(leftShoulderBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(leftShoulderBone)), worldToScreen(ped.GetBonePosition(leftElbowBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(leftElbowBone)), worldToScreen(ped.GetBonePosition(leftHandBone)), color, 1.5f);
 
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(neckBone)), boneToScreen(ped.GetBonePosition(rightShoulderBone)), color, 1.5f);
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(rightShoulderBone)), boneToScreen(ped.GetBonePosition(rightElbowBone)), color, 1.5f);
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(rightElbowBone)), boneToScreen(ped.GetBonePosition(rightHandBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(rightShoulderBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(rightShoulderBone)), worldToScreen(ped.GetBonePosition(rightElbowBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(rightElbowBone)), worldToScreen(ped.GetBonePosition(rightHandBone)), color, 1.5f);
 
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(neckBone)), boneToScreen(ped.GetBonePosition(torsoBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(torsoBone)), color, 1.5f);
 
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(torsoBone)), boneToScreen(ped.GetBonePosition(leftKneeBone)), color, 1.5f);
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(leftKneeBone)), boneToScreen(ped.GetBonePosition(leftFootBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(torsoBone)), worldToScreen(ped.GetBonePosition(leftKneeBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(leftKneeBone)), worldToScreen(ped.GetBonePosition(leftFootBone)), color, 1.5f);
 
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(torsoBone)), boneToScreen(ped.GetBonePosition(rightKneeBone)), color, 1.5f);
-		drawList->AddLine(boneToScreen(ped.GetBonePosition(rightKneeBone)), boneToScreen(ped.GetBonePosition(rightFootBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(torsoBone)), worldToScreen(ped.GetBonePosition(rightKneeBone)), color, 1.5f);
+		drawList->AddLine(worldToScreen(ped.GetBonePosition(rightKneeBone)), worldToScreen(ped.GetBonePosition(rightFootBone)), color, 1.5f);
 	}
 
 	//TODO : Very bare bones currently, expand and possibly refactor
 	void ESP::DrawPlayer(Player plyr, ImDrawList* drawList)
 	{
 		if (!plyr.IsValid() || !plyr.GetPed().IsValid() || plyr == Self::GetPlayer()
-		    || boneToScreen(plyr.GetPed().GetBonePosition(torsoBone)).x == 0
+		    || worldToScreen(plyr.GetPed().GetBonePosition(torsoBone)).x == 0
 		    || (plyr.GetPed().IsDead() && !Features::_ESPDrawDeadPlayers.GetState()))
 			return;
 
@@ -132,7 +140,7 @@ namespace YimMenu
 
 		if (Features::_ESPName.GetState())
 		{
-			drawList->AddText(boneToScreen(plyr.GetPed().GetBonePosition(headBone)),
+			drawList->AddText(worldToScreen(plyr.GetPed().GetBonePosition(headBone)),
 			    plyr == Players::GetSelected() ? ImGui::ColorConvertFloat4ToU32(Blue) :
 			                                     ImGui::ColorConvertFloat4ToU32(Features::_NameColorPlayers.GetState()),
 			    plyr.GetName());
@@ -141,7 +149,7 @@ namespace YimMenu
 		if (Features::_ESPDistance.GetState())
 		{
 			std::string distanceStr = std::to_string((int)Self::GetPed().GetPosition().GetDistance(plyr.GetPed().GetBonePosition(torsoBone))) + "m";
-			drawList->AddText({boneToScreen(plyr.GetPed().GetBonePosition(headBone)).x, boneToScreen(plyr.GetPed().GetBonePosition(headBone)).y + 20}, colorBasedOnDistance, distanceStr.c_str());
+			drawList->AddText({worldToScreen(plyr.GetPed().GetBonePosition(headBone)).x, worldToScreen(plyr.GetPed().GetBonePosition(headBone)).y + 20}, colorBasedOnDistance, distanceStr.c_str());
 		}
 
 		currentFont->Scale = originalFontSize;
@@ -160,7 +168,7 @@ namespace YimMenu
 
 	void ESP::DrawPed(Ped ped, ImDrawList* drawList)
 	{
-		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || boneToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
+		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
 			return;
 
 		float distanceToPed = 0.0f;
@@ -210,13 +218,13 @@ namespace YimMenu
 		}
 
 		if (!info.empty())
-			drawList->AddText(boneToScreen(ped.GetBonePosition(headBone)), ImGui::ColorConvertFloat4ToU32(Features::_HashColorPeds.GetState()), info.c_str());
+			drawList->AddText(worldToScreen(ped.GetBonePosition(headBone)), ImGui::ColorConvertFloat4ToU32(Features::_HashColorPeds.GetState()), info.c_str());
 
 		if (Features::_ESPDistancePeds.GetState())
 		{
 			std::string distanceStr = std::to_string((int)distanceToPed) + "m";
 			drawList->AddText(
-			    {boneToScreen(ped.GetBonePosition(headBone)).x, boneToScreen(ped.GetBonePosition(headBone)).y + 20},
+			    {worldToScreen(ped.GetBonePosition(headBone)).x, worldToScreen(ped.GetBonePosition(headBone)).y + 20},
 			    colorBasedOnDistance,
 			    distanceStr.c_str());
 		}
@@ -232,6 +240,32 @@ namespace YimMenu
 			{
 				DrawSkeleton(ped, drawList, Features::_SkeletonColorPeds.GetState());
 			}
+		}
+	}
+
+	void ESP::DrawRandomEvent(int event, ImDrawList* drawList)
+	{
+		if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("freemode"_J) == 0 || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
+			return;
+
+		if (GPBD_FM_2::Get()->Entries[Self::GetPlayer().GetId()].RandomEventsClientData.InitState != eRandomEventClientInitState::INITIALIZED)
+			return;
+
+		auto state        = GSBD_RandomEvents::Get()->EventData[event].State;
+		auto coords       = GSBD_RandomEvents::Get()->EventData[event].TriggerPosition;
+		auto range        = GSBD_RandomEvents::Get()->EventData[event].TriggerRange;
+		auto timer        = GSBD_RandomEvents::Get()->EventData[event].TimerState;
+		auto availability = RANDOM_EVENTS_FREEMODE_DATA::Get(Scripts::FindScriptThread("freemode"_J))->EventData[event].AvailableTime;
+		auto timeLeft     = GSBD_RandomEvents::Get()->EventData[event].TimerState.GetRemainingTimeStr(availability);
+		if (state != eRandomEventState::INACTIVE && coords != Vector3(0.0f, 0.0f, 0.0f))
+		{
+			float distance          = Self::GetPed().GetPosition().GetDistance(coords);
+			float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
+			std::string unit        = (distance < 1000.0f) ? "m" : "km";
+			std::string text        = std::format("{}\n{:.2f}{} {}", randomEventNames[event], formattedDistance, unit, (state == eRandomEventState::AVAILABLE ? timeLeft : ""));
+			ImColor color           = (state == eRandomEventState::ACTIVE) ? Green : White;
+
+			drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, text.c_str());
 		}
 	}
 
@@ -255,6 +289,13 @@ namespace YimMenu
 				{
 					if (ped.GetPointer<void*>())
 						DrawPed(ped, drawList);
+				}
+			}
+			if (Features::_ESPDrawRandomEvents.GetState())
+			{
+				for (int event = 0; event < 21; event++)
+				{
+					DrawRandomEvent(event, drawList);
 				}
 			}
 		}

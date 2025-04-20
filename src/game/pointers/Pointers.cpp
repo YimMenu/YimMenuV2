@@ -303,6 +303,26 @@ namespace YimMenu
 			GetSessionByGamerHandle = ptr.Sub(0x4A).Add(1).Rip().As<Functions::GetSessionByGamerHandle>();
 		});
 
+		constexpr auto networkTimePtrn = Pattern<"89 05 ? ? ? ? 80 3D ? ? ? ? ? 0F 84 ? ? ? ? E9">("NetworkTime");
+		scanner.Add(networkTimePtrn, [this](PointerCalculator ptr) {
+			NetworkTime = ptr.Add(2).Rip().As<std::uint32_t*>();
+		});
+
+		constexpr auto gameTimerPtrn = Pattern<"3B 2D ? ? ? ? 76">("GameTimer");
+		scanner.Add(gameTimerPtrn, [this](PointerCalculator ptr) {
+			GameTimer = ptr.Add(2).Rip().As<std::uint32_t*>();
+		});
+
+		constexpr auto formatIntCaller1Ptrn = Pattern<"48 89 35 ? ? ? ? 48 8B 74 24">("FormatIntCaller1");
+		scanner.Add(formatIntCaller1Ptrn, [this](PointerCalculator ptr) {
+			FormatIntCaller1 = ptr.Add(0x5D).As<PVOID>();
+		});
+
+		constexpr auto formatIntCaller2Ptrn = Pattern<"48 B8 20 73 69 7A 65 3D 27 32 48 89 84 24">("FormatIntCaller2");
+		scanner.Add(formatIntCaller2Ptrn, [this](PointerCalculator ptr) {
+			FormatIntCaller2 = ptr.Sub(0x11).As<PVOID>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";
@@ -350,6 +370,11 @@ namespace YimMenu
 		constexpr auto readAttributePatch2Ptrn = Pattern<"32 C0 EB ? C7 83">("ReadAttributesPatch2");
 		scanner.Add(readAttributePatch2Ptrn, [this](PointerCalculator ptr) {
 			BytePatches::Add(ptr.As<void*>(), std::vector<std::uint8_t>{0xB0, 0x01})->Apply(); 
+		});
+
+		constexpr auto getAvatarsPtrn = Pattern<"89 4B 7C 48 8B CB E8 ? ? ? ? 84 C0">("GetAvatars");
+		scanner.Add(getAvatarsPtrn, [this](PointerCalculator ptr) {
+			GetAvatars = ptr.Add(6).Add(1).Rip().As<Functions::GetAvatars>();
 		});
 
 		if (!scanner.Scan())

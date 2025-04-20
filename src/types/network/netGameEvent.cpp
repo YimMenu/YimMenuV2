@@ -9,7 +9,7 @@ bool CScriptedGameEvent::Deserialize(rage::datBitBuffer& buffer)
 	if (m_ArgsSize > sizeof(m_Args))
 		return false;
 
-	buffer.ReadArray(m_Args, 8 * m_ArgsSize);
+	buffer.ReadArrayBytes(m_Args, m_ArgsSize);
 	return true;
 }
 

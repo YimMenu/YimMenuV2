@@ -197,4 +197,20 @@ namespace YimMenu
 		std::optional<std::string> m_LabelOverride;
 		std::optional<std::string> m_CurrentInput = std::nullopt;
 	};
+
+	class TabItem : public UIItem
+	{
+	public:
+		explicit TabItem(const std::string& name);
+		void Draw() override;
+
+		void AddItem(std::shared_ptr<UIItem>&& item)
+		{
+			m_Items.push_back(std::move(item));
+		}
+
+	private:
+		std::string m_Name;
+		std::vector<std::shared_ptr<UIItem>> m_Items;
+	};
 }

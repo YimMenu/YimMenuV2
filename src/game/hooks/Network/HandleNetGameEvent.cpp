@@ -36,12 +36,14 @@ namespace YimMenu::Hooks
 			if (event.m_CameraShake > 0.0f && dist <= 30.0f)
 			{
 				// Camera shake
+				LOGF(WARNING, "Blocked EXPLOSION_EVENT from {} since m_CameraShake > 0.0f", player.GetName());
 				return true;
 			}
 
 			if (event.m_DamageScale > 0.0f && dist <= 10.0f)
 			{
 				// Ragdoll
+				LOGF(WARNING, "Blocked EXPLOSION_EVENT from {} since m_DamageScale > 0.0f", player.GetName());
 				return true;
 			}
 		}
@@ -134,8 +136,7 @@ namespace YimMenu::Hooks
 
 			if (event.m_WeaponType == "WEAPON_TRANQUILIZER"_J)
 			{
-				LOG(INFO) << "blocked this thing from " << player.GetName();
-				//player.AddDetection();
+				LOGF(WARNING, "Blocked WEAPON_DAMAGE_EVENT from {} with m_WeaponType == WEAPON_TRANQUILIZER", player.GetName());
 				return false;
 			}
 
@@ -163,6 +164,7 @@ namespace YimMenu::Hooks
 			if (self_veh && self_veh.GetNetworkObjectId() == veh_id && sender_veh && sender_veh.GetNetworkObjectId() != veh_id)
 			{
 				// Vehicle takeover
+				LOGF(WARNING, "Blocked CHANGE_RADIO_STATION_EVENT on our local vehicle from {}", player.GetName());
 				return false;
 			}
 
@@ -171,7 +173,7 @@ namespace YimMenu::Hooks
 		case rage::netGameEvent::Type::DOOR_BREAK_EVENT:
 		{
 			// never used for legitimate reasons
-
+			LOGF(WARNING, "Blocked DOOR_BREAK_EVENT from {}", player.GetName());
 			return false;
 		}
 		case rage::netGameEvent::Type::SCRIPTED_GAME_EVENT:
@@ -202,12 +204,14 @@ namespace YimMenu::Hooks
 				if (pop_group == 0 && (percentage == 0 || percentage == 103))
 				{
 					// pop group override crash
+					LOGF(WARNING, "Blocked SCRIPT_WORLD_STATE_EVENT of type PopGroupOverride with invalid params from {}", player.GetName());
 					return false;
 				}
 			}
 			else if (type == CScriptWorldStateEvent::Type::PopMultiplierArea && !NETWORK::NETWORK_IS_ACTIVITY_SESSION())
 			{
 				// Stop traffic
+				LOGF(WARNING, "Blocked SCRIPT_WORLD_STATE_EVENT of type PopMultiplierArea from {}", player.GetName());
 				return false;
 			}
 
@@ -227,12 +231,14 @@ namespace YimMenu::Hooks
 				if (action >= 15 && action <= 18)
 				{
 					// vehicle temp action crash
+					LOGF(WARNING, "Blocked SCRIPT_ENTITY_STATE_CHANGE_EVENT of type SettingOfTaskVehicleTempAction with invalid params from {}", player.GetName());
 					return false;
 				}
 
 				if (Self::GetPed().GetNetworkObjectId() == entity)
 				{
 					// Ped takeover
+					LOGF(WARNING, "Blocked SCRIPT_ENTITY_STATE_CHANGE_EVENT of type SettingOfTaskVehicleTempAction on our local ped from {}", player.GetName());
 					return false;
 				}
 
@@ -240,6 +246,7 @@ namespace YimMenu::Hooks
 				if (self_veh && self_veh.GetNetworkObjectId() == veh_id)
 				{
 					// Vehicle takeover
+					LOGF(WARNING, "Blocked SCRIPT_ENTITY_STATE_CHANGE_EVENT of type SettingOfTaskVehicleTempAction on our local vehicle from {}", player.GetName());
 					return false;
 				}
 			}
@@ -311,6 +318,7 @@ namespace YimMenu::Hooks
 			if (Self::GetPed().GetVehicleObjectId() == event.m_VehicleId && !Self::GetVehicle().IsRemote())
 			{
 				// Vehicle takeover
+				LOGF(WARNING, "Blocked ACTIVATE_VEHICLE_SPECIAL_ABILITY_EVENT on our local vehicle from {}", player.GetName());
 				return false;
 			}
 
@@ -324,6 +332,7 @@ namespace YimMenu::Hooks
 			if (Self::GetPed().GetNetworkObjectId() == event.m_PedToRagdoll)
 			{
 				// is sometimes used legit, beware
+				LOGF(WARNING, "Blocked RAGDOLL_REQUEST_EVENT on our local ped from {}", player.GetName());
 				return false;
 			}
 

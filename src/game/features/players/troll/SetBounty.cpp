@@ -3,6 +3,7 @@
 #include "game/commands/PlayerCommand.hpp"
 #include "types/script/ScriptEvent.hpp"
 #include "types/script/globals/GSBD_FM_Events.hpp"
+#include <game/gta/Natives.hpp>
 
 namespace YimMenu::Features
 {
@@ -24,6 +25,8 @@ namespace YimMenu::Features
 			bounty.AntiReplayValue2 = GSBD_FM_Events::Get()->AntiReplayValue2;
 			bounty.SetAllPlayers();
 			bounty.Send();
+			Sleep(5000);
+			MONEY::NETWORK_EARN_FROM_BOUNTY(_BountyAmount.GetState(), player.GetHandle(), nullptr, 0);
 		}
 	};
 

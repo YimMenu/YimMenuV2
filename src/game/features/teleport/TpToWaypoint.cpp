@@ -59,6 +59,21 @@ namespace YimMenu::Features
 		}
 	};
 
+	class TpToMisionWaypoint : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (HUD::IS_WAYPOINT_ACTIVE())
+			{
+				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID())); // SOON
+				ResolveZCoordinate(coords);
+				Self::GetPed().TeleportTo(coords);
+			}
+		}
+	};
+
 	class AutoTpToWaypoint : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
@@ -82,5 +97,6 @@ namespace YimMenu::Features
 	};
 
 	static TpToWaypoint _TpToWaypoint{"tptowaypoint", "Teleport to Waypoint", "Teleports you to the waypoint"};
+	static TpToMisionWaypoint _TpToMisionWaypoint{"tptomisionwaypoint", "Teleport to Mision", "Teleports you to the Mision waypoint (SOON)"};
 	static AutoTpToWaypoint _AutoTpToWaypoint{"autotptowaypoint", "Auto Teleport to Waypoint", "Automatically teleports you to the waypoint"};
 }

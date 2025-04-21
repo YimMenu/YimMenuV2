@@ -15,6 +15,9 @@ namespace YimMenu
 
 		bool m_IsFSLLoaded = false;
 		bool m_BattlEyeRunning = false;
+		int m_FSLVersion       = -1;
+		bool m_LocalSaves      = false;
+		bool m_BEBypass        = false;
 
 	public:
 		static void RunScript()

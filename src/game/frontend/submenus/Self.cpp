@@ -38,7 +38,7 @@ namespace YimMenu::Submenus
 		toolsGroup->AddItem(std::make_shared<CommandItem>("heal"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("cleardamage"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("MobileRadio"_J));
+		toolsGroup->AddItem(std::make_shared<BoolCommandItem>("MobileRadio"_J));
 		
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("standonvehicles"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("disableactionmode"_J));

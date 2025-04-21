@@ -18,10 +18,10 @@ namespace YimMenu::Network
 {
 	void LaunchJoinType(JoinType to_launch)
 	{
-		static ScriptFunction send_to_clouds("SendToClouds", "shop_controller"_J, "2D 00 02 00 00 72 5D ? ? ? 72");
+		static ScriptFunction sendToClouds("shop_controller"_J, ScriptPointer("SendToClouds", "2D 00 02 00 00 72 5D ? ? ? 72"));
 		static ScriptGlobal join_type_global(1575038);
 
-		send_to_clouds.Call<void>();
+		sendToClouds.Call<void>();
 		*join_type_global.As<JoinType*>() = to_launch;
 	}
 

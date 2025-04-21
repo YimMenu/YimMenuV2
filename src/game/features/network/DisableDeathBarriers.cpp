@@ -13,7 +13,7 @@ namespace YimMenu::Features
 		{
 			if (!m_DeathBarriersPatch)
 			{
-				m_DeathBarriersPatch = ScriptPatches::AddPatch("freemode"_J, "2D 01 09 00 00 5D ? ? ? 56 ? ? 3A", 5, {0x2E, 0x01, 0x00});
+				m_DeathBarriersPatch = ScriptPatches::AddPatch("freemode"_J, ScriptPointer("DeathBarriersPatch", "2D 01 09 00 00 5D ? ? ? 56 ? ? 3A").Add(5), {0x2E, 0x01, 0x00});
 			}
 			m_DeathBarriersPatch->Enable();
 		}

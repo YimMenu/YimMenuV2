@@ -8,6 +8,9 @@
 
 namespace YimMenu
 {
+	// This implementation exclusively supports the WINMM.dll-based FSL Shim.
+	// version.dll or other shims are not supported intentionally.
+
 	static bool CheckForFSL()
 	{
 		int num_versions = 0;

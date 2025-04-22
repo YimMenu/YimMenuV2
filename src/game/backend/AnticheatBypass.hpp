@@ -20,6 +20,7 @@ namespace YimMenu
 		bool m_BEBypass        = false;
 
 	public:
+
 		static void RunScript()
 		{
 			GetInstance().RunScriptImpl();
@@ -34,6 +35,21 @@ namespace YimMenu
 		static bool IsBattlEyeRunning()
 		{
 			return GetInstance().m_BattlEyeRunning;
+		}
+
+		static int GetFSLVersion()
+		{
+			return GetInstance().m_FSLVersion;
+		}
+
+		static bool IsLocalSavesEnabled()
+		{
+			return GetInstance().m_LocalSaves;
+		}
+
+		static bool IsBattleEyeBypassEnabled()
+		{
+			return GetInstance().m_BEBypass;
 		}
 	};
 }

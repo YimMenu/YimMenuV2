@@ -11,8 +11,8 @@ namespace YimMenu::Submenus
 		auto main          = std::make_shared<Category>("Main");
 		auto globalsGroup  = std::make_shared<Group>("Globals");
 		auto movementGroup = std::make_shared<Group>("Movement");
-		auto wantedGroup = std::make_shared<Group>("Wanted");
 		auto toolsGroup    = std::make_shared<Group>("Tools", 1);
+		auto wantedGroup   = std::make_shared<Group>("Wanted");
 
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("godmode"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("invis"_J));
@@ -22,6 +22,14 @@ namespace YimMenu::Submenus
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noidlekick"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("unlimitedoxygen"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("formatmoney"_J));
+		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("mobileradio"_J));
+
+		toolsGroup->AddItem(std::make_shared<CommandItem>("skipcutscene"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("suicide"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("heal"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("cleardamage"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
+		toolsGroup->AddItem(std::make_shared<CommandItem>("openwardrobe"_J));
 
 		auto clearWanted = std::make_shared<Group>("", 1);
 		clearWanted->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, std::make_shared<CommandItem>("clearwanted"_J), true));
@@ -32,13 +40,6 @@ namespace YimMenu::Submenus
 		setWanted->AddItem(std::make_shared<BoolCommandItem>("freezewanted"_J));
 		wantedGroup->AddItem(std::make_shared<ConditionalItem>("freezewanted"_J, clearWanted, true));
 		wantedGroup->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, setWanted, true));
-
-		toolsGroup->AddItem(std::make_shared<CommandItem>("skipcutscene"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("suicide"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("heal"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("cleardamage"_J));
-		toolsGroup->AddItem(std::make_shared<CommandItem>("fillinventory"_J));
-		toolsGroup->AddItem(std::make_shared<BoolCommandItem>("MobileRadio"_J));
 		
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("standonvehicles"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("disableactionmode"_J));
@@ -50,8 +51,8 @@ namespace YimMenu::Submenus
 		movementGroup->AddItem(std::make_shared<ConditionalItem>("freecam"_J, std::make_shared<FloatCommandItem>("freecamspeed"_J)));
 
 		main->AddItem(globalsGroup);
-		main->AddItem(wantedGroup);
 		main->AddItem(toolsGroup);
+		main->AddItem(wantedGroup);
 		main->AddItem(movementGroup);
 		AddCategory(std::move(main));
 

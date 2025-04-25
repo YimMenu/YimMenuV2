@@ -22,6 +22,8 @@ namespace YimMenu::Submenus
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("noidlekick"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("unlimitedoxygen"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("formatmoney"_J));
+		globalsGroup->AddItem(std::make_shared<IntCommandItem>("rpmultiplierinput"_J));
+		globalsGroup->AddItem(std::make_shared<CommandItem>("rpmultiplier"_J));
 
 		auto clearWanted = std::make_shared<Group>("", 1);
 		clearWanted->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, std::make_shared<CommandItem>("clearwanted"_J), true));

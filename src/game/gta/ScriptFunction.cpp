@@ -1,34 +1,66 @@
 #include "ScriptFunction.hpp"
+#include "game/backend/ScriptPointers.hpp"
+#include "game/pointers/Pointers.hpp"
+#include "game/gta/Scripts.hpp"
+#include "game/gta/ScriptPointer.hpp"
+#include "types/script/scrThread.hpp"
+#include "types/script/scrProgram.hpp"
+#include "types/rage/tlsContext.hpp"
 
 namespace YimMenu
 {
-	ScriptFunction::ScriptFunction(const std::string& name, const joaat_t script, const SimplePattern& pattern, std::int32_t offset, bool rip) :
-		m_Name(name),
-		m_Script(script),
-		m_Pattern(pattern),
-		m_Offset(offset),
-		m_Rip(rip),
-		m_PC(0)
+	ScriptFunction::ScriptFunction(const joaat_t script, ScriptPointer ptr) :
+	    m_Script(script),
+	    m_Pointer(ptr),
+	    m_Pc(0)
 	{
 	}
 
-	std::uint32_t ScriptFunction::GetPC(rage::scrProgram* program)
+	void ScriptFunction::CallImpl(const std::vector<uint64_t>& args, void* returnValue, std::uint32_t returnSize)
 	{
-		if (m_PC != 0)
-			return m_PC;
+		auto thread  = Scripts::FindScriptThread(m_Script);
+		auto program = Scripts::FindScriptProgram(m_Script);
 
-		if (auto location = Scripts::GetCodeLocationByPattern(program, m_Pattern))
+		if (!thread || !program)
+			return;
+
+		if (!m_Pc)
 		{
-			m_PC = location.value() + m_Offset;
-			if (m_Rip)
-				m_PC = ReadThreeByte(program->GetCodeAddress(m_PC));
-			LOG(INFO) << "Found pattern for " << m_Name << " at " << HEX(m_PC) << " in script " << program->m_Name;
-		}
-		else
-		{
-			LOG(FATAL) << "Failed to find pattern for " << m_Name << " in script " << program->m_Name;
+			if (auto address = ScriptPointers::GetPointer(Joaat(m_Pointer.GetName())))
+			{
+				m_Pc = address;
+			}
+			else
+			{
+				m_Pc = m_Pointer.Scan(program).As<std::uint32_t>();
+				ScriptPointers::CachePointer(Joaat(m_Pointer.GetName()), m_Pc);
+			}
+
+			if (!m_Pc) // if still not valid
+				return;
 		}
 
-		return m_PC;
+		auto tlsCtx                   = rage::tlsContext::Get();
+		auto stack                    = (std::uint64_t*)thread->m_Stack;
+		auto ogThread                 = tlsCtx->m_CurrentScriptThread;
+		tlsCtx->m_CurrentScriptThread = thread;
+		tlsCtx->m_ScriptThreadActive  = true;
+		rage::scrThread::Context ctx  = thread->m_Context;
+		auto topStack                 = ctx.m_StackPointer;
+
+		for (auto& arg : args)
+			stack[ctx.m_StackPointer++] = arg;
+
+		stack[ctx.m_StackPointer++] = 0;
+		ctx.m_ProgramCounter        = m_Pc;
+		ctx.m_State                 = rage::scrThread::State::IDLE;
+
+		Pointers.ScriptVM(stack, Pointers.ScriptGlobals, program, &ctx);
+
+		tlsCtx->m_CurrentScriptThread = ogThread;
+		tlsCtx->m_ScriptThreadActive  = ogThread != nullptr;
+
+		if (returnValue)
+			std::memcpy(returnValue, stack + topStack, returnSize);
 	}
 }

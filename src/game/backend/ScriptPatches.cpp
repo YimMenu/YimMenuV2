@@ -1,67 +1,13 @@
 #include "ScriptPatches.hpp"
 
+#include "game/backend/ScriptPointers.hpp"
 #include "game/pointers/Pointers.hpp"
 
 #include "types/script/scrProgram.hpp"
 
 namespace YimMenu
 {
-	static uint8_t* GetCodeLocation(ScriptPatches::Data* data, int idx)
-	{
-		return &data->GetData()[idx >> 14][idx & 0x3FFF];
-	}
-
-	// TODO: refactor this and cache results
-	static std::optional<int32_t> GetCodeLocationByPattern(ScriptPatches::Data* data, const SimplePattern& pattern)
-	{
-		uint32_t code_size = data->GetSize();
-		for (uint32_t i = 0; i < (code_size - pattern.m_Bytes.size()); i++)
-		{
-			for (uint32_t j = 0; j < pattern.m_Bytes.size(); j++)
-			{
-				if (pattern.m_Bytes[j].has_value())
-				{
-					int loc = i + j;
-					if (pattern.m_Bytes[j] != *GetCodeLocation(data, loc))
-						goto incorrect;
-				}
-			}
-
-			return i;
-		incorrect:
-			continue;
-		}
-
-		return std::nullopt;
-	}
-
-	ScriptPatches::Data::Data(rage::scrProgram* program)
-	{
-		auto pages = new uint8_t*[program->GetNumCodePages()];
-
-		for (auto i = 0u; i < program->GetNumCodePages(); i++)
-		{
-			pages[i] = new uint8_t[program->GetCodePageSize(i)];
-			std::memcpy(pages[i], program->GetCodePage(i), program->GetCodePageSize(i));
-		}
-
-		m_Data  = pages;
-		m_Pages = program->GetNumCodePages();
-		m_Size  = program->GetFullCodeSize();
-	}
-
-	ScriptPatches::Data::~Data()
-	{
-		for (auto i = 0u; i < m_Pages; i++)
-		{
-			delete[] m_Data[i];
-		}
-
-		delete[] m_Data;
-		m_Data = nullptr;
-	}
-
-	std::optional<int32_t> ScriptPatches::Patch::GetPC()
+	std::optional<uint32_t> ScriptPatches::Patch::GetPC()
 	{
 		if (m_Pc.has_value())
 			return m_Pc;
@@ -71,15 +17,14 @@ namespace YimMenu
 		if (!data)
 			return std::nullopt;
 
-		auto location = GetCodeLocationByPattern(data, m_Pattern);
-
-		if (!location.has_value())
+		if (auto address = ScriptPointers::GetPointer(Joaat(m_Pointer.GetName())))
 		{
-			LOG(FATAL) << "Failed to find pattern for script " << HEX(m_Hash);
+			m_Pc = address;
 		}
 		else
 		{
-			m_Pc = location.value() + m_Offset;
+			m_Pc = m_Pointer.Scan(data).As<std::uint32_t>();
+			ScriptPointers::CachePointer(Joaat(m_Pointer.GetName()), m_Pc.value());
 		}
 
 		return m_Pc;
@@ -96,10 +41,10 @@ namespace YimMenu
 		if (m_OriginalBytes.size() == 0)
 		{
 			m_OriginalBytes.resize(m_PatchedBytes.size());
-			memcpy(m_OriginalBytes.data(), GetCodeLocation(data, pc.value()), m_PatchedBytes.size());
+			memcpy(m_OriginalBytes.data(), ScriptData::GetCodeLocation(data, pc.value()), m_PatchedBytes.size());
 		}
 
-		memcpy(GetCodeLocation(data, pc.value()), m_PatchedBytes.data(), m_PatchedBytes.size());
+		memcpy(ScriptData::GetCodeLocation(data, pc.value()), m_PatchedBytes.data(), m_PatchedBytes.size());
 	}
 
 	void ScriptPatches::Patch::Restore()
@@ -113,13 +58,12 @@ namespace YimMenu
 		if (!pc || !data)
 			return;
 
-		memcpy(GetCodeLocation(data, pc.value()), m_OriginalBytes.data(), m_OriginalBytes.size());
+		memcpy(ScriptData::GetCodeLocation(data, pc.value()), m_OriginalBytes.data(), m_OriginalBytes.size());
 	}
 
-	ScriptPatches::Patch::Patch(joaat_t script, SimplePattern pattern, int32_t offset, std::vector<uint8_t> patch) :
-	    m_Pattern(pattern),
-	    m_Offset(offset),
+	ScriptPatches::Patch::Patch(joaat_t script, ScriptPointer pointer, std::vector<uint8_t> patch) :
 	    m_PatchedBytes(patch),
+	    m_Pointer(pointer),
 	    m_Enabled(false),
 	    m_Pc(std::nullopt),
 	    m_OriginalBytes({}),
@@ -162,9 +106,9 @@ namespace YimMenu
 		return m_Hash == hash;
 	}
 
-	std::shared_ptr<ScriptPatches::Patch> ScriptPatches::AddPatchImpl(joaat_t script, const std::string& pattern, int32_t offset, std::vector<uint8_t> patch)
+	std::shared_ptr<ScriptPatches::Patch> ScriptPatches::AddPatchImpl(joaat_t script, ScriptPointer pointer, std::vector<uint8_t> patch)
 	{
-		auto scr_patch = std::make_shared<Patch>(script, SimplePattern(pattern), offset, patch);
+		auto scr_patch = std::make_shared<Patch>(script, pointer, patch);
 
 		// add patch to map
 		m_Patches.push_back(scr_patch);
@@ -202,7 +146,7 @@ namespace YimMenu
 		if (!in_scope)
 			return; // avoid polluting memory with unused program bytecode
 
-		m_Datas.emplace(program->m_NameHash, std::move(std::make_unique<Data>(program)));
+		m_Datas.emplace(program->m_NameHash, std::move(std::make_unique<ScriptData>(program)));
 
 		// refresh patches so they can enable themselves
 		for (auto& patch : m_Patches)
@@ -248,7 +192,7 @@ namespace YimMenu
 		}
 	}
 
-	ScriptPatches::Data* ScriptPatches::GetDataImpl(joaat_t script)
+	ScriptData* ScriptPatches::GetDataImpl(joaat_t script)
 	{
 		if (auto it = m_Datas.find(script); it != m_Datas.end())
 			return it->second.get();

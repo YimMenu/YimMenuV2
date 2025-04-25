@@ -89,6 +89,9 @@ namespace YimMenu
 			LOGF(WARNING, "[Anticheat] If you are not using a real BattlEye bypass, exit immediately and disable BE!");
 		}
 
+		if (!m_IsFSLLoaded)
+			Pointers.BattlEyeStatusUpdatePatch->Apply();
+
 		while (true)
 		{
 			if (!m_IsFSLLoaded)

@@ -1,32 +1,30 @@
 #include "Globals.hpp"
-#include "game/backend/SavedVariables.hpp"
-
 #include "DrawVariable.hpp"
 
 // TODO: name compares are expensive, but this is way better than the old impl that reads the json file every frame
 
 namespace YimMenu::Submenus
 {
-	static void SaveGlobal(SavedGlobal& global_obj)
+	static void SaveGlobal(SavedGlobal& globalObj)
 	{
 		for (auto& global : SavedVariables::GetSavedGlobals())
 		{
-			if (global.name == global_obj.name)
+			if (global.name == globalObj.name)
 			{
-				global = global_obj;
+				global = globalObj;
 				SavedVariables::Save();
 				return;
 			}
 		}
 
-		SavedVariables::GetSavedGlobals().push_back(global_obj);
+		SavedVariables::GetSavedGlobals().push_back(globalObj);
 		SavedVariables::Save();
 	}
 
-	static void DeleteGlobal(SavedGlobal& global_obj)
+	static void DeleteGlobal(SavedGlobal& globalObj)
 	{
 		std::erase_if(SavedVariables::GetSavedGlobals(), [&](SavedGlobal& g) {
-			return g.name == global_obj.name;
+			return g.name == globalObj.name;
 		});
 		SavedVariables::Save();
 	}
@@ -35,31 +33,31 @@ namespace YimMenu::Submenus
 	{
 		auto globals = std::make_unique<Category>("Globals");
 
-		static bool ensure_vars_loaded = ([] {
+		auto editor = std::make_unique<Group>("Editor");
+		auto saved  = std::make_unique<Group>("Saved");
+
+		static bool ensureVarsLoaded = ([] {
 			SavedVariables::Init();
 			return true;
 		})();
 
-		static char global_name[255]{};
+		static char globalName[255]{};
+		static SavedGlobal curGlobal{};
 
-		static SavedGlobal cur_global{};
-
-		auto editor = std::make_unique<Group>("Editor");
 		editor->AddItem(std::make_unique<ImGuiItem>([] {
-			DrawSavedVariable(cur_global);
-			DrawSavedVariableEdit(cur_global, cur_global.Read());
+			DrawSavedVariable(curGlobal);
+			DrawSavedVariableEdit(curGlobal, curGlobal.Read());
 		}));
 
-		auto saved = std::make_unique<Group>("Saved");
 		saved->AddItem(std::make_unique<ImGuiItem>([] {
 			if (ImGui::BeginListBox("##savedglobals", ImVec2(200, 200)))
 			{
 				for (auto& var : SavedVariables::GetSavedGlobals())
 				{
-					if (ImGui::Selectable(var.name.c_str(), var.name == cur_global.name))
+					if (ImGui::Selectable(var.name.c_str(), var.name == curGlobal.name))
 					{
-						cur_global = var;
-						strncpy(global_name, var.name.c_str(), sizeof(global_name));
+						curGlobal = var;
+						strncpy(globalName, var.name.c_str(), sizeof(globalName));
 					}
 				}
 				ImGui::EndListBox();
@@ -77,19 +75,19 @@ namespace YimMenu::Submenus
 			ImGui::BeginGroup();
 
 			ImGui::SetNextItemWidth(200.f);
-			ImGui::InputTextWithHint("##global_name", "Name", global_name, sizeof(global_name));
+			ImGui::InputTextWithHint("##global_name", "Name", globalName, sizeof(globalName));
 			ImGui::SameLine();
 			if (ImGui::Button("Save"))
 			{
-				cur_global.name = global_name;
-				SaveGlobal(cur_global);
+				curGlobal.name = globalName;
+				SaveGlobal(curGlobal);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Delete"))
 			{
-				cur_global.name = global_name;
-				DeleteGlobal(cur_global);
-				cur_global = SavedGlobal();
+				curGlobal.name = globalName;
+				DeleteGlobal(curGlobal);
+				curGlobal = SavedGlobal();
 			}
 
 			ImGui::EndGroup();

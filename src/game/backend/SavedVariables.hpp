@@ -10,9 +10,12 @@ namespace YimMenu
 	enum class VariableType
 	{
 		INT,
-		FLOAT,
+		INT64,
+		BITSET,
 		BOOL,
-		INT64
+		FLOAT,
+		VECTOR,
+		STRING
 	};
 
 	struct VariableAppendage

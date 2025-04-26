@@ -4,11 +4,11 @@
 #include "game/backend/Self.hpp"
 #include "game/backend/ScriptPatches.hpp"
 #include "game/backend/NativeHooks.hpp"
+#include "game/gta/data/StackSizes.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptLocal.hpp"
 #include "game/pointers/Pointers.hpp"
-#include "types/script/types.hpp"
 
 namespace YimMenu::Features
 {
@@ -50,7 +50,7 @@ namespace YimMenu::Features
 			launchData.Type     = 7;
 			launchData.Position = Self::GetPed().GetPosition();
 			launchData.Heading  = Self::GetPed().GetHeading();
-			if (!BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS("wardrobe_mp"_J, &launchData, sizeof(launchData) / 8, 2324))
+			if (!BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS("wardrobe_mp"_J, &launchData, SCR_SIZEOF(launchData), eStackSizes::SHOP))
 			{
 				Notifications::Show("Wardrobe", "Failed to open the wardrobe.", NotificationType::Error);
 				return;

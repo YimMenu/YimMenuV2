@@ -7,13 +7,6 @@ namespace YimMenu
 {
 	constexpr int TUNABLE_BASE_ADDRESS = 0x40001;
 
-	struct TUNABLES_LAUNCH_DATA
-	{
-		alignas(8) int Context;
-		alignas(8) int ContentModifier;
-	};
-	static_assert(sizeof(TUNABLES_LAUNCH_DATA) == 2 * 8);
-
 #pragma pack(push, 1)
 	struct TunableSaveStruct
 	{

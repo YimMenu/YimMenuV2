@@ -1,6 +1,7 @@
 #include "GiveVehicleReward.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
+#include "game/gta/data/StackSizes.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
@@ -40,7 +41,7 @@ namespace YimMenu
 				SCRIPT::REQUEST_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J);
 				if (SCRIPT::HAS_SCRIPT_WITH_NAME_HASH_LOADED("AM_MP_VEHICLE_REWARD"_J))
 				{
-					int id   = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J, 2050);
+					int id   = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J, eStackSizes::FRIEND);
 					m_Thread = Scripts::FindScriptThreadByID(id);
 					if (m_Thread)
 						m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;

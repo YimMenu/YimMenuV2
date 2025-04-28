@@ -117,7 +117,6 @@ namespace YimMenu::Submenus
 			{
 				if (auto eventProgram = Scripts::FindScriptProgram(randomEventScripts[(int)selectedEvent]))
 				{
-					// TO-DO: Cache these too?
 					if (NetComponent->IsLocalPlayerHost())
 					{
 						std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);

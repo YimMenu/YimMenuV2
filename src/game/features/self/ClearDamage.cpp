@@ -1,14 +1,17 @@
-#include "core/commands/Command.hpp"
+#include "core/commands/LoopedCommand.hpp"
 #include "game/backend/Self.hpp"
 
 namespace YimMenu::Features
 {
-	class ClearDamage : Command
+	class ClearDamage : public LoopedCommand
 	{
-		using Command::Command;
+		using LoopedCommand::LoopedCommand;
 
-		virtual void OnCall() override
+		virtual void OnTick() override
 		{
+			if (!Self::GetPed())
+				return;
+
 			Self::GetPed().ClearDamage();
 		}
 	};

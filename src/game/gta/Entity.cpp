@@ -421,22 +421,30 @@ namespace YimMenu
 	{
 		ENTITY_ASSERT_VALID();
 
-		if (HasControl())
-		{
-			ENTITY::SET_ENTITY_HEALTH(GetHandle(), 0, PLAYER::PLAYER_PED_ID(), 0);
-		}
-		else
-		{
-			auto ptr = GetPointer<CEntity*>();
-			auto local = reinterpret_cast<CEntity*>((*Pointers.PedFactory)->m_LocalPed);
-			auto pos = GetPosition();
-			std::uint32_t weapon = "WEAPON_EXPLOSION"_J;
+		if (IsDead())
+			return;
 
-			if (!ptr || !local)
-				return;
+		Hash weapon_hash = Self::GetPed().GetCurrentWeapon();
+		auto pos = GetPosition();
+		auto headBone = 31086;
+		auto headpos = PED::GET_PED_BONE_COORDS(GetHandle(), headBone, 0, 0, 0);
 
-			Pointers.TriggerWeaponDamageEvent(local, ptr, &pos, 0, true, weapon, 9999.9f, 2, 0, (1<<4)|0x80000, 0, 0, 0, false, false, true, true, nullptr);
-		}
+
+		MISC::SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
+			headpos.x - 0.01f,
+		    headpos.y - 0.01f,
+		    headpos.z - 0.01f,
+		    headpos.x + 0.01f,
+		    headpos.y + 0.01f,
+		    headpos.z + 0.01f,
+		    9999,
+		    true,
+		    weapon_hash,
+		    Self::GetPed().GetHandle(),
+		    false,
+		    true,
+		    -1.0
+		);
 	}
 
 	int Entity::GetHealth()

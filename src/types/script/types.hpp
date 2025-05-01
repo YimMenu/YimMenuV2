@@ -31,6 +31,7 @@ using Vector3   = rage::scrVector;
 #define INTERIOR_INDEX alignas(8) Interior
 #define NETWORK_INDEX alignas(8) int
 
+#define SCR_SIZEOF(x) (sizeof(x) / 8)
 #define SCR_HASH alignas(8) Hash
 #define SCR_INT alignas(8) int
 #define SCR_BOOL alignas(8) BOOL

@@ -52,7 +52,7 @@ namespace YimMenu
 	{
 		for (int i = 0; i < 176; i++)
 		{
-			if (Pointers.ScriptPrograms[i] != nullptr)
+			if (Pointers.ScriptPrograms[i] != nullptr && Pointers.ScriptPrograms[i]->m_CodeSize && Pointers.ScriptPrograms[i]->m_CodeBlocks)
 				RegisterProgram(Pointers.ScriptPrograms[i]);
 		}
 	}

@@ -3,6 +3,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "types/network/netGameEvent.hpp"
 #include "types/script/globals/GPBD_FM_3.hpp"
+#include "types/script/globals/GlobalPlayerBD.hpp"
 #include "types/script/ScriptEvent.hpp"
 
 namespace YimMenu::Hooks
@@ -48,7 +49,7 @@ namespace YimMenu::Hooks
 		{
 			SCRIPT_EVENT_SEND_TO_INTERIOR* interior_control = static_cast<SCRIPT_EVENT_SEND_TO_INTERIOR*>(script_event);
 
-			if (interior_control->Interior < 0 || interior_control->Interior > 175) // the upper bound will change after an update
+			if (interior_control->Interior < 0 || interior_control->Interior >= static_cast<int>(eSimpleInteriorIndex::SIMPLE_INTERIOR_MAX)) // the upper bound will change after an update
 			{
 				// null function kick
 				return false;

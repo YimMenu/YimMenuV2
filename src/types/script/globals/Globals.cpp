@@ -1,4 +1,3 @@
-#include "GlobalPlayerBD.hpp"
 #include "GPBD_FM.hpp"
 #include "GPBD_FM_2.hpp"
 #include "GPBD_FM_3.hpp"
@@ -10,17 +9,19 @@
 #include "GSBD_FM_Events.hpp"
 #include "GSBD_Kicking.hpp"
 #include "GSBD_PropertyInstances.hpp"
-#include "g_AMC_playerBD.hpp"
 #include "GSBD_RandomEvents.hpp"
+#include "GlobalPlayerBD.hpp"
+#include "g_AMC_playerBD.hpp"
 #include "game/gta/ScriptGlobal.hpp"
 
-#define DEFINE_GLOBAL_ACCESSOR(str, global) str* str::Get()\
-											{                                               \
-												auto glb = YimMenu::ScriptGlobal(global);	\
-												if (!glb.CanAccess())                       \
-													return nullptr;                         \
-												return glb.As<str*>();                      \
-											}
+#define DEFINE_GLOBAL_ACCESSOR(str, global)       \
+	str* str::Get()                               \
+	{                                             \
+		auto glb = YimMenu::ScriptGlobal(global); \
+		if (!glb.CanAccess())                     \
+			return nullptr;                       \
+		return glb.As<str*>();                    \
+	}
 
 DEFINE_GLOBAL_ACCESSOR(GlobalPlayerBD, 2657994);
 DEFINE_GLOBAL_ACCESSOR(GPBD_FM, 1845270);

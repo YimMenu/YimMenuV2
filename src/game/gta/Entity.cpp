@@ -424,26 +424,23 @@ namespace YimMenu
 		if (IsDead())
 			return;
 
-		Hash weapon_hash = Self::GetPed().GetCurrentWeapon();
-		auto pos = GetPosition();
-		auto headBone = 31086;
-		auto headpos = PED::GET_PED_BONE_COORDS(GetHandle(), headBone, 0, 0, 0);
-
+		auto weaponHash  = Self::GetPed().GetCurrentWeapon();
+		auto pedPosition    = GetPosition();
 
 		MISC::SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
-			headpos.x - 0.01f,
-		    headpos.y - 0.01f,
-		    headpos.z - 0.01f,
-		    headpos.x + 0.01f,
-		    headpos.y + 0.01f,
-		    headpos.z + 0.01f,
-		    9999,
-		    true,
-		    weapon_hash,
+			pedPosition.x,
+		    pedPosition.y,
+		    pedPosition.z - 0.001f,
+		    pedPosition.x,
+		    pedPosition.y,
+		    pedPosition.z + 0.001f,
+			9999,
+			true,
+			weaponHash,
 		    Self::GetPed().GetHandle(),
-		    false,
-		    true,
-		    -1.0
+			false,
+			false,
+			1000.0f
 		);
 	}
 

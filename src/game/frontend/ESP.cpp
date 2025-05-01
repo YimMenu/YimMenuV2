@@ -33,6 +33,12 @@ namespace
 	constexpr int rightKneeBone     = 16335;
 	constexpr int leftShoulderBone  = 61163; // TODO verify all the bones
 	constexpr int rightShoulderBone = 28252;
+	// map from object hash to name
+	std::unordered_map<std::string, std::string> m_objectNames = {
+	    {"0x2D9A5028", "G's cache"},
+	    {"0x9f658eb1", "G's cache (blue)"},
+	    {"0x84592ed", "G's cache (red)"},
+	};
 }
 
 namespace YimMenu::Features
@@ -65,6 +71,9 @@ namespace YimMenu::Features
 
 	// Random Events
 	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?");
+
+	// objects
+	BoolCommand _ESPDrawObjects("espdrawobjects", "Objects ESP", "Should the ESP draw objects?");
 }
 
 namespace YimMenu
@@ -95,6 +104,8 @@ namespace YimMenu
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
+		if (!ped || !ped.IsValid())
+			return;
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(leftShoulderBone)), color, 1.5f);
@@ -168,7 +179,7 @@ namespace YimMenu
 
 	void ESP::DrawPed(Ped ped, ImDrawList* drawList)
 	{
-		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
+		if (!ped || !ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
 			return;
 
 		float distanceToPed = 0.0f;
@@ -269,6 +280,39 @@ namespace YimMenu
 		}
 	}
 
+	void ESP::DrawObject(Entity object, ImDrawList* drawList)
+	{
+		if (HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
+			return;
+
+		if (!object)
+			return;
+
+		if (!object.IsObject())
+			return;
+
+		Vector3 coords = object.GetPosition();
+		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
+		float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
+		ImColor color = Red;
+		if (distance < 100.f)
+			color = Green;
+		else if (distance > 100.f && distance < 300.f)
+			color = Orange;
+		else if (distance > 300.f)
+			color = Red;
+		std::string unit        = (distance < 1000.0f) ? "m" : "km";
+		auto objectHash = object.GetModel();
+		std::string objectName = "0x" + std::to_string(objectHash);
+		if (m_objectNames.find(objectName) != m_objectNames.end())
+		{
+			objectName = m_objectNames[objectName] + " (" + objectName + ")";
+		}
+		std::string text = std::format("{}\n{:.2f}{} ", objectName, formattedDistance, unit);
+		
+		drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, text.c_str());
+	}
+
 	void ESP::Draw()
 	{
 		if (!NativeInvoker::AreHandlersCached() || CAM::IS_SCREEN_FADED_OUT() || HUD::IS_WARNING_MESSAGE_ACTIVE())
@@ -287,7 +331,7 @@ namespace YimMenu
 			{
 				for (Ped ped : Pools::GetPeds())
 				{
-					if (ped.GetPointer<void*>())
+					if (ped && ped.GetPointer<void*>())
 						DrawPed(ped, drawList);
 				}
 			}
@@ -296,6 +340,14 @@ namespace YimMenu
 				for (int event = 0; event < 21; event++)
 				{
 					DrawRandomEvent(event, drawList);
+				}
+			}
+			if (Features::_ESPDrawObjects.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj)
+						DrawObject(obj, drawList);
 				}
 			}
 		}

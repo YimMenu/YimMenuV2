@@ -124,9 +124,14 @@ namespace YimMenu
 		auto r1  = PED::GET_RELATIONSHIP_BETWEEN_PEDS(GetHandle(), PLAYER::PLAYER_PED_ID());
 		auto r2  = PED::GET_RELATIONSHIP_BETWEEN_PEDS(PLAYER::PLAYER_PED_ID(), GetHandle());
 		auto r3  = PED::IS_PED_IN_COMBAT(GetHandle(), PLAYER::PLAYER_PED_ID()) ? 5 : 0;
-		auto rel = std::max({r1, r2, r3});
-
-		return rel == 3 || rel == 4 || rel == 5;
+		
+		if (r1 == 3 || r2 == 3)
+			return true;
+		if (r1 == 4 || r2 == 4)
+			return true;
+		if (r1 == 5 || r2 == 5 || r3 == 5)
+			return true;
+		return false;
 	}
 
 	int Ped::GetAccuracy()

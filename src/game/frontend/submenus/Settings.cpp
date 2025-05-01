@@ -38,6 +38,7 @@ namespace YimMenu::Submenus
 		auto gui               = std::make_shared<Category>("GUI");
 		auto playerEsp         = std::make_shared<Group>("Player ESP", 10);
 		auto pedEsp            = std::make_shared<Group>("Ped ESP", 10);
+		auto objectEsp         = std::make_shared<Group>("Object ESP");
 		auto overlay           = std::make_shared<Group>("Overlay");
 
 		hotkeys->AddItem(std::make_shared<ImGuiItem>(Hotkeys));
@@ -71,11 +72,14 @@ namespace YimMenu::Submenus
 		pedEsp->AddItem(std::make_shared<ConditionalItem>("espdrawpeds"_J, std::make_shared<BoolCommandItem>("espskeletonpeds"_J, "Ped Skeleton")));
 		pedEsp->AddItem(std::make_shared<ConditionalItem>("espdrawpeds"_J, std::make_shared<ColorCommandItem>("skeletoncolorpeds"_J)));
 
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawobjects"_J));
+
 		overlay->AddItem(std::make_shared<BoolCommandItem>("overlay"_J));
 		overlay->AddItem(std::make_shared<ConditionalItem>("overlay"_J, std::make_shared<BoolCommandItem>("overlayfps"_J)));
 
 		gui->AddItem(playerEsp);
 		gui->AddItem(pedEsp);
+		gui->AddItem(objectEsp);
 		gui->AddItem(overlay);
 
 		AddCategory(std::move(hotkeys));

@@ -28,7 +28,7 @@ namespace YimMenu::Features
 			const auto location = ent.GetPosition();
 
 			// cleanup when changing entities
-			if (m_Entity != ent)
+			if (m_Entity && m_Entity != ent)
 			{
 				m_Entity.SetFrozen(false);
 				m_Entity.SetCollision(true);

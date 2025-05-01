@@ -3,7 +3,7 @@
 
 namespace YimMenu::Features
 {
-	class ClearDamage : public LoopedCommand
+	class KeepPlayerClean : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
 
@@ -16,5 +16,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	static ClearDamage _ClearDamage{"keepplayerclean", "Keep Player Clean", "Keeps the player clean from any blood, dirt, water."};
+	static KeepPlayerClean _KeepPlayerClean{"keepplayerclean", "Keep Player Clean", "Keeps the player clean from any blood, dirt, water."};
 }

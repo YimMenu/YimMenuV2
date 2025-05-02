@@ -26,6 +26,33 @@ namespace
 
 		return 0;
 	}
+
+	std::unordered_set<int> cameraHashes = {
+		-1007354661,
+		-1842407088,
+		289451089,
+		548760764,
+		-354221800,
+		-1159421424,
+		1449155105, 
+		-1095296451,
+		1919058329, 
+		-1884701657, 
+		-173206916, 
+		168901740, 
+		-1340405475, 
+		1927491455, 
+		299608302, 
+		-6978462, 
+		2135655372
+	};
+
+	std::unordered_set<int> gCacheHashes = {
+		528555233,
+		-1620734287,
+		138777325,
+		765087784
+	};
 }
 
 namespace YimMenu
@@ -121,6 +148,20 @@ namespace YimMenu
 	{ 
 		ENTITY_ASSERT_VALID();
 		return ENTITY::IS_ENTITY_A_MISSION_ENTITY(GetHandle()); // TODO: detect more mission states
+	}
+
+	bool Entity::IsCCTV()
+	{
+		ENTITY_ASSERT_VALID();
+		int objectHash = GetModel();
+		return cameraHashes.find(objectHash) != cameraHashes.end();
+	}
+
+	bool Entity::IsGsCache()
+	{
+		ENTITY_ASSERT_VALID();
+		int objectHash = GetModel();
+		return gCacheHashes.find(objectHash) != gCacheHashes.end();
 	}
 
 	int Entity::GetModel()

@@ -33,12 +33,6 @@ namespace
 	constexpr int rightKneeBone     = 16335;
 	constexpr int leftShoulderBone  = 61163; // TODO verify all the bones
 	constexpr int rightShoulderBone = 28252;
-	// map from object hash to name
-	std::unordered_map<std::string, std::string> m_objectNames = {
-	    {"0x2D9A5028", "G's cache"},
-	    {"0x9f658eb1", "G's cache (blue)"},
-	    {"0x84592ed", "G's cache (red)"},
-	};
 }
 
 namespace YimMenu::Features
@@ -73,7 +67,9 @@ namespace YimMenu::Features
 	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?");
 
 	// objects
-	BoolCommand _ESPDrawObjects("espdrawobjects", "Objects ESP", "Should the ESP draw objects?");
+	BoolCommand _ESPDrawObjects("espdrawobjects", "Show Object Model", "Should the ESP draw objects model?");
+	BoolCommand _ESPDrawCCTVs("espdrawcctvs", "Show CCTV", "Should the ESP draw CCTV cameras?");
+	BoolCommand _ESPDrawGCache("espdrawgcache", "Show G's Cache", "Should the ESP draw G's Cache?");
 }
 
 namespace YimMenu
@@ -104,7 +100,7 @@ namespace YimMenu
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
-		if (!ped || !ped.IsValid())
+		if (!ped.IsValid())
 			return;
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
@@ -179,7 +175,7 @@ namespace YimMenu
 
 	void ESP::DrawPed(Ped ped, ImDrawList* drawList)
 	{
-		if (!ped || !ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
+		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
 			return;
 
 		float distanceToPed = 0.0f;
@@ -280,7 +276,7 @@ namespace YimMenu
 		}
 	}
 
-	void ESP::DrawObject(Entity object, ImDrawList* drawList)
+	void ESP::DrawObject(Entity object, ImDrawList* drawList, ObjectType objectType)
 	{
 		if (HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
 			return;
@@ -289,6 +285,12 @@ namespace YimMenu
 			return;
 
 		if (!object.IsObject())
+			return;
+
+		if (objectType == CCTV && !object.IsCCTV())
+			return;
+
+		if (objectType == GCache && !object.IsGsCache())
 			return;
 
 		Vector3 coords = object.GetPosition();
@@ -303,10 +305,18 @@ namespace YimMenu
 			color = Red;
 		std::string unit        = (distance < 1000.0f) ? "m" : "km";
 		auto objectHash = object.GetModel();
-		std::string objectName = "0x" + std::to_string(objectHash);
-		if (m_objectNames.find(objectName) != m_objectNames.end())
+		std::string objectName = std::to_string(objectHash);
+		if (object.IsCCTV())
 		{
-			objectName = m_objectNames[objectName] + " (" + objectName + ")";
+			objectName = "CCTV";
+		}
+		else if (object.IsGsCache())
+		{
+			objectName = "G's Cache";
+		}
+		else if (object.IsMissionEntity())
+		{
+			objectName += " (Mission Object)";
 		}
 		std::string text = std::format("{}\n{:.2f}{} ", objectName, formattedDistance, unit);
 		
@@ -348,6 +358,22 @@ namespace YimMenu
 				{
 					if (obj)
 						DrawObject(obj, drawList);
+				}
+			}
+			if (Features::_ESPDrawCCTVs.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj && obj.IsCCTV())
+						DrawObject(obj, drawList, CCTV);
+				}
+			}
+			if (Features::_ESPDrawGCache.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj && obj.IsGsCache())
+						DrawObject(obj, drawList, GCache);
 				}
 			}
 		}

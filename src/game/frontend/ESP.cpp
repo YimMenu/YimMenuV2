@@ -100,7 +100,7 @@ namespace YimMenu
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
-		if (!ped.IsValid())
+		if (!ped || !ped.IsValid())
 			return;
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
@@ -175,7 +175,7 @@ namespace YimMenu
 
 	void ESP::DrawPed(Ped ped, ImDrawList* drawList)
 	{
-		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
+		if (!ped || !ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
 			return;
 
 		float distanceToPed = 0.0f;
@@ -281,7 +281,7 @@ namespace YimMenu
 		if (HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
 			return;
 
-		if (!object)
+		if (!object || !object.IsValid())
 			return;
 
 		if (!object.IsObject())
@@ -293,16 +293,13 @@ namespace YimMenu
 		if (objectType == GCache && !object.IsGsCache())
 			return;
 
+		if (objectType == SignalJammerCollectible && !object.IsSignalJammerCollectible())
+			return;
+
 		Vector3 coords = object.GetPosition();
 		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
 		float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
 		ImColor color = Red;
-		if (distance < 100.f)
-			color = Green;
-		else if (distance > 100.f && distance < 300.f)
-			color = Orange;
-		else if (distance > 300.f)
-			color = Red;
 		std::string unit        = (distance < 1000.0f) ? "m" : "km";
 		auto objectHash = object.GetModel();
 		std::string objectName = std::to_string(objectHash);
@@ -313,6 +310,10 @@ namespace YimMenu
 		else if (object.IsGsCache())
 		{
 			objectName = "G's Cache";
+		}
+		else if (object.IsSignalJammerCollectible())
+		{
+			objectName += " (Signal Jammer)";
 		}
 		else if (object.IsMissionEntity())
 		{

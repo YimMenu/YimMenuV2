@@ -92,6 +92,7 @@ namespace YimMenu
 		bool IsMissionEntity();
 		bool IsCCTV();
 		bool IsGsCache();
+		bool IsSignalJammerCollectible();
 
 		// info
 		int GetModel();

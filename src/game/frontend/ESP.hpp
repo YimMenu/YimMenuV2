@@ -8,6 +8,7 @@ namespace YimMenu
 		Generic,
 		CCTV,
 		GCache,
+		SignalJammerCollectible
 	};
 	class ESP
 	{

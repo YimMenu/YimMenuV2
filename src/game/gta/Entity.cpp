@@ -44,7 +44,8 @@ namespace
 		1927491455, 
 		299608302, 
 		-6978462, 
-		2135655372
+		2135655372,
+		-1233322078
 	};
 
 	std::unordered_set<int> gCacheHashes = {
@@ -162,6 +163,13 @@ namespace YimMenu
 		ENTITY_ASSERT_VALID();
 		int objectHash = GetModel();
 		return gCacheHashes.find(objectHash) != gCacheHashes.end();
+	}
+
+	bool Entity::IsSignalJammerCollectible()
+	{
+		ENTITY_ASSERT_VALID();
+		int objectHash = GetModel();
+		return objectHash == -305186631;
 	}
 
 	int Entity::GetModel()

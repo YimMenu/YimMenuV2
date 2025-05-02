@@ -1,6 +1,6 @@
 #include "World.hpp"
 #include "game/frontend/items/Items.hpp"
-
+#include "game/frontend/submenus/World/TimeChanger.hpp"
 namespace YimMenu::Submenus
 {
 	World::World() :
@@ -55,5 +55,8 @@ namespace YimMenu::Submenus
 		AddCategory(std::move(main));
 		AddCategory(std::move(spawnersGroup));
 		AddCategory(std::move(iplsGroup));
+
+		AddCategory(timechanger());
+
 	}
 };

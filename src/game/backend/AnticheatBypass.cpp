@@ -9,21 +9,15 @@
 
 namespace YimMenu
 {
+	
 	static bool CheckForFSL()
 	{
-		HMODULE hWinmm    = GetModuleHandleA("WINMM.dll");
-		bool hasFakeWINMM = hWinmm && GetProcAddress(hWinmm, "LawnchairGetVersion");
-
-		int versionCount = 0;
+		int num_versions = 0;
 		for (auto& module : ModuleMgr.GetModules())
-		{
-			if (module.first == "version.dll"_J)
-				versionCount++;
-		}
+			if (module.first == "WINMM.dll"_J)
+				num_versions++;
 
-		bool hasFakeVersionDLL = versionCount > 1;
-
-		return hasFakeWINMM || hasFakeVersionDLL;
+		return num_versions > 1;
 	}
 
 

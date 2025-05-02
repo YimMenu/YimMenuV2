@@ -116,7 +116,7 @@ namespace YimMenu
 		// find existing programs to register
 		for (int i = 0; i < 176; i++)
 		{
-			if (Pointers.ScriptPrograms[i] && Pointers.ScriptPrograms[i]->m_NameHash == script)
+			if (Pointers.ScriptPrograms[i] && Pointers.ScriptPrograms[i]->m_NameHash == script && Pointers.ScriptPrograms[i]->m_CodeSize && Pointers.ScriptPrograms[i]->m_CodeBlocks)
 				RegisterProgram(Pointers.ScriptPrograms[i]);
 		}
 

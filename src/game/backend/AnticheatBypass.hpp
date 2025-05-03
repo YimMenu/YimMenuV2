@@ -2,6 +2,13 @@
 
 namespace YimMenu
 {
+	enum class FSLStatus
+	{
+		NotLoaded,
+		Loaded_NoBypass,
+		FSL_BypassEnabled
+	};
+
 	class AnticheatBypass
 	{
 	private:
@@ -12,11 +19,7 @@ namespace YimMenu
 		}
 
 		void RunScriptImpl();
-
 		bool m_IsFSLLoaded     = false;
-		int m_FSLVersion       = -1;
-		bool m_LocalSaves      = false;
-		bool m_BEBypass        = false;
 		bool m_BattlEyeRunning = false;
 
 	public:
@@ -27,7 +30,7 @@ namespace YimMenu
 
 		static bool IsFSLLoaded()
 		{
-			return GetInstance().m_IsFSLLoaded;
+			return GetModuleHandleA("WINMM.dll") != nullptr;
 		}
 
 		static bool IsBattlEyeRunning()
@@ -37,17 +40,43 @@ namespace YimMenu
 
 		static int GetFSLVersion()
 		{
-			return GetInstance().m_FSLVersion;
+			using Fn     = int(__stdcall*)();
+			HMODULE hMod = GetModuleHandleA("WINMM.dll");
+			if (!hMod)
+				return -1;
+			auto fn = reinterpret_cast<Fn>(GetProcAddress(hMod, "LawnchairGetVersion"));
+			return fn ? fn() : -1;
 		}
 
 		static bool IsLocalSavesEnabled()
 		{
-			return GetInstance().m_LocalSaves;
+			using Fn     = bool(__stdcall*)();
+			HMODULE hMod = GetModuleHandleA("WINMM.dll");
+			if (!hMod)
+				return false;
+			auto fn = reinterpret_cast<Fn>(GetProcAddress(hMod, "LawnchairIsProvidingLocalSaves"));
+			return fn ? fn() : false;
 		}
 
 		static bool IsBattleEyeBypassEnabled()
 		{
-			return GetInstance().m_BEBypass;
+			using Fn     = bool(__stdcall*)();
+			HMODULE hMod = GetModuleHandleA("WINMM.dll");
+			if (!hMod)
+				return false;
+			auto fn = reinterpret_cast<Fn>(GetProcAddress(hMod, "LawnchairIsProvidingBattlEyeBypass"));
+			return fn ? fn() : false;
+		}
+
+		static FSLStatus GetFSLStatus()
+		{
+			if (!IsFSLLoaded())
+				return FSLStatus::NotLoaded;
+
+			if (IsBattleEyeBypassEnabled())
+				return FSLStatus::FSL_BypassEnabled;
+
+			return FSLStatus::Loaded_NoBypass;
 		}
 	};
 }

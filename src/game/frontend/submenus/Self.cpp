@@ -2,6 +2,7 @@
 
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "game/backend/AnticheatBypass.hpp"
 
 namespace YimMenu::Submenus
 {

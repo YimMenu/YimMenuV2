@@ -27,10 +27,6 @@ namespace YimMenu::Submenus
 		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));
 		weatherOpts->AddItem(std::make_shared<BoolCommandItem>("forceweather"_J));
 
-		auto timeOverrideGroup = std::make_shared<Group>("", 1);
-		timeOverrideGroup->AddItem(std::make_shared<ConditionalItem>("freezetime"_J, std::make_shared<CommandItem>("settime"_J), true));
-		timeOverrideGroup->AddItem(std::make_shared<BoolCommandItem>("freezetime"_J));
-
 		auto timeControlGroup = std::make_shared<Group>("Time Override", 1);
 		timeControlGroup->AddItem(std::make_shared<IntCommandItem>("timeslider_hour"_J, "Hour"));
 		timeControlGroup->AddItem(std::make_shared<IntCommandItem>("timeslider_minute"_J, "Minute"));

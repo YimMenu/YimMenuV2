@@ -1,41 +1,39 @@
-#include "TimeChanger.hpp"
-
-#include "core/frontend/manager/UIManager.hpp"
-#include "game/backend/Self.hpp"
-#include "game/frontend/items/Items.hpp"
+#include "core/commands/Command.hpp"
+#include "core/commands/IntCommand.hpp"
+#include "core/commands/LoopedCommand.hpp"
 #include "game/gta/Natives.hpp"
-#include "imgui.h"
 
-namespace YimMenu::Submenus
+namespace YimMenu::Features
 {
-	std::shared_ptr<Category> timechanger()
+	static IntCommand _HourSlider{"timeslider_hour", "Hour", "Select hour", 0, 23, 12};
+	static IntCommand _MinuteSlider{"timeslider_minute", "Minute", "Select minute", 0, 59, 0};
+	static IntCommand _SecondSlider{"timeslider_second", "Second", "Select second", 0, 59, 0};
+
+	class SetTime : public Command
 	{
-		auto category = std::make_shared<YimMenu::Category>("Time Control");
+		using Command::Command;
 
-		category->AddItem(std::make_shared<ImGuiItem>([] {
-			static int hour     = 12;
-			static int minute   = 0;
-			static int second   = 0;
-			static bool enabled = false;
+		virtual void OnCall() override
+		{
+			NETWORK::NETWORK_OVERRIDE_CLOCK_TIME(_HourSlider.GetState(), _MinuteSlider.GetState(), _SecondSlider.GetState());
+		}
+	};
 
-			ImGui::Text("Override Time");
+	class FreezeTime : public LoopedCommand
+	{
+		using LoopedCommand::LoopedCommand;
 
-			ImGui::SliderInt("Hour", &hour, 0, 23);
-			ImGui::SliderInt("Minute", &minute, 0, 59);
-			ImGui::SliderInt("Second", &second, 0, 59);
+		virtual void OnTick() override
+		{
+			NETWORK::NETWORK_OVERRIDE_CLOCK_TIME(_HourSlider.GetState(), _MinuteSlider.GetState(), _SecondSlider.GetState());
+		}
 
-			if (ImGui::Checkbox("Enable Override", &enabled))
-			{
-				if (!enabled)
-					NETWORK::NETWORK_CLEAR_CLOCK_TIME_OVERRIDE();
-			}
+		virtual void OnDisable() override
+		{
+			NETWORK::NETWORK_CLEAR_CLOCK_TIME_OVERRIDE();
+		}
+	};
 
-			if (enabled)
-			{
-				NETWORK::NETWORK_OVERRIDE_CLOCK_TIME(hour, minute, second);
-			}
-		}));
-
-		return category;
-	}
+	static SetTime _SetTime{"settime", "Set Time", "Set clock to selected time"};
+	static FreezeTime _FreezeTime{"freezetime", "Freeze Time", "Freeze the clock time at selected values"};
 }

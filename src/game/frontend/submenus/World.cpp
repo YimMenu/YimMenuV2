@@ -1,6 +1,6 @@
 #include "World.hpp"
 #include "game/frontend/items/Items.hpp"
-#include "game/frontend/submenus/World/TimeChanger.hpp"
+
 namespace YimMenu::Submenus
 {
 	World::World() :
@@ -27,10 +27,22 @@ namespace YimMenu::Submenus
 		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));
 		weatherOpts->AddItem(std::make_shared<BoolCommandItem>("forceweather"_J));
 
+		auto timeOverrideGroup = std::make_shared<Group>("", 1);
+		timeOverrideGroup->AddItem(std::make_shared<ConditionalItem>("freezetime"_J, std::make_shared<CommandItem>("settime"_J), true));
+		timeOverrideGroup->AddItem(std::make_shared<BoolCommandItem>("freezetime"_J));
+
+		auto timeControlGroup = std::make_shared<Group>("Time Override", 1);
+		timeControlGroup->AddItem(std::make_shared<IntCommandItem>("timeslider_hour"_J, "Hour"));
+		timeControlGroup->AddItem(std::make_shared<IntCommandItem>("timeslider_minute"_J, "Minute"));
+		timeControlGroup->AddItem(std::make_shared<IntCommandItem>("timeslider_second"_J, "Second"));
+		timeControlGroup->AddItem(std::make_shared<ConditionalItem>("freezetime"_J, std::make_shared<CommandItem>("settime"_J), true));
+		timeControlGroup->AddItem(std::make_shared<BoolCommandItem>("freezetime"_J));
+
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));
 		main->AddItem(std::move(bringOpts));
 		main->AddItem(std::move(weatherOpts));
+		main->AddItem(std::move(timeControlGroup));
 
 		auto spawnGroup = std::make_shared<Group>("Vehicle");
 		auto modsGroup  = std::make_shared<Group>("Modifications");	
@@ -55,8 +67,5 @@ namespace YimMenu::Submenus
 		AddCategory(std::move(main));
 		AddCategory(std::move(spawnersGroup));
 		AddCategory(std::move(iplsGroup));
-
-		AddCategory(timechanger());
-
 	}
 };

@@ -334,6 +334,16 @@ namespace YimMenu
 			GetAssistedAimTypePatch = BytePatches::Add(ptr.Sub(0xE).As<void*>(), std::vector<std::uint8_t>{0xB0, 0x01, 0xC3});
 		});
 
+		constexpr auto allowPausingInSessionPatchPtrn = Pattern<"80 88 ? ? ? ? ? EB ? E8">("AllowPausingInSessionPatch");
+		scanner.Add(allowPausingInSessionPatchPtrn, [this](PointerCalculator ptr) {
+			AllowPausingInSessionPatch = BytePatches::Add(ptr.Sub(0x1E).As<std::uint8_t*>(), 0xEB);
+		});
+
+		constexpr auto openPauseMenuPtrn = Pattern<"E9 ? ? ? ? B9 30 09 09 21">("OpenPauseMenu");
+		scanner.Add(openPauseMenuPtrn, [this](PointerCalculator ptr) {
+			OpenPauseMenu = ptr.Add(1).Rip().As<PVOID>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

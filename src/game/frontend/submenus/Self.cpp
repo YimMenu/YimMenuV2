@@ -11,7 +11,7 @@ namespace YimMenu::Submenus
 		auto main          = std::make_shared<Category>("Main");
 		auto globalsGroup  = std::make_shared<Group>("Globals");
 		auto movementGroup = std::make_shared<Group>("Movement");
-		auto toolsGroup    = std::make_shared<Group>("Tools", 1);
+		auto toolsGroup    = std::make_shared<Group>("Tools", 2);
 		auto wantedGroup   = std::make_shared<Group>("Wanted");
 
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("godmode"_J));

@@ -1,0 +1,25 @@
+#include "core/commands/LoopedCommand.hpp"
+#include "game/backend/Self.hpp"
+#include "game/gta/Pools.hpp"
+
+#include <game/gta/Natives.hpp>
+
+namespace YimMenu::Features
+{
+	class PedIgnore : public LoopedCommand
+	{
+		using LoopedCommand::LoopedCommand;
+		virtual void OnTick() override
+		{
+			PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(Self::GetPlayer().GetId(), FALSE);
+		}
+
+		virtual void OnDisable() override
+		{
+			PLAYER::SET_DISPATCH_COPS_FOR_PLAYER(Self::GetPlayer().GetId(), TRUE);
+		}
+	};
+
+	static PedIgnore _PedIgnore{"CopsDispatch", "CopsDispatch", "When you are wanted, no police will be spawned."};
+
+}

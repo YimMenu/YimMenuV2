@@ -39,12 +39,12 @@ namespace YimMenu::Submenus
 		loots->AddItem(std::make_shared<ImGuiItem>([] {
 			ImGui::SameLine();
 		}));
-		loots->AddItem(std::make_shared<CommandItem>("diamondcasinoheistsetpotentialtake"_J));
+		loots->AddItem(std::make_shared<CommandItem>("diamondcasinoheistsetpotentialtake"_J, "Set##potentialtake"));
 		loots->AddItem(std::make_shared<IntCommandItem>("diamondcasinoheistactualtake"_J));
 		loots->AddItem(std::make_shared<ImGuiItem>([] {
 			ImGui::SameLine();
 		}));
-		loots->AddItem(std::make_shared<CommandItem>("diamondcasinoheistsetactualtake"_J));
+		loots->AddItem(std::make_shared<CommandItem>("diamondcasinoheistsetactualtake"_J, "Set##actualtake"));
 
 		misc->AddItem(std::make_shared<CommandItem>("diamondcasinoheistskiphacking"_J));
 		misc->AddItem(std::make_shared<CommandItem>("diamondcasinoheistskipdrilling"_J));

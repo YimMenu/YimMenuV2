@@ -6,7 +6,7 @@
 
 namespace YimMenu::Features
 {
-	class PedIgnore : public LoopedCommand
+	class CopsDispatch : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
 		virtual void OnTick() override
@@ -20,6 +20,6 @@ namespace YimMenu::Features
 		}
 	};
 
-	static PedIgnore _PedIgnore{"CopsDispatch", "CopsDispatch", "When you are wanted, no police will be spawned."};
+	static CopsDispatch _CopsDispatch{"CopsDispatch", "CopsDispatch", "When you are wanted, no police will be spawned."};
 
 }

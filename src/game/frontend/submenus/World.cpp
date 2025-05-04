@@ -62,8 +62,10 @@ namespace YimMenu::Submenus
 
         PopGroup->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
 
+		auto PopFun = std::make_shared<Group>("PopFun");
+		PopGroup->AddItem(PopFun);
 
-
+		PopGroup->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
 
 		AddCategory(std::move(main));
 		AddCategory(std::move(spawnersGroup));

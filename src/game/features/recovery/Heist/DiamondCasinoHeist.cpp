@@ -42,8 +42,8 @@ namespace YimMenu::Features
 
 				*base.At(0, 68).At(8).At(0).As<int*>() = 1;
 				*base.At(1, 68).At(8).At(1).As<int*>() = 1;
-                *base.At(2, 68).At(8).At(2).As<int*>() = 1; 
-                *base.At(3, 68).At(8).At(3).As<int*>() = 1;
+				*base.At(2, 68).At(8).At(2).As<int*>() = 1; 
+				*base.At(3, 68).At(8).At(3).As<int*>() = 1;
 			}
 		};
 
@@ -66,9 +66,9 @@ namespace YimMenu::Features
 
 		static std::vector<std::vector<std::vector<std::pair<int, const char*>>>> diamondCasinoHeistWeapon = {
 			{
-		        {{0, "MK II Shotgun Loadout"}, {1, "MK II Rifle Loadout"}},
-		        {{0, "MK II SMG Loadout"}, {1, "MK II Rifle Loadout"}},
-		        {{0, "MK II Shotgun Loadout"}, {1, "MK II Rifle Loadout"}}
+				{{0, "MK II Shotgun Loadout"}, {1, "MK II Rifle Loadout"}},
+				{{0, "MK II SMG Loadout"}, {1, "MK II Rifle Loadout"}},
+				{{0, "MK II Shotgun Loadout"}, {1, "MK II Rifle Loadout"}}
 			},
 			{
 				{{0, "Rifle Loadout"}, {1, "Shotgun Loadout"}},
@@ -81,17 +81,17 @@ namespace YimMenu::Features
 				{{0, "Shotgun Loadout"}, {1, "Combat MG Loadout"}}
 			},
 			{
-		        {{0, "SMG Loadout"}, {1, "Shotgun Loadout"}},
-		        {{0, "Machine Pistol Loadout"}, {1, "Shotgun Loadout"}},
-		        {{0, "SMG Loadout"}, {1, "Shotgun Loadout"}}
+				{{0, "SMG Loadout"}, {1, "Shotgun Loadout"}},
+				{{0, "Machine Pistol Loadout"}, {1, "Shotgun Loadout"}},
+				{{0, "SMG Loadout"}, {1, "Shotgun Loadout"}}
 			},
 			{
-		        {{0, "Micro SMG Loadout"}, {1, "Machine Pistol Loadout"}},
-		        {{0, "Micro SMG Loadout"}, {1, "Shotgun Loadout"}},
+				{{0, "Micro SMG Loadout"}, {1, "Machine Pistol Loadout"}},
+				{{0, "Micro SMG Loadout"}, {1, "Shotgun Loadout"}},
 				{{0, "Shotgun Loadout"}, {1, "Revolver Loadout"}}
 			},
 			{
-		        {{0, "                                        "}, {1, ""}},
+				{{0, "                                        "}, {1, ""}},
 				{{0, ""}, {1, ""}},
 				{{0, ""}, {1, ""}}
 			}
@@ -152,7 +152,7 @@ namespace YimMenu::Features
 			{{0, "Retinue MK II"}, {1, "Drifty Yosemite"}, {2, "Sugoi"}, {3, "Jugular"}},
 			{{0, "Manchez"}, {1, "Stryder"}, {2, "Defiler"}, {3, "Lectro"}},
 			{{0, "Issi Classic"}, {1, "Asbo"}, {2, "Kanjo"}, {3, "Sentinel Classic"}},
-		    {{0, "                           "}, {1, ""}, {2, ""}, {3, ""}}
+			{{0, "                           "}, {1, ""}, {2, ""}, {3, ""}}
 		};
 		static ListCommand _DiamondCasinoHeistVehicle{"diamondcasinoheistvehicle", "Vehicle", "Vehicle", diamondCasinoHeistVehicle[5], 0};
 
@@ -179,11 +179,11 @@ namespace YimMenu::Features
 
 		static std::vector<std::pair<int, const char*>> diamondCasinoHeistHacker = {
 			{4, "Avi Schwartzman"},
-		    {5, "Paige Harris"},
-		    {2, "Christian Feltz"},
-		    {3, "Yohan Blair"},
-		    {1, "Rickie Lukens"},
-		    {6, "Remove Hacker"}
+			{5, "Paige Harris"},
+			{2, "Christian Feltz"},
+			{3, "Yohan Blair"},
+			{1, "Rickie Lukens"},
+			{6, "Remove Hacker"}
 		};
 		static ListCommand _DiamondCasinoHeistHacker{"diamondcasinoheisthacker", "Hacker", "Hacker", diamondCasinoHeistHacker, 6};
 
@@ -242,7 +242,7 @@ namespace YimMenu::Features
 				Stats::SetInt("MPX_H3OPT_BITSET0", rand() % (INT_MAX)); // Refresh board
 				Stats::SetInt("MPX_H3OPT_BITSET1", rand() % (INT_MAX)); // Refresh board
 
-                ScriptMgr::Yield(500ms);
+				ScriptMgr::Yield(500ms);
 
 				Stats::SetInt("MPX_H3OPT_BITSET0", -1); // Refresh board
 				Stats::SetInt("MPX_H3OPT_BITSET1", -1); // Refresh board

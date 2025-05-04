@@ -20,6 +20,6 @@ namespace YimMenu::Features
 		}
 	};
 
-	static CopsDispatch _CopsDispatch{"CopsDispatch", "CopsDispatch", "When you are wanted, no police will be spawned."};
+	static CopsDispatch _CopsDispatch{"CopsDispatch", "Cops Dispatch", "When you are wanted, no police will be spawned."};
 
 }

@@ -9,7 +9,6 @@ namespace YimMenu::Submenus
 		auto main          = std::make_shared<Category>("Main");
 		auto spawnersGroup = std::make_shared<Category>("Spawners");
 		auto iplsGroup     = std::make_shared<Category>("IPLs");
-		auto PopGroup      = std::make_shared<Category>("Population");
 	
 		auto killPeds = std::make_shared<Group>("Kill", 1);
 		killPeds->AddItem(std::make_shared<CommandItem>("killallpeds"_J));
@@ -30,6 +29,8 @@ namespace YimMenu::Submenus
 
 		auto otherOpts = std::make_shared<Group>("Other", 1);
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("pedsignore"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
 
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));
@@ -57,19 +58,11 @@ namespace YimMenu::Submenus
 		iplsGroup->AddItem(std::make_shared<CommandItem>("unloadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("ipltp"_J));
 
-		auto Populatio	 = std::make_shared<Group>("Populatio");
-		PopGroup->AddItem(Populatio);
 
-        PopGroup->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
 
-		auto PopFun = std::make_shared<Group>("PopFun");
-		PopGroup->AddItem(PopFun);
-
-		PopGroup->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
 
 		AddCategory(std::move(main));
 		AddCategory(std::move(spawnersGroup));
 		AddCategory(std::move(iplsGroup));
-		AddCategory(std::move(PopGroup));
 	}
 };

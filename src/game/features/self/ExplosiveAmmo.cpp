@@ -16,6 +16,6 @@ namespace YimMenu::Features
 		}
 	};
 
-	static ExplosiveAmmo _ExplosiveAmmo{"ExplosiveAmmo", "ExplosiveAmmo", "Every bullet you shoot explodes."};
+	static ExplosiveAmmo _ExplosiveAmmo{"ExplosiveAmmo", "Explosive Ammo", "Every bullet you shoot explodes."};
 
 }

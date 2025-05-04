@@ -35,6 +35,8 @@ namespace YimMenu
 		BaseHook::Add<Hooks::Spoofing::WriteNetArrayData>(new DetourHook("WriteNetArrayData", Pointers.WriteNetArrayData, Hooks::Spoofing::WriteNetArrayData));
 		BaseHook::Add<Hooks::Spoofing::WriteNodeData>(new DetourHook("WriteNodeData", Pointers.WriteNodeData, Hooks::Spoofing::WriteNodeData));
 		BaseHook::Add<Hooks::Spoofing::WriteSyncTree>(new DetourHook("WriteSyncTree", Pointers.WriteSyncTree, Hooks::Spoofing::WriteSyncTree));
+
+		BaseHook::Add<Hooks::Features::OpenPauseMenu>(new DetourHook("OpenPauseMenu", Pointers.OpenPauseMenu, Hooks::Features::OpenPauseMenu));
 	}
 
 	Hooking::~Hooking()

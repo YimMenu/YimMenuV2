@@ -12,7 +12,7 @@ namespace YimMenu::Submenus
 		auto main          = std::make_shared<Category>("Main");
 		auto globalsGroup  = std::make_shared<Group>("Globals");
 		auto movementGroup = std::make_shared<Group>("Movement");
-		auto toolsGroup    = std::make_shared<Group>("Tools", 1);
+		auto toolsGroup    = std::make_shared<Group>("Tools", 2);
 		auto wantedGroup   = std::make_shared<Group>("Wanted");
 
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("godmode"_J));
@@ -67,6 +67,7 @@ namespace YimMenu::Submenus
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("rapidfire"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("aimbot"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteparachutes"_J));
+		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("ExplosiveAmmo"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<CommandItem>("giveallweapons"_J));
 
 		weapons->AddItem(weaponsGlobalsGroup);

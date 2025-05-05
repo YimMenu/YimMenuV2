@@ -13,10 +13,12 @@ namespace YimMenu::Submenus
 		auto killPeds = std::make_shared<Group>("Kill", 1);
 		killPeds->AddItem(std::make_shared<CommandItem>("killallpeds"_J));
 		killPeds->AddItem(std::make_shared<CommandItem>("killallenemies"_J));
+		
 		auto deleteOpts = std::make_shared<Group>("Delete", 1);
 		deleteOpts->AddItem(std::make_shared<CommandItem>("delpeds"_J));
 		deleteOpts->AddItem(std::make_shared<CommandItem>("delvehs"_J));
 		deleteOpts->AddItem(std::make_shared<CommandItem>("delobjs"_J));
+		
 		auto bringOpts = std::make_shared<Group>("Bring", 1);
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringpeds"_J));
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringvehs"_J));
@@ -34,11 +36,17 @@ namespace YimMenu::Submenus
 		timeControlGroup->AddItem(std::make_shared<ConditionalItem>("freezetime"_J, std::make_shared<CommandItem>("settime"_J), true));
 		timeControlGroup->AddItem(std::make_shared<BoolCommandItem>("freezetime"_J));
 
+		auto otherOpts = std::make_shared<Group>("Other", 1);
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("pedsignore"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
+
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));
 		main->AddItem(std::move(bringOpts));
 		main->AddItem(std::move(weatherOpts));
 		main->AddItem(std::move(timeControlGroup));
+		main->AddItem(std::move(otherOpts));
 
 		auto spawnGroup = std::make_shared<Group>("Vehicle");
 		auto modsGroup  = std::make_shared<Group>("Modifications");	

@@ -12,23 +12,25 @@ namespace YimMenu::Features
 	{
 		constexpr float max_ground_check = 1000.f;
 		constexpr int max_attempts = 20;
-		float ground_z = vec.z;
+		constexpr float min_safe_z = 1.0f;
+
+		float ground_z = vec.z + 25.f;  // empezar con una z un poco más alta
 		int current_attempts = 0;
 
 		do
 		{
-			STREAMING::REQUEST_COLLISION_AT_COORD(vec.x, vec.y, vec.z);
+			STREAMING::REQUEST_COLLISION_AT_COORD(vec.x, vec.y, ground_z);
 
 			float water_height;
-			if (WATER::GET_WATER_HEIGHT(vec.x, vec.y, vec.z, &water_height))
+			if (WATER::GET_WATER_HEIGHT(vec.x, vec.y, ground_z, &water_height))
 			{
-				vec.z = water_height;
+				vec.z = std::max(water_height, min_safe_z);
 				return;
 			}
 
-			if (MISC::GET_GROUND_Z_FOR_3D_COORD(vec.x, vec.y, max_ground_check, &ground_z, false, false))
+			if (MISC::GET_GROUND_Z_FOR_3D_COORD(vec.x, vec.y, ground_z, &ground_z, false, false))
 			{
-				vec.z = ground_z + 1.0f;
+				vec.z = std::max(ground_z + 1.0f, min_safe_z);
 				return;
 			}
 
@@ -41,7 +43,8 @@ namespace YimMenu::Features
 			ScriptMgr::Yield();
 		} while (current_attempts < max_attempts);
 
-		vec.z = PATHFIND::GET_APPROX_HEIGHT_FOR_POINT(vec.x, vec.y); // fallback value
+		// Último intento como fallback
+		vec.z = std::max(PATHFIND::GET_APPROX_HEIGHT_FOR_POINT(vec.x, vec.y), min_safe_z);
 	}
 
 	class TpToWaypoint : public Command
@@ -72,7 +75,7 @@ namespace YimMenu::Features
 			{
 				auto coords = HUD::GET_BLIP_COORDS(HUD::GET_CLOSEST_BLIP_INFO_ID(HUD::GET_WAYPOINT_BLIP_ENUM_ID()));
 				FiberPool::Push([coords] {
-					auto new_coords{coords};
+					auto new_coords = coords;
 					ResolveZCoordinate(new_coords);
 					Self::GetPed().TeleportTo(new_coords);
 				});

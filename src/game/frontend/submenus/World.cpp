@@ -27,10 +27,16 @@ namespace YimMenu::Submenus
 		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));
 		weatherOpts->AddItem(std::make_shared<BoolCommandItem>("forceweather"_J));
 
+		auto otherOpts = std::make_shared<Group>("Other", 1);
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("pedsignore"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
+
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));
 		main->AddItem(std::move(bringOpts));
 		main->AddItem(std::move(weatherOpts));
+		main->AddItem(std::move(otherOpts));
 
 		auto spawnGroup = std::make_shared<Group>("Vehicle");
 		auto modsGroup  = std::make_shared<Group>("Modifications");	
@@ -51,6 +57,9 @@ namespace YimMenu::Submenus
 		iplsGroup->AddItem(std::make_shared<CommandItem>("loadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("unloadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("ipltp"_J));
+
+
+
 
 		AddCategory(std::move(main));
 		AddCategory(std::move(spawnersGroup));

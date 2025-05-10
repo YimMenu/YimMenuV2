@@ -2,6 +2,7 @@
 
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "OutfitEditor.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -96,5 +97,8 @@ namespace YimMenu::Submenus
 		vehicle->AddItem(vehicleGlobalsGroup);
 		vehicle->AddItem(vehicleMiscGroup);
 		AddCategory(std::move(vehicle));
+
+		auto outfitEditorCategory = YimMenu::CreateOutfitsMenu();
+		AddCategory(std::move(outfitEditorCategory));
 	}
 }

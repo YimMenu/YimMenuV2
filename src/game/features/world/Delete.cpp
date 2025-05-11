@@ -1,5 +1,6 @@
 #include "core/commands/Command.hpp"
 #include "game/gta/Pools.hpp"
+#include "game/gta/Object.hpp"
 
 namespace YimMenu::Features
 {
@@ -25,7 +26,7 @@ namespace YimMenu::Features
 		{
 			for (auto obj : Pools::GetObjects())
 			{
-				if (obj && obj.IsCamera())
+				if (obj && Object::IsCamera(obj.GetModel()))
 					obj.Delete();
 			}
 		}

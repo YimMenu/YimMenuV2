@@ -299,7 +299,7 @@ namespace YimMenu
 		Vector3 coords = object.GetPosition();
 		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
 		float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
-		ImColor color = RGB(255, 0, 0);
+		ImColor color = Green;
 		std::string unit        = (distance < 1000.0f) ? "m" : "km";
 		std::string objectName = std::to_string(objectHash);
 		if (Object::IsCamera(objectHash))

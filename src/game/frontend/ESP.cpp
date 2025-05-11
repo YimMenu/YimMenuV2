@@ -1,5 +1,5 @@
 #include "ESP.hpp"
-
+#include "game/gta/Object.hpp"
 #include "common.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/ColorCommand.hpp"
@@ -68,7 +68,7 @@ namespace YimMenu::Features
 
 	// objects
 	BoolCommand _ESPDrawObjects("espdrawobjects", "Show Object Model", "Should the ESP draw objects model?");
-	BoolCommand _ESPDrawCCTVs("espdrawcctvs", "Show CCTV", "Should the ESP draw CCTV cameras?");
+	BoolCommand _ESPDrawCCTVs("espdrawcctvs", "Show Camera", "Should the ESP draw Camera cameras?");
 	BoolCommand _ESPDrawGCache("espdrawgcache", "Show G's Cache", "Should the ESP draw G's Cache?");
 	BoolCommand _ESPDrawSignalJammers("espdrawsignaljammers", "Show Signal Jammers", "Should the ESP draw Signal Jammers?");
 }
@@ -176,7 +176,7 @@ namespace YimMenu
 
 	void ESP::DrawPed(Ped ped, ImDrawList* drawList)
 	{
-		if (!ped || !ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
+		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
 			return;
 
 		float distanceToPed = 0.0f;
@@ -285,34 +285,32 @@ namespace YimMenu
 		if (!object || !object.IsValid())
 			return;
 
-		if (!object.IsObject())
+		int objectHash = object.GetModel();
+
+		if (objectType == Camera && !Object::IsCamera(objectHash))
 			return;
 
-		if (objectType == CCTV && !object.IsCCTV())
+		if (objectType == Cache && !Object::IsCache(objectHash))
 			return;
 
-		if (objectType == GCache && !object.IsGsCache())
-			return;
-
-		if (objectType == SignalJammerCollectible && !object.IsSignalJammerCollectible())
+		if (objectType == SignalJammer && !Object::IsSignalJammer(objectHash))
 			return;
 
 		Vector3 coords = object.GetPosition();
 		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
 		float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
-		ImColor color = Red;
+		ImColor color = RGB(255, 0, 0);
 		std::string unit        = (distance < 1000.0f) ? "m" : "km";
-		auto objectHash = object.GetModel();
 		std::string objectName = std::to_string(objectHash);
-		if (object.IsCCTV())
+		if (Object::IsCamera(objectHash))
 		{
-			objectName = "CCTV";
+			objectName = "Camera";
 		}
-		else if (object.IsGsCache())
+		else if (Object::IsCache(objectHash))
 		{
 			objectName = "G's Cache";
 		}
-		else if (object.IsSignalJammerCollectible())
+		else if (Object::IsSignalJammer(objectHash))
 		{
 			objectName += " (Signal Jammer)";
 		}
@@ -366,24 +364,24 @@ namespace YimMenu
 			{
 				for (auto obj : Pools::GetObjects())
 				{
-					if (obj && obj.IsCCTV())
-						DrawObject(obj, drawList, CCTV);
+					if (obj && Object::IsCamera(obj.GetModel()))
+						DrawObject(obj, drawList, Camera);
 				}
 			}
 			if (Features::_ESPDrawGCache.GetState())
 			{
 				for (auto obj : Pools::GetObjects())
 				{
-					if (obj && obj.IsGsCache())
-						DrawObject(obj, drawList, GCache);
+					if (obj && Object::IsCache(obj.GetModel()))
+						DrawObject(obj, drawList, Cache);
 				}
 			}
 			if (Features::_ESPDrawSignalJammers.GetState())
 			{
 				for (auto obj : Pools::GetObjects())
 				{
-					if (obj && obj.IsSignalJammerCollectible())
-						DrawObject(obj, drawList, SignalJammerCollectible);
+					if (obj && Object::IsSignalJammer(obj.GetModel()))
+						DrawObject(obj, drawList, SignalJammer);
 				}
 			}
 		}

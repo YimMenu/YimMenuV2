@@ -6,9 +6,9 @@ namespace YimMenu
 	enum ObjectType
 	{
 		Generic,
-		CCTV,
-		GCache,
-		SignalJammerCollectible
+		Camera,
+		Cache,
+		SignalJammer
 	};
 	class ESP
 	{

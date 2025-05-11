@@ -25,7 +25,7 @@ namespace YimMenu::Features
 		{
 			for (auto obj : Pools::GetObjects())
 			{
-				if (obj && obj.IsCCTV())
+				if (obj && obj.IsCamera())
 					obj.Delete();
 			}
 		}
@@ -58,7 +58,7 @@ namespace YimMenu::Features
 		}
 	};
 
-	static DeleteAllCameras _DeleteAllCameras("delcams", "Delete All CCTV", "Deletes all CCTV cameras in the game world, including mission critical CCTV");
+	static DeleteAllCameras _DeleteAllCameras("delcams", "Delete All Camera", "Deletes all Camera cameras in the game world, including mission critical Camera");
 	static DeleteAllObjects _DeleteAllObjects{"delobjs", "Delete All Objects", "Deletes all objects in the game world, including mission critical objects"};
 	static DeleteAllPeds _DeleteAllPeds{"delpeds", "Delete All Peds", "Deletes all peds in the game world, including mission critical peds"};
 	static DeleteAllVehs _DeleteAllVehs{"delvehs", "Delete All Vehicles", "Deletes all vehicles in the game world, including mission critical vehicles"};

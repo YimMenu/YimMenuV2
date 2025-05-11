@@ -3,6 +3,37 @@
 #include "core/backend/ScriptMgr.hpp"
 #include "game/pointers/Pointers.hpp"
 
+namespace
+{
+	std::unordered_set<int> cameraHashes = {
+		-1007354661,
+		-1842407088,
+		289451089,
+		548760764,
+		-354221800,
+		-1159421424,
+		1449155105, 
+		-1095296451,
+		1919058329, 
+		-1884701657, 
+		-173206916, 
+		168901740, 
+		-1340405475, 
+		1927491455, 
+		299608302, 
+		-6978462, 
+		2135655372,
+		-1233322078
+	};
+
+	std::unordered_set<int> gCacheHashes = {
+		528555233,
+		-1620734287,
+		138777325,
+		765087784
+	};
+}
+
 namespace YimMenu
 {
 	Object Object::Create(uint32_t model, rage::fvector3 coords)
@@ -47,5 +78,20 @@ namespace YimMenu
 		STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
 
 		return obj;
+	}
+
+	bool Object::IsCamera(int objectHash)
+	{
+		return cameraHashes.find(objectHash) != cameraHashes.end();
+	}
+
+	bool Object::IsCache(int objectHash)
+	{
+		return gCacheHashes.find(objectHash) != gCacheHashes.end();
+	}
+
+	bool Object::IsSignalJammer(int objectHash)
+	{
+		return objectHash == -305186631;
 	}
 }

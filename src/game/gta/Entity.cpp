@@ -26,34 +26,6 @@ namespace
 
 		return 0;
 	}
-
-	std::unordered_set<int> cameraHashes = {
-		-1007354661,
-		-1842407088,
-		289451089,
-		548760764,
-		-354221800,
-		-1159421424,
-		1449155105, 
-		-1095296451,
-		1919058329, 
-		-1884701657, 
-		-173206916, 
-		168901740, 
-		-1340405475, 
-		1927491455, 
-		299608302, 
-		-6978462, 
-		2135655372,
-		-1233322078
-	};
-
-	std::unordered_set<int> gCacheHashes = {
-		528555233,
-		-1620734287,
-		138777325,
-		765087784
-	};
 }
 
 namespace YimMenu
@@ -149,27 +121,6 @@ namespace YimMenu
 	{ 
 		ENTITY_ASSERT_VALID();
 		return ENTITY::IS_ENTITY_A_MISSION_ENTITY(GetHandle()); // TODO: detect more mission states
-	}
-
-	bool Entity::IsCCTV()
-	{
-		ENTITY_ASSERT_VALID();
-		int objectHash = GetModel();
-		return cameraHashes.find(objectHash) != cameraHashes.end();
-	}
-
-	bool Entity::IsGsCache()
-	{
-		ENTITY_ASSERT_VALID();
-		int objectHash = GetModel();
-		return gCacheHashes.find(objectHash) != gCacheHashes.end();
-	}
-
-	bool Entity::IsSignalJammerCollectible()
-	{
-		ENTITY_ASSERT_VALID();
-		int objectHash = GetModel();
-		return objectHash == -305186631;
 	}
 
 	int Entity::GetModel()
@@ -470,27 +421,22 @@ namespace YimMenu
 	{
 		ENTITY_ASSERT_VALID();
 
-		if (IsDead())
-			return;
+		if (HasControl())
+		{
+			ENTITY::SET_ENTITY_HEALTH(GetHandle(), 0, PLAYER::PLAYER_PED_ID(), 0);
+		}
+		else
+		{
+			auto ptr = GetPointer<CEntity*>();
+			auto local = reinterpret_cast<CEntity*>((*Pointers.PedFactory)->m_LocalPed);
+			auto pos = GetPosition();
+			std::uint32_t weapon = "WEAPON_EXPLOSION"_J;
 
-		auto weaponHash  = Self::GetPed().GetCurrentWeapon();
-		auto pedPosition    = GetPosition();
+			if (!ptr || !local)
+				return;
 
-		MISC::SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
-			pedPosition.x,
-		    pedPosition.y,
-		    pedPosition.z - 0.001f,
-		    pedPosition.x,
-		    pedPosition.y,
-		    pedPosition.z + 0.001f,
-			9999,
-			true,
-			weaponHash,
-		    Self::GetPed().GetHandle(),
-			false,
-			false,
-			1000.0f
-		);
+			Pointers.TriggerWeaponDamageEvent(local, ptr, &pos, 0, true, weapon, 9999.9f, 2, 0, (1<<4)|0x80000, 0, 0, 0, false, false, true, true, nullptr);
+		}
 	}
 
 	int Entity::GetHealth()

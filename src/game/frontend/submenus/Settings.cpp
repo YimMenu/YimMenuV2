@@ -73,7 +73,7 @@ namespace YimMenu::Submenus
 		pedEsp->AddItem(std::make_shared<ConditionalItem>("espdrawpeds"_J, std::make_shared<ColorCommandItem>("skeletoncolorpeds"_J)));
 
 		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawobjects"_J));
-		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawcctvs"_J));
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawcameras"_J));
 		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawgcache"_J));
 		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawsignaljammers"_J));
 

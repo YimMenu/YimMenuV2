@@ -68,7 +68,7 @@ namespace YimMenu::Features
 
 	// objects
 	BoolCommand _ESPDrawObjects("espdrawobjects", "Show Object Model", "Should the ESP draw objects model?");
-	BoolCommand _ESPDrawCCTVs("espdrawcctvs", "Show Camera", "Should the ESP draw Camera cameras?");
+	BoolCommand _ESPDrawCameras("espdrawcameras", "Show Cameras", "Should the ESP draw Camera cameras?");
 	BoolCommand _ESPDrawGCache("espdrawgcache", "Show G's Cache", "Should the ESP draw G's Cache?");
 	BoolCommand _ESPDrawSignalJammers("espdrawsignaljammers", "Show Signal Jammers", "Should the ESP draw Signal Jammers?");
 }
@@ -360,7 +360,7 @@ namespace YimMenu
 						DrawObject(obj, drawList);
 				}
 			}
-			if (Features::_ESPDrawCCTVs.GetState())
+			if (Features::_ESPDrawCameras.GetState())
 			{
 				for (auto obj : Pools::GetObjects())
 				{

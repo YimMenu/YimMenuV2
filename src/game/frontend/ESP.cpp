@@ -101,7 +101,7 @@ namespace YimMenu
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
-		if (!ped || !ped.IsValid())
+		if (!ped.IsValid())
 			return;
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
@@ -282,7 +282,7 @@ namespace YimMenu
 		if (HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
 			return;
 
-		if (!object || !object.IsValid())
+		if (!object.IsValid())
 			return;
 
 		int objectHash = object.GetModel();

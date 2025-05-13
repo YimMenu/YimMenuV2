@@ -1,9 +1,10 @@
-#include <iostream>
 #include <random>
-#include <ctime>
+#include <set>
 #include "game/gta/Natives.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "game/gta/ScriptLocal.hpp"
+
+
 
 
 namespace YimMenu::Features
@@ -13,13 +14,14 @@ namespace YimMenu::Features
 		using BoolCommand::BoolCommand;
 
         int slots_random_results_table = 1348;
+        std::set<int> slots_blacklist = {9, 21, 22, 87, 152};
 
 		virtual void OnEnable() override
 		{
             bool needs_run = false;
             if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("casino_slots"_J)) {
                 for (int slots_iter = 3; slots_iter <= 196; ++slots_iter) {
-                    if (slots_iter != 67 && slots_iter != 132) {
+                    if (!slots_blacklist.contains(slots_iter)) {
                         if (*ScriptLocal("casino_slots"_J, slots_random_results_table + slots_iter).As<int*>() != 6) {
                             needs_run = true;
                         }
@@ -27,7 +29,7 @@ namespace YimMenu::Features
                 }
                 if (needs_run) {
                     for (int slots_iter = 3; slots_iter <= 196; ++slots_iter) {
-                        if (slots_iter != 67 && slots_iter != 132) {
+                        if (!slots_blacklist.contains(slots_iter)) {
                             int slot_result = 6;
                             *ScriptLocal("casino_slots"_J, slots_random_results_table + slots_iter).As<int*>() = slot_result;
                         }
@@ -38,26 +40,14 @@ namespace YimMenu::Features
 
         virtual void OnDisable() override
         {
-            bool needs_run = true;
-            int sum = 0;
-
-            if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("casino_slots"_J)) {
-
-                sum = 0;
+            if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("casino_slots"_J))
+            {
                 for (int slots_iter = 3; slots_iter <= 196; ++slots_iter) {
-                    if (slots_iter != 67 && slots_iter != 132) {
-                        sum += *ScriptLocal("casino_slots"_J, slots_random_results_table + slots_iter).As<int*>();
-                    }
-                }
-                needs_run = (sum == 1152);
-                if (needs_run) {
-                    for (int slots_iter = 3; slots_iter <= 196; ++slots_iter) {
-                        if (slots_iter != 67 && slots_iter != 132) {
-                            int slot_result = 6;
-                            std::srand(static_cast<unsigned int>(std::time(0)) + slots_iter);
-                            slot_result = std::rand() % 8; // Generates a number between 0 and 7
-                            *ScriptLocal("casino_slots"_J, slots_random_results_table + slots_iter).As<int*>() = slot_result;
-                        }
+                    if (!slots_blacklist.contains(slots_iter)) {
+                        int slot_result = 6;
+                        std::srand(static_cast<unsigned int>(std::time(0)) + slots_iter);
+                        slot_result = std::rand() % 7; // Generates a pseudo random number between 0 and 7
+                        *ScriptLocal("casino_slots"_J, slots_random_results_table + slots_iter).As<int*>() = slot_result;
                     }
                 }
             }

@@ -17,9 +17,6 @@ namespace YimMenu::Features
 			{
 				state = 0;
 			}
-
-			// int rp1 = *Tunables::GetTunable("XP_MULTIPLIER"_J).As<float*>();
-			// LOG(INFO) << "Debug: [ " << rp1 << " ]";
 			*Tunables::GetTunable("XP_MULTIPLIER"_J).As<float*>() = state;
 		}
 	};

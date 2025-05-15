@@ -74,7 +74,7 @@ namespace YimMenu::Submenus
 
 		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawobjects"_J));
 		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawcameras"_J));
-		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawgcache"_J));
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawcache"_J));
 		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawsignaljammers"_J));
 
 		overlay->AddItem(std::make_shared<BoolCommandItem>("overlay"_J));

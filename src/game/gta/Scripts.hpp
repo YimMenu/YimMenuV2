@@ -19,4 +19,5 @@ namespace YimMenu::Scripts
 	extern bool SafeToModifyFreemodeBroadcastGlobals(); // TODO: find a better method for this that works for all scripts
 	extern std::optional<std::uint32_t> GetCodeLocationByPattern(rage::scrProgram* program, SimplePattern pattern);
 	extern void ForceScriptHost(rage::scrThread* thread); // likely unstable, beware!
+	extern void RunScript(std::string scriptName, int stackSize);
 }

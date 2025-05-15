@@ -178,6 +178,7 @@ namespace YimMenu::Submenus
 		// miscGroup->AddItem(std::make_shared<CommandItem>("tptomoonshineshack"_J));
 		// miscGroup->AddItem(std::make_shared<CommandItem>("tptonazar"_J));
 		miscGroup->AddItem(std::make_shared<CommandItem>("tptoobjective"_J));
+		miscGroup->AddItem(std::make_shared<CommandItem>("tptoarcade"_J));
 
 		main->AddItem(miscGroup);
 

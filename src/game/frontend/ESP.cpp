@@ -69,7 +69,7 @@ namespace YimMenu::Features
 	// objects
 	BoolCommand _ESPDrawObjects("espdrawobjects", "Show Object Model", "Should the ESP draw objects model?");
 	BoolCommand _ESPDrawCameras("espdrawcameras", "Show Cameras", "Should the ESP draw Camera cameras?");
-	BoolCommand _ESPDrawGCache("espdrawgcache", "Show G's Cache", "Should the ESP draw G's Cache?");
+	BoolCommand _ESPDrawCache("espdrawcache", "Show G's Cache", "Should the ESP draw G's Cache?");
 	BoolCommand _ESPDrawSignalJammers("espdrawsignaljammers", "Show Signal Jammers", "Should the ESP draw Signal Jammers?");
 }
 
@@ -304,11 +304,11 @@ namespace YimMenu
 		std::string objectName = std::to_string(objectHash);
 		if (Object::IsCamera(objectHash))
 		{
-			objectName = "Camera";
+			objectName += " (Camera)";
 		}
 		else if (Object::IsCache(objectHash))
 		{
-			objectName = "G's Cache";
+			objectName += " (G's Cache)";
 		}
 		else if (Object::IsSignalJammer(objectHash))
 		{
@@ -368,7 +368,7 @@ namespace YimMenu
 						DrawObject(obj, drawList, Camera);
 				}
 			}
-			if (Features::_ESPDrawGCache.GetState())
+			if (Features::_ESPDrawCache.GetState())
 			{
 				for (auto obj : Pools::GetObjects())
 				{

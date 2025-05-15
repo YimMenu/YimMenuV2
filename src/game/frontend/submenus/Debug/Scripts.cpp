@@ -135,34 +135,7 @@ namespace YimMenu::Submenus
 			if (ImGui::Button("Start Script"))
 			{
 				FiberPool::Push([] {
-					auto hash = Joaat(scriptName);
-
-					if (!SCRIPT::DOES_SCRIPT_WITH_NAME_HASH_EXIST(hash))
-					{
-						Notifications::Show("Start Script", "Script does not exist.", NotificationType::Error);
-						return;
-					}
-
-					if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(hash) > 0)
-					{
-						Notifications::Show("Start Script", "Script is already running.", NotificationType::Error);
-						return;
-					}
-
-					if (MISC::GET_NUMBER_OF_FREE_STACKS_OF_THIS_SIZE(stackSize) == 0)
-					{
-						Notifications::Show("Start Script", "No free stack.", NotificationType::Error);
-						return;
-					}
-
-					while (!SCRIPT::HAS_SCRIPT_WITH_NAME_HASH_LOADED(hash))
-					{
-						SCRIPT::REQUEST_SCRIPT_WITH_NAME_HASH(hash);
-						ScriptMgr::Yield();
-					}
-
-					BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH(hash, stackSize);
-					SCRIPT::SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED(hash);
+					Scripts::RunScript(scriptName, stackSize);
 				});
 			}
 		}));

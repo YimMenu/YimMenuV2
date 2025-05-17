@@ -2,7 +2,7 @@
 
 namespace YimMenu
 {
-	static constexpr std::array scriptNames = {
+	static constexpr const char* scriptNames[] = {
 	    "abigail1",
 	    "abigail2",
 	    "achievement_controller",

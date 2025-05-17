@@ -85,8 +85,8 @@ namespace YimMenu::Submenus
 
 			ImGui::Text("Thread ID: %d", curThread->m_Context.m_ThreadId);
 			ImGui::Text("Stack Size: %d", curThread->m_Context.m_StackSize);
-			ImGui::Text("Stack Pointer: 0x%X", &curThread->m_Context.m_StackPointer);
-			ImGui::Text("Program Counter: 0x%X", &curThread->m_Context.m_ProgramCounter); // This is not really accurate (always points to the WAIT)
+			ImGui::Text("Stack Pointer: 0x%X", curThread->m_Context.m_StackPointer);
+			ImGui::Text("Program Counter: 0x%X", curThread->m_Context.m_ProgramCounter); // This is not really accurate (always points to the WAIT)
 			if (curThread->m_Context.m_State == rage::scrThread::State::KILLED)
 				ImGui::Text("Exit Reason: %s", curThread->m_ErrorMessage);
 		}));

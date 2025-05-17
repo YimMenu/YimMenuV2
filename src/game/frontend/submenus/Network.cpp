@@ -4,7 +4,7 @@
 #include "game/frontend/items/Items.hpp"
 #include "game/frontend/submenus/Network/SavedPlayers.hpp"
 #include "game/gta/Network.hpp"
-#include "game/frontend/submenus/Network/RandomEvents.hpp"
+#include "game/frontend/submenus/network/RandomEvents.hpp"
 
 namespace YimMenu::Submenus
 {

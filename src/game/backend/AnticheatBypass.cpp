@@ -17,7 +17,7 @@ namespace YimMenu
 	{
 		int num_versions = 0;
 		for (auto& module : ModuleMgr.GetModules())
-			if (module.first == "version.dll"_J)
+			if (module.first == "WINMM.dll"_J)
 				num_versions++;
 
 		return num_versions > 1;

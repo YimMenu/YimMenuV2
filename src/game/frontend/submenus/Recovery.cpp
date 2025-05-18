@@ -34,7 +34,7 @@ namespace YimMenu::Submenus
 
 		generalGroup->AddItem(std::make_shared<BoolCommandItem>("playallmissionssolo"_J));
 		generalGroup->AddItem(std::make_shared<CommandItem>("forcelaunchheist"_J));
-		generalRGroup->AddItem(std::make_shared<IntCommandItem>("rpmultiplierinput"_J));
+		generalGroup->AddItem(std::make_shared<IntCommandItem>("rpmultiplierinput"_J));
 		generalGroup->AddItem(std::make_shared<CommandItem>("rpmultiplier"_J));
 
 		casinoGroup->AddItem(std::make_shared<BoolCommandItem>("casinomanipulaterigslotmachines"_J));

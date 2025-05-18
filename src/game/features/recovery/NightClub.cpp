@@ -1,11 +1,10 @@
 #include "core/commands/LoopedCommand.hpp"
 #include "game/gta/Stats.hpp"
 #include <ctime>
-using namespace std;
 
 namespace YimMenu::Features
 {
-	class NightClub : public LoopedCommand
+	class NightClubSafePayout : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
         bool running = false;
@@ -31,5 +30,5 @@ namespace YimMenu::Features
         }
 	};
 
-	static NightClub _NightClub{"nightclubsafe", "Trigger nightclub safe payout", "Triggers nighclub safe payout"};
+	static NightClubSafePayout _NightClubSafePayout{"nightclubsafe", "Trigger nightclub safe payout", "Triggers nighclub safe payout"};
 }

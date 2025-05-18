@@ -15,12 +15,14 @@ namespace YimMenu::Submenus
 		auto nightClub = std::make_shared<Category>("Nightclub");
 		auto arcade = std::make_shared<Category>("Arcade");
 		auto casino = std::make_shared<Category>("Casino");
+		auto rp = std::make_shared<Category>("RP");
+
 		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
 		auto generalGroup = std::make_shared<Group>("General");
-
 		auto nightClubGroup = std::make_shared<Group>("NightclubSafe");
 		auto arcadeGroup = std::make_shared<Group>("ArcadeSafe");
 		auto casinoGroup = std::make_shared<Group>("CasinoRigSlotMachines");
+		auto rpGroup = std::make_shared<Group>("RP");
 
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));
@@ -42,7 +44,10 @@ namespace YimMenu::Submenus
 
 		arcadeGroup->AddItem(std::make_shared<BoolCommandItem>("arcadesafe"_J));
 
-		casinoGroup->AddItem(std::make_shared<BoolCommandItem>("rigslotmachines"_J));
+		casinoGroup->AddItem(std::make_shared<BoolCommandItem>("casinomanipulaterigslotmachines"_J));
+
+		rpGroup->AddItem(std::make_shared<IntCommandItem>("rpmultiplierinput"_J));
+		rpGroup->AddItem(std::make_shared<CommandItem>("rpmultiplier"_J));
 
 		shopping->AddItem(vehiclesGroup);
 
@@ -50,10 +55,12 @@ namespace YimMenu::Submenus
 		arcade->AddItem(arcadeGroup);
 		missions->AddItem(generalGroup);
 		casino->AddItem(casinoGroup);
+		rp->AddItem(rpGroup);
 		AddCategory(std::move(shopping));
 		AddCategory(std::move(missions));
 		AddCategory(std::move(nightClub));
 		AddCategory(std::move(arcade));
+		AddCategory(std::move(rp));
 		AddCategory(std::move(casino));
 		AddCategory(BuildStatEditorMenu());
 		AddCategory(BuildTransactionsMenu());

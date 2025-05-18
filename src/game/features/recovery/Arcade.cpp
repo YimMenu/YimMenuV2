@@ -4,7 +4,7 @@
 
 namespace YimMenu::Features
 {
-	class Arcade : public LoopedCommand
+	class ArcadeSafePayout : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
         bool running = false;
@@ -28,5 +28,5 @@ namespace YimMenu::Features
         }
 	};
 
-	static Arcade _Arcade{"arcadesafe", "Trigger arcade safe payout", "Triggers arcade safe payout"};
+	static ArcadeSafePayout _ArcadeSafePayout{"arcadesafe", "Trigger arcade safe payout", "Triggers arcade safe payout"};
 }

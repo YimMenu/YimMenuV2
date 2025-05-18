@@ -1,7 +1,6 @@
 #include "core/commands/LoopedCommand.hpp"
 #include "game/gta/Stats.hpp"
 #include <ctime>
-using namespace std;
 
 namespace YimMenu::Features
 {

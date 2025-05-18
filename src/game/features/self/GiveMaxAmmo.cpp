@@ -1,7 +1,7 @@
 #include "core/commands/Command.hpp"
 #include "game/backend/Self.hpp"
-#include "src/game/gta/Natives.hpp"
 #include "game/gta/data/Weapons.hpp"
+#include "src/game/gta/Natives.hpp"
 
 namespace YimMenu::Features
 {
@@ -11,10 +11,10 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-            for (auto weapon : Data::Weapons)
-            {
-                Self::GetPed().SetMaxAmmoForWeapon(weapon);
-            }
+			for (auto weapon : Data::Weapons)
+			{
+				Self::GetPed().SetMaxAmmoForWeapon(weapon);
+			}
 		}
 	};
 

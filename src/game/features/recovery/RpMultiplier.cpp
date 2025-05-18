@@ -1,11 +1,11 @@
-#include "game/backend/Tunables.hpp"
-#include "core/commands/IntCommand.hpp"
 #include "core/commands/Command.hpp"
+#include "core/commands/IntCommand.hpp"
+#include "game/backend/Tunables.hpp"
 
 namespace YimMenu::Features
 {
 	static IntCommand _RpMultiplierInput{"rpmultiplierinput", "RP Multiplier Input", "RP Mulitplier (< 0 = 0 -> No RP)", std::nullopt, std::nullopt, 1};
-	
+
 	class RPMultiplier : public Command
 	{
 		using Command::Command;

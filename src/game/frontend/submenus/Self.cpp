@@ -1,8 +1,8 @@
 #include "Self.hpp"
 
+#include "OutfitEditor.hpp"
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
-#include "OutfitEditor.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -42,7 +42,7 @@ namespace YimMenu::Submenus
 		setWanted->AddItem(std::make_shared<BoolCommandItem>("freezewanted"_J));
 		wantedGroup->AddItem(std::make_shared<ConditionalItem>("freezewanted"_J, clearWanted, true));
 		wantedGroup->AddItem(std::make_shared<ConditionalItem>("neverwanted"_J, setWanted, true));
-		
+
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("standonvehicles"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("disableactionmode"_J));
 		movementGroup->AddItem(std::make_shared<BoolCommandItem>("superrun"_J));
@@ -78,9 +78,9 @@ namespace YimMenu::Submenus
 		weapons->AddItem(weaponsAimbotGroup);
 		AddCategory(std::move(weapons));
 
-		auto vehicle = std::make_shared<Category>("Vehicle");
+		auto vehicle             = std::make_shared<Category>("Vehicle");
 		auto vehicleGlobalsGroup = std::make_shared<Group>("Globals");
-		auto vehicleMiscGroup = std::make_shared<Group>("Misc");
+		auto vehicleMiscGroup    = std::make_shared<Group>("Misc");
 
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("vehiclegodmode"_J, "Godmode"));
 		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("keepfixed"_J, "Keep Fixed"));

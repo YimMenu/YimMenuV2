@@ -1,28 +1,29 @@
 #include "Recovery.hpp"
-#include "game/frontend/items/Items.hpp"
-#include "game/features/recovery/GiveVehicleReward.hpp"
+
+#include "Recovery/HeistModifier.hpp"
 #include "Recovery/StatEditor.hpp"
 #include "Recovery/Transactions.hpp"
-#include "Recovery/HeistModifier.hpp"
+#include "game/features/recovery/GiveVehicleReward.hpp"
+#include "game/frontend/items/Items.hpp"
 
 namespace YimMenu::Submenus
 {
 	Recovery::Recovery() :
 	    Submenu::Submenu("Recovery")
 	{
-		auto shopping = std::make_shared<Category>("Shopping");
-		auto missions = std::make_shared<Category>("Missions");
+		auto shopping  = std::make_shared<Category>("Shopping");
+		auto missions  = std::make_shared<Category>("Missions");
 		auto nightClub = std::make_shared<Category>("Nightclub");
-		auto arcade = std::make_shared<Category>("Arcade");
-		auto casino = std::make_shared<Category>("Casino");
-		auto rp = std::make_shared<Category>("RP");
+		auto arcade    = std::make_shared<Category>("Arcade");
+		auto casino    = std::make_shared<Category>("Casino");
+		auto rp        = std::make_shared<Category>("RP");
 
-		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
-		auto generalGroup = std::make_shared<Group>("General");
+		auto vehiclesGroup  = std::make_shared<Group>("Vehicles");
+		auto generalGroup   = std::make_shared<Group>("General");
 		auto nightClubGroup = std::make_shared<Group>("NightclubSafe");
-		auto arcadeGroup = std::make_shared<Group>("ArcadeSafe");
-		auto casinoGroup = std::make_shared<Group>("CasinoRigSlotMachines");
-		auto rpGroup = std::make_shared<Group>("RP");
+		auto arcadeGroup    = std::make_shared<Group>("ArcadeSafe");
+		auto casinoGroup    = std::make_shared<Group>("CasinoRigSlotMachines");
+		auto rpGroup        = std::make_shared<Group>("RP");
 
 
 		vehiclesGroup->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));

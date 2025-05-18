@@ -54,7 +54,6 @@ namespace YimMenu::Hooks
 
 		if (arx_score >= 2)
 		{
-			auto from_offset = *reinterpret_cast<std::uint64_t*>(_AddressOfReturnAddress()) - ModuleMgr.Get("GTA5_Enhanced.exe"_J)->Base();
 			return;
 		}
 

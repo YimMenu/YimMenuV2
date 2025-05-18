@@ -33,9 +33,8 @@ message(STATUS "Setting up include directories.")
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${SRC_DIR}"
     "${imgui_SOURCE_DIR}"
-    "${minhook_SOURCE_DIR}/include"    
-    "${minhook_SOURCE_DIR}/src/hde"    
-    "${gtav_classes_SOURCE_DIR}"
+    "${minhook_SOURCE_DIR}/include"
+    "${minhook_SOURCE_DIR}/src/hde"
 )
 
 message(STATUS "Setting up linked libraries")

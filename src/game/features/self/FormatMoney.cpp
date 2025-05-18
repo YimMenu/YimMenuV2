@@ -19,12 +19,12 @@ namespace YimMenu::Features
 		{
 			if (!formatIntCaller1Hook)
 			{
-				formatIntCaller1Hook = CallSiteHook::AddHook(Pointers.FormatIntCaller1, FormatIntHook);
+				formatIntCaller1Hook = CallSiteHook::AddHook(Pointers.FormatIntCaller1, reinterpret_cast<void*>(FormatIntHook));
 			}
 			formatIntCaller1Hook->Enable();
 			if (!formatIntCaller2Hook)
 			{
-				formatIntCaller2Hook = CallSiteHook::AddHook(Pointers.FormatIntCaller2, FormatIntHook);
+				formatIntCaller2Hook = CallSiteHook::AddHook(Pointers.FormatIntCaller2, reinterpret_cast<void*>(FormatIntHook));
 			}
 			formatIntCaller2Hook->Enable();
 			NativeHooks::AddHook("shop_controller"_J, NativeIndex::SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT, &ScaleformAddIntHook);

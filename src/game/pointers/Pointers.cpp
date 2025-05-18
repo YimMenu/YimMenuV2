@@ -353,6 +353,22 @@ namespace YimMenu
 			OpenPauseMenu = ptr.Add(1).Rip().As<PVOID>();
 		});
 
+		constexpr auto getPoolTypePtrn = Pattern<"BA CE 94 A6 ED E8">("GetPoolType");
+		scanner.Add(getPoolTypePtrn, [this](PointerCalculator ptr) {
+			GetPoolType = ptr.Sub(19).As<PVOID>();
+		});
+
+		constexpr auto setJoinRequestPoolTypePatchPtrn = Pattern<"89 86 ? ? ? ? E8 ? ? ? ? 89 C0">("SetJoinRequestPoolTypePatch");
+		scanner.Add(setJoinRequestPoolTypePatchPtrn, [this](PointerCalculator ptr) {
+			// MOV EAX, 0; 0 is the normal pool
+			SetJoinRequestPoolTypePatch = BytePatches::Add(ptr.Sub(5).As<std::uint8_t*>(), std::to_array<std::uint8_t>({0xB8, 0x00, 0x00, 0x00, 0x00}));
+		});
+
+		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"41 83 FF 05 ? 30 43">("HandleJoinRequestIgnorePoolPatch");
+		scanner.Add(handleJoinRequestIgnorePoolPatchPtrn, [this](PointerCalculator ptr) {
+			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.Add(4).As<std::uint8_t*>(), 0xEB);
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";
@@ -373,6 +389,7 @@ namespace YimMenu
 
 			if (IsSocialClubNeverGoingToLoad())
 			{
+				LOG(WARNING) << "Timed out checking for socialclub.dll";
 				return false;
 			}
 

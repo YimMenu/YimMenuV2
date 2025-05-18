@@ -159,7 +159,7 @@ namespace YimMenu
 		ENTITY_ASSERT_VALID();
 		ENTITY_ASSERT_CONTROL();
 
-		WEAPON::SET_PED_INFINITE_AMMO(GetHandle(), infinite, NULL);
+		WEAPON::SET_PED_INFINITE_AMMO(GetHandle(), infinite, 0);
 	}
 
 	void Ped::SetInfiniteClip(bool infinite)

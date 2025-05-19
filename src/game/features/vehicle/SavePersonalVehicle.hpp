@@ -5,13 +5,13 @@ namespace rage
 	class scrThread;
 }
 
-namespace YimMenu
+namespace YimMenu::Features
 {
-	class GiveVehicleReward
+	class SavePersonalVehicle
 	{
-		static GiveVehicleReward& GetInstance()
+		static SavePersonalVehicle& GetInstance()
 		{
-			static GiveVehicleReward instance;
+			static SavePersonalVehicle instance;
 			return instance;
 		}
 
@@ -22,8 +22,6 @@ namespace YimMenu
 		rage::scrThread* m_Thread = nullptr;
 
 	public:
-		static bool IsSafeToRunScript();
-
 		static void RunScript()
 		{
 			GetInstance().RunScriptImpl();

@@ -266,7 +266,7 @@ namespace YimMenu::Submenus
 				ImGui::Text("Normalized name to: %s", current_info.m_Name.data());
 			}
 
-			bool can_edit = !current_info.m_Data->IsServerAuthoritative() || AnticheatBypass::IsFSLLoaded(); // TODO: a lot of false positives and negatives with this one
+			bool can_edit = !current_info.m_Data->IsServerAuthoritative() || AnticheatBypass::IsFSLProvidingLocalSaves(); // TODO: a lot of false positives and negatives with this one
 
 			RenderStatEditor(value, current_info.m_Data);
 

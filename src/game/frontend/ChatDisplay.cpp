@@ -42,22 +42,25 @@ namespace YimMenu
 
 		ImGui::SetNextWindowSize(ImVec2(*Pointers.ScreenResX - x_pos - 10, *Pointers.ScreenResY - y_pos), ImGuiCond_Always);
 		ImGui::SetNextWindowPos(ImVec2(x_pos, y_pos), ImGuiCond_Always);
-		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::PushFont(Menu::Font::g_ChatFont);
 
-		ImGui::Begin("##chatwin", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
-
-		for (auto& message : m_Messages)
+		if (ImGui::Begin("##chatwin", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs))
 		{
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(message.m_Color));
-			ImGui::TextWrapped("%s:", message.m_Sender.data());
+			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+			ImGui::PushFont(Menu::Font::g_ChatFont);
+
+			for (auto& message : m_Messages)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(message.m_Color));
+				ImGui::TextWrapped("%s:", message.m_Sender.data());
+				ImGui::PopStyleColor();
+				ImGui::SameLine();
+				ImGui::TextWrapped("%s", message.m_Message.data());
+			}
+
+			ImGui::PopFont();
 			ImGui::PopStyleColor();
-			ImGui::SameLine();
-			ImGui::TextWrapped("%s", message.m_Message.data());
 		}
 
-		ImGui::PopFont();
-		ImGui::PopStyleColor();
 		ImGui::End();
 	}
 

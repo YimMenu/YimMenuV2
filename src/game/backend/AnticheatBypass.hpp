@@ -16,8 +16,8 @@ namespace YimMenu
 		bool m_IsFSLLoaded = false;
 		bool m_BattlEyeRunning = false;
 		int m_FSLVersion          = -1;
-		bool m_ProvidesLocalSaves = false;
-		bool m_ProvidesBEBYPASS   = false;
+		bool m_FSLProvidesLocalSaves = false;
+		bool m_FSLProvidesBEBypass   = false;
 
 	public:
 		static void RunScript()
@@ -41,14 +41,14 @@ namespace YimMenu
 			return GetInstance().m_FSLVersion;
 		}
 
-		static bool ProvidesLocalSaves()
+		static bool IsFSLProvidingLocalSaves()
 		{
-			return GetInstance().m_ProvidesLocalSaves;
+			return GetInstance().m_FSLProvidesLocalSaves;
 		}
 
-		static bool ProvidesBattlEyeBypass()
+		static bool IsFSLProvidingBattlEyeBypass()
 		{
-			return GetInstance().m_ProvidesBEBYPASS;
+			return GetInstance().m_FSLProvidesBEBypass;
 		}
 	};
 }

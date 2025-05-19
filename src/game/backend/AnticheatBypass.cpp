@@ -60,12 +60,12 @@ namespace YimMenu
 				if (LawnchairGetVersion && LawnchairIsProvidingLocalSaves && LawnchairIsProvidingBattlEyeBypass)
 				{
 					m_FSLVersion         = LawnchairGetVersion();
-					m_ProvidesLocalSaves = LawnchairIsProvidingLocalSaves();
-					m_ProvidesBEBYPASS   = LawnchairIsProvidingBattlEyeBypass();
+					m_FSLProvidesLocalSaves = LawnchairIsProvidingLocalSaves();
+					m_FSLProvidesBEBypass   = LawnchairIsProvidingBattlEyeBypass();
 
 					LOGF(VERBOSE, "FSL Version: {}", m_FSLVersion);
-					LOGF(VERBOSE, "FSL Local Saves: {}", m_ProvidesLocalSaves ? "Enabled" : "Disabled");
-					LOGF(VERBOSE, "FSL BE Bypass: {}", m_ProvidesBEBYPASS ? "Enabled" : "Disabled");
+					LOGF(VERBOSE, "FSL Local Saves: {}", m_FSLProvidesLocalSaves ? "Enabled" : "Disabled");
+					LOGF(VERBOSE, "FSL BE Bypass: {}", m_FSLProvidesBEBypass ? "Enabled" : "Disabled");
 				}
 				else
 				{

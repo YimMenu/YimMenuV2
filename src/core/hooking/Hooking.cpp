@@ -37,6 +37,8 @@ namespace YimMenu
 		BaseHook::Add<Hooks::Spoofing::WriteSyncTree>(new DetourHook("WriteSyncTree", Pointers.WriteSyncTree, Hooks::Spoofing::WriteSyncTree));
 
 		BaseHook::Add<Hooks::Features::OpenPauseMenu>(new DetourHook("OpenPauseMenu", Pointers.OpenPauseMenu, Hooks::Features::OpenPauseMenu));
+
+		BaseHook::Add<Hooks::Network::GetPoolType>(new DetourHook("GetPoolType", Pointers.GetPoolType, Hooks::Network::GetPoolType));
 	}
 
 	Hooking::~Hooking()

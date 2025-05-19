@@ -94,6 +94,7 @@ namespace YimMenu::Submenus
 		spoofMMRegion->AddItem(std::make_shared<BoolCommandItem>("spoofmmregion"_J, "Spoof Region"));
 		spoofMMRegion->AddItem(std::make_shared<ConditionalItem>("spoofmmregion"_J, std::make_shared<ListCommandItem>("mmregion"_J, "##mmregion")));
 		matchmakingGroup->AddItem(spoofMMRegion);
+		matchmakingGroup->AddItem(std::make_shared<BoolCommandItem>("cheaterpool"_J));
 		spoofing->AddItem(matchmakingGroup);
 	
 		AddCategory(std::move(session));

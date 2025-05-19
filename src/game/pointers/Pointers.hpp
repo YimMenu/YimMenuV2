@@ -144,6 +144,9 @@ namespace YimMenu
 		BytePatch ShouldAllowDriverLockOnPatch;
 		BytePatch AllowPausingInSessionPatch;
 		PVOID OpenPauseMenu;
+		PVOID GetPoolType;
+		BytePatch SetJoinRequestPoolTypePatch;
+		BytePatch HandleJoinRequestIgnorePoolPatch;
 	};
 
 	struct Pointers : PointerData

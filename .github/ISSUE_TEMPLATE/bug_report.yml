@@ -1,12 +1,12 @@
 name: Bug report
 description: Report a *specific* issue
-title: "[Bug]: "
+title: "[Bug]: <Enter descriptive title here>"
 labels: bug
 body:
   - type: textarea
     attributes:
       label: Describe the bug
-      description: A clear and concise description of what the bug is. If you want to ask a general question about the menu, please open a new Discussion instead
+      description: A clear and concise description of what the bug is. If you want to ask a general question about the menu, please open a new Discussion instead. I repeat, if this is NOT A BUG WITH THE MENU, do not open a bug report
     validations:
       required: true
   - type: textarea
@@ -32,6 +32,7 @@ body:
       description: |
         For a bug report to be valid, please include the logs for YimMenuV2.
         They can be found under `%appdata%/YimMenuV2/cout.log`, even if you think the log file is useless we'd still like for you to include it here.
+        You MUST do this if you're reporting a crash. Attaching the DLL you used is also helpful
 
         Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
       value: |
@@ -49,6 +50,7 @@ body:
         - Steam
         - Epic Games
         - Rockstar
+        - Microsoft Store/Game Pass
         - Other (please mention in "Additional context")
     validations:
       required: true

@@ -118,8 +118,7 @@ namespace YimMenu::Submenus
 						if (ImGui::Selectable(name.c_str()))
 						{
 							FiberPool::Push([hash] {
-								auto handle =
-								    Vehicle::Create(hash, GetVehicleSpawnLoc(hash, spawnInside), Self::GetPed().GetHeading());
+								auto handle = Vehicle::Create(hash, GetVehicleSpawnLoc(hash, spawnInside), Self::GetPed().GetHeading());
 
 								if (spawnInside)
 									Self::GetPed().SetInVehicle(handle);

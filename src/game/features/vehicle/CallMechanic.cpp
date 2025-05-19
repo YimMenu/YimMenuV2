@@ -17,7 +17,7 @@ namespace YimMenu::Features
 		{
 			if (!*Pointers.IsSessionStarted || SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("AM_CONTACT_REQUESTS"_J) > 0)
 			{
-				Notifications::Show("Wardrobe", "Not safe to call the mechanic at the moment.", NotificationType::Error);
+				Notifications::Show("Mechanic", "Not safe to call the mechanic at the moment.", NotificationType::Error);
 				return;
 			}
 

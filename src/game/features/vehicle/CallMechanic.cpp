@@ -6,6 +6,8 @@
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptLocal.hpp"
+#include "game/gta/ScriptGlobal.hpp"
+#include "types/script/Timer.hpp"
 
 namespace YimMenu::Features
 {
@@ -41,6 +43,7 @@ namespace YimMenu::Features
 					if (auto thread = Scripts::FindScriptThreadByID(id))
 					{
 						*ScriptLocal(thread, 519).As<int*>() = 1;
+						ScriptGlobal(2685663).At(4344).At(251).At(7, 2).As<TIMER*>()->Destroy();
 					}
 				}
 				else
@@ -49,10 +52,6 @@ namespace YimMenu::Features
 				}
 
 				SCRIPT::SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED("AM_CONTACT_REQUESTS"_J);
-			}
-			else
-			{
-				Notifications::Show("Mechanic", "Please join GTA Online.", NotificationType::Error);
 			}
 		}
 	};

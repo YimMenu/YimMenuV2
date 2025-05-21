@@ -1,6 +1,8 @@
-#include "GiveVehicleReward.hpp"
+#include "SavePersonalVehicle.hpp"
+#include "core/commands/Command.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
+#include "core/frontend/Notifications.hpp"
 #include "game/gta/data/StackSizes.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
@@ -8,14 +10,9 @@
 #include "game/gta/ScriptLocal.hpp"
 #include "types/script/locals/VehicleRewardData.hpp"
 
-namespace YimMenu
+namespace YimMenu::Features
 {
-	bool GiveVehicleReward::IsSafeToRunScript()
-	{
-		return Self::GetVehicle().IsValid() && *Pointers.IsSessionStarted;
-	}
-
-	void GiveVehicleReward::RunScriptImpl()
+	void SavePersonalVehicle::RunScriptImpl()
 	{
 		while (g_Running)
 		{
@@ -24,7 +21,7 @@ namespace YimMenu
 			if (!m_ShouldRunScript)
 				continue;
 
-			if (!IsSafeToRunScript())
+			if (!*Pointers.IsSessionStarted || !Self::GetVehicle().IsValid())
 			{
 				if (m_StartedByUs && m_Thread)
 				{
@@ -88,4 +85,35 @@ namespace YimMenu
 			}
 		}
 	}
+
+	class _SavePersonalVehicle : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+			{
+				Notifications::Show("Save Personal Vehicle", "Please join GTA Online.", NotificationType::Error);
+				return;
+			}
+
+			if (!Self::GetVehicle().IsValid())
+			{
+				Notifications::Show("Save Personal Vehicle", "Please get in a vehicle.", NotificationType::Error);
+				return;
+			}
+
+			static ScriptFunction isVehicleValidForPV("freemode"_J, ScriptPointer("IsVehicleValidForPV", "5D ? ? ? 2A 06 56 13 00 38 00").Add(1).Rip());
+			if (!isVehicleValidForPV.Call<bool>(Self::GetVehicle().GetModel()))
+			{
+				Notifications::Show("Save Personal Vehicle", "This vehicle cannot be saved as a personal vehicle.", NotificationType::Error);
+				return;
+			}
+
+			SavePersonalVehicle::SetShouldRunScript(true);
+		}
+	};
+
+	static _SavePersonalVehicle __SavePersonalVehicle{"savepersonalvehicle", "Save Personal Vehicle", "Saves the current vehicle you are in as your personal vehicle."};
 }

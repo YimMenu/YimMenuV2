@@ -78,26 +78,6 @@ namespace YimMenu::Submenus
 		weapons->AddItem(weaponsAimbotGroup);
 		AddCategory(std::move(weapons));
 
-		auto vehicle = std::make_shared<Category>("Vehicle");
-		auto vehicleGlobalsGroup = std::make_shared<Group>("Globals");
-		auto vehicleMiscGroup = std::make_shared<Group>("Misc");
-
-		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("vehiclegodmode"_J, "Godmode"));
-		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("keepfixed"_J, "Keep Fixed"));
-		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("hornboost"_J));
-		vehicleGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("modifyboostbehavior"_J));
-		vehicleGlobalsGroup->AddItem(std::make_shared<ConditionalItem>("modifyboostbehavior"_J, std::make_shared<ListCommandItem>("boostbehavior"_J)));
-		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
-		vehicleGlobalsGroup->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
-
-		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
-		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));
-		vehicleMiscGroup->AddItem(std::make_shared<BoolCommandItem>("allowhatsinvehicles"_J));
-
-		vehicle->AddItem(vehicleGlobalsGroup);
-		vehicle->AddItem(vehicleMiscGroup);
-		AddCategory(std::move(vehicle));
-
 		auto outfitEditorCategory = YimMenu::CreateOutfitsMenu();
 		AddCategory(std::move(outfitEditorCategory));
 	}

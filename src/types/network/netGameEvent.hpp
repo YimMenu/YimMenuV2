@@ -248,8 +248,10 @@ class CExplosionEvent : public rage::netGameEvent
 public:
 	void Deserialize(rage::datBitBuffer& buffer);
 
+#if !__GNUC__
 	struct
 	{
+#endif
 		ExplosionType m_ExplosionType; // 0x30
 		rage::fvector3 m_Position;     // 0x40
 		uint64_t m_0x50;               // 0x50
@@ -282,7 +284,9 @@ public:
 		bool m_Expected;               // 0xC2 -- for telemetry
 		uint32_t m_ScriptHash;         // 0xC4 -- for telemetry
 		uint32_t m_ProgramCounter;     // 0xC8 -- for telemetry
+#if !__GNUC__
 	};
+#endif
 	uint16_t m_TargetEntity;      // 0xD0
 	uint16_t m_TargetEnt2;        // 0xD2
 	uint16_t m_OwnerNetId;        // 0xD4

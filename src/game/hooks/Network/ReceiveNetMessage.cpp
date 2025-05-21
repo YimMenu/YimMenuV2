@@ -150,13 +150,13 @@ namespace YimMenu::Hooks
 		}
 		case rage::netMessage::Type::KickPlayer:
 		{
-			if (!AnticheatBypass::IsFSLLoaded())
+			if (!AnticheatBypass::IsFSLProvidingBattlEyeBypass())
 				return;
 			break;
 		}
 		case rage::netMessage::Type::BattlEyeCmd:
 		{
-			if (!AnticheatBypass::IsFSLLoaded() && !AnticheatBypass::IsBattlEyeRunning())
+			if (!AnticheatBypass::IsFSLProvidingBattlEyeBypass() && !AnticheatBypass::IsBattlEyeRunning())
 			{
 				char data[1028]{};
 				int size = buffer.Read<int>(11);

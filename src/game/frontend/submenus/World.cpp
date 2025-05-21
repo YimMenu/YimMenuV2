@@ -38,28 +38,26 @@ namespace YimMenu::Submenus
 		main->AddItem(std::move(weatherOpts));
 		main->AddItem(std::move(otherOpts));
 
-		auto spawnGroup = std::make_shared<Group>("Vehicle");
-		auto modsGroup  = std::make_shared<Group>("Modifications");	
+		auto spawnVehicle = std::make_shared<Group>("Vehicle");
+		spawnVehicle->AddItem(std::make_shared<StringCommandItem>("vehmodelname"_J));
+		spawnVehicle->AddItem(std::make_shared<CommandItem>("spawnvehicle"_J));
 
-		spawnGroup->AddItem(std::make_shared<StringCommandItem>("vehmodelname"_J));
-		spawnGroup->AddItem(std::make_shared<BoolCommandItem>("spawninvehicle"_J));
-		spawnGroup->AddItem(std::make_shared<BoolCommandItem>("spawnupgraded"_J));
-		spawnGroup->AddItem(std::make_shared<BoolCommandItem>("usecustomlicenseplate"_J));
-		spawnGroup->AddItem(std::make_shared<ConditionalItem>("usecustomlicenseplate"_J, std::make_shared<StringCommandItem>("customlicenseplate"_J)));
-		spawnGroup->AddItem(std::make_shared<CommandItem>("spawnvehicle"_J));
+		auto spawnPed = std::make_shared<Group>("Ped");
+		spawnPed->AddItem(std::make_shared<StringCommandItem>("pedmodelname"_J));
+		spawnPed->AddItem(std::make_shared<CommandItem>("spawnped"_J));
 
-		modsGroup->AddItem(std::make_shared<BoolCommandItem>("lsccustomsbypass"_J));
+		auto spawnObject = std::make_shared<Group>("Object");
+		spawnObject->AddItem(std::make_shared<StringCommandItem>("objectmodelname"_J));
+		spawnObject->AddItem(std::make_shared<CommandItem>("spawnobject"_J));
 
-		spawnersGroup->AddItem(spawnGroup);
-		spawnersGroup->AddItem(modsGroup);
+		spawnersGroup->AddItem(spawnVehicle);
+		spawnersGroup->AddItem(spawnPed);
+		spawnersGroup->AddItem(spawnObject);
 
 		iplsGroup->AddItem(std::make_shared<ListCommandItem>("iplselector"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("loadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("unloadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("ipltp"_J));
-
-
-
 
 		AddCategory(std::move(main));
 		AddCategory(std::move(spawnersGroup));

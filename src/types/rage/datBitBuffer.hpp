@@ -42,7 +42,7 @@ namespace rage
 				v11 = 8;
 				if (size > 8)
 				{
-					v12 = 1i64;
+					v12 = 1;
 					do
 					{
 						if (v12 > v9)

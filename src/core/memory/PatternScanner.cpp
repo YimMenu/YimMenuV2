@@ -32,10 +32,7 @@ namespace YimMenu
 			if (scanSuccess)
 				scanSuccess = job.get();
 		}
-		if (!scanSuccess)
-		{
-			LOG(FATAL) << "Some patterns have not been found, continuing would be foolish.";
-		}
+
 		return scanSuccess;
 	}
 

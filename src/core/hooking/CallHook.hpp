@@ -57,7 +57,7 @@ namespace YimMenu
 			template<typename T>
 			T GetOriginal()
 			{
-				return static_cast<T>(m_OriginalFunction);
+				return reinterpret_cast<T>(m_OriginalFunction);
 			}
 		};
 

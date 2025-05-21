@@ -28,6 +28,7 @@ namespace rage
 		std::uint32_t m_CxnId;                 // 0x0044
 		rage::netEvent* m_This;                // 0x0048
 		uint32_t m_PeerId;                     // 0x0050
+		char pad_0084[4];                      // 0x0054
 	};
 	static_assert(sizeof(rage::netEvent) == 0x58);
 

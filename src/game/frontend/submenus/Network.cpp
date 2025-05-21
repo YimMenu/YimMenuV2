@@ -4,7 +4,7 @@
 #include "game/frontend/items/Items.hpp"
 #include "game/frontend/submenus/Network/SavedPlayers.hpp"
 #include "game/gta/Network.hpp"
-#include "game/frontend/submenus/Network/RandomEvents.hpp"
+#include "game/frontend/submenus/network/RandomEvents.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -94,6 +94,7 @@ namespace YimMenu::Submenus
 		spoofMMRegion->AddItem(std::make_shared<BoolCommandItem>("spoofmmregion"_J, "Spoof Region"));
 		spoofMMRegion->AddItem(std::make_shared<ConditionalItem>("spoofmmregion"_J, std::make_shared<ListCommandItem>("mmregion"_J, "##mmregion")));
 		matchmakingGroup->AddItem(spoofMMRegion);
+		matchmakingGroup->AddItem(std::make_shared<BoolCommandItem>("cheaterpool"_J));
 		spoofing->AddItem(matchmakingGroup);
 	
 		AddCategory(std::move(session));

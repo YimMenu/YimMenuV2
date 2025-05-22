@@ -19,8 +19,9 @@ namespace YimMenu::Submenus
 		globals->AddItem(std::make_shared<BoolCommandItem>("modifyboostbehavior"_J));
 		globals->AddItem(std::make_shared<ConditionalItem>("modifyboostbehavior"_J, std::make_shared<ListCommandItem>("boostbehavior"_J)));
 
-		tools->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
 		tools->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
+		tools->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));
+		tools->AddItem(std::make_shared<CommandItem>("fixallvehicles"_J));
 		tools->AddItem(std::make_shared<CommandItem>("callmechanic"_J));
 		tools->AddItem(std::make_shared<CommandItem>("savepersonalvehicle"_J));
 

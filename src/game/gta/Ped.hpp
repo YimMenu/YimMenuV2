@@ -48,6 +48,7 @@ namespace YimMenu
 		bool HasWeapon(std::uint32_t hash);
 		void SetInfiniteAmmo(bool infinite);
 		void SetInfiniteClip(bool infinite);
+		void SetMaxAmmoForWeapon(std::uint32_t hash);
 
 		// teleport
 		void TeleportTo(const rage::fvector3& pos); // similar to SetPosition, but handles vehicles correctly

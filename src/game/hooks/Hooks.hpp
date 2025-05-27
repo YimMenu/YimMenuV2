@@ -74,9 +74,4 @@ namespace YimMenu::Hooks
 	{
 		extern LRESULT WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
 	}
-
-	namespace Features
-	{
-		extern void OpenPauseMenu(uint32_t menuHash, bool pause, uint32_t unk1, bool unk2);
-	}
 }

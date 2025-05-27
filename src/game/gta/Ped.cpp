@@ -236,4 +236,11 @@ namespace YimMenu
 		ENTITY_ASSERT_VALID();
 		PED::SET_PED_MAX_TIME_UNDERWATER(GetHandle(), time);
 	}
+
+	void Ped::SetMaxAmmoForWeapon(std::uint32_t hash)
+	{
+		int maxAmmo;
+		WEAPON::GET_MAX_AMMO(GetHandle(), hash, &maxAmmo);
+		WEAPON::SET_PED_AMMO(GetHandle(), hash, maxAmmo, 0);
+	}
 }

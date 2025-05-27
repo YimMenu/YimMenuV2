@@ -12,6 +12,7 @@
 #include "GSBD_RandomEvents.hpp"
 #include "GlobalPlayerBD.hpp"
 #include "g_AMC_playerBD.hpp"
+#include "MPSV.hpp"
 #include "game/gta/ScriptGlobal.hpp"
 
 #define DEFINE_GLOBAL_ACCESSOR(str, global)       \
@@ -37,3 +38,4 @@ DEFINE_GLOBAL_ACCESSOR(GSBD_Kicking, 1877529);
 DEFINE_GLOBAL_ACCESSOR(GSBD_PropertyInstances, 1937699);
 DEFINE_GLOBAL_ACCESSOR(g_AMC_playerBD, 2699624);
 DEFINE_GLOBAL_ACCESSOR(GSBD_RandomEvents, 1882524);
+DEFINE_GLOBAL_ACCESSOR(MPSV, 1586543); // purposely +1

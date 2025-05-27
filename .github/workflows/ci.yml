@@ -1,12 +1,11 @@
-# TODO: use Clang instead of MSVC
 name: CI
 
 on: [ push, pull_request ]
 
 jobs:
-  ci:
+  msvc-ci:
     runs-on: [ self-hosted, Windows ]
-    name: CI
+    name: CI (MSVC)
     steps:
       - uses: actions/checkout@v3
 
@@ -19,10 +18,10 @@ jobs:
           arch: amd64
 
       - name: Generate CMake project
-        run: cmake -D CMAKE_BUILD_TYPE=Release -S. -Bbuild -G Ninja
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
 
-      - name: Build 64bit release DLL
-        run: cmake --build ./build --config Release --target YimMenuV2 --
+      - name: Build 64bit RelWithDebInfo DLL
+        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
 
       - name: Check if DLL got built
         run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
@@ -36,5 +35,40 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binary
+          name: RelWithDebInfo-MSVC
+          path: build/YimMenuV2-dev-*.dll
+
+  msvc-clang:
+    runs-on: [ self-hosted, Windows ]
+    name: CI (Clang)
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check CMake version
+        run: cmake --version
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Generate CMake project
+        run: cmake -DCMAKE_C_COMPILER=clang.exe -DCMAKE_CXX_COMPILER=clang++.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+
+      - name: Build 64bit RelWithDebInfo DLL
+        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
+
+      - name: Rename DLL to YimMenuV2-dev-{GITHUB_SHA}.dll
+        run: |
+          del YimMenuV2-dev-*.dll
+          ren YimMenuV2.dll YimMenuV2-dev-${{github.sha}}.dll
+        working-directory: build/
+
+      - name: Check if DLL got built
+        run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RelWithDebInfo-Clang
           path: build/YimMenuV2-dev-*.dll

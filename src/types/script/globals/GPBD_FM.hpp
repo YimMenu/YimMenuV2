@@ -381,8 +381,8 @@ struct ARCADE_DATA
 	SCR_INT AppearanceBitset;
 	SCR_INT AppearanceBitset2;
 	SCR_INT AppearanceBitset3;
+	SCR_INT UNK_0004;
 	SCR_INT SafeCashValue;
-	SCR_INT PAD_0005; // unused
 };
 static_assert(sizeof(ARCADE_DATA) == 6 * 8);
 
@@ -459,7 +459,9 @@ static_assert(sizeof(SALVAGE_YARD_DATA) == 7 * 8);
 struct BAIL_SHOP_DATA
 {
 	SCR_INT Index;
-	uint64_t PAD_0001[11]; // a field was removed in b3407
+	SCR_INT StyleFlags;
+	SCR_INT SafeCashValue;
+	uint64_t PAD_0001[9]; // a field was removed in b3407
 };
 static_assert(sizeof(BAIL_SHOP_DATA) == 12 * 8);
 

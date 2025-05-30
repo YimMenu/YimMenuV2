@@ -1,13 +1,9 @@
 #pragma once
 #include "core/util/Joaat.hpp"
+#include "types/script/types.hpp"
 
 namespace YimMenu::Stats
 {
-	struct Date
-	{
-		alignas(8) int Year, Month, Day, Hour, Minute, Second, Millisecond;
-	};
-
 	extern int GetCharIndex();
 
 	extern void SetInt(std::string statName, int value);

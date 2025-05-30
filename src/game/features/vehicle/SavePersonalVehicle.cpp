@@ -1,14 +1,14 @@
 #include "SavePersonalVehicle.hpp"
 #include "core/commands/Command.hpp"
 #include "core/backend/ScriptMgr.hpp"
-#include "game/backend/Self.hpp"
 #include "core/frontend/Notifications.hpp"
-#include "game/gta/data/StackSizes.hpp"
-#include "game/gta/Natives.hpp"
+#include "game/backend/Self.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "game/gta/ScriptLocal.hpp"
+#include "game/pointers/Pointers.hpp"
 #include "types/script/locals/VehicleRewardData.hpp"
+#include "types/script/globals/FreemodeGeneral.hpp"
 
 namespace YimMenu::Features
 {
@@ -28,37 +28,25 @@ namespace YimMenu::Features
 					m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
 					m_StartedByUs               = false;
 				}
-				m_Thread = nullptr;
+				m_Thread          = nullptr;
 				m_ShouldRunScript = false;
 				continue;
-			}
-
-			if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("AM_MP_VEHICLE_REWARD"_J) == 0)
-			{
-				SCRIPT::REQUEST_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J);
-				if (SCRIPT::HAS_SCRIPT_WITH_NAME_HASH_LOADED("AM_MP_VEHICLE_REWARD"_J))
-				{
-					int id   = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH("AM_MP_VEHICLE_REWARD"_J, eStackSizes::FRIEND);
-					m_Thread = Scripts::FindScriptThreadByID(id);
-					if (m_Thread)
-						m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
-					SCRIPT::SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED("AM_MP_VEHICLE_REWARD"_J);
-					m_StartedByUs = true;
-				}
-				else
-				{
-					continue;
-				}
-			}
-			else
-			{
-				m_Thread = Scripts::FindScriptThread("AM_MP_VEHICLE_REWARD"_J);
 			}
 
 			if (!m_Thread)
 			{
-				m_ShouldRunScript = false;
-				continue;
+				int id   = Scripts::StartScript("AM_MP_VEHICLE_REWARD"_J, eStackSizes::FRIEND);
+				m_Thread = Scripts::FindScriptThreadByID(id);
+				if (m_Thread)
+				{
+					m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
+					m_StartedByUs               = true;
+				}
+				else
+				{
+					m_ShouldRunScript = false;
+					continue;
+				}
 			}
 
 			if (auto VehicleRewardData = VEHICLE_REWARD_DATA::Get(m_Thread))
@@ -108,6 +96,12 @@ namespace YimMenu::Features
 			if (!isVehicleValidForPV.Call<bool>(Self::GetVehicle().GetModel()))
 			{
 				Notifications::Show("Save Personal Vehicle", "This vehicle cannot be saved as a personal vehicle.", NotificationType::Error);
+				return;
+			}
+
+			if (Self::GetVehicle().GetHandle() == FreemodeGeneral::Get()->PersonalVehicleIndex)
+			{
+				Notifications::Show("Save Personal Vehicle", "This vehicle is already a personal vehicle.", NotificationType::Error);
 				return;
 			}
 

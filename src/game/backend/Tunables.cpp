@@ -107,7 +107,7 @@ namespace YimMenu
 					TUNABLES_LAUNCH_DATA args;
 					args.Context         = 6;  // BASE_GLOBALS
 					args.ContentModifier = 27; // MP_FM_RANDOM
-					if (!BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS("tuneables_processing"_J, &args, SCR_SIZEOF(args), eStackSizes::DEFAULT))
+					if (!BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS("tuneables_processing"_J, &args, SCR_SIZEOF(args), static_cast<int>(eStackSizes::DEFAULT)))
 					{
 						LOG(FATAL) << "Failed to start tuneables_processing. Cannot cache tunables.";
 						return;

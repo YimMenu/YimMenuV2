@@ -9,15 +9,22 @@ namespace YimMenu::Submenus
 	Recovery::Recovery() :
 	    Submenu::Submenu("Recovery")
 	{
-		auto missions = std::make_shared<Category>("Missions");
-		auto vehiclesGroup = std::make_shared<Group>("Vehicles");
-		auto generalGroup = std::make_shared<Group>("General");
+		auto missions   = std::make_shared<Category>("Missions");
+		auto businesses = std::make_shared<Category>("Businesses");
 
-		generalGroup->AddItem(std::make_shared<BoolCommandItem>("playallmissionssolo"_J));
-		generalGroup->AddItem(std::make_shared<CommandItem>("forcelaunchheist"_J));
+		auto missionsGeneralGroup   = std::make_shared<Group>("General");
+		auto businessesGeneralGroup = std::make_shared<Group>("General");
 
-		missions->AddItem(generalGroup);
+		missionsGeneralGroup->AddItem(std::make_shared<BoolCommandItem>("playallmissionssolo"_J));
+		missionsGeneralGroup->AddItem(std::make_shared<CommandItem>("forcelaunchheist"_J));
+
+		businessesGeneralGroup->AddItem(std::make_shared<ListCommandItem>("businesssafe"_J));
+		businessesGeneralGroup->AddItem(std::make_shared<CommandItem>("claimsafeearnings"_J));
+
+		missions->AddItem(missionsGeneralGroup);
+		businesses->AddItem(businessesGeneralGroup);
 		AddCategory(std::move(missions));
+		AddCategory(std::move(businesses));
 		AddCategory(BuildStatEditorMenu());
 		AddCategory(BuildTransactionsMenu());
 		AddCategory(BuildHeistModifierMenu());

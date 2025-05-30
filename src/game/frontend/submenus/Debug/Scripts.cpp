@@ -15,6 +15,37 @@
 
 namespace YimMenu::Submenus
 {
+	static constexpr std::pair<const char*, int> stackSizes[] = {
+		{"MICRO", static_cast<int>(eStackSizes::MICRO)},
+		{"MINI", static_cast<int>(eStackSizes::MINI)},
+		{"DEFAULT", static_cast<int>(eStackSizes::DEFAULT)},
+		{"SPECIAL_ABILITY", static_cast<int>(eStackSizes::SPECIAL_ABILITY)},
+		{"FRIEND", static_cast<int>(eStackSizes::FRIEND)},
+		{"SHOP", static_cast<int>(eStackSizes::SHOP)},
+		{"CELLPHONE", static_cast<int>(eStackSizes::CELLPHONE)},
+		{"VEHICLE_SPAWN", static_cast<int>(eStackSizes::VEHICLE_SPAWN)},
+		{"CAR_MOD_SHOP", static_cast<int>(eStackSizes::CAR_MOD_SHOP)},
+		{"PAUSE_MENU_SCRIPT", static_cast<int>(eStackSizes::PAUSE_MENU_SCRIPT)},
+		{"APP_INTERNET", static_cast<int>(eStackSizes::APP_INTERNET)},
+		{"MULTIPLAYER_MISSION", static_cast<int>(eStackSizes::MULTIPLAYER_MISSION)},
+		{"CONTACTS_APP", static_cast<int>(eStackSizes::CONTACTS_APP)},
+		{"INTERACTION_MENU", static_cast<int>(eStackSizes::INTERACTION_MENU)},
+		{"SCRIPT_XML", static_cast<int>(eStackSizes::SCRIPT_XML)},
+		{"PROPERTY_INT", static_cast<int>(eStackSizes::PROPERTY_INT)},
+		{"ACTIVITY_CREATOR_INT", static_cast<int>(eStackSizes::ACTIVITY_CREATOR_INT)},
+		{"SMPL_INTERIOR", static_cast<int>(eStackSizes::SMPL_INTERIOR)},
+		{"WAREHOUSE", static_cast<int>(eStackSizes::WAREHOUSE)},
+		{"IE_DELIVERY", static_cast<int>(eStackSizes::IE_DELIVERY)},
+		{"SHOP_CONTROLLER", static_cast<int>(eStackSizes::SHOP_CONTROLLER)},
+		{"AM_MP_YACHT", static_cast<int>(eStackSizes::AM_MP_YACHT)},
+		{"INGAMEHUD", static_cast<int>(eStackSizes::INGAMEHUD)},
+		{"TRANSITION", static_cast<int>(eStackSizes::TRANSITION)},
+		{"FMMC_LAUNCHER", static_cast<int>(eStackSizes::FMMC_LAUNCHER)},
+		{"MULTIPLAYER_FREEMODE", static_cast<int>(eStackSizes::MULTIPLAYER_FREEMODE)},
+		{"MISSION", static_cast<int>(eStackSizes::MISSION)},
+		{"MP_LAUNCH_SCRIPT", static_cast<int>(eStackSizes::MP_LAUNCH_SCRIPT)}
+	};
+
 	std::shared_ptr<Category> BuildScriptsMenu()
 	{
 		auto scripts = std::make_unique<Category>("Scripts");

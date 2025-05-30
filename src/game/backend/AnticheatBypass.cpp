@@ -77,12 +77,12 @@ namespace YimMenu
 		if (m_BattlEyeRunning)
 			LOGF(WARNING, "If you are not running an actual BattlEye bypass, exit the game immediately and ensure that BE is properly disabled");
 
-		if (!m_IsFSLLoaded)
+		if (!m_FSLProvidesBEBypass)
 			Pointers.BattlEyeStatusUpdatePatch->Apply();
 
 		while (true)
 		{
-			if (!m_IsFSLLoaded)
+			if (!m_FSLProvidesBEBypass)
 			{
 				*Pointers.BERestartStatus = 0;
 				*Pointers.NeedsBERestart = false;

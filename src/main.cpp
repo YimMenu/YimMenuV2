@@ -38,6 +38,9 @@ namespace YimMenu
 		if (!ModuleMgr.LoadModules())
 			goto EARLY_UNLOAD;
 
+		if (ModuleMgr.IsManualMapped())
+			LOGF(WARNING, "Manual mapping detected, switch to normal injection if you're having issues");
+
 		if (!Pointers.Init())
 			goto EARLY_UNLOAD;
 
@@ -99,8 +102,9 @@ EARLY_UNLOAD:
 BOOL WINAPI DllMain(HINSTANCE dllInstance, DWORD reason, void*)
 {
 	using namespace YimMenu;
-
-	DisableThreadLibraryCalls(dllInstance);
+	
+	if (dllInstance)
+		DisableThreadLibraryCalls(dllInstance);
 
 	if (reason == DLL_PROCESS_ATTACH)
 	{

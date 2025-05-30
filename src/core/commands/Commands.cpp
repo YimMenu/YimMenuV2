@@ -45,7 +45,7 @@ namespace YimMenu
 	void Commands::RunLoopedCommandsImpl()
 	{
 		for (auto& command : m_LoopedCommands)
-			if (command->GetState())
+			if (command->GetState() && command->IsReady())
 				command->Tick();
 	}
 

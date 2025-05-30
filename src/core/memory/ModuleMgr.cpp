@@ -22,6 +22,8 @@ namespace YimMenu
 	{
 		m_CachedModules.clear();
 
+		m_ManualMapped = true;
+
 		const auto peb = reinterpret_cast<PPEB>(NtCurrentTeb()->ProcessEnvironmentBlock);
 		if (!peb)
 			return false;
@@ -42,6 +44,9 @@ namespace YimMenu
 			{
 				auto module = std::make_unique<Module>(tableEntry);
 
+				if (module->Base() == reinterpret_cast<uint64_t>(g_DllInstance))
+					m_ManualMapped = false;
+
 				m_CachedModules.insert({Joaat(module->Name()), std::move(module)});
 			}
 		}
@@ -52,5 +57,10 @@ namespace YimMenu
 	std::unordered_multimap<std::uint32_t, std::unique_ptr<Module>>& ModuleMgr::GetModules()
 	{
 		return m_CachedModules;
+	}
+
+	bool ModuleMgr::IsManualMapped()
+	{
+		return m_ManualMapped;
 	}
 }

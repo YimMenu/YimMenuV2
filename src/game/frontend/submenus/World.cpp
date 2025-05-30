@@ -27,6 +27,15 @@ namespace YimMenu::Submenus
 		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));
 		weatherOpts->AddItem(std::make_shared<BoolCommandItem>("forceweather"_J));
 
+		auto timeGroup = std::make_shared<Group>("Time Control");
+
+		timeGroup->AddItem(std::make_shared<IntCommandItem>("networktimehour"_J, "Hour"));
+		timeGroup->AddItem(std::make_shared<IntCommandItem>("networktimeminute"_J, "Minute"));
+		timeGroup->AddItem(std::make_shared<IntCommandItem>("networktimesecond"_J, "Second"));
+
+		timeGroup->AddItem(std::make_shared<CommandItem>("setnetworktime"_J, "Set"));
+		timeGroup->AddItem(std::make_shared<BoolCommandItem>("freezenetworktime"_J, "Freeze"));
+
 		auto otherOpts = std::make_shared<Group>("Other", 1);
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("pedsignore"_J));
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
@@ -37,6 +46,7 @@ namespace YimMenu::Submenus
 		main->AddItem(std::move(bringOpts));
 		main->AddItem(std::move(weatherOpts));
 		main->AddItem(std::move(otherOpts));
+		main->AddItem(timeGroup);
 
 		auto spawnVehicle = std::make_shared<Group>("Vehicle");
 		spawnVehicle->AddItem(std::make_shared<StringCommandItem>("vehmodelname"_J));

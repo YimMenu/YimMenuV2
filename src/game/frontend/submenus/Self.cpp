@@ -71,6 +71,7 @@ namespace YimMenu::Submenus
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteparachutes"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("ExplosiveAmmo"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<CommandItem>("giveallweapons"_J));
+		weaponsGlobalsGroup->AddItem(std::make_shared<CommandItem>("givemaxammo"_J));
 
 		weaponsAimbotGroup->AddItem(std::make_shared<BoolCommandItem>("aimbot"_J));
 		weaponsAimbotGroup->AddItem(std::make_shared<ConditionalItem>("aimbot"_J, std::make_shared<BoolCommandItem>("aimbotaimforhead"_J)));

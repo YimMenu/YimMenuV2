@@ -3,6 +3,7 @@
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "OutfitEditor.hpp"
+#include "game/frontend/submenus/Self/Weapons.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -61,25 +62,7 @@ namespace YimMenu::Submenus
 		main->AddItem(movementGroup);
 		AddCategory(std::move(main));
 
-		auto weapons             = std::make_shared<Category>("Weapons");
-		auto weaponsGlobalsGroup = std::make_shared<Group>("Globals");
-		auto weaponsAimbotGroup  = std::make_shared<Group>("Aimbot", 1);
-
-		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteammo"_J));
-		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteclip"_J));
-		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("rapidfire"_J));
-		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteparachutes"_J));
-		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("ExplosiveAmmo"_J));
-		weaponsGlobalsGroup->AddItem(std::make_shared<CommandItem>("giveallweapons"_J));
-		weaponsGlobalsGroup->AddItem(std::make_shared<CommandItem>("givemaxammo"_J));
-
-		weaponsAimbotGroup->AddItem(std::make_shared<BoolCommandItem>("aimbot"_J));
-		weaponsAimbotGroup->AddItem(std::make_shared<ConditionalItem>("aimbot"_J, std::make_shared<BoolCommandItem>("aimbotaimforhead"_J)));
-		weaponsAimbotGroup->AddItem(std::make_shared<ConditionalItem>("aimbot"_J, std::make_shared<BoolCommandItem>("aimbottargetdrivers"_J)));
-
-		weapons->AddItem(weaponsGlobalsGroup);
-		weapons->AddItem(weaponsAimbotGroup);
-		AddCategory(std::move(weapons));
+		AddCategory(BuildWeaponsMenu());
 
 		auto outfitEditorCategory = YimMenu::CreateOutfitsMenu();
 		AddCategory(std::move(outfitEditorCategory));

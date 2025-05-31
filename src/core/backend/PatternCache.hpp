@@ -7,6 +7,7 @@ namespace YimMenu
 	{
 		bool m_Initialized;
 		std::unordered_map<std::uint64_t, int> m_Data;
+		std::mutex m_Mutex;
 
 	public:
 		PatternCache() :

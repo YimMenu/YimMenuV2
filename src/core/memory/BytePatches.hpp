@@ -23,16 +23,16 @@ namespace YimMenu
 			    m_Address(address),
 			    m_Applied(false)
 			{
-				m_Size          = sizeof(std::remove_pointer_t<std::remove_reference_t<TAddr>>);
+				m_Size = sizeof(std::remove_pointer_t<std::remove_reference_t<TAddr>>);
 				m_OriginalBytes = std::make_unique<uint8_t[]>(m_Size);
-				m_Value         = std::make_unique<uint8_t[]>(m_Size);
+				m_Value = std::make_unique<uint8_t[]>(m_Size);
 
 				memcpy(m_OriginalBytes.get(), m_Address, m_Size);
 				memcpy(m_Value.get(), &value, m_Size);
 			}
 
 			Patch(void* address, std::span<std::uint8_t const> const values) :
-			    m_Address((void*)address),
+			    m_Address(address),
 			    m_Applied(false)
 			{
 				m_Size = values.size();
@@ -54,17 +54,20 @@ namespace YimMenu
 		};
 
 	private:
-		static inline std::vector<std::shared_ptr<Patch>> m_Patches;
+		static inline std::vector<std::shared_ptr<Patch>> m_Patches{};
+		static inline std::mutex m_Mutex;
 
 	public:
 		template<typename TAddr>
 		static std::shared_ptr<Patch> Add(TAddr address, std::remove_pointer_t<std::remove_reference_t<TAddr>> value)
 		{
+			std::lock_guard lock(m_Mutex);
 			return m_Patches.emplace_back(std::make_shared<Patch>(address, value));
 		}
 
 		static std::shared_ptr<Patch> Add(void* address, std::span<std::uint8_t const> const values)
 		{
+			std::lock_guard lock(m_Mutex);
 			return m_Patches.emplace_back(std::make_shared<Patch>(address, values));
 		}
 

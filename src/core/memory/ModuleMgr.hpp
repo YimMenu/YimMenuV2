@@ -27,8 +27,10 @@ namespace YimMenu
 		 */
 		bool LoadModules();
 		std::unordered_multimap<std::uint32_t, std::unique_ptr<Module>>& GetModules();
+		bool IsManualMapped();
 
 	private:
+		bool m_ManualMapped = false;
 		std::unordered_multimap<std::uint32_t, std::unique_ptr<Module>> m_CachedModules;
 	};
 

@@ -29,6 +29,7 @@ using Vector3   = rage::scrVector;
 #define PED_INDEX alignas(8) Ped
 #define VEHICLE_INDEX alignas(8) Vehicle
 #define INTERIOR_INDEX alignas(8) Interior
+#define BLIP_INDEX alignas(8) Blip
 #define NETWORK_INDEX alignas(8) int
 
 #define SCR_SIZEOF(x) (sizeof(x) / 8)
@@ -98,6 +99,12 @@ struct Color3
 	SCR_INT B;
 };
 static_assert(sizeof(Color3) == 3 * 8);
+
+struct Date
+{
+	SCR_INT Year, Month, Day, Hour, Minute, Second, Millisecond;
+};
+static_assert(sizeof(Date) == 7 * 8);
 
 // serialized bitbuffer data of rage::rlGamerHandle + some padding for last gen compatibility
 // TODO: is the above statement true in Enhanced?

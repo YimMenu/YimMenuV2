@@ -5,9 +5,9 @@
 
 namespace YimMenu::Features
 {
-	static IntCommand _NetworkTimeHour{"networktimehour", "Hour", "Set hour (0–23)", 0, 23, 12};
-	static IntCommand _NetworkTimeMinute{"networktimeminute", "Minute", "Set minute (0–59)", 0, 59, 0};
-	static IntCommand _NetworkTimeSecond{"networktimesecond", "Second", "Set second (0–59)", 0, 59, 0};
+	static IntCommand _NetworkTimeHour{"networktimehour", "Hour", "Set hour (0-23)", 0, 23, 12};
+	static IntCommand _NetworkTimeMinute{"networktimeminute", "Minute", "Set minute (0-59)", 0, 59, 0};
+	static IntCommand _NetworkTimeSecond{"networktimesecond", "Second", "Set second (0-59)", 0, 59, 0};
 
 
 	class SetNetworkTime : public Command

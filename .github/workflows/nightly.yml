@@ -49,10 +49,16 @@ jobs:
         with:
           arch: amd64
 
-      - name: Generate CMake project
-        run: cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo -S. -Bbuild -G Ninja
+      - name: Setup Ninja
+        run: |
+          Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip -OutFile "${{ runner.temp }}\ninja-win-v1.12.1.zip"
+          Expand-Archive -Path "${{ runner.temp }}\ninja-win-v1.12.1.zip" -DestinationPath "${{ runner.temp }}\ninja"
+          echo "${{ runner.temp }}\ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Build 64bit release DLL
+      - name: Generate CMake project
+        run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+
+      - name: Build 64bit RelWithDebInfo DLL
         run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
 
       - name: Upload Artifact

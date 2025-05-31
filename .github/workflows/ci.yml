@@ -3,9 +3,9 @@ name: CI
 on: [ push, pull_request ]
 
 jobs:
-  msvc-ci:
+  ci:
     runs-on: [ self-hosted, Windows ]
-    name: CI (MSVC)
+    name: CI
     steps:
       - uses: actions/checkout@v3
 
@@ -17,41 +17,11 @@ jobs:
         with:
           arch: amd64
 
-      - name: Generate CMake project
-        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
-
-      - name: Build 64bit RelWithDebInfo DLL
-        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
-
-      - name: Check if DLL got built
-        run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
-
-      - name: Rename DLL to YimMenuV2-dev-{GITHUB_SHA}.dll
+      - name: Setup Ninja
         run: |
-          del YimMenuV2-dev-*.dll
-          ren YimMenuV2.dll YimMenuV2-dev-${{github.sha}}.dll
-        working-directory: build/
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: RelWithDebInfo-MSVC
-          path: build/YimMenuV2-dev-*.dll
-
-  msvc-clang:
-    runs-on: [ self-hosted, Windows ]
-    name: CI (Clang)
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Check CMake version
-        run: cmake --version
-
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2
-        with:
-          version: "20"
-          arch: "x64"
+          Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip -OutFile "${{ runner.temp }}\ninja-win-v1.12.1.zip"
+          Expand-Archive -Path "${{ runner.temp }}\ninja-win-v1.12.1.zip" -DestinationPath "${{ runner.temp }}\ninja"
+          echo "${{ runner.temp }}\ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Generate CMake project
         run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja

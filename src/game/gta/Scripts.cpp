@@ -35,7 +35,7 @@ namespace YimMenu::Scripts
 		}
 
 		int id = 0;
-		if (args)
+		if (args && argCount > 0)
 		{
 			id = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS(hash, args, argCount, static_cast<int>(stackSize));
 		}

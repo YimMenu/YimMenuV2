@@ -71,9 +71,6 @@ namespace YimMenu::Submenus
 				return true;
 			}();
 
-			if (vehicleNames.empty())
-				return ImGui::TextDisabled("Loading...");
-
 			static char search[64];
 			ImGui::SetNextItemWidth(300.f);
 			ImGui::InputTextWithHint("Name", "Search", search, sizeof(search));
@@ -105,6 +102,9 @@ namespace YimMenu::Submenus
 				std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 				for (int veh = 0; veh < vehicleNames.size(); veh++)
 				{
+					if (vehicleNames[veh].empty())
+						continue;
+
 					auto hash      = g_VehicleHashes[veh];
 					auto name      = vehicleNames[veh];
 					auto lowerName = name;

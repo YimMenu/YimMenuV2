@@ -115,20 +115,17 @@ namespace YimMenu::Submenus
 		{
 			if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
 			{
-				if (auto eventProgram = Scripts::FindScriptProgram(randomEventScripts[(int)selectedEvent]))
+				if (NetComponent->IsLocalPlayerHost())
 				{
-					if (NetComponent->IsLocalPlayerHost())
-					{
-						std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);
-						ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
-						setFMContentScriptServerState.Call<void>(3);
-					}
-					else
-					{
-						std::string ptrName = "SetFMContentScriptClientState" + std::to_string(selectedEvent);
-						ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 08 00 74").Add(1).Rip());
-						setFMContentScriptClientState.Call<void>(3);
-					}
+					std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);
+					ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
+					setFMContentScriptServerState.Call<void>(3);
+				}
+				else
+				{
+					std::string ptrName = "SetFMContentScriptClientState" + std::to_string(selectedEvent);
+					ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 08 00 74").Add(1).Rip());
+					setFMContentScriptClientState.Call<void>(3);
 				}
 			}
 		}

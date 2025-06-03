@@ -1,5 +1,6 @@
 #include "Weapons.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/data/Weapons.hpp"
 #include "game/gta/Natives.hpp"
@@ -25,6 +26,9 @@ namespace YimMenu::Submenus
 
 		static bool init = [] {
 			FiberPool::Push([] {
+				while (Scripts::IsScriptActive("startup"_J))
+					ScriptMgr::Yield();
+
 				if (auto id = Scripts::StartScript("mp_weapons"_J))
 				{
 					if (auto thread = Scripts::FindScriptThreadByID(id))
@@ -52,9 +56,6 @@ namespace YimMenu::Submenus
 			});
 			return true;
 		}();
-
-		if (weaponDisplays.empty())
-			return ImGui::TextDisabled("Loading...");
 
 		ImGui::BeginCombo("Weapons", selectedWeapon.c_str());
 		if (ImGui::IsItemActive() && !ImGui::IsPopupOpen("##weaponspopup"))

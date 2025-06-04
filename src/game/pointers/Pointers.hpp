@@ -148,6 +148,7 @@ namespace YimMenu
 		BytePatch SetJoinRequestPoolTypePatch;
 		BytePatch HandleJoinRequestIgnorePoolPatch;
 		CStatsMpCharacterMappingData* StatsMpCharacterMappingData;
+		int* HasGTAPlus;
 	};
 
 	struct Pointers : PointerData

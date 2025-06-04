@@ -96,8 +96,10 @@ namespace YimMenu::Submenus
 		else
 		{
 			// Phantom Car's cooldown is actually 2147483647ms if STANDARDTARGETTINGTIME is not enabled
-			setCooldown     = *Tunables::GetTunable(randomEventCooldowns[event]).As<int*>();
-			setAvailability = *Tunables::GetTunable(randomEventAvailabilities[event]).As<int*>();
+			if (auto tunable = Tunables::GetTunable(randomEventCooldowns[event]))
+				setCooldown = *tunable->As<int*>();
+			if (auto tunable = Tunables::GetTunable(randomEventAvailabilities[event]))
+				setAvailability = *tunable->As<int*>();
 		}
 	}
 
@@ -115,20 +117,17 @@ namespace YimMenu::Submenus
 		{
 			if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
 			{
-				if (auto eventProgram = Scripts::FindScriptProgram(randomEventScripts[(int)selectedEvent]))
+				if (NetComponent->IsLocalPlayerHost())
 				{
-					if (NetComponent->IsLocalPlayerHost())
-					{
-						std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);
-						ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
-						setFMContentScriptServerState.Call<void>(3);
-					}
-					else
-					{
-						std::string ptrName = "SetFMContentScriptClientState" + std::to_string(selectedEvent);
-						ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 08 00 74").Add(1).Rip());
-						setFMContentScriptClientState.Call<void>(3);
-					}
+					std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);
+					ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
+					setFMContentScriptServerState.Call<void>(3);
+				}
+				else
+				{
+					std::string ptrName = "SetFMContentScriptClientState" + std::to_string(selectedEvent);
+					ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 08 00 74").Add(1).Rip());
+					setFMContentScriptClientState.Call<void>(3);
 				}
 			}
 		}
@@ -213,7 +212,8 @@ namespace YimMenu::Submenus
 			}
 
 			int numActiveEvents = GetNumLocallyActiveEvents();
-			int maxActiveEvents = *Tunables::GetTunable("FMREMAXACTIVATEDEVENTS"_J).As<int*>();
+			static Tunable maxEventsTune{"FMREMAXACTIVATEDEVENTS"_J};
+			int maxActiveEvents = maxEventsTune.IsReady() ? maxEventsTune.Get<int>() : 0;
 			if (numActiveEvents >= maxActiveEvents)
 				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Active Events: %d/%d", numActiveEvents, maxActiveEvents);
 			else

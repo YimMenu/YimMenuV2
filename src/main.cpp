@@ -21,6 +21,7 @@
 #include "game/frontend/GUI.hpp"
 #include "game/pointers/Pointers.hpp"
 #include "game/features/vehicle/SavePersonalVehicle.hpp"
+#include "game/features/self/OpenGunLocker.hpp"
 
 namespace YimMenu
 {
@@ -67,6 +68,7 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::SavePersonalVehicle::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenGunLocker::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
 
 		if (!Pointers.LateInit())

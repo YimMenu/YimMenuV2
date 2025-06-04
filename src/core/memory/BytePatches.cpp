@@ -11,6 +11,9 @@ namespace YimMenu
 	{
 		if (m_Applied || !g_Running)
 			return;
+
+		std::lock_guard lock(m_Mutex); // this function should be thread-safe, but doesn't hurt
+
 		unsigned long old_protect;
 		unsigned long temp;
 		VirtualProtect(m_Address, m_Size, PAGE_EXECUTE_READWRITE, &old_protect);
@@ -23,6 +26,9 @@ namespace YimMenu
 	{
 		if (!m_Applied)
 			return;
+
+		std::lock_guard lock(m_Mutex);
+
 		unsigned long old_protect;
 		unsigned long temp;
 		VirtualProtect(m_Address, m_Size, PAGE_EXECUTE_READWRITE, &old_protect);

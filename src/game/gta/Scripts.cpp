@@ -1,4 +1,5 @@
 #include "Scripts.hpp"
+#include "core/backend/ScriptMgr.hpp"
 #include "game/pointers/Pointers.hpp"
 #include "types/rage/atArray.hpp"
 #include "types/rage/tlsContext.hpp"
@@ -8,6 +9,7 @@
 #include "types/script/CGameScriptHandlerNetComponent.hpp"
 #include "types/script/CGameScriptId.hpp"
 #include "types/script/globals/GlobalPlayerBD.hpp"
+#include "game/gta/Natives.hpp"
 #include "game/gta/Packet.hpp"
 #include "game/backend/Players.hpp"
 #include "game/backend/Self.hpp"
@@ -15,6 +17,45 @@
 
 namespace YimMenu::Scripts
 {
+	int StartScript(joaat_t hash, eStackSizes stackSize, void* args, int argCount)
+	{
+		if (!SCRIPT::DOES_SCRIPT_WITH_NAME_HASH_EXIST(hash))
+			return 0;
+
+		if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(hash) > 0)
+			return FindScriptThread(hash)->m_Context.m_ThreadId;
+
+		for (int i = 0; !SCRIPT::HAS_SCRIPT_WITH_NAME_HASH_LOADED(hash); i++)
+		{
+			SCRIPT::REQUEST_SCRIPT_WITH_NAME_HASH(hash);
+			ScriptMgr::Yield();
+
+			if (i > 30)
+				return 0;
+		}
+
+		int id = 0;
+		if (args && argCount > 0)
+		{
+			id = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS(hash, args, argCount, static_cast<int>(stackSize));
+		}
+		else
+		{
+			id = BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH(hash, static_cast<int>(stackSize));
+		}
+
+		SCRIPT::SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED(hash);
+		return id;
+	}
+
+	bool IsScriptActive(joaat_t hash)
+	{
+		if (auto program = FindScriptProgram(hash))
+			return (program->m_RefCount - 1) > 0;
+
+		return false;
+	}
+
 	rage::scrThread* FindScriptThread(joaat_t hash)
 	{
 		for (auto& thread : *Pointers.ScriptThreads)

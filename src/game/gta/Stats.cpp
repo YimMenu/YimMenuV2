@@ -1,18 +1,15 @@
 #include "Stats.hpp"
 #include "game/gta/Natives.hpp"
 
-namespace
+namespace YimMenu::Stats
 {
-	void ConvertMPX(std::string& statName)
+	static void ConvertMPX(std::string& statName)
 	{
 		std::transform(statName.begin(), statName.end(), statName.begin(), ::tolower);
 		if (statName.substr(0, 3) == "mpx")
-			statName[2] = YimMenu::Stats::GetCharIndex() + '0';
+			statName[2] = GetCharIndex() + '0';
 	}
-}
 
-namespace YimMenu::Stats
-{
 	int GetCharIndex()
 	{
 		int index{};
@@ -41,7 +38,7 @@ namespace YimMenu::Stats
 	void SetDate(std::string statName, Date* value)
 	{
 		ConvertMPX(statName);
-		STATS::STAT_SET_DATE(Joaat(statName), value, sizeof(Date) / 8, TRUE);
+		STATS::STAT_SET_DATE(Joaat(statName), value, SCR_SIZEOF(Date), TRUE);
 	}
 	
 	void SetString(std::string statName, const char* value)
@@ -78,7 +75,7 @@ namespace YimMenu::Stats
 	{
 		Date value{};
 		ConvertMPX(statName);
-		STATS::STAT_GET_DATE(Joaat(statName), &value, sizeof(Date) / 8, -1);
+		STATS::STAT_GET_DATE(Joaat(statName), &value, SCR_SIZEOF(Date), -1);
 		return value;
 	}
 	

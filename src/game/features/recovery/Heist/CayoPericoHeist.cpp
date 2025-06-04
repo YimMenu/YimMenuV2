@@ -137,12 +137,48 @@ namespace YimMenu::Features
 
 				switch (primary_target)
 				{
-				case 0: *Tunables::GetTunable("IH_PRIMARY_TARGET_VALUE_TEQUILA"_J).As<int*>() = _CayoPericoHeistPrimaryTargetValue.GetState(); break;
-				case 1:	*Tunables::GetTunable("IH_PRIMARY_TARGET_VALUE_PEARL_NECKLACE"_J).As<int*>() = _CayoPericoHeistPrimaryTargetValue.GetState(); break;
-				case 2:	*Tunables::GetTunable("IH_PRIMARY_TARGET_VALUE_BEARER_BONDS"_J).As<int*>() = _CayoPericoHeistPrimaryTargetValue.GetState(); break;
-				case 3:	*Tunables::GetTunable("IH_PRIMARY_TARGET_VALUE_PINK_DIAMOND"_J).As<int*>() = _CayoPericoHeistPrimaryTargetValue.GetState(); break;
-				case 4:	*Tunables::GetTunable("IH_PRIMARY_TARGET_VALUE_MADRAZO_FILES"_J).As<int*>() = _CayoPericoHeistPrimaryTargetValue.GetState(); break;
-				case 5:	*Tunables::GetTunable("IH_PRIMARY_TARGET_VALUE_SAPPHIRE_PANTHER_STATUE"_J).As<int*>() = _CayoPericoHeistPrimaryTargetValue.GetState(); break;
+				case 0:
+				{
+					static Tunable tunable{"IH_PRIMARY_TARGET_VALUE_TEQUILA"_J};
+					if (tunable.IsReady())
+						tunable.Set(_CayoPericoHeistPrimaryTargetValue.GetState());
+					break;
+				}
+				case 1:
+				{
+					static Tunable tunable{"IH_PRIMARY_TARGET_VALUE_PEARL_NECKLACE"_J};
+					if (tunable.IsReady())
+						tunable.Set(_CayoPericoHeistPrimaryTargetValue.GetState());
+					break;
+				}
+				case 2:
+				{
+					static Tunable tunable{"IH_PRIMARY_TARGET_VALUE_BEARER_BONDS"_J};
+					if (tunable.IsReady())
+						tunable.Set(_CayoPericoHeistPrimaryTargetValue.GetState());
+					break;
+				}
+				case 3:
+				{
+					static Tunable tunable{"IH_PRIMARY_TARGET_VALUE_PINK_DIAMOND"_J};
+					if (tunable.IsReady())
+						tunable.Set(_CayoPericoHeistPrimaryTargetValue.GetState());
+					break;
+				}
+				case 4:
+				{
+					static Tunable tunable{"IH_PRIMARY_TARGET_VALUE_MADRAZO_FILES"_J};
+					if (tunable.IsReady())
+						tunable.Set(_CayoPericoHeistPrimaryTargetValue.GetState());
+					break;
+				}
+				case 5:
+				{
+					static Tunable tunable{"IH_PRIMARY_TARGET_VALUE_SAPPHIRE_PANTHER_STATUE"_J};
+					if (tunable.IsReady())
+						tunable.Set(_CayoPericoHeistPrimaryTargetValue.GetState());
+					break;
+				}
 				default: break;
 				}
 			}

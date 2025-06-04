@@ -1,25 +1,35 @@
-#include "core/commands/Command.hpp"
-#include "core/commands/IntCommand.hpp"
+#include "core/commands/LoopedCommand.hpp"
+#include "core/commands/FloatCommand.hpp"
 #include "game/backend/Tunables.hpp"
 
 namespace YimMenu::Features
 {
-	static IntCommand _RpMultiplierInput{"rpmultiplierinput", "RP Multiplier Input", "RP Mulitplier (< 0 = 0 -> No RP)", std::nullopt, std::nullopt, 1};
+	static FloatCommand _RpMultiplierInput{"rpmultiplierinput", "RP Multiplier Input", "RP Mulitplier (< 0 = 0 -> No RP)", std::nullopt, std::nullopt, 1};
 
-	class RPMultiplier : public Command
+	class OverrideRPMultiplier : public LoopedCommand
 	{
-		using Command::Command;
+		using LoopedCommand::LoopedCommand;
 
-		virtual void OnCall() override
+		Tunable m_XPMultiplier{"XP_MULTIPLIER"_J};
+
+		virtual void OnTick() override
 		{
-			int state = _RpMultiplierInput.GetState();
+			auto state = _RpMultiplierInput.GetState();
 			if (state < 0)
 			{
 				state = 0;
 			}
-			*Tunables::GetTunable("XP_MULTIPLIER"_J).As<float*>() = state;
+
+			if (m_XPMultiplier.IsReady())
+				m_XPMultiplier.Set(state);
+		}
+
+		virtual void OnDisable() override
+		{
+			if (m_XPMultiplier.IsReady())
+				m_XPMultiplier.Set(1.0f);
 		}
 	};
 
-	static RPMultiplier _RPMultiplier{"rpmultiplier", "Set RP Multiplier", "Multiplies RP by the given value"};
+	static OverrideRPMultiplier _OverrideRPMultiplier{"overriderpmultiplier", "Override RP Multiplier", "Multiplies RP by the given value"};
 }

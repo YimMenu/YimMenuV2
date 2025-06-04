@@ -36,6 +36,11 @@ namespace YimMenu
 			return *static_cast<std::add_pointer_t<std::remove_reference_t<T>>>(Get());
 		}
 
+        constexpr bool operator==(const ScriptGlobal& other)
+        {
+			return m_Index == other.m_Index;
+        }
+
         bool CanAccess() const;
 
     private:

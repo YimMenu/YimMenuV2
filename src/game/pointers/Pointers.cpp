@@ -369,6 +369,12 @@ namespace YimMenu
 			StatsMpCharacterMappingData = ptr.Add(3).Rip().As<CStatsMpCharacterMappingData*>();
 		});
 
+		static constexpr auto scMembershipStuffPtrn = Pattern<"48 8D 15 ? ? ? ? 41 B8 18 02 00 00 E8">("ScMembershipStuff");
+		scanner.Add(scMembershipStuffPtrn, [this](PointerCalculator addr) {
+			HasGTAPlus = addr.Add(3).Rip().As<int*>();
+		});
+
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

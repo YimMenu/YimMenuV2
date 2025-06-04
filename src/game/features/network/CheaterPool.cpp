@@ -22,7 +22,7 @@ namespace YimMenu::Features
 		}
 	};
 
-	static CheaterPool _CheaterPool{"cheaterpool", "Cheater Pool", "Matchmaking will put you into sessions with other YimMenu users.", true};
+	static CheaterPool _CheaterPool{"cheaterpool", "Join YimMenu-only Sessions", "Matchmaking will put you into sessions with other YimMenu users.", true};
 }
 
 namespace YimMenu::Hooks

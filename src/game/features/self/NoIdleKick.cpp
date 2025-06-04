@@ -7,17 +7,25 @@ namespace YimMenu::Features
 	{
 		using LoopedCommand::LoopedCommand;
 
-		static constexpr std::array m_TunableHashes = {"IDLEKICK_WARNING1"_J, "IDLEKICK_WARNING2"_J, "IDLEKICK_WARNING3"_J, "IDLEKICK_KICK"_J, "ConstrainedKick_Warning1"_J, "ConstrainedKick_Warning2"_J, "ConstrainedKick_Warning3"_J, "ConstrainedKick_Kick"_J};
-		static constexpr std::array m_DefaultValues = {120000, 300000, 600000, 900000, 30000, 60000, 90000, 120000};
+		std::array<Tunable, 8> m_Tunables = std::to_array({
+			Tunable("IDLEKICK_WARNING1"_J), 
+			Tunable("IDLEKICK_WARNING2"_J), 
+			Tunable("IDLEKICK_WARNING3"_J), 
+			Tunable("IDLEKICK_KICK"_J), 
+			Tunable("ConstrainedKick_Warning1"_J), 
+			Tunable("ConstrainedKick_Warning2"_J), 
+			Tunable("ConstrainedKick_Warning3"_J), 
+			Tunable("ConstrainedKick_Kick"_J),
+		});
+
+		static constexpr auto m_DefaultValues = std::to_array({120000, 300000, 600000, 900000, 30000, 60000, 90000, 120000});
 
 		virtual void OnTick() override
 		{
-			for (auto tunable : m_TunableHashes)
+			for (auto& tunable : m_Tunables)
 			{
-				if (auto tunablePtr = Tunables::GetTunable(tunable).As<int*>())
-				{
-					*tunablePtr = INT_MAX;
-				}
+				if (tunable.IsReady())
+					tunable.Set(INT_MAX);
 			}
 		}
 
@@ -25,11 +33,8 @@ namespace YimMenu::Features
 		{
 			for (int i = 0; i < m_DefaultValues.size(); i++)
 			{
-				if (auto tunablePtr = Tunables::GetTunable(m_TunableHashes[i]).As<int*>())
-				{
-					// TO-DO: Add methods for getting the default script value and cloud value to the Tunables class
-					*tunablePtr = m_DefaultValues[i];
-				}
+				if (m_Tunables[i].IsReady())
+					m_Tunables[i].Set(m_DefaultValues[i]);
 			}
 		}
 	};

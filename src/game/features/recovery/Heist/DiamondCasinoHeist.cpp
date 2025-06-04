@@ -261,10 +261,34 @@ namespace YimMenu::Features
 
 				switch (primary_target)
 				{
-				case 0: *Tunables::GetTunable(static_cast<joaat_t>(-1638885821)).As<int*>() = _DiamondCasinoHeistPotentialTake.GetState(); break; // "Cash"
-				case 1: *Tunables::GetTunable(static_cast<joaat_t>(-582734553)).As<int*>() = _DiamondCasinoHeistPotentialTake.GetState(); break; // "Gold"
-				case 2: *Tunables::GetTunable(static_cast<joaat_t>(1934398910)).As<int*>() = _DiamondCasinoHeistPotentialTake.GetState(); break; // "Artwork"
-				case 3: *Tunables::GetTunable(static_cast<joaat_t>(1277889925)).As<int*>() = _DiamondCasinoHeistPotentialTake.GetState(); break; // "Diamond"
+				case 0:
+				{
+					static Tunable tunable{static_cast<joaat_t>(-1638885821)};
+					if (tunable.IsReady())
+						tunable.Set(_DiamondCasinoHeistPotentialTake.GetState());
+					break;
+				} // "Cash"
+				case 1:
+				{
+					static Tunable tunable{static_cast<joaat_t>(-582734553)};
+					if (tunable.IsReady())
+						tunable.Set(_DiamondCasinoHeistPotentialTake.GetState());
+					break;
+				} // "Gold"
+				case 2:
+				{
+					static Tunable tunable{1934398910};
+					if (tunable.IsReady())
+						tunable.Set(_DiamondCasinoHeistPotentialTake.GetState());
+					break;
+				} // "Artwork"
+				case 3:
+				{
+					static Tunable tunable{1277889925};
+					if (tunable.IsReady())
+						tunable.Set(_DiamondCasinoHeistPotentialTake.GetState());
+					break;
+				} // "Diamond"
 				default: break;
 				}
 			}

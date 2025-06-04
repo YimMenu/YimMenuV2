@@ -6,6 +6,7 @@ namespace YimMenu
 {
 	std::optional<int> PatternCache::GetCachedOffsetImpl(PatternHash hash)
 	{
+		std::lock_guard lock(m_Mutex);
 		if (auto it = m_Data.find(hash.GetHash()); it != m_Data.end())
 			return it->second;
 
@@ -14,11 +15,14 @@ namespace YimMenu
 
 	void PatternCache::UpdateCachedOffsetImpl(PatternHash hash, int offset)
 	{
+		std::lock_guard lock(m_Mutex);
 		m_Data[hash.GetHash()] = offset;
 	}
 
 	void PatternCache::InitImpl()
 	{
+		std::lock_guard lock(m_Mutex);
+
 		auto file = FileMgr::GetProjectFile("./pattern_cache.bin");
 		if (file.Exists())
 		{
@@ -40,6 +44,8 @@ namespace YimMenu
 
 	void PatternCache::UpdateImpl()
 	{
+		std::lock_guard lock(m_Mutex);
+
 		auto file = FileMgr::GetProjectFile("./pattern_cache.bin");
 		std::ofstream stream(file.Path(), std::ios_base::binary);
 

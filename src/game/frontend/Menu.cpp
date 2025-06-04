@@ -19,6 +19,7 @@
 #include "submenus/World.hpp"
 #include "core/filemgr/FileMgr.hpp"
 #include "core/memory/ModuleMgr.hpp"
+#include "Onboarding.hpp"
 
 namespace YimMenu
 {
@@ -37,6 +38,8 @@ namespace YimMenu
 
 		Renderer::AddRendererCallBack(
 		    [&] {
+			    ProcessOnboarding();
+
 			    if (!GUI::IsOpen())
 				    return;
 

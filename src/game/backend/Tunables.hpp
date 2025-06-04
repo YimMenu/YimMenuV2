@@ -70,14 +70,43 @@ namespace YimMenu
 			return GetInstance().m_CurrentJunkVal++;
 		}
 
-		static ScriptGlobal GetTunable(joaat_t hash)
+		static std::optional<ScriptGlobal> GetTunable(joaat_t hash)
 		{
 			if (auto it = GetInstance().m_Tunables.find(hash); it != GetInstance().m_Tunables.end())
 			{
 				return ScriptGlobal(it->second);
 			}
 
-			return ScriptGlobal(TUNABLE_BASE_ADDRESS); // this is not good
+			return std::nullopt;
+		}
+	};
+
+	class Tunable
+	{
+		joaat_t m_Hash;
+		std::optional<ScriptGlobal> m_Global;
+
+	public:
+		constexpr Tunable(joaat_t hash) :
+			m_Hash(hash),
+			m_Global(std::nullopt)
+		{
+		}
+
+		bool IsReady();
+	
+		// make sure to call IsReady before accessing tunables
+		template<typename T>
+		T Get()
+		{
+			return *m_Global->As<T*>();
+		}
+
+		// make sure to call IsReady before accessing tunables
+		template<typename T>
+		void Set(T new_value)
+		{
+			*m_Global->As<T*>() = new_value;
 		}
 	};
 }

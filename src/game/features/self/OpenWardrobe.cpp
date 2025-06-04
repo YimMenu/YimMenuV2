@@ -4,7 +4,6 @@
 #include "game/backend/Self.hpp"
 #include "game/backend/ScriptPatches.hpp"
 #include "game/backend/NativeHooks.hpp"
-#include "game/gta/data/StackSizes.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptLocal.hpp"
@@ -18,6 +17,7 @@ namespace YimMenu::Features
 		SCR_VEC3 Position;
 		SCR_FLOAT Heading;
 	};
+	static_assert(sizeof(WARDROBE_LAUNCH_DATA) == 5 * 8);
 
 	static bool startedByUs{};
 	static ScriptPatch shouldCleanupWardrobePatch{};
@@ -34,23 +34,17 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			if (!*Pointers.IsSessionStarted || SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("wardrobe_mp"_J) > 0)
+			if (!*Pointers.IsSessionStarted || Scripts::IsScriptActive("wardrobe_mp"_J))
 			{
 				Notifications::Show("Wardrobe", "Not safe to open the wardrobe at the moment.", NotificationType::Error);
 				return;
-			}
-
-			while (!SCRIPT::HAS_SCRIPT_WITH_NAME_HASH_LOADED("wardrobe_mp"_J))
-			{
-				SCRIPT::REQUEST_SCRIPT_WITH_NAME_HASH("wardrobe_mp"_J);
-				ScriptMgr::Yield();
 			}
 
 			WARDROBE_LAUNCH_DATA launchData;
 			launchData.Type     = 7;
 			launchData.Position = Self::GetPed().GetPosition();
 			launchData.Heading  = Self::GetPed().GetHeading();
-			if (!BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS("wardrobe_mp"_J, &launchData, SCR_SIZEOF(launchData), eStackSizes::SHOP))
+			if (!Scripts::StartScript("wardrobe_mp"_J, eStackSizes::SHOP, &launchData, SCR_SIZEOF(launchData)))
 			{
 				Notifications::Show("Wardrobe", "Failed to open the wardrobe.", NotificationType::Error);
 				return;
@@ -92,9 +86,10 @@ namespace YimMenu::Features
 			}
 			isItemLockedByStatPatch3->Enable();
 
-			NativeHooks::AddHook("wardrobe_mp"_J, NativeIndex::GET_DISTANCE_BETWEEN_COORDS, &GetDistanceBetweenCoordsHook);
-
-			SCRIPT::SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED("wardrobe_mp"_J);
+			static bool initNativeHook = [] {
+				NativeHooks::AddHook("wardrobe_mp"_J, NativeIndex::GET_DISTANCE_BETWEEN_COORDS, &GetDistanceBetweenCoordsHook);
+				return true;
+			}();
 
 			startedByUs = true;
 		}

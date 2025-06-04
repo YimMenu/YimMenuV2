@@ -41,9 +41,20 @@ namespace YimMenu
 			GetInstance().RunScriptImpl();
 		}
 
+		static void SetOnboarding(bool state)
+		{
+			GetInstance().SetOnboardingImpl(state);
+		}
+
+		static bool IsOnboarding()
+		{
+			return GetInstance().m_Onboarding;
+		}
+
 	private:
 		void WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
+		void SetOnboardingImpl(bool state);
 		void RunScriptImpl();
 
 		static void ToggleMouse();
@@ -56,5 +67,6 @@ namespace YimMenu
 
 	private:
 		bool m_IsOpen;
+		bool m_Onboarding;
 	};
 }

@@ -205,5 +205,7 @@ namespace YimMenu
 
 		if (m_Global)
 			return true;
+
+		return false;
 	}
 }

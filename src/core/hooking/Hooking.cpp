@@ -20,6 +20,7 @@ namespace YimMenu
 		BaseHook::Add<Hooks::Anticheat::PrepareMetricForSending>(new DetourHook("PrepareMetricForSending", Pointers.PrepareMetricForSending, Hooks::Anticheat::PrepareMetricForSending));
 		BaseHook::Add<Hooks::Anticheat::GetThreadContext>(new DetourHook("GetThreadContext", reinterpret_cast<void*>(GetProcAddress(LoadLibraryA("kernel32.dll"), "GetThreadContext")), Hooks::Anticheat::GetThreadContext));
 		BaseHook::Add<Hooks::Anticheat::HttpStartRequest>(new DetourHook("HttpStartRequest", Pointers.HttpStartRequest, Hooks::Anticheat::HttpStartRequest));
+		BaseHook::Add<Hooks::Anticheat::BattlEyeServerProcessPlayerJoin>(new DetourHook("BattlEyeServerProcessPlayerJoin", Pointers.BattlEyeServerProcessPlayerJoin, Hooks::Anticheat::BattlEyeServerProcessPlayerJoin));
 
 		BaseHook::Add<Hooks::Script::RunScriptThreads>(new DetourHook("RunScriptThreads", Pointers.RunScriptThreads, Hooks::Script::RunScriptThreads));
 		BaseHook::Add<Hooks::Script::InitNativeTables>(new DetourHook("InitNativeTables", Pointers.InitNativeTables, Hooks::Script::InitNativeTables));

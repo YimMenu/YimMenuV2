@@ -149,6 +149,7 @@ namespace YimMenu
 		BytePatch HandleJoinRequestIgnorePoolPatch;
 		CStatsMpCharacterMappingData* StatsMpCharacterMappingData;
 		int* HasGTAPlus;
+		PVOID BattlEyeServerProcessPlayerJoin;
 	};
 
 	struct Pointers : PointerData

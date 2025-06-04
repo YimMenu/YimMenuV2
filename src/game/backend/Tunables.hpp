@@ -74,7 +74,8 @@ namespace YimMenu
 		{
 			if (auto it = GetInstance().m_Tunables.find(hash); it != GetInstance().m_Tunables.end())
 			{
-				return ScriptGlobal(it->second);
+				if (ScriptGlobal(it->second).CanAccess())
+					return ScriptGlobal(it->second);
 			}
 
 			return std::nullopt;

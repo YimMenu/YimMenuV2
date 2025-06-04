@@ -7,7 +7,7 @@ jobs:
     runs-on: [ self-hosted, Windows ]
     name: CI
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Check CMake version
         run: cmake --version

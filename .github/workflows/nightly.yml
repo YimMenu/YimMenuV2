@@ -17,7 +17,7 @@ jobs:
     outputs:
       should_run: ${{ steps.should_run.outputs.should_run }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - id: should_run
         name: Check if latest commit date is within the previous 24 hours
@@ -37,7 +37,7 @@ jobs:
       full_sha: ${{ steps.var.outputs.full_sha }}
       short_sha: ${{ steps.var.outputs.short_sha }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -75,11 +75,11 @@ jobs:
     needs: build_nightly
     if: needs.check_recent_commit.outputs.should_run == 'true'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Delete Existing Release
         id: delete_release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const owner = context.repo.owner;
@@ -131,7 +131,7 @@ jobs:
           cat sha256.checksum
 
       - name: Nightly Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Nightly [${{ needs.build_nightly.outputs.short_sha }}]
           tag_name: nightly

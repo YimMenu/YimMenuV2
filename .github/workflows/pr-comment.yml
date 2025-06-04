@@ -17,7 +17,7 @@ jobs:
           # Assume the 0th index in the array of found PRs is the correct one (it seems to usually be the latest one)
           PR_NUM=$(echo $PR_RAW | jq '.items | map(select(.repository_url=="https://api.github.com/repos/${{ github.repository }}")) | .[0].number')
           echo "PR_NUM=${PR_NUM}" >> $GITHUB_ENV
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         with:
           # This snippet is public-domain, taken from
           # https://github.com/oprypin/nightly.link/blob/master/.github/workflows/pr-comment.yml

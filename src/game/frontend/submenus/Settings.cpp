@@ -39,6 +39,7 @@ namespace YimMenu::Submenus
 		auto playerEsp         = std::make_shared<Group>("Player ESP", 10);
 		auto pedEsp            = std::make_shared<Group>("Ped ESP", 10);
 		auto overlay           = std::make_shared<Group>("Overlay");
+		auto chat           = std::make_shared<Group>("Chat");
 
 		hotkeys->AddItem(std::make_shared<ImGuiItem>(Hotkeys));
 
@@ -74,9 +75,12 @@ namespace YimMenu::Submenus
 		overlay->AddItem(std::make_shared<BoolCommandItem>("overlay"_J));
 		overlay->AddItem(std::make_shared<ConditionalItem>("overlay"_J, std::make_shared<BoolCommandItem>("overlayfps"_J)));
 
+		chat->AddItem(std::make_shared<BoolCommandItem>("clearchat"_J));
+
 		gui->AddItem(playerEsp);
 		gui->AddItem(pedEsp);
 		gui->AddItem(overlay);
+		gui->AddItem(chat);
 
 		AddCategory(std::move(hotkeys));
 		AddCategory(std::move(gui));

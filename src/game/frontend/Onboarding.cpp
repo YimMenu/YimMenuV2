@@ -38,9 +38,9 @@ namespace YimMenu
 			static int value = 0;
 			ImGui::RadioButton("Play with YimMenu users", &value, 0);
 			ImGui::SameLine();
-			ImGui::RadioButton("Play with everyone", &value, 1);
+			ImGui::RadioButton("Play with everyone (Broken!)", &value, 1);
 			ImGui::TextWrapped("%s", 
-				"You can always change your choice by going to Network > Spoofing > Join YimMenu-only Sessions. Our official repository is at "
+				"You can always change your choice by toggling Network > Spoofing > Join YimMenu-only Sessions. Our official repository is at "
 				"https://github.com/YimMenu/YimMenuV2. Make sure to only download the menu from GitHub to avoid malware. "
 				"You can use the repository to report bugs, suggest features, and contribute by making pull requests. We also have a "
 				"Matrix server that can be found at https://matrix.to/#/#yimmenu:matrix.org for faster communication with developers "

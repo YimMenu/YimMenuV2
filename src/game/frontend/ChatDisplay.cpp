@@ -30,6 +30,7 @@ namespace YimMenu
 		}
 
 		m_Messages.push_back(notification);
+		MarkAccessed();
 	}
 
 	void ChatDisplay::DrawImpl()
@@ -40,32 +41,53 @@ namespace YimMenu
 		static const float y_pos = position * 100 + 200;
 		static const float x_pos = *Pointers.ScreenResX - 470;
 
-		ImGui::SetNextWindowSize(ImVec2(*Pointers.ScreenResX - x_pos - 10, *Pointers.ScreenResY - y_pos), ImGuiCond_Always);
-		ImGui::SetNextWindowPos(ImVec2(x_pos, y_pos), ImGuiCond_Always);
-
-		if (ImGui::Begin("##chatwin", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs))
+		if (m_Messages.size() && m_Opacity >= 0.011f)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-			ImGui::PushFont(Menu::Font::g_ChatFont);
+			ImGui::SetNextWindowSize(ImVec2(*Pointers.ScreenResX - x_pos - 10, *Pointers.ScreenResY - y_pos), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(ImVec2(x_pos, y_pos), ImGuiCond_Always);
 
-			for (auto& message : m_Messages)
+			if (ImGui::Begin("##chatwin", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs))
 			{
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(message.m_Color));
-				ImGui::TextWrapped("%s:", message.m_Sender.data());
+				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+				ImGui::PushFont(Menu::Font::g_ChatFont);
+
+				for (auto& message : m_Messages)
+				{
+					auto color = message.m_Color;
+					color.Value.w = m_Opacity;
+					ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+					ImGui::TextWrapped("%s:", message.m_Sender.data());
+					ImGui::PopStyleColor();
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, m_Opacity));
+					ImGui::TextWrapped("%s", message.m_Message.data());
+					ImGui::PopStyleColor();
+				}
+
+				ImGui::PopFont();
 				ImGui::PopStyleColor();
-				ImGui::SameLine();
-				ImGui::TextWrapped("%s", message.m_Message.data());
 			}
 
-			ImGui::PopFont();
-			ImGui::PopStyleColor();
+			ImGui::End();
 		}
 
-		ImGui::End();
+		// TODO: unlink fade speed with FPS
+		if (std::chrono::system_clock::now() - m_LastAccessTime > 15s && m_Opacity != 0.0f)
+		{
+			m_Opacity -= 0.01f;
+			if (m_Opacity <= 0.011f)
+				m_Opacity = 0.0f;
+		}
 	}
 
 	void ChatDisplay::ClearImpl()
 	{
 		m_Messages.clear();
+	}
+
+	void ChatDisplay::MarkAccessedImpl()
+	{
+		m_Opacity = 1.0f;
+		m_LastAccessTime = std::chrono::system_clock::now();
 	}
 }

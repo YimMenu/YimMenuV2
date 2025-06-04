@@ -2,8 +2,8 @@
 
 #include "core/util/Joaat.hpp"
 #include "game/frontend/items/Items.hpp"
-#include "OutfitEditor.hpp"
-#include "game/frontend/submenus/Self/Weapons.hpp"
+#include "Self/OutfitEditor.hpp"
+#include "Self/Weapons.hpp"
 
 namespace YimMenu::Submenus
 {

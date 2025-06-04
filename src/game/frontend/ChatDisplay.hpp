@@ -16,12 +16,15 @@ namespace YimMenu
 	class ChatDisplay
 	{
 	private:
+		std::chrono::system_clock::time_point m_LastAccessTime;
+		float m_Opacity = 1.0f;
 		std::vector<Message> m_Messages = {};
 		std::mutex m_Mutex;
 
 		void ShowImpl(std::string sender, std::string message, ImColor color);
 		void DrawImpl();
 		void ClearImpl();
+		void MarkAccessedImpl();
 
 		static ChatDisplay& GetInstance()
 		{
@@ -43,6 +46,11 @@ namespace YimMenu
 		static void Clear()
 		{
 			GetInstance().ClearImpl();
+		}
+
+		static void MarkAccessed()
+		{
+			GetInstance().MarkAccessedImpl();
 		}
 	};
 

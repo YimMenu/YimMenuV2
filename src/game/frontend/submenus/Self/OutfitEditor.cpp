@@ -4,10 +4,10 @@
 #include "game/backend/Self.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "game/gta/Natives.hpp"
-#include "imgui.h"
 
-#include <format>
 #include <random>
+
+// TODO: clean up more AI generated junk from this file
 
 namespace YimMenu
 {
@@ -58,30 +58,12 @@ namespace YimMenu
 	void SetOutfitSlot(int slot, int drawable, int texture)
 	{
 		auto ped = Self::GetPed();
-		if (!ENTITY::DOES_ENTITY_EXIST(static_cast<int>(ped.GetHandle())))
-			return;
-
-		int maxDrawable = GetMaxDrawable(slot);
-		int maxTexture  = GetMaxTexture(slot, drawable);
-
-		if (drawable < 0 || drawable >= maxDrawable || texture < 0 || texture >= maxTexture)
-			return;
-
 		PED::SET_PED_COMPONENT_VARIATION(static_cast<int>(ped.GetHandle()), slot, drawable, texture, 0);
 	}
 
 	void SetPropSlot(int slot, int drawable, int texture)
 	{
 		auto ped = Self::GetPed();
-		if (!ENTITY::DOES_ENTITY_EXIST(static_cast<int>(ped.GetHandle())))
-			return;
-
-		int maxDrawable = GetMaxPropDrawable(slot);
-		int maxTexture  = GetMaxPropTexture(slot, drawable);
-
-		if (drawable < 0 || drawable >= maxDrawable || texture < 0 || texture >= maxTexture)
-			return;
-
 		PED::SET_PED_PROP_INDEX(static_cast<int>(ped.GetHandle()), slot, drawable, texture, true, 0);
 	}
 
@@ -95,17 +77,130 @@ namespace YimMenu
 		ImGui::GetWindowDrawList()->AddLine(min, max, ImGui::GetColorU32(ImGui::GetStyle().Colors[ImGuiCol_Text]));
 	}
 
+	static void TextUnderlinedAt(const char* text, float y)
+	{
+		auto old_cursor = ImGui::GetCursorPos();
+		ImGui::SetCursorPosY(y);
+		TextUnderlined(text);
+		ImGui::SetCursorPos(old_cursor);
+	}
+
 	std::shared_ptr<Category> CreateOutfitsMenu()
 	{
 		auto category = std::make_shared<Category>("Outfit Editor");
 
 		category->AddItem(std::make_shared<ImGuiItem>([] {
+			if (!NativeInvoker::AreHandlersCached())
+				return ImGui::TextDisabled("Natives not cached yet");
+
 			auto ped = Self::GetPed();
-			if (!ENTITY::DOES_ENTITY_EXIST(static_cast<int>(ped.GetHandle())))
+
+			if (!ped)
 			{
-				ImGui::TextDisabled("Error: Player not found");
+				ImGui::TextDisabled("Player not found");
 				return;
 			}
+
+			// Create two columns layout
+			const float windowWidth = ImGui::GetContentRegionAvail().x;
+			const float columnWidth = windowWidth * 0.5f;
+			const float inputWidth  = 120.0f; // Minimal width for number input
+
+			ImGui::Columns(2, "OutfitColumns", false);
+			ImGui::SetColumnWidth(0, columnWidth);
+
+			// Components section (Left column)
+
+			float header_y = ImGui::GetCursorPosY();
+
+			TextUnderlined("Components");
+			const struct
+			{
+				const char* name;
+				int slot;
+			} componentSlots[] = {{"Top", 11}, {"Undershirt", 8}, {"Legs", 4}, {"Feet", 6}, {"Accessories", 7}, {"Bags", 5}, {"Mask", 1}, {"Gloves", 3}, {"Decals", 10}, {"Armor", 9}};
+
+			bool first_iter = true;
+			for (const auto& component : componentSlots)
+			{
+				ImGui::PushID(component.slot);
+
+				int drawable, texture;
+				GetOutfitSlot(component.slot, drawable, texture);
+
+				ImGui::Text("%s", component.name);
+				ImGui::SameLine();
+
+				ImGui::SetCursorPosX(columnWidth - inputWidth * 2 - 10);
+
+				ImGui::PushItemWidth(inputWidth);
+				if (first_iter)
+					TextUnderlinedAt("Drawable", header_y);
+				if (ImGui::InputInt("##{}drawable", &drawable))
+				{
+					drawable = std::clamp(drawable, 0, GetMaxDrawable(component.slot) - 1);
+					SetOutfitSlot(component.slot, drawable, texture);
+				}
+				ImGui::SameLine();
+				if (first_iter)
+					TextUnderlinedAt("Texture", header_y); // TODO: this heading is slightly misaligned and I'm not sure why (caused by the above SameLine?)
+				if (ImGui::InputInt("##{}texture", &texture))
+				{
+					texture = std::clamp(texture, 0, GetMaxTexture(component.slot, drawable) - 1);
+					SetOutfitSlot(component.slot, drawable, texture);
+				}
+				ImGui::PopItemWidth();
+				ImGui::PopID();
+
+				first_iter = false;
+			}
+
+			// Props section (Right column)
+			ImGui::NextColumn();
+			TextUnderlined("Props");
+
+			const struct
+			{
+				const char* name;
+				int slot;
+			} propSlots[] = {{"Hats", 0}, {"Glasses", 1}, {"Ears", 2}, {"Watches", 6}};
+
+			first_iter = true;
+			for (const auto& prop : propSlots)
+			{
+				ImGui::PushID(prop.slot);
+
+				int drawable, texture;
+				GetPropSlot(prop.slot, drawable, texture);
+
+				ImGui::Text("%s", prop.name);
+				ImGui::SameLine();
+
+				ImGui::SetCursorPosX(columnWidth + (columnWidth - inputWidth * 2 - 10));
+
+				ImGui::PushItemWidth(inputWidth);
+				if (first_iter)
+					TextUnderlinedAt("Drawable", header_y);
+				if (ImGui::InputInt("##pdrawable", &drawable))
+				{
+					drawable = std::clamp(drawable, 0, GetMaxPropDrawable(prop.slot) - 1);
+					SetPropSlot(prop.slot, drawable, texture);
+				}
+				ImGui::SameLine();
+				if (first_iter)
+					TextUnderlinedAt("Texture", header_y);
+				if (ImGui::InputInt("##ptexture", &texture))
+				{
+					texture = std::clamp(texture, 0, GetMaxPropTexture(prop.slot, drawable) - 1);
+					SetPropSlot(prop.slot, drawable, texture);
+				}
+				ImGui::PopItemWidth();
+				ImGui::PopID();
+
+				first_iter = false;
+			}
+
+			ImGui::Columns(1);
 
 			if (ImGui::Button("Randomize Outfit"))
 			{
@@ -138,93 +233,6 @@ namespace YimMenu
 					}
 				}
 			}
-
-			// Create two columns layout
-			const float windowWidth = ImGui::GetContentRegionAvail().x;
-			const float columnWidth = windowWidth * 0.5f;
-			const float inputWidth  = 80.0f; // Minimal width for number input
-
-			ImGui::Columns(2, "OutfitColumns", false);
-			ImGui::SetColumnWidth(0, columnWidth);
-
-			// Components section (Left column)
-			TextUnderlined("Components");
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // White text color
-
-			const struct
-			{
-				const char* name;
-				int slot;
-			} componentSlots[] = {{"Top", 11}, {"Undershirt", 8}, {"Legs", 4}, {"Feet", 6}, {"Accessories", 7}, {"Bags", 5}, {"Mask", 1}, {"Gloves", 3}, {"Decals", 10}, {"Armor", 9}};
-
-			for (const auto& component : componentSlots)
-			{
-				int drawable, texture;
-				GetOutfitSlot(component.slot, drawable, texture);
-
-				ImGui::Text("%s", component.name);
-				ImGui::SameLine();
-
-				ImGui::SetCursorPosX(columnWidth - inputWidth * 2 - 10);
-
-				ImGui::PushItemWidth(inputWidth);
-				if (ImGui::InputInt(std::format("##{}Drawable", component.name).c_str(), &drawable, 0, 0))
-				{
-					drawable = std::clamp(drawable, 0, GetMaxDrawable(component.slot) - 1);
-					SetOutfitSlot(component.slot, drawable, texture);
-				}
-				ImGui::SameLine();
-
-				ImGui::PushItemWidth(inputWidth);
-				if (ImGui::InputInt(std::format("##{}Texture", component.name).c_str(), &texture, 0, 0))
-				{
-					texture = std::clamp(texture, 0, GetMaxTexture(component.slot, drawable) - 1);
-					SetOutfitSlot(component.slot, drawable, texture);
-				}
-				ImGui::PopItemWidth();
-				ImGui::PopItemWidth();
-			}
-
-			// Props section (Right column)
-			ImGui::NextColumn();
-			TextUnderlined("Props");
-
-			const struct
-			{
-				const char* name;
-				int slot;
-			} propSlots[] = {{"Hats", 0}, {"Glasses", 1}, {"Ears", 2}, {"Watches", 6}};
-
-			for (const auto& prop : propSlots)
-			{
-				int drawable, texture;
-				GetPropSlot(prop.slot, drawable, texture);
-
-				ImGui::Text("%s", prop.name);
-				ImGui::SameLine();
-
-				ImGui::SetCursorPosX(columnWidth + (columnWidth - inputWidth * 2 - 10));
-
-				ImGui::PushItemWidth(inputWidth);
-				if (ImGui::InputInt(std::format("##{}Drawable", prop.name).c_str(), &drawable, 0, 0))
-				{
-					drawable = std::clamp(drawable, 0, GetMaxPropDrawable(prop.slot) - 1);
-					SetPropSlot(prop.slot, drawable, texture);
-				}
-				ImGui::SameLine();
-
-				ImGui::PushItemWidth(inputWidth);
-				if (ImGui::InputInt(std::format("##{}Texture", prop.name).c_str(), &texture, 0, 0))
-				{
-					texture = std::clamp(texture, 0, GetMaxPropTexture(prop.slot, drawable) - 1);
-					SetPropSlot(prop.slot, drawable, texture);
-				}
-				ImGui::PopItemWidth();
-				ImGui::PopItemWidth();
-			}
-
-			ImGui::PopStyleColor();
-			ImGui::Columns(1);
 		}));
 
 		return category;

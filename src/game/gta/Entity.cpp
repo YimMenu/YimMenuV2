@@ -421,15 +421,6 @@ namespace YimMenu
 	{
 		ENTITY_ASSERT_VALID();
 
-		std::unordered_set<long long> enemiesNotToKill = {
-		    600300561,
-		    658984954,
-			3678516463,
-		};
-
-		if (enemiesNotToKill.find(GetModel()) != enemiesNotToKill.end())
-			return;
-
 		if (HasControl())
 		{
 			ENTITY::SET_ENTITY_HEALTH(GetHandle(), 0, PLAYER::PLAYER_PED_ID(), 0);

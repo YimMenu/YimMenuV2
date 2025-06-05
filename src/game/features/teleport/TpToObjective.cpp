@@ -37,20 +37,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	class TpToArcade : public Command
-	{
-		using Command::Command;
-
-		virtual void OnCall() override
-		{
-			Vector3 location = {0, 0, 0};
-			if (GetBlipLocationOfType(location, 740))
-			{
-				Self::GetPed().TeleportTo(location);
-			}
-		}
-	};
-
 	static TpToObjective _TpToObjective{"tptoobjective", "Teleport to Objective", "Teleports you to the Objective"};
-	static TpToArcade _TpToArcade{"tptoarcade", "Teleport to Arcade", "Teleports you to the Arcade"};
 }

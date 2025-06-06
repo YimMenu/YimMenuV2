@@ -1,9 +1,7 @@
 #include "common.hpp"
-#include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
-#include "core/commands/Commands.hpp"
-#include "core/commands/HotkeySystem.hpp"
-#include "core/settings/Settings.hpp"
+#include "core/backend/ScriptMgr.hpp"
+#include "core/componentStates/LoopState.hpp"
 #include "core/filemgr/FileMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "core/hooking/Hooking.hpp"
@@ -11,17 +9,13 @@
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
 #include "game/backend/AnticheatBypass.hpp"
-#include "game/backend/Players.hpp"
-#include "game/backend/SavedLocations.hpp"
-#include "game/backend/SavedPlayers.hpp"
-#include "game/backend/Self.hpp"
 #include "game/backend/NativeHooks.hpp"
+#include "game/backend/ScriptPatches.hpp"
+#include "game/backend/Self.hpp"
 #include "game/backend/Tunables.hpp"
-#include "game/backend/ScriptPointers.hpp"
+#include "game/features/vehicle/SavePersonalVehicle.hpp"
 #include "game/frontend/GUI.hpp"
 #include "game/pointers/Pointers.hpp"
-#include "game/features/vehicle/SavePersonalVehicle.hpp"
-#include "game/features/self/OpenGunLocker.hpp"
 
 namespace YimMenu
 {
@@ -31,10 +25,6 @@ namespace YimMenu
 		FileMgr::Init(documents);
 
 		LogHelper::Init("YimMenuV2", FileMgr::GetProjectFile("./cout.log"));
-
-		g_HotkeySystem.RegisterCommands();
-		SavedLocations::FetchSavedLocations();
-		Settings::Initialize(FileMgr::GetProjectFile("./settings.json"));
 
 		if (!ModuleMgr.LoadModules())
 			goto EARLY_UNLOAD;
@@ -48,28 +38,22 @@ namespace YimMenu
 		if (!Renderer::Init())
 			goto EARLY_UNLOAD;
 
-		Players::Init();
-
 		Hooking::Init();
 
 		ScriptMgr::Init();
 		LOG(INFO) << "ScriptMgr initialized";
 
-		ScriptPointers::Init();
-
 		GUI::Init();
 
-		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
-		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
+		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript));                      // runs once
+		ScriptMgr::AddScript(std::make_unique<Script>(&ScriptPatches::RegisterDefaultScriptPatches)); // runs once
+		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript));                         // runs once
 		ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
 		FiberPool::Init(16);
-		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>(&LoopState::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::SavePersonalVehicle::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenGunLocker::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
 
 		if (!Pointers.LateInit())
 			LOG(WARNING) << "Socialclub patterns failed to load";
@@ -78,7 +62,6 @@ namespace YimMenu
 
 		while (g_Running)
 		{
-			Settings::Tick();
 			std::this_thread::yield();
 		}
 
@@ -89,7 +72,7 @@ namespace YimMenu
 		Hooking::Destroy();
 		CallSiteHook::Destroy();
 
-EARLY_UNLOAD:
+	EARLY_UNLOAD:
 		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();

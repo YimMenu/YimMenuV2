@@ -30,7 +30,7 @@ namespace YimMenu
 		if (ImGui::BeginPopupModal("IMPORTANT! PLEASE READ!", nullptr, ImGuiWindowFlags_NoSavedSettings))
 		{
 			ImGui::TextWrapped("%s", 
-				"Welcome to YimMenuV2! With the introduction of BattlEye, the ability to join and stay in public sessions has been severely limited. "
+				"Welcome to YimMenuV2! You can press INSERT or Ctrl+\\ to open the menu. With the introduction of BattlEye, the ability to join and stay in public sessions has been severely limited. "
 			    "You have an option to play only with other YimMenu users, or you can choose to connect to regular BattlEye-protected sessions. "
 			    "You will automatically be kicked out of regular sessions in under three minutes, and you may be temporarily blacklisted from "
 			    "joining for up to two days, even after re-enabling BattlEye"

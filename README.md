@@ -10,6 +10,10 @@ Experimental menu for GTA 5: Enhanced
 4. Open Rockstar Launcher, select Grand Theft Auto V Enhanced, go to settings, and disable BattlEye. If you are using Steam or Epic Games, you may have to pass the -nobattleye command line parameter as well
 5. Launch GTA V, then use your injector to inject YimMenuV2.dll at the main menu
 
+## How to open the menu?
+
+Press the `INSERT` key or `Ctrl+\` to open the menu
+ 
 ## Common issues
 
 ### I keep getting desynced from public sessions every five minutes

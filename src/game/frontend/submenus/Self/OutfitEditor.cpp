@@ -96,10 +96,7 @@ namespace YimMenu
 			auto ped = Self::GetPed();
 
 			if (!ped)
-			{
-				ImGui::TextDisabled("Player not found");
-				return;
-			}
+				return ImGui::TextDisabled("Player ped not found");
 
 			// Create two columns layout
 			const float windowWidth = ImGui::GetContentRegionAvail().x;

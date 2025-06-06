@@ -52,6 +52,6 @@ namespace YimMenu
         if (folder.is_absolute())
             throw std::invalid_argument("FileMgr::GetProjectFolder expects a relative path.");
 
-        return { m_RootFolder / folder };
+        return CreateFolderIfNotExists(m_RootFolder / folder);
     }
 }

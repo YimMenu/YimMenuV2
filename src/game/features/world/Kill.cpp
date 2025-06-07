@@ -23,9 +23,15 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
+			const std::unordered_set<long long> enemiesNotToKill = {
+				600300561,
+				658984954,
+				3678516463
+			};
+
 			for (auto ped : Pools::GetPeds())
 			{
-				if (!ped.IsPlayer() && ped.IsEnemy())
+				if (!ped.IsPlayer() && ped.IsEnemy() && !enemiesNotToKill.contains(ped.GetModel()))
 					ped.Kill();
 			}
 		}

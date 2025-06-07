@@ -1,5 +1,6 @@
 #include "core/commands/Command.hpp"
 #include "game/gta/Pools.hpp"
+#include "game/gta/Object.hpp"
 
 namespace YimMenu::Features
 {
@@ -12,6 +13,20 @@ namespace YimMenu::Features
 			for (auto obj : Pools::GetObjects())
 			{
 				if (obj)
+					obj.Delete();
+			}
+		}
+	};
+
+	class DeleteAllCameras : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			for (auto obj : Pools::GetObjects())
+			{
+				if (obj && Object::IsCamera(obj.GetModel()))
 					obj.Delete();
 			}
 		}
@@ -44,6 +59,7 @@ namespace YimMenu::Features
 		}
 	};
 
+	static DeleteAllCameras _DeleteAllCameras("delcams", "Delete All Camera", "Deletes all Camera cameras in the game world, including mission critical Camera");
 	static DeleteAllObjects _DeleteAllObjects{"delobjs", "Delete All Objects", "Deletes all objects in the game world, including mission critical objects"};
 	static DeleteAllPeds _DeleteAllPeds{"delpeds", "Delete All Peds", "Deletes all peds in the game world, including mission critical peds"};
 	static DeleteAllVehs _DeleteAllVehs{"delvehs", "Delete All Vehicles", "Deletes all vehicles in the game world, including mission critical vehicles"};

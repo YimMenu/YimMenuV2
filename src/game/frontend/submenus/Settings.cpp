@@ -38,6 +38,7 @@ namespace YimMenu::Submenus
 		auto gui               = std::make_shared<Category>("GUI");
 		auto playerEsp         = std::make_shared<Group>("Player ESP", 10);
 		auto pedEsp            = std::make_shared<Group>("Ped ESP", 10);
+		auto objectEsp         = std::make_shared<Group>("Object ESP");
 		auto overlay           = std::make_shared<Group>("Overlay");
 		auto chat           = std::make_shared<Group>("Chat");
 
@@ -72,6 +73,11 @@ namespace YimMenu::Submenus
 		pedEsp->AddItem(std::make_shared<ConditionalItem>("espdrawpeds"_J, std::make_shared<BoolCommandItem>("espskeletonpeds"_J, "Ped Skeleton")));
 		pedEsp->AddItem(std::make_shared<ConditionalItem>("espdrawpeds"_J, std::make_shared<ColorCommandItem>("skeletoncolorpeds"_J)));
 
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawobjects"_J));
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawcameras"_J));
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawcache"_J));
+		objectEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawsignaljammers"_J));
+
 		overlay->AddItem(std::make_shared<BoolCommandItem>("overlay"_J));
 		overlay->AddItem(std::make_shared<ConditionalItem>("overlay"_J, std::make_shared<BoolCommandItem>("overlayfps"_J)));
 
@@ -79,6 +85,7 @@ namespace YimMenu::Submenus
 
 		gui->AddItem(playerEsp);
 		gui->AddItem(pedEsp);
+		gui->AddItem(objectEsp);
 		gui->AddItem(overlay);
 		gui->AddItem(chat);
 

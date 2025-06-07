@@ -1,5 +1,5 @@
 #include "ESP.hpp"
-
+#include "game/gta/Object.hpp"
 #include "common.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/ColorCommand.hpp"
@@ -65,6 +65,12 @@ namespace YimMenu::Features
 
 	// Random Events
 	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?");
+
+	// objects
+	BoolCommand _ESPDrawObjects("espdrawobjects", "Show Object Model", "Should the ESP draw objects model?");
+	BoolCommand _ESPDrawCameras("espdrawcameras", "Show Cameras", "Should the ESP draw Camera cameras?");
+	BoolCommand _ESPDrawCache("espdrawcache", "Show G's Cache", "Should the ESP draw G's Cache?");
+	BoolCommand _ESPDrawSignalJammers("espdrawsignaljammers", "Show Signal Jammers", "Should the ESP draw Signal Jammers?");
 }
 
 namespace YimMenu
@@ -95,6 +101,8 @@ namespace YimMenu
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
+		if (!ped.IsValid())
+			return;
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(leftShoulderBone)), color, 1.5f);
@@ -269,6 +277,52 @@ namespace YimMenu
 		}
 	}
 
+	void ESP::DrawObject(Entity object, ImDrawList* drawList, ObjectType objectType)
+	{
+		if (HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
+			return;
+
+		if (!object.IsValid())
+			return;
+
+		int objectHash = object.GetModel();
+
+		if (objectType == Camera && !Object::IsCamera(objectHash))
+			return;
+
+		if (objectType == Cache && !Object::IsCache(objectHash))
+			return;
+
+		if (objectType == SignalJammer && !Object::IsSignalJammer(objectHash))
+			return;
+
+		Vector3 coords = object.GetPosition();
+		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
+		float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
+		ImColor color = Green;
+		std::string unit        = (distance < 1000.0f) ? "m" : "km";
+		std::string objectName = std::to_string(objectHash);
+		if (Object::IsCamera(objectHash))
+		{
+			objectName += " (Camera)";
+		}
+		else if (Object::IsCache(objectHash))
+		{
+			objectName += " (G's Cache)";
+		}
+		else if (Object::IsSignalJammer(objectHash))
+		{
+			objectName += " (Signal Jammer)";
+		}
+		else if (object.IsMissionEntity())
+		{
+			objectName += " (Mission Object)";
+		}
+		std::string text = std::format("{}\n{:.2f}{} ", objectName, formattedDistance, unit);
+		
+		drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, text.c_str());
+	}
+
 	void ESP::Draw()
 	{
 		if (!NativeInvoker::AreHandlersCached() || CAM::IS_SCREEN_FADED_OUT() || HUD::IS_WARNING_MESSAGE_ACTIVE())
@@ -287,7 +341,7 @@ namespace YimMenu
 			{
 				for (Ped ped : Pools::GetPeds())
 				{
-					if (ped.GetPointer<void*>())
+					if (ped && ped.GetPointer<void*>())
 						DrawPed(ped, drawList);
 				}
 			}
@@ -296,6 +350,38 @@ namespace YimMenu
 				for (int event = 0; event < 21; event++)
 				{
 					DrawRandomEvent(event, drawList);
+				}
+			}
+			if (Features::_ESPDrawObjects.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj)
+						DrawObject(obj, drawList);
+				}
+			}
+			if (Features::_ESPDrawCameras.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj && Object::IsCamera(obj.GetModel()))
+						DrawObject(obj, drawList, Camera);
+				}
+			}
+			if (Features::_ESPDrawCache.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj && Object::IsCache(obj.GetModel()))
+						DrawObject(obj, drawList, Cache);
+				}
+			}
+			if (Features::_ESPDrawSignalJammers.GetState())
+			{
+				for (auto obj : Pools::GetObjects())
+				{
+					if (obj && Object::IsSignalJammer(obj.GetModel()))
+						DrawObject(obj, drawList, SignalJammer);
 				}
 			}
 		}

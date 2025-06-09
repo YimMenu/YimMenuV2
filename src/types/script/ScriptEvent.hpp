@@ -79,7 +79,8 @@ enum class ScriptEventIndex
 	StartScriptBegin   = -366707054,
 	StartScriptProceed = 1757622014,
 
-	RequestRandomEvent = -126218586
+	RequestRandomEvent = -126218586,
+	CollectCollectable = 968269233
 };
 
 struct SCRIPT_EVENT
@@ -194,6 +195,36 @@ struct SCRIPT_EVENT_COMMAND : public SCRIPT_EVENT
 
 	eCommand Command;
 	SCR_INT RandomNumber; // it's fine if we don't set this
+};
+
+struct SCRIPT_EVENT_COLLECT_COLLECTABLE : public SCRIPT_EVENT
+{
+	enum class eCollectables
+	{
+		MovieProps = 0,
+		HiddenCaches = 1,
+		TresureChests = 2,
+		RadioStations = 3,
+		USBPirateRadio = 4,
+		Shipwrecked = 5,
+		BuriedStash = 6,
+		TrickOrTreat = 8,
+		LDOrganics = 9,
+		Skydives = 10,
+		Snowmen = 16,
+		DeadDrop = 17,
+		Tagging = 19,
+		SprayCans = 20,
+		Yuanbao = 21,
+	};
+
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_COLLECT_COLLECTABLE, CollectCollectable);
+
+	eCollectables CollectableType;
+	SCR_INT CollectableIndex;
+	SCR_INT SetCollected;
+	SCR_INT SetMoviePropCollected;
+	SCR_INT DisplayNotification;
 };
 
 #undef REGISTER_SCRIPT_EVENT

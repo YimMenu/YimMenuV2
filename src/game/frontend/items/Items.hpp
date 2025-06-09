@@ -213,4 +213,20 @@ namespace YimMenu
 		std::string m_Name;
 		std::vector<std::shared_ptr<UIItem>> m_Items;
 	};
+
+	class CollapsingHeaderItem : public UIItem
+	{
+	public:
+		explicit CollapsingHeaderItem(const std::string& name);
+		void Draw() override;
+
+		void AddItem(std::shared_ptr<UIItem>&& item)
+		{
+			m_Items.push_back(std::move(item));
+		}
+
+	private:
+		std::string m_Name;
+		std::vector<std::shared_ptr<UIItem>> m_Items;
+	};
 }

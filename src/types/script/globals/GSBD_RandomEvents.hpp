@@ -48,7 +48,7 @@ static_assert(sizeof(RANDOM_EVENTS_DATA) == 15 * 8);
 
 struct RANDOM_EVENTS_VEHICLE_LIST_DATA
 {
-	SCR_INT UNK_0000; // 0
+	SCR_INT Index; // 0
 	SCR_INT Variation; // 1
 };
 static_assert(sizeof(RANDOM_EVENTS_VEHICLE_LIST_DATA) == 2 * 8);

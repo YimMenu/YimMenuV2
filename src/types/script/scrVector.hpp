@@ -77,6 +77,11 @@ namespace rage
 			return {x, y, z};
 		}
 
+		operator bool()
+		{
+			return this->x != 0.0f || this->y != 0.0f || this->z != 0.0f;
+		}
+
 		alignas(8) float x{};
 		alignas(8) float y{};
 		alignas(8) float z{};

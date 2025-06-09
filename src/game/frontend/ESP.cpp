@@ -9,13 +9,8 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/gta/Pools.hpp"
 #include "game/gta/Scripts.hpp"
-//#include "game/gta/data/PedModels.hpp"
-#include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/invoker/Invoker.hpp"
 #include "game/gta/Natives.hpp"
-#include "types/script/globals/GPBD_FM_2.hpp"
-#include "types/script/globals/GSBD_RandomEvents.hpp"
-#include "types/script/locals/FMRandomEvents.hpp"
 
 namespace
 {
@@ -61,9 +56,6 @@ namespace YimMenu::Features
 
 	ColorCommand _HashColorPeds("hashcolorpeds", "Ped Hash Color", "Changes the color of the hash ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 	ColorCommand _SkeletonColorPeds("skeletoncolorpeds", "Ped Skeleton Color", "Changes the color of the skeleton ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
-
-	// Random Events
-	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?"); // TODO: do we need this?
 
 	// Objects
 	BoolCommand _ESPDrawObjects("espdrawobjects", "Draw Special Objects", "Should the ESP draw special objects?");
@@ -236,43 +228,16 @@ namespace YimMenu
 		}
 	}
 
-	static void DrawRandomEvent(int event, ImDrawList* drawList)
-	{
-		if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("freemode"_J) == 0 || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
-			return;
-
-		if (GPBD_FM_2::Get()->Entries[Self::GetPlayer().GetId()].RandomEventsClientData.InitState != eRandomEventClientInitState::INITIALIZED)
-			return;
-
-		auto state        = GSBD_RandomEvents::Get()->EventData[event].State;
-		auto coords       = GSBD_RandomEvents::Get()->EventData[event].TriggerPosition;
-		auto range        = GSBD_RandomEvents::Get()->EventData[event].TriggerRange;
-		auto timer        = GSBD_RandomEvents::Get()->EventData[event].TimerState;
-		auto availability = RANDOM_EVENTS_FREEMODE_DATA::Get(Scripts::FindScriptThread("freemode"_J))->EventData[event].AvailableTime;
-		auto timeLeft     = GSBD_RandomEvents::Get()->EventData[event].TimerState.GetRemainingTimeStr(availability);
-		if (state != eRandomEventState::INACTIVE && coords != Vector3(0.0f, 0.0f, 0.0f))
-		{
-			float distance          = Self::GetPed().GetPosition().GetDistance(coords);
-			float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
-			std::string unit        = (distance < 1000.0f) ? "m" : "km";
-			std::string text        = std::format("{}\n{:.2f}{} {}", randomEventNames[event], formattedDistance, unit, (state == eRandomEventState::AVAILABLE ? timeLeft : ""));
-			ImColor color           = (state == eRandomEventState::ACTIVE) ? Green : White;
-
-			drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, text.c_str());
-		}
-	}
-
 	static void DrawObject(Object object, ImDrawList* drawList)
 	{
 		if (!object.IsValid())
 			return;
 
 		bool is_camera = object.IsCamera();
-		bool is_cache = object.IsCache();
 		bool is_signal_jammer = object.IsSignalJammer();
 		bool is_mission_object = object.IsMissionEntity();
 
-		if (!is_camera && !is_cache && !is_signal_jammer && !is_mission_object)
+		if (!is_camera && !is_signal_jammer && !is_mission_object)
 			return;
 
 		float distanceToObject = 0.0f;
@@ -315,11 +280,6 @@ namespace YimMenu
 		{
 			color = Red;
 			info += " (Camera)";
-		}
-		else if (is_cache)
-		{
-			color = Orange;
-			info += " (Cache)";
 		}
 		else if (is_signal_jammer)
 		{
@@ -371,13 +331,6 @@ namespace YimMenu
 					{
 						if (ped && ped.GetPointer<void*>())
 							DrawPed(ped, drawList);
-					}
-				}
-				if (Features::_ESPDrawRandomEvents.GetState())
-				{
-					for (int event = 0; event < 21; event++)
-					{
-						DrawRandomEvent(event, drawList);
 					}
 				}
 				if (Features::_ESPDrawObjects.GetState() && GetObjectPool())

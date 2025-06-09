@@ -2,7 +2,7 @@
 
 #include "core/backend/FiberPool.hpp"
 #include "core/frontend/Notifications.hpp"
-#include "core/util/Strings.hpp"
+#include "core/util/strings.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/SavedVehicles.hpp"
 #include "game/gta/Vehicle.hpp"

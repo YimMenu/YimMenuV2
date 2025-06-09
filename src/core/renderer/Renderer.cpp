@@ -23,10 +23,18 @@ namespace YimMenu
 
 	void Renderer::DestroyImpl()
 	{
+		// TODO: we aren't destroying resources properly
 		ImGui_ImplWin32_Shutdown();
 
 		
 		WaitForLastFrame();
+		ImGui_ImplDX12_InvalidateDeviceObjects();
+
+		for (size_t i{}; i != GetInstance().m_SwapChainDesc.BufferCount; ++i)
+		{
+			REL(GetInstance().m_FrameContext[i].Resource);
+		}
+
 		ImGui_ImplDX12_Shutdown();
 
 		ImGui::DestroyContext();
@@ -194,15 +202,6 @@ namespace YimMenu
 			return GetInstance().m_HeapAllocator.Free(cpu_handle, gpu_handle);
 		};
 		ImGui_ImplDX12_Init(&init_info);
-
-		#if 0
-		ImGui_ImplDX12_Init(m_Device.Get(),
-		    m_SwapChainDesc.BufferCount,
-		    DXGI_FORMAT_R8G8B8A8_UNORM,
-		    m_DescriptorHeap.Get(),
-		    m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		    m_DescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		#endif
 
 		ImGui::StyleColorsDark();
 

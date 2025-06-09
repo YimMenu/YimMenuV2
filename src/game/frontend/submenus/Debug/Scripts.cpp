@@ -345,7 +345,7 @@ namespace YimMenu::Submenus
 
 					if (MISC::GET_NUMBER_OF_FREE_STACKS_OF_THIS_SIZE(stackSize) == 0)
 					{
-						Notifications::Show("Start Script", "No free stack.", NotificationType::Error);
+						Notifications::Show("Start Script", "No free stack of this size.", NotificationType::Error);
 						return;
 					}
 

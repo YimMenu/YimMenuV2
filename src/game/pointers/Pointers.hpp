@@ -30,6 +30,7 @@ namespace rage
 	class rlQueryAccountsResult;
 	class rlGetAvatarsContext;
 	class rlGetAvatarsPlayerList;
+	struct gameSkeleton;
 }
 class CPedFactory;
 class CNetGamePlayer;
@@ -65,6 +66,7 @@ namespace YimMenu
 		using GetSessionByGamerHandle = bool (*)(int profile_index, rage::rlGamerHandle* handles, int num_handles, rage::rlSessionByGamerTaskResult* results, int num_results, bool* success, rage::rlTaskStatus* state);
 		using GetPresenceAttributes = bool (*)(int profile_index, rage::rlScGamerHandle* handles, int num_handles, rage::rlQueryPresenceAttributesContext** contexts, int count, rage::rlScTaskStatus* state);
 		using GetAvatars = bool (*)(rage::rlGetAvatarsContext* context, rage::rlGetAvatarsPlayerList* players);
+		using AssistedAimFindNewTarget = bool(*)(__int64 a1);
 	}
 
 	struct PointerData
@@ -150,6 +152,10 @@ namespace YimMenu
 		CStatsMpCharacterMappingData* StatsMpCharacterMappingData;
 		int* HasGTAPlus;
 		PVOID BattlEyeServerProcessPlayerJoin;
+		PVOID AssistedAimShouldReleaseEntity;
+		Functions::AssistedAimFindNewTarget AssistedAimFindNewTarget;
+		rage::gameSkeleton* GameSkeleton;
+		PVOID Nullsub;
 	};
 
 	struct Pointers : PointerData

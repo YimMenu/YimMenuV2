@@ -22,6 +22,7 @@ namespace YimMenu
 		// mods
 		void Upgrade();
 		void SetPlateText(std::string_view text);
+		std::map<int, int32_t> GetOwnedMods();
 
 		// seats
 		bool IsSeatFree(int seat);
@@ -30,5 +31,7 @@ namespace YimMenu
 		bool SupportsBoost();
 		bool IsBoostActive();
 		void SetBoostCharge(int percentage = 100);
+
+		std::string GetFullName();
 	};
 }

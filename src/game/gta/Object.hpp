@@ -9,5 +9,8 @@ namespace YimMenu
 		using Entity::Entity;
 
 		static Object Create(uint32_t model, rage::fvector3 coords);
+		bool IsCamera();
+		bool IsCache();
+		bool IsSignalJammer();
 	};
 }

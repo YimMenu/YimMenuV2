@@ -5,6 +5,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/backend/NativeHooks.hpp"
 #include "game/gta/Natives.hpp"
+#include "types/rage/gameSkeleton.hpp"
 
 
 using FnGetVersion = int(*)();
@@ -32,8 +33,52 @@ namespace YimMenu
 		return NativeInvoker::GetNativeHandler(NativeIndex::NET_GAMESERVER_BEGIN_SERVICE)(ctx);
 	}
 
+	static void DefuseSigscanner()
+	{
+		bool patched = false;
+		for (auto mode = Pointers.GameSkeleton->m_UpdateModes; mode; mode = mode->m_Next)
+		{
+			for (auto update_node = mode->m_Head; update_node; update_node = update_node->m_Next)
+			{
+				if (update_node->m_Hash != "Common Main"_J)
+					continue;
+
+				auto group = reinterpret_cast<rage::gameSkeletonUpdateGroup*>(update_node);
+
+				for (auto group_child_node = group->m_Head; group_child_node; group_child_node = group_child_node->m_Next)
+				{
+					// TamperActions is a leftover from the old AC, but still useful to block anyway
+					if (group_child_node->m_Hash != 0xA0F39FB6 && group_child_node->m_Hash != "TamperActions"_J)
+						continue;
+					patched = true;
+
+					reinterpret_cast<rage::gameSkeletonUpdateElement*>(group_child_node)->m_Function = reinterpret_cast<void(*)()>(Pointers.Nullsub);
+				}
+				break;
+			}
+		}
+
+		for (rage::gameSkeletonData& i : Pointers.GameSkeleton->m_SysData)
+		{
+			if (i.m_Hash != 0xA0F39FB6 && i.m_Hash != "TamperActions"_J)
+				continue;
+			i.m_InitFunc = Pointers.Nullsub;
+			i.m_ShutdownFunc = Pointers.Nullsub;
+		}
+
+		if (patched)
+		{
+			LOGF(VERBOSE, "DefuseSigscanner: Patched out the sigscanner");
+		}
+		else
+		{
+			LOGF(WARNING, "DefuseSigscanner: Failed to patch the sigscanner");
+		}
+	}
+
 	void AnticheatBypass::RunScriptImpl()
 	{
+		DefuseSigscanner();
 		NativeHooks::AddHook("shop_controller"_J, NativeIndex::NET_GAMESERVER_BEGIN_SERVICE, &TransactionHook);
 
 		m_IsFSLLoaded = CheckForFSL();

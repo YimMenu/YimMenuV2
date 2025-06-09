@@ -1,5 +1,5 @@
 #include "ESP.hpp"
-
+#include "game/gta/Object.hpp"
 #include "common.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/ColorCommand.hpp"
@@ -60,11 +60,18 @@ namespace YimMenu::Features
 	BoolCommand _ESPSkeletonPeds("espskeletonpeds", "Show Ped Skeleton", "Should the ESP draw the skeleton?");
 
 	ColorCommand _HashColorPeds("hashcolorpeds", "Ped Hash Color", "Changes the color of the hash ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
-	ColorCommand _DistanceColorPeds("distancecolorpeds", "Ped Distance Color", "Changes the color of the distance ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 	ColorCommand _SkeletonColorPeds("skeletoncolorpeds", "Ped Skeleton Color", "Changes the color of the skeleton ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 
 	// Random Events
-	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?");
+	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?"); // TODO: do we need this?
+
+	// Objects
+	BoolCommand _ESPDrawObjects("espdrawobjects", "Draw Special Objects", "Should the ESP draw special objects?");
+	BoolCommand _ESPNetworkInfoObjects("espnetinfoobjects", "Show Object Network Info", "Should the ESP draw network info?");
+	BoolCommand _ESPScriptInfoObjects("espscriptinfoobjects", "Show Object Script Info", "Should the ESP draw script info?");
+	BoolCommand _ESPDistanceObjects("espdistanceobjects", "Show Object Distance", "Should the ESP draw distance?");
+
+	ColorCommand _HashColorObjects("hashcolorobjects", "Object Hash Color", "Changes the color of the hash ESP for objects", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 }
 
 namespace YimMenu
@@ -95,6 +102,8 @@ namespace YimMenu
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)
 	{
+		if (!ped.IsValid())
+			return;
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
 		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(leftShoulderBone)), color, 1.5f);
@@ -115,7 +124,7 @@ namespace YimMenu
 	}
 
 	//TODO : Very bare bones currently, expand and possibly refactor
-	void ESP::DrawPlayer(Player plyr, ImDrawList* drawList)
+	static void DrawPlayer(Player plyr, ImDrawList* drawList)
 	{
 		if (!plyr.IsValid() || !plyr.GetPed().IsValid() || plyr == Self::GetPlayer()
 		    || worldToScreen(plyr.GetPed().GetBonePosition(torsoBone)).x == 0
@@ -133,11 +142,6 @@ namespace YimMenu
 		else if (distanceToPlayer > 300.f)
 			colorBasedOnDistance = Red, alphaBasedOnDistance = 125;
 
-		const auto originalFontSize = ImGui::GetFont()->Scale;
-		auto* currentFont           = ImGui::GetFont();
-		currentFont->Scale *= 1.2;
-		ImGui::PushFont(ImGui::GetFont());
-
 		if (Features::_ESPName.GetState())
 		{
 			drawList->AddText(worldToScreen(plyr.GetPed().GetBonePosition(headBone)),
@@ -152,9 +156,6 @@ namespace YimMenu
 			drawList->AddText({worldToScreen(plyr.GetPed().GetBonePosition(headBone)).x, worldToScreen(plyr.GetPed().GetBonePosition(headBone)).y + 20}, colorBasedOnDistance, distanceStr.c_str());
 		}
 
-		currentFont->Scale = originalFontSize;
-		ImGui::PopFont();
-
 		//TODO Boxes, Distance colors, Friendlies, Tracers, Health bars
 
 		if (Features::_ESPSkeleton.GetState() /* && !plyr.GetPed().IsAnimal() */) // yes, this is neccesary.
@@ -166,7 +167,7 @@ namespace YimMenu
 		}
 	}
 
-	void ESP::DrawPed(Ped ped, ImDrawList* drawList)
+	static void DrawPed(Ped ped, ImDrawList* drawList)
 	{
 		if (!ped.IsValid() || ped.IsPlayer() || ped == Self::GetPlayer().GetPed() || worldToScreen(ped.GetBonePosition(torsoBone)).x == 0 || (ped.IsDead() && !Features::_ESPDrawDeadPeds.GetState()))
 			return;
@@ -185,11 +186,6 @@ namespace YimMenu
 			colorBasedOnDistance = Orange, alphaBasedOnDistance = 200;
 		else if (distanceToPed > 300.f)
 			colorBasedOnDistance = Red, alphaBasedOnDistance = 125;
-
-		const auto originalFontSize = ImGui::GetFont()->Scale;
-		auto* currentFont           = ImGui::GetFont();
-		currentFont->Scale *= 1.2;
-		ImGui::PushFont(ImGui::GetFont());
 
 		std::string info = "";
 
@@ -229,9 +225,6 @@ namespace YimMenu
 			    distanceStr.c_str());
 		}
 
-		currentFont->Scale = originalFontSize;
-		ImGui::PopFont();
-
 		//TODO Boxes, Distance colors, Tracers, Health bars
 
 		if (Features::_ESPSkeletonPeds.GetState() /* && !ped.IsAnimal() */)
@@ -243,7 +236,7 @@ namespace YimMenu
 		}
 	}
 
-	void ESP::DrawRandomEvent(int event, ImDrawList* drawList)
+	static void DrawRandomEvent(int event, ImDrawList* drawList)
 	{
 		if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("freemode"_J) == 0 || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
 			return;
@@ -269,36 +262,139 @@ namespace YimMenu
 		}
 	}
 
-	void ESP::Draw()
+	static void DrawObject(Object object, ImDrawList* drawList)
 	{
-		if (!NativeInvoker::AreHandlersCached() || CAM::IS_SCREEN_FADED_OUT() || HUD::IS_WARNING_MESSAGE_ACTIVE())
+		if (!object.IsValid())
 			return;
 
-		if (const auto drawList = ImGui::GetBackgroundDrawList())
+		bool is_camera = object.IsCamera();
+		bool is_cache = object.IsCache();
+		bool is_signal_jammer = object.IsSignalJammer();
+		bool is_mission_object = object.IsMissionEntity();
+
+		if (!is_camera && !is_cache && !is_signal_jammer && !is_mission_object)
+			return;
+
+		float distanceToObject = 0.0f;
+
+		if (auto local = Self::GetPed())
+			distanceToObject = local.GetPosition().GetDistance(object.GetPosition());
+
+		int alphaBasedOnDistance     = 255;
+		ImColor colorBasedOnDistance = Red;
+
+		if (distanceToObject < 100.f)
+			colorBasedOnDistance = Green, alphaBasedOnDistance = 255;
+		else if (distanceToObject > 100.f && distanceToObject < 300.f)
+			colorBasedOnDistance = Orange, alphaBasedOnDistance = 200;
+		else if (distanceToObject > 300.f)
+			colorBasedOnDistance = Red, alphaBasedOnDistance = 125;
+
+		Vector3 coords = object.GetPosition();
+		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
+		ImColor color = ImGui::ColorConvertFloat4ToU32(Features::_HashColorObjects.GetState());
+		std::string info = std::format("0x{:08X} ", (joaat_t)object.GetModel());
+
+		if (Features::_ESPNetworkInfoObjects.GetState() && object.IsNetworked())
 		{
-			if (Features::_ESPDrawPlayers.GetState())
+			auto owner = Player(object.GetOwner());
+			auto id    = object.GetNetworkObjectId();
+
+			info += std::format("{} {} ", id, owner.GetName());
+		}
+
+		if (Features::_ESPScriptInfoObjects.GetState())
+		{
+			if (auto script = ENTITY::GET_ENTITY_SCRIPT(object.GetHandle(), nullptr))
 			{
-				for (auto& [id, player] : Players::GetPlayers())
-				{
-					DrawPlayer(player, drawList);
-				}
+				info += std::format("{} ", script);
 			}
-			if (Features::_ESPDrawPeds.GetState() && GetPedPool())
-			{
-				for (Ped ped : Pools::GetPeds())
-				{
-					if (ped.GetPointer<void*>())
-						DrawPed(ped, drawList);
-				}
-			}
-			if (Features::_ESPDrawRandomEvents.GetState())
-			{
-				for (int event = 0; event < 21; event++)
-				{
-					DrawRandomEvent(event, drawList);
-				}
-			}
+		}
+
+		if (is_camera)
+		{
+			color = Red;
+			info += " (Camera)";
+		}
+		else if (is_cache)
+		{
+			color = Orange;
+			info += " (Cache)";
+		}
+		else if (is_signal_jammer)
+		{
+			color = Red;
+			info += " (Jammer)";
+		}
+		else if (is_mission_object)
+		{
+			info += " (Mission)";
+		}
+		
+		drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, info.c_str());
+
+		if (Features::_ESPDistanceObjects.GetState())
+		{
+			std::string distanceStr = std::to_string((int)distanceToObject) + "m";
+			drawList->AddText(
+			    {worldToScreen(object.GetPosition()).x, worldToScreen(object.GetPosition()).y + 20},
+			    colorBasedOnDistance,
+			    distanceStr.c_str());
 		}
 	}
 
+	void ESP::Draw()
+	{
+		if (!NativeInvoker::AreHandlersCached() || CAM::IS_SCREEN_FADED_OUT() || HUD::IS_WARNING_MESSAGE_ACTIVE() || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
+			return;
+
+		const auto originalFontSize = ImGui::GetFont()->Scale;
+		auto* currentFont           = ImGui::GetFont();
+		currentFont->Scale *= 1.2;
+		ImGui::PushFont(ImGui::GetFont());
+
+		if (const auto drawList = ImGui::GetBackgroundDrawList())
+		{
+			// lots of race conditions and other things make this particularly crash-prone
+			__try
+			{
+				if (Features::_ESPDrawPlayers.GetState())
+				{
+					for (auto& [id, player] : Players::GetPlayers())
+					{
+						DrawPlayer(player, drawList);
+					}
+				}
+				if (Features::_ESPDrawPeds.GetState() && GetPedPool())
+				{
+					for (Ped ped : Pools::GetPeds())
+					{
+						if (ped && ped.GetPointer<void*>())
+							DrawPed(ped, drawList);
+					}
+				}
+				if (Features::_ESPDrawRandomEvents.GetState())
+				{
+					for (int event = 0; event < 21; event++)
+					{
+						DrawRandomEvent(event, drawList);
+					}
+				}
+				if (Features::_ESPDrawObjects.GetState() && GetObjectPool())
+				{
+					for (auto obj : Pools::GetObjects())
+					{
+						if (obj)
+							DrawObject(obj.As<Object>(), drawList);
+					}
+				}
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER)
+			{
+			}
+		}
+
+		currentFont->Scale = originalFontSize;
+		ImGui::PopFont();
+	}
 }

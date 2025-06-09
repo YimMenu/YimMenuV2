@@ -129,7 +129,7 @@ namespace YimMenu
 	{
 		while (g_Running)
 		{
-			if (Features::_AutoUpdateEnabled.GetState() && m_LastPlayerInfoFetch + AUTO_REFRESH_TIME < std::chrono::system_clock::now() && Pointers.GetPresenceAttributes)
+			if (Features::_AutoUpdateEnabled.GetState() && std::chrono::system_clock::now() - m_LastPlayerInfoFetch > AUTO_REFRESH_TIME && Pointers.GetPresenceAttributes)
 			{
 				FetchPlayerInfo(true);
 				m_LastPlayerInfoFetch = std::chrono::system_clock::now();

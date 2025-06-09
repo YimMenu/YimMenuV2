@@ -2,9 +2,44 @@
 #include "Natives.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/pointers/Pointers.hpp"
+#include "core/util/Joaat.hpp"
+
 
 namespace YimMenu
 {
+	static std::unordered_set<joaat_t> cameraHashes = {
+	    "p_cctv_s"_J,
+	    "prop_cctv_cam_01a"_J,
+	    "prop_cctv_cam_01b"_J,
+	    "prop_cctv_cam_02a"_J,
+	    "prop_cctv_cam_03a"_J,
+	    "prop_cctv_cam_04a"_J,
+	    "prop_cctv_cam_04b"_J,
+	    "prop_cctv_cam_04c"_J,
+	    "prop_cctv_cam_05a"_J,
+	    "prop_cctv_cam_06a"_J,
+	    "prop_cctv_cam_07a"_J,
+	    "prop_cctv_pole_01a"_J,
+	    "prop_cctv_pole_02"_J,
+	    "prop_cctv_pole_03"_J,
+	    "prop_cctv_pole_04"_J,
+	    "prop_cctv_cam_07a"_J,
+	    "prop_cs_cctv"_J,
+	    "hei_prop_bank_cctv_01"_J,
+	    "hei_prop_bank_cctv_02"_J,
+	    "ch_prop_ch_cctv_cam_02a"_J,
+	    "xm_prop_x17_server_farm_cctv_01"_J,
+	};
+
+	static std::unordered_set<joaat_t> cacheHashes = {
+	    "prop_drug_package"_J,
+	    "prop_mp_drug_pack_blue"_J,
+	    "prop_mp_drug_pack_red"_J,
+	    "prop_mp_drug_package"_J,
+	    "tr_prop_tr_sand_01a"_J,
+	    "h4_prop_h4_chest_01a"_J,
+	};
+
 	Object Object::Create(uint32_t model, rage::fvector3 coords)
 	{
 		ENTITY_ASSERT_SCRIPT_CONTEXT();
@@ -39,7 +74,7 @@ namespace YimMenu
 		if (!obj)
 		{
 #ifdef ENTITY_DEBUG
-			LOGF(WARNING, "CREATE_PED failed when creating a ped with model {:X}", model);
+			LOGF(WARNING, "CREATE_OBJECT failed when creating an object with model {:X}", model);
 #endif
 			return nullptr;
 		}
@@ -47,5 +82,20 @@ namespace YimMenu
 		STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
 
 		return obj;
+	}
+
+	bool Object::IsCamera()
+	{
+		return cameraHashes.contains(GetModel());
+	}
+
+	bool Object::IsCache()
+	{
+		return cacheHashes.contains(GetModel());
+	}
+
+	bool Object::IsSignalJammer()
+	{
+		return GetModel() == -305186631;
 	}
 }

@@ -576,7 +576,7 @@ namespace YimMenu::Features
 			{
 				thread->m_Context.m_State = rage::scrThread::State::PAUSED;
 
-				*ScriptLocal(thread, 3060).At(130).At(1).As<int*>() = BikeTimeTrialData::Get(thread)->Location; // if we don't init this, the par time duration function will return 0 and the COMPLETED stat will be set to 0, which is bad
+				*ScriptLocal(thread, 3060).At(130).At(1).As<int*>() = FreemodeGeneral::Get()->DailyReset.Seed % 14; // if we don't init this, the par time duration function will return 0 and the COMPLETED stat will be set to 0, which is bad
 				*ScriptLocal(thread, 142).At(4).As<int*>()          = 0;
 				static ScriptFunction onBTTEnd("fm_content_bicycle_time_trial"_J, ScriptPointer("OnBTTEnd", "64 ? ? ? 5D ? ? ? 75 77").Add(1).Rip());
 				onBTTEnd.Call<void>();

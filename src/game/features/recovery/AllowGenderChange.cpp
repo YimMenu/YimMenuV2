@@ -9,12 +9,12 @@ namespace YimMenu::Features
 
 		virtual void OnEnable() override
 		{
-			Stats::SetInt("MPx_ALLOW_GENDER_CHANGE", 52);
+			Stats::SetInt("MPX_ALLOW_GENDER_CHANGE", 52);
 		}
 
 		virtual void OnDisable() override
 		{
-			Stats::SetInt("MPX_HEIST_PLANNING_STAGE", 0);
+			Stats::SetInt("MPX_ALLOW_GENDER_CHANGE", 0);
 		}
 	};
 

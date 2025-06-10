@@ -141,8 +141,7 @@ namespace YimMenu::Submenus
 		{
 			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
 			{
-				std::string ptrName = "SendUpdateRECoordsTSECooldownPatch" + std::to_string(event);
-				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], ScriptPointer(ptrName, "43 88 13 2E 00 01"), {0x71, 0x00, 0x00}));
+				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], ScriptPointer("SendUpdateRECoordsTSECooldownPatch", "43 88 13 2E 00 01"), {0x71, 0x00, 0x00}));
 			}
 		}
 

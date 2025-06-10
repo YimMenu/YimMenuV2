@@ -20,6 +20,9 @@ namespace YimMenu::Submenus
 		auto lsTagsTab        = std::make_shared<CollapsingHeaderItem>("LS Tags");
 		auto madrazoHitsTab   = std::make_shared<CollapsingHeaderItem>("Madrazo Hits");
 
+		dailyActivities->AddItem(std::make_shared<CommandItem>("setallactivitiescompleted"_J));
+		dailyActivities->AddItem(std::make_shared<CommandItem>("resetallactivities"_J));
+
 		challengesTab->AddItem(std::make_shared<CommandItem>("completeallchallenges"_J));
 
 		hiddenCacheTab->AddItem(std::make_shared<ListCommandItem>("hiddencacheindex"_J));

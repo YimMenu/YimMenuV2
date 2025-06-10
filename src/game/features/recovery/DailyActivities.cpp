@@ -76,6 +76,68 @@ namespace YimMenu::Features
 		{{0, "LS Tag 1"}, {1, "LS Tag 2"}, {2, "LS Tag 3"}, {3, "LS Tag 4"}, {4, "LS Tag 5"}}
 	};
 
+	static void SetAllDailyActivitiesCompleted(bool completed)
+	{
+		Stats::SetPackedBool(36628, completed); // G's Cache
+		Stats::SetPackedBool(36657, completed); // Stash House
+		Stats::SetPackedBool(31734, completed); // Shipwreck
+		Stats::SetPackedBool(30297, completed); // Hidden Cache 1
+		Stats::SetPackedBool(30298, completed); // Hidden Cache 2
+		Stats::SetPackedBool(30299, completed); // Hidden Cache 3
+		Stats::SetPackedBool(30300, completed); // Hidden Cache 4
+		Stats::SetPackedBool(30301, completed); // Hidden Cache 5
+		Stats::SetPackedBool(30302, completed); // Hidden Cache 6
+		Stats::SetPackedBool(30303, completed); // Hidden Cache 7
+		Stats::SetPackedBool(30304, completed); // Hidden Cache 8
+		Stats::SetPackedBool(30305, completed); // Hidden Cache 9
+		Stats::SetPackedBool(30306, completed); // Hidden Cache 10
+		Stats::SetPackedBool(30307, completed); // Treasure Chest 1
+		Stats::SetPackedBool(30308, completed); // Treasure Chest 2
+		Stats::SetPackedBool(25522, completed); // Buried Stash 1
+		Stats::SetPackedBool(25523, completed); // Buried Stash 2
+		Stats::SetPackedBool(42252, completed); // LS Tag 1
+		Stats::SetPackedBool(42253, completed); // LS Tag 2
+		Stats::SetPackedBool(42254, completed); // LS Tag 3
+		Stats::SetPackedBool(42255, completed); // LS Tag 4
+		Stats::SetPackedBool(42256, completed); // LS Tag 5
+		Stats::SetPackedBool(42269, completed); // Madrazo Hit
+		Stats::SetPackedBool(42059, completed); // Shoot Animals Photography 1
+		Stats::SetPackedBool(42060, completed); // Shoot Animals Photography 2
+		Stats::SetPackedBool(42061, completed); // Shoot Animals Photography 3
+		for (int i = 0; i < 10; i++)
+		{
+			// see TSE 1916113629
+			int location = Stats::GetInt("MPX_DAILYCOLLECT_SKYDIVES" + std::to_string(i));
+			Stats::SetPackedInt((34837 + i * 4), completed ? location : -1); // Junk Energy Skydives Checkpoint
+			Stats::SetPackedInt((34839 + i * 4), completed ? location : -1); // Junk Energy Skydives Accurate Landing
+			Stats::SetPackedInt((34838 + i * 4), completed ? location : -1); // Junk Energy Skydives Partime
+			Stats::SetPackedInt((34840 + i * 4), completed ? location : -1); // Junk Energy Skydives Gold
+		}
+		for (int i = 34252; i <= 34261; i++)
+		{
+			Stats::SetPackedBool(i, completed); // Trick or Treat
+		}
+		for (int i = 34512; i <= 34701; i++)
+		{
+			Stats::SetPackedBool(i, completed); // Trick or Treat
+		}
+		int ttLocation   = 0;
+		int rcttLocation = 0;
+		int bttLocation  = 0;
+		if (auto thread = Scripts::FindScriptThread("freemode"_J))
+		{
+			ttLocation = StandardTimeTrialData::Get(thread)->Location; // gets its value from tunable TIMETRIALVARIATION
+			// we can actually manually calculate these using FreemodeGeneral::Get()->DailyReset.Seed % 14
+			rcttLocation = RCBanditoTimeTrialData::Get(thread)->Location;
+			bttLocation  = BikeTimeTrialData::Get(thread)->Location;
+		}
+		Stats::SetInt("MPPLY_TIMETRIAL_COMPLETED_WEEK", completed ? ttLocation : -1); // Standard Time Trial
+		Stats::SetInt("MPPLY_RCTTCOMPLETEDWEEK", completed ? rcttLocation : -1); // RC Bandito Time Trial
+		Stats::SetInt("MPPLY_BTTCOMPLETED", completed ? bttLocation : -1); // Junk Energy Bike Time Trial
+		Stats::SetInt("MPX_CBV_DELIVERED_BS", completed ? 1023 : 0); // Exotic Exports
+		Stats::SetInt("MPX_CBV_STATE", completed); // Exotic Exports
+	}
+
 	static void TeleportToCollectable(SCRIPT_EVENT_COLLECT_COLLECTABLE::eCollectables collectable, int index)
 	{
 		static ScriptFunction getCollectibleCoords("freemode"_J, ScriptPointer("GetCollectibleCoords", "5D ? ? ? 7D 2C 10").Add(1).Rip());
@@ -109,6 +171,34 @@ namespace YimMenu::Features
 		}
 		return 0;
 	}
+
+	class SetAllActivitiesCompleted : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!Pointers.IsSessionStarted)
+				return;
+
+			SetAllDailyActivitiesCompleted(true);
+			Notifications::Show("Daily Activities", "Completed all activities, switch session to apply the changes.");
+		}
+	};
+
+	class ResetAllActivities : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!Pointers.IsSessionStarted)
+				return;
+
+			SetAllDailyActivitiesCompleted(false);
+			Notifications::Show("Daily Activities", "Reset all activities, switch session to apply the changes.");
+		}
+	};
 
 	class CompleteAllChallenges : public Command
 	{
@@ -401,15 +491,16 @@ namespace YimMenu::Features
 				return;
 			}
 
-			int blip = -1;
+			int sprite = -1;
 			switch (timeTrialIndex.GetState())
 			{
-			case 0: blip = static_cast<int>(BlipSprite::RADAR_TEMP_2);         break;
-			case 1: blip = static_cast<int>(BlipSprite::RADAR_RC_TIME_TRIALS); break;
-			case 2: blip = static_cast<int>(BlipSprite::RADAR_BICYCLE_TRIAL);  break;
+			case 0: sprite = static_cast<int>(BlipSprite::RADAR_TEMP_2);         break;
+			case 1: sprite = static_cast<int>(BlipSprite::RADAR_RC_TIME_TRIALS); break;
+			case 2: sprite = static_cast<int>(BlipSprite::RADAR_BICYCLE_TRIAL);  break;
 			}
 
-			if (blip != -1 && HUD::DOES_BLIP_EXIST(blip))
+			auto blip = HUD::GET_FIRST_BLIP_INFO_ID(sprite);
+			if (HUD::DOES_BLIP_EXIST(blip))
 			{
 				if (auto coords = HUD::GET_BLIP_COORDS(blip))
 				{
@@ -735,6 +826,9 @@ namespace YimMenu::Features
 			}
 		}
 	};
+
+	static SetAllActivitiesCompleted _SetAllActivitiesCompleted{"setallactivitiescompleted", "Set All Activities Completed", "Switch session to apply the changes."};
+	static ResetAllActivities _ResetAllActivities{"resetallactivities", "Reset All Activities", "Switch session to apply the changes."};
 
 	static CompleteAllChallenges _CompleteAllChallenges{"completeallchallenges", "Complete All Challenges", "Completes all the Daily Objectives and the Weekly Challenge."};
 

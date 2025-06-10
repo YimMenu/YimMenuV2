@@ -119,12 +119,12 @@ namespace YimMenu::Submenus
 			{
 				if (NetComponent->IsLocalPlayerHost())
 				{
-					ScriptFunction setFMContentScriptServerState(randomEventScripts[(static_cast<int>(selectedEvent)], ScriptPointer("SetFMContentScriptServerState", "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
+					ScriptFunction setFMContentScriptServerState(randomEventScripts[static_cast<int>(selectedEvent)], ScriptPointer("SetFMContentScriptServerState", "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
 					setFMContentScriptServerState.Call<void>(3);
 				}
 				else
 				{
-					ScriptFunction setFMContentScriptClientState(randomEventScripts[(static_cast<int>(selectedEvent)], ScriptPointer("SetFMContentScriptClientState", "5D ? ? ? 55 08 00 74").Add(1).Rip());
+					ScriptFunction setFMContentScriptClientState(randomEventScripts[static_cast<int>(selectedEvent)], ScriptPointer("SetFMContentScriptClientState", "5D ? ? ? 55 08 00 74").Add(1).Rip());
 					setFMContentScriptClientState.Call<void>(3);
 				}
 			}

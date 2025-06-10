@@ -5,10 +5,8 @@
 
 namespace YimMenu::Features
 {
-	// not setting a max speed on purpose to avoid value slider showing up
-	// maybe bring this up as an issue and fix?
-	static FloatCommand _SuperRunMoveRateOverride{"moverateoverride", "Move Rate Override", "Multipler for base run/sprint speed", 0.0f, std::nullopt, 2.0f};
-	static FloatCommand _SuperRunRunSprintMultiplier{"runsprintswimmultiplier", "Run/Sprint/Swim Multiplier", "Multipler with which the run/sprint/swim speed is increased with until maximum speed is reached", 1.0f, std::nullopt, 1.0f};
+	static FloatCommand _SuperRunMoveRateOverride{"moverateoverride", "Move Rate Override", "Multipler for base run/sprint speed", 0.0f, 10.0f, 2.0f};
+	static FloatCommand _SuperRunRunSprintMultiplier{"runsprintswimmultiplier", "Run/Sprint/Swim Multiplier", "Multipler with which the run/sprint/swim speed is increased with until maximum speed is reached", 1.0f, 1.49f, 1.0f};
 
 	class SuperRun : public LoopedCommand
 	{

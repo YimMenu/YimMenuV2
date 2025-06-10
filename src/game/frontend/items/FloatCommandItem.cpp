@@ -6,7 +6,8 @@
 
 namespace YimMenu
 {
-	FloatCommandItem::FloatCommandItem(joaat_t id, std::optional<std::string> label_override) :
+	FloatCommandItem::FloatCommandItem(joaat_t id, std::optional<std::string> label_override, bool use_slider) :
+	    m_useSlider(use_slider),
 	    m_Command(Commands::GetCommand<FloatCommand>(id)),
 	    m_LabelOverride(label_override)
 	{
@@ -20,9 +21,9 @@ namespace YimMenu
 			return;
 		}
 
-		auto value  = m_Command->GetState();
+		auto value = m_Command->GetState();
 		auto label = m_LabelOverride.has_value() ? m_LabelOverride.value().c_str() : m_Command->GetLabel().c_str();
-		if (!m_Command->GetMinimum().has_value() || !m_Command->GetMaximum().has_value())
+		if (!m_Command->GetMinimum().has_value() || !m_Command->GetMaximum().has_value() || !m_useSlider)
 		{
 			ImGui::SetNextItemWidth(150);
 			if (ImGui::InputFloat(label, &value))

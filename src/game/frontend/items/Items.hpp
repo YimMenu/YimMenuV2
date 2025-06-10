@@ -64,10 +64,11 @@ namespace YimMenu
 	class IntCommandItem : public UIItem
 	{
 	public:
-		explicit IntCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt);
+		explicit IntCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt, bool use_slider = true);
 		void Draw() override;
 
 	private:
+		bool m_useSlider;
 		IntCommand* m_Command;
 		std::optional<std::string> m_LabelOverride;
 	};
@@ -75,10 +76,11 @@ namespace YimMenu
 	class FloatCommandItem : public UIItem
 	{
 	public:
-		explicit FloatCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt);
+		explicit FloatCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt, bool use_slider = true);
 		void Draw() override;
 
 	private:
+		bool m_useSlider;
 		FloatCommand* m_Command;
 		std::optional<std::string> m_LabelOverride;
 	};

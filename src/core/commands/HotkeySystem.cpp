@@ -27,7 +27,6 @@ namespace YimMenu
 			m_CommandHotkeys.insert(std::make_pair(hash, link));
 		}
 		
-		LOG(INFO) << "Registered " << m_CommandHotkeys.size() << " commands";
 		m_CommandHotkeys.at("chathelper"_J).m_Chain.clear(); // ensure chat is always bound
 		m_CommandHotkeys.at("chathelper"_J).m_Chain.push_back(0x54); 
 	}
@@ -72,25 +71,23 @@ namespace YimMenu
 	void HotkeySystem::CreateHotkey(std::vector<int>& chain)
 	{
 		static auto is_key_unique = [this](int Key, std::vector<int> List) -> bool {
-			for (auto& Key_ : List)
-				if (GetHotkeyLabel(Key_) == GetHotkeyLabel(Key))
+			for (auto& _key : List)
+				if (_key == Key)
 					return false;
 
 			return true;
 		};
 
 		int pressed_key = 0;
-		ListenAndApply(pressed_key, chain);
-
-		if (pressed_key > 1)
+		if (ListenAndApply(pressed_key, chain))
 		{
+			MarkStateDirty();
+
 			if (is_key_unique(pressed_key, chain))
 			{
 				chain.push_back(pressed_key);
 			}
 		}
-
-		MarkStateDirty();
 	}
 
 	void HotkeySystem::RunScriptImpl()

@@ -146,7 +146,7 @@ namespace YimMenu
 	    {47, "HORN_XM15_2"},
 	    {48, "HORN_XM15_3"}};
 
-	const char* VehicleModel::GetModName(Hash model, int vehicle, int mod_slot, int mod, int mod_count)
+	std::string VehicleModel::GetModName(Hash model, int vehicle, int mod_slot, int mod, int mod_count)
 	{
 		if (mod_count == 0)
 			return "";

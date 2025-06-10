@@ -26,14 +26,14 @@ namespace YimMenu
 
 		if (!m_Pc)
 		{
-			if (auto address = ScriptPointers::GetPointer(Joaat(m_Pointer.GetName())))
+			if (auto address = ScriptPointers::GetPointer(m_Script, Joaat(m_Pointer.GetName())))
 			{
 				m_Pc = address;
 			}
 			else
 			{
 				m_Pc = m_Pointer.Scan(program).As<std::uint32_t>();
-				ScriptPointers::CachePointer(Joaat(m_Pointer.GetName()), m_Pc);
+				ScriptPointers::CachePointer(m_Script, Joaat(m_Pointer.GetName()), m_Pc);
 			}
 
 			if (!m_Pc) // if still not valid

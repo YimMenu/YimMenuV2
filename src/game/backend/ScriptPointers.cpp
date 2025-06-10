@@ -5,7 +5,7 @@
 namespace YimMenu
 {
 	ScriptPointers::ScriptPointers() :
-	    m_CacheFile(FileMgr::GetProjectFile("./scr_pointers.bin"))
+	    m_CacheFile(FileMgr::GetProjectFile("./scr_pointers.bin"), 1)
 	{
 	}
 
@@ -18,17 +18,25 @@ namespace YimMenu
 		}
 	}
 
-	void ScriptPointers::CachePointerImpl(joaat_t nameHash, std::uint32_t address)
+	void ScriptPointers::CachePointerImpl(joaat_t scriptHash, joaat_t nameHash, std::uint32_t address)
 	{
-		m_ScriptPointers.emplace(nameHash, address);
+		if (auto it = m_ScriptPointers.find(scriptHash); it != m_ScriptPointers.end())
+			it->second.emplace(nameHash, address);
+		else
+		{
+			m_ScriptPointers.emplace(scriptHash, std::unordered_map<joaat_t, std::uint32_t>({{nameHash, address}}));
+		}
 		Save();
 	}
 
-	std::uint32_t ScriptPointers::GetPointerImpl(joaat_t nameHash)
+	std::uint32_t ScriptPointers::GetPointerImpl(joaat_t scriptHash, joaat_t nameHash)
 	{
-		if (auto it = m_ScriptPointers.find(nameHash); it != m_ScriptPointers.end())
+		if (auto it = m_ScriptPointers.find(scriptHash); it != m_ScriptPointers.end())
 		{
-			return it->second;
+			if (auto it2 = it->second.find(nameHash); it2 != it->second.end())
+			{
+				return it2->second;
+			}
 		}
 
 		return 0;
@@ -36,20 +44,27 @@ namespace YimMenu
 
 	void ScriptPointers::Save()
 	{
-		auto dataSize = sizeof(std::uint32_t) + sizeof(scrPointerSaveStruct) * m_ScriptPointers.size();
-		auto data     = std::make_unique<uint8_t[]>(dataSize);
-		auto dataPtr  = data.get();
+		std::vector<scrPointerSaveStruct> savedPointers;
 
-		*(std::uint32_t*)dataPtr = m_ScriptPointers.size();
-		dataPtr += sizeof(std::uint32_t);
-
-		for (auto& [hash, val] : m_ScriptPointers)
+		for (auto& [script, ptrs] : m_ScriptPointers)
 		{
-			auto saveStruct        = (scrPointerSaveStruct*)dataPtr;
-			saveStruct->m_NameHash = hash;
-			saveStruct->m_Address  = val;
-			dataPtr += sizeof(scrPointerSaveStruct);
+			for (auto& [hash, val] : ptrs)
+			{
+				scrPointerSaveStruct saveStruct;
+				saveStruct.m_NameHash = hash;
+				saveStruct.m_Address = val;
+				saveStruct.m_ScriptHash = script;
+				savedPointers.push_back(saveStruct);
+			}
 		}
+
+		auto dataSize = sizeof(std::uint32_t) + sizeof(scrPointerSaveStruct) * savedPointers.size();
+		auto data = std::make_unique<uint8_t[]>(dataSize);
+		auto dataPtr = data.get();
+
+		auto numPtrsAddr = (std::uint32_t*)dataPtr;
+		dataPtr += sizeof(std::uint32_t);
+		memcpy(dataPtr, savedPointers.data(), sizeof(scrPointerSaveStruct) * savedPointers.size());
 
 		m_CacheFile.SetHeaderVersion(ModuleMgr.Get("GTA5_Enhanced.exe"_J)->GetNtHeader()->FileHeader.TimeDateStamp);
 		m_CacheFile.SetData(std::move(data), dataSize);
@@ -66,7 +81,12 @@ namespace YimMenu
 		for (int i = 0; i < numPointers; i++)
 		{
 			auto saveStruct = (scrPointerSaveStruct*)data;
-			m_ScriptPointers.emplace(saveStruct->m_NameHash, saveStruct->m_Address);
+			if (auto it = m_ScriptPointers.find(saveStruct->m_ScriptHash); it != m_ScriptPointers.end())
+				it->second.emplace(saveStruct->m_NameHash, saveStruct->m_Address);
+			else
+			{
+				m_ScriptPointers.emplace(saveStruct->m_ScriptHash, std::unordered_map<joaat_t, std::uint32_t>({{saveStruct->m_NameHash, saveStruct->m_Address}}));
+			}
 			data += sizeof(scrPointerSaveStruct);
 		}
 

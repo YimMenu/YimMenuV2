@@ -1,5 +1,7 @@
+#include "DailyActivities.hpp"
 #include "core/commands/ListCommand.hpp"
 #include "core/commands/BoolCommand.hpp"
+#include "core/backend/ScriptMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/ScriptPatches.hpp"
@@ -171,6 +173,64 @@ namespace YimMenu::Features
 			}
 		}
 		return 0;
+	}
+
+	static bool initialized = false;
+
+	void OpenStreetDealerMenu::RunScriptImpl()
+	{
+		while (g_Running)
+		{
+			ScriptMgr::Yield();
+
+			if (!m_ShouldRunScript)
+				continue;
+
+			if (!m_Thread)
+			{
+				int id   = Scripts::StartScript("fm_street_dealer"_J);
+				m_Thread = Scripts::FindScriptThreadByID(id);
+				if (m_Thread)
+				{
+					m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
+				}
+				else
+				{
+					m_ShouldRunScript = false;
+					continue;
+				}
+			}
+
+			auto streetDealerData = ScriptLocal(m_Thread, 253).At(12);
+
+			if (!initialized)
+			{
+				auto selected                                               = streetDealerIndex.GetState();
+				FreemodeGeneral::Get()->StreetDealers.ClosestDealerLocation = FreemodeGeneral::Get()->StreetDealers.Dealers[selected].Location;
+				FreemodeGeneral::Get()->StreetDealers.ClosetsDealerIndex    = selected;
+
+				static ScriptFunction initStreetDealerData("fm_street_dealer"_J, ScriptPointer("InitStreetDealerData", "2D 00 07 00 00 61 E9 CE 29"));
+				initStreetDealerData.Call<void>();
+				streetDealerData.At(5).As<SCR_BITSET<uint64_t>*>()->Set(0);
+				initialized = true;
+			}
+
+			static ScriptFunction runStreetDealerMenu("fm_street_dealer"_J, ScriptPointer("RunStreetDealerMenu", "2D 01 03 00 00 5D ? ? ? 2A"));
+			runStreetDealerMenu.Call<void>(streetDealerData.As<int*>());
+
+			if (streetDealerData.At(5).As<SCR_BITSET<uint64_t>*>()->IsSet(2) || !*Pointers.IsSessionStarted)
+			{
+				// if we don't reset these, freemode won't start the script legitimately
+				FreemodeGeneral::Get()->StreetDealers.ClosestDealerLocation = -1;
+				FreemodeGeneral::Get()->StreetDealers.ClosetsDealerIndex    = -1;
+
+				m_Thread->Kill();
+				m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
+				m_Thread                    = nullptr;
+				initialized                 = false;
+				m_ShouldRunScript           = false;
+			}
+		}
 	}
 
 	class SetAllActivitiesCompleted : public Command
@@ -749,6 +809,19 @@ namespace YimMenu::Features
 		}
 	};
 
+	class _OpenStreetDealerMenu : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted || Scripts::IsScriptActive("fm_street_dealer"_J))
+				return;
+
+			OpenStreetDealerMenu::SetShouldRunScript(true);
+		}
+	};
+
 	class TeleportToLSTag : public Command
 	{
 		using Command::Command;
@@ -874,6 +947,7 @@ namespace YimMenu::Features
 	static EnterStashHouseSafeCode _EnterStashHouseSafeCode{"enterstashhousesafecode", "Enter Stash House Safe Code", "Enters the Stash House safe code."};
 
 	static TeleportToStreetDealer _TeleportToStreetDealer{"tptostreetdealer", "Teleport to Dealer", "Teleports to the selected Street Dealer."};
+	static _OpenStreetDealerMenu __OpenStreetDealerMenu{"openstreetdealermenu", "Open Street Dealer Menu", "Allows you to access the selected Street Dealer remotely."};
 
 	static TeleportToLSTag _TeleportToLSTag{"tptolstag", "Teleport to LS Tag", "Teleports to the selected LS Tag."};
 	static SprayLSTag _SprayLSTag{"spraylstag", "Spray LS Tag", "Sprays the selected LS Tag."};

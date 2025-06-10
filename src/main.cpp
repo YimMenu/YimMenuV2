@@ -22,6 +22,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/features/vehicle/SavePersonalVehicle.hpp"
 #include "game/features/self/OpenGunLocker.hpp"
+#include "game/features/recovery/DailyActivities.hpp"
 
 namespace YimMenu
 {
@@ -71,6 +72,7 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::SavePersonalVehicle::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenGunLocker::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenStreetDealerMenu::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
 
 		if (!Pointers.LateInit())

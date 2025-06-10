@@ -60,9 +60,9 @@ namespace YimMenu::Submenus
 		stashHouseTab->AddItem(std::make_shared<CommandItem>("tptostashhouse"_J));
 		stashHouseTab->AddItem(std::make_shared<CommandItem>("enterstashhousesafecode"_J));
 
-		// TO-DO: Add remote open street dealer menu
 		streetDealerTab->AddItem(std::make_shared<ListCommandItem>("streetdealerindex"_J));
 		streetDealerTab->AddItem(std::make_shared<CommandItem>("tptostreetdealer"_J));
+		streetDealerTab->AddItem(std::make_shared<CommandItem>("openstreetdealermenu"_J));
 
 		lsTagsTab->AddItem(std::make_shared<ListCommandItem>("lstagindex"_J));
 		lsTagsTab->AddItem(std::make_shared<CommandItem>("tptolstag"_J));

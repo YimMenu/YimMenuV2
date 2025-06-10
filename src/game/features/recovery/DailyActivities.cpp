@@ -3,6 +3,7 @@
 #include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/ScriptPatches.hpp"
+#include "game/backend/Tunables.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/Stats.hpp"
@@ -448,23 +449,34 @@ namespace YimMenu::Features
 			if (!*Pointers.IsSessionStarted)
 				return;
 
-			// TO-DO: Fix this
-			MP_SCRIPT_DATA garbage{};
-			if (auto thread = Scripts::FindScriptThreadByID(Scripts::StartScript("fm_content_skydive"_J, eStackSizes::MULTIPLAYER_FREEMODE, &garbage, SCR_SIZEOF(garbage))))
-			{
-				thread->m_Context.m_State = rage::scrThread::State::PAUSED;
+			static Tunable checkpointReward{"SKYDIVING_CHALLENGE_CASH_REWARD_ALL_CHECKPOINTS_COLLECTED"_J};
+			static Tunable parTimeReward{"SKYDIVING_CHALLENGE_CASH_REWARD_PAR_TIME"_J};
+			static Tunable landingReward{"SKYDIVING_CHALLENGE_CASH_REWARD_ACCURATE_LANDING"_J};
 
-				*ScriptLocal(thread, 142).At(1).As<int*>()          = skydiveIndex.GetState();
-				*ScriptLocal(thread, 3122).At(146).At(1).As<int*>() = Stats::GetInt("MPX_DAILYCOLLECT_SKYDIVES" + std::to_string(skydiveIndex.GetState()));
-				*ScriptLocal(thread, 142).At(2).As<int*>()          = *ScriptLocal(thread, 276).At(143).As<int*>() - 1;
-				ScriptLocal(thread, 3307).At(Self::GetPlayer().GetId(), 51).At(43).At(1).As<SCR_BITSET<uint64_t>*>()->Set(7);
-				ScriptLocal(thread, 3307).At(Self::GetPlayer().GetId(), 51).At(43).At(1).As<SCR_BITSET<uint64_t>*>()->Set(4);
+			if (!checkpointReward.IsReady() || !parTimeReward.IsReady() || !landingReward.IsReady())
+				return;
 
-				static ScriptFunction onSkydiveEnd("fm_content_skydive"_J, ScriptPointer("OnSkydiveEnd", "2D 00 02 00 00 5D ? ? ? 5D ? ? ? 3A"));
-				onSkydiveEnd.Call<void>();
+			int index        = skydiveIndex.GetState();
+			int location     = Stats::GetInt("MPX_DAILYCOLLECT_SKYDIVES" + std::to_string(index));
+			bool checkpoints = Stats::GetPackedInt(34837 + (index * 4)) == location;
+			bool partime     = Stats::GetPackedInt(34838 + (index * 4)) == location;
+			bool landing     = Stats::GetPackedInt(34839 + (index * 4)) == location;
 
-				thread->m_Context.m_State = rage::scrThread::State::KILLED;
-			}
+			*ScriptGlobal(1973628).As<int*>()             = 1;
+			*ScriptGlobal(1973628).At(1).As<int*>()       = 1;
+			*ScriptGlobal(1973628).At(3).As<int*>()       = 5;
+			*ScriptGlobal(1973628).At(4).As<int*>()       = location + 1;
+			*ScriptGlobal(1973628).At(8).At(1).As<int*>() = checkpointReward.Get<int>() / (1 + (checkpoints * 9));
+			*ScriptGlobal(1973628).At(8).At(2).As<int*>() = parTimeReward.Get<int>() / (1 + (partime * 9));
+			*ScriptGlobal(1973628).At(8).At(3).As<int*>() = landingReward.Get<int>() / (1 + (landing * 9));
+
+			SET_SKYDIVE_COMPLETED data;
+			data.SkydiveIndex      = index;
+			data.SkydiveLocation   = location;
+			data.AllCheckpointsHit = TRUE;
+			data.ParTimeBeaten     = TRUE;
+			data.AccurateLanding   = TRUE;
+			data.Send();
 		}
 	};
 

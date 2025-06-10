@@ -80,7 +80,8 @@ enum class ScriptEventIndex
 	StartScriptProceed = 1757622014,
 
 	RequestRandomEvent = -126218586,
-	CollectCollectable = 968269233
+	CollectCollectable = 968269233,
+	SetSkydiveCompleted = 1916113629
 };
 
 struct SCRIPT_EVENT
@@ -225,6 +226,17 @@ struct SCRIPT_EVENT_COLLECT_COLLECTABLE : public SCRIPT_EVENT
 	SCR_INT SetCollected;
 	SCR_INT SetMoviePropCollected;
 	SCR_INT DisplayNotification;
+};
+
+struct SET_SKYDIVE_COMPLETED : public SCRIPT_EVENT
+{
+	REGISTER_SCRIPT_EVENT(SET_SKYDIVE_COMPLETED, SetSkydiveCompleted);
+
+	SCR_INT SkydiveIndex;
+	SCR_INT SkydiveLocation;
+	SCR_BOOL AllCheckpointsHit;
+	SCR_BOOL ParTimeBeaten;
+	SCR_BOOL AccurateLanding;
 };
 
 #undef REGISTER_SCRIPT_EVENT

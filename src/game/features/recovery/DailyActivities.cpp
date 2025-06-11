@@ -107,6 +107,26 @@ namespace YimMenu::Features
 		Stats::SetPackedBool(42059, completed); // Shoot Animals Photography 1
 		Stats::SetPackedBool(42060, completed); // Shoot Animals Photography 2
 		Stats::SetPackedBool(42061, completed); // Shoot Animals Photography 3
+		// Street Dealers
+		for (int i = 0; i < 3; ++i)
+		{
+			static Tunable maxCoke{1238316723};
+			static Tunable maxMeth{658190943};
+			static Tunable maxWeed{803541362};
+			static Tunable maxAcid{3123173154};
+
+			int statIndex = 41218 + i * 5;
+			int premium   = completed ? 0 : static_cast<int>(FreemodeGeneral::Get()->StreetDealers.Dealers[i].PremiumProduct);
+			int coke      = completed ? 0 : (maxCoke.IsReady() ? maxCoke.Get<int>() : 1);
+			int meth      = completed ? 0 : (maxMeth.IsReady() ? maxMeth.Get<int>() : 2);
+			int weed      = completed ? 0 : (maxWeed.IsReady() ? maxWeed.Get<int>() : 10);
+			int acid      = completed ? 0 : (maxAcid.IsReady() ? maxAcid.Get<int>() : 10);
+			Stats::SetPackedInt(statIndex + 0, premium);
+			Stats::SetPackedInt(statIndex + 1, coke);
+			Stats::SetPackedInt(statIndex + 2, meth);
+			Stats::SetPackedInt(statIndex + 3, weed);
+			Stats::SetPackedInt(statIndex + 4, acid);
+		}
 		for (int i = 0; i < 10; i++)
 		{
 			// see TSE 1916113629
@@ -537,6 +557,8 @@ namespace YimMenu::Features
 			data.ParTimeBeaten     = TRUE;
 			data.AccurateLanding   = TRUE;
 			data.Send();
+
+			ScriptGlobal(1977574).At(4).As<SCR_BITSET<uint64_t>*>()->Clear(3);
 		}
 	};
 

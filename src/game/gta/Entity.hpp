@@ -117,7 +117,7 @@ namespace YimMenu
 		bool IsRemote();
 		bool HasControl();
 		rage::netObject* GetNetworkObject();
-		
+
 		int GetOwner(); // index because we want to avoid cyclic imports
 		std::uint16_t GetNetworkObjectId();
 

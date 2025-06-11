@@ -4,7 +4,6 @@ namespace YimMenu
 {
 	BytePatches::Patch::~Patch()
 	{
-
 	}
 
 	void BytePatches::Patch::Apply()
@@ -18,7 +17,7 @@ namespace YimMenu
 		unsigned long temp;
 		VirtualProtect(m_Address, m_Size, PAGE_EXECUTE_READWRITE, &old_protect);
 		memcpy(m_Address, m_Value.get(), m_Size);
-		VirtualProtect(m_Address, m_Size, old_protect, &temp); 
+		VirtualProtect(m_Address, m_Size, old_protect, &temp);
 		m_Applied = true;
 	}
 

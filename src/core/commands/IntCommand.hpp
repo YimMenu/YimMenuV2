@@ -6,7 +6,7 @@ namespace YimMenu
 	class IntCommand : public Command
 	{
 	protected:
-		virtual void OnChange(){};
+		virtual void OnChange() {};
 		virtual void OnCall() override;
 		virtual void SaveState(nlohmann::json& value) override;
 		virtual void LoadState(nlohmann::json& value) override;

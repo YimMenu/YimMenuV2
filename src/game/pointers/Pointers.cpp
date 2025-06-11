@@ -51,7 +51,7 @@ namespace YimMenu
 
 		constexpr auto versionPtrn = Pattern<"4C 8D 0D ? ? ? ? 48 8D 5C 24 ? 48 89 D9 48 89 FA">("Version");
 		scanner.Add(versionPtrn, [this](PointerCalculator ptr) {
-			GameVersion   = ptr.Add(3).Rip().As<const char*>();
+			GameVersion = ptr.Add(3).Rip().As<const char*>();
 			OnlineVersion = ptr.Add(0x47).Add(3).Rip().As<const char*>();
 		});
 
@@ -118,7 +118,7 @@ namespace YimMenu
 
 		constexpr auto regionCodePtrn = Pattern<"4C 8D 05 ? ? ? ? 48 89 F1 48 89 FA E8 ? ? ? ? 84 C0 74 3D">("RegionCode");
 		scanner.Add(regionCodePtrn, [this](PointerCalculator ptr) {
-			RegionCode = ptr.Add(3).Rip().As<int*>();		
+			RegionCode = ptr.Add(3).Rip().As<int*>();
 		});
 
 		constexpr auto networkObjectMgrPtrn = Pattern<"41 83 7E FA 02 40 0F 9C C5 C1 E5 02">("NetworkObjectMgr&GetSyncTreeForType");
@@ -223,7 +223,7 @@ namespace YimMenu
 		constexpr auto beDataPtrn = Pattern<"48 C7 05 ? ? ? ? 00 00 00 00 E8 ? ? ? ? 48 89 C1 E8 ? ? ? ? E8 ? ? ? ? BD 0A 00 00 00">("BEData");
 		scanner.Add(beDataPtrn, [this](PointerCalculator ptr) {
 			BERestartStatus = ptr.Add(3).Rip().Add(8).Add(4).As<int*>();
-			NeedsBERestart  = ptr.Add(3).Rip().Add(8).Add(4).Add(8).As<bool*>();
+			NeedsBERestart = ptr.Add(3).Rip().Add(8).Add(4).Add(8).As<bool*>();
 			IsBEBanned = ptr.Add(3).Rip().Add(8).Add(4).Add(8).Add(4).As<bool*>();
 		});
 
@@ -442,7 +442,7 @@ namespace YimMenu
 
 		constexpr auto readAttributePatch2Ptrn = Pattern<"32 C0 EB ? C7 83">("ReadAttributesPatch2");
 		scanner.Add(readAttributePatch2Ptrn, [this](PointerCalculator ptr) {
-			BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0xB0, 0x01}))->Apply(); 
+			BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0xB0, 0x01}))->Apply();
 		});
 
 		constexpr auto getAvatarsPtrn = Pattern<"89 4E 7C 48 8B CE E8 ? ? ? ? 84 C0">("GetAvatars");

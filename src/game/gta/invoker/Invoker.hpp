@@ -12,7 +12,7 @@ namespace YimMenu
 		constexpr CustomCallContext()
 		{
 			m_ReturnValue = &m_ReturnStack[0];
-			m_Args         = &m_ArgStack[0];
+			m_Args = &m_ArgStack[0];
 		}
 
 	private:
@@ -27,7 +27,7 @@ namespace YimMenu
 		static inline bool m_AreHandlersCached{false};
 
 	public:
-		constexpr NativeInvoker(){};
+		constexpr NativeInvoker() {};
 
 		constexpr void BeginCall()
 		{

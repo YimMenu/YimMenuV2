@@ -9,8 +9,8 @@ namespace rage
 	{
 	public:
 		uint64_t m_RockstarId; // 0x00
-		uint16_t m_UnkData;   // 0x08
-		uint8_t m_Platform;   // 0x0A
+		uint16_t m_UnkData;    // 0x08
+		uint8_t m_Platform;    // 0x0A
 
 		inline rlScGamerHandle() = default;
 

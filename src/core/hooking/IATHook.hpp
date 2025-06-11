@@ -29,7 +29,7 @@ namespace YimMenu
 	{
 		m_HookLocation = module->GetImport(library, import);
 		m_OriginalFunc = *m_HookLocation;
-		m_HookFunc     = (void*)(detour);
+		m_HookFunc = (void*)(detour);
 	}
 
 	template<typename T>

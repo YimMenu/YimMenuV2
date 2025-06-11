@@ -8,27 +8,27 @@
 // TODO: serialization isn't stable
 
 #include "game/pointers/Pointers.hpp" // game import in core!
-#include "game/gta/Natives.hpp" // game import in core!
+#include "game/gta/Natives.hpp"       // game import in core!
 
 namespace YimMenu
 {
-	HotkeySystem::HotkeySystem() : 
-		IStateSerializer("hotkeys")
+	HotkeySystem::HotkeySystem() :
+	    IStateSerializer("hotkeys")
 	{
 	}
 
 	void HotkeySystem::RegisterCommands()
 	{
 		auto& cmds = Commands::GetCommands();
-		
+
 		for (auto& [hash, cmd] : cmds)
 		{
 			CommandLink link;
 			m_CommandHotkeys.insert(std::make_pair(hash, link));
 		}
-		
+
 		m_CommandHotkeys.at("chathelper"_J).m_Chain.clear(); // ensure chat is always bound
-		m_CommandHotkeys.at("chathelper"_J).m_Chain.push_back(0x54); 
+		m_CommandHotkeys.at("chathelper"_J).m_Chain.push_back(0x54);
 	}
 
 	bool HotkeySystem::ListenAndApply(int& Hotkey, std::vector<int> Blacklist)
@@ -155,7 +155,7 @@ namespace YimMenu
 		for (auto& [key, value] : state.items())
 		{
 			if (m_CommandHotkeys.contains(std::atoi(key.data())))
-				m_CommandHotkeys[std::atoi(key.data())].m_Chain = value.get<std::vector<int>>(); 
+				m_CommandHotkeys[std::atoi(key.data())].m_Chain = value.get<std::vector<int>>();
 		}
 	}
 }

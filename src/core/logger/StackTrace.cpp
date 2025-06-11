@@ -69,7 +69,7 @@ namespace YimMenu
 			return;
 
 		const auto module_list = &ldr_data->InMemoryOrderModuleList;
-		auto module_entry      = module_list->Flink;
+		auto module_entry = module_list->Flink;
 		for (; module_list != module_entry; module_entry = module_entry->Flink)
 		{
 			const auto table_entry = CONTAINING_RECORD(module_entry, LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks);
@@ -117,9 +117,9 @@ namespace YimMenu
 
 		// alloc once
 		char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME];
-		auto symbol          = reinterpret_cast<SYMBOL_INFO*>(buffer);
+		auto symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
 		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-		symbol->MaxNameLen   = MAX_SYM_NAME;
+		symbol->MaxNameLen = MAX_SYM_NAME;
 
 		DWORD64 displacement64;
 		DWORD displacement;
@@ -130,7 +130,7 @@ namespace YimMenu
 
 		for (size_t i = 0; i < m_FramePointers.size() && m_FramePointers[i]; ++i)
 		{
-			const auto addr        = m_FramePointers[i];
+			const auto addr = m_FramePointers[i];
 			const auto module_info = GetModuleByAddress(addr);
 
 			m_Dump << "\n[" << i << "]\t";
@@ -184,10 +184,20 @@ namespace YimMenu
 
 			switch (flag)
 			{
-			case EXCEPTION_READ_FAULT: m_Dump << '\n' << "Attempted to read from " << HEX(addr) << '\n'; break;
-			case EXCEPTION_WRITE_FAULT: m_Dump << '\n' << "Attempted to write to " << HEX(addr) << '\n'; break;
-			case EXCEPTION_EXECUTE_FAULT: m_Dump << '\n' << "Attempted to execute at " << HEX(addr) << '\n'; break;
-			default: m_Dump << '\n' << "Inaccessible data at " << HEX(addr) << '\n';
+			case EXCEPTION_READ_FAULT:
+				m_Dump << '\n'
+				       << "Attempted to read from " << HEX(addr) << '\n';
+				break;
+			case EXCEPTION_WRITE_FAULT:
+				m_Dump << '\n'
+				       << "Attempted to write to " << HEX(addr) << '\n';
+				break;
+			case EXCEPTION_EXECUTE_FAULT:
+				m_Dump << '\n'
+				       << "Attempted to execute at " << HEX(addr) << '\n';
+				break;
+			default: m_Dump << '\n'
+				            << "Inaccessible data at " << HEX(addr) << '\n';
 			}
 
 			if (exception_code == EXCEPTION_IN_PAGE_ERROR)
@@ -202,10 +212,10 @@ namespace YimMenu
 		CONTEXT context = *m_ExceptionInfo->ContextRecord;
 
 		STACKFRAME64 frame{};
-		frame.AddrPC.Mode      = AddrModeFlat;
-		frame.AddrFrame.Mode   = AddrModeFlat;
-		frame.AddrStack.Mode   = AddrModeFlat;
-		frame.AddrPC.Offset    = context.Rip;
+		frame.AddrPC.Mode = AddrModeFlat;
+		frame.AddrFrame.Mode = AddrModeFlat;
+		frame.AddrStack.Mode = AddrModeFlat;
+		frame.AddrPC.Offset = context.Rip;
 		frame.AddrFrame.Offset = context.Rbp;
 		frame.AddrStack.Offset = context.Rsp;
 

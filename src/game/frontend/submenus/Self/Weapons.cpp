@@ -85,7 +85,7 @@ namespace YimMenu::Submenus
 					ImGui::PushID(weap.hash);
 					if (ImGui::Selectable(weap.name.c_str()))
 					{
-						selectedWeapon     = weap.name;
+						selectedWeapon = weap.name;
 						selectedWeaponHash = weap.hash;
 					}
 					ImGui::PopID();
@@ -121,10 +121,10 @@ namespace YimMenu::Submenus
 	{
 		auto weapons = std::make_shared<Category>("Weapons");
 
-		auto weaponsGlobalsGroup    = std::make_shared<Group>("Globals");
-		auto weaponsToolsGroup      = std::make_shared<Group>("Tools", 1);
+		auto weaponsGlobalsGroup = std::make_shared<Group>("Globals");
+		auto weaponsToolsGroup = std::make_shared<Group>("Tools", 1);
 		auto weaponsAmmuNationGroup = std::make_shared<Group>("Ammu-Nation");
-		auto weaponsAimbotGroup     = std::make_shared<Group>("Aimbot", 1);
+		auto weaponsAimbotGroup = std::make_shared<Group>("Aimbot", 1);
 
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteammo"_J));
 		weaponsGlobalsGroup->AddItem(std::make_shared<BoolCommandItem>("infiniteclip"_J));

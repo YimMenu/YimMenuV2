@@ -8,6 +8,9 @@ namespace YimMenu
 	{
 	public:
 		virtual void Draw() = 0;
-		virtual bool CanDraw() { return true; }
+		virtual bool CanDraw()
+		{
+			return true;
+		}
 	};
 }

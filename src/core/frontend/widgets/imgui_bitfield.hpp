@@ -11,22 +11,22 @@ namespace ImGui
 		std::string format;
 		if (size == 1)
 		{
-			type   = ImGuiDataType_U8;
+			type = ImGuiDataType_U8;
 			format = "%02X";
 		}
 		if (size == 2)
 		{
-			type   = ImGuiDataType_U16;
+			type = ImGuiDataType_U16;
 			format = "%04X";
 		}
 		if (size == 4)
 		{
-			type   = ImGuiDataType_U32;
+			type = ImGuiDataType_U32;
 			format = "%08X";
 		}
 		if (size == 8)
 		{
-			type   = ImGuiDataType_U64;
+			type = ImGuiDataType_U64;
 			format = "%p";
 		}
 

@@ -6,8 +6,7 @@ namespace YimMenu::Features
 {
 	static std::vector<std::pair<int, const char*>> g_BoostBehavior = {
 	    {0, "Infinite"},
-	    {1, "Instant recharge"}
-	};
+	    {1, "Instant recharge"}};
 
 	static ListCommand _BoostBehavior{"boostbehavior", "Boost behavior", "Desired rocket boost behavior", g_BoostBehavior, 0};
 
@@ -26,13 +25,12 @@ namespace YimMenu::Features
 					/* Infinite */
 					if (desiredBehavior == 0)
 						vehicle.SetBoostCharge();
-					
+
 					/* Instant charge */
 					else if (desiredBehavior == 1)
 						if (!vehicle.IsBoostActive())
 							vehicle.SetBoostCharge();
 				}
-
 			}
 		}
 	};

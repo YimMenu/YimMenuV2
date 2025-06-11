@@ -20,11 +20,11 @@ namespace rage
 		virtual void _0x08() = 0;
 		virtual void _0x10() = 0;
 		virtual void SetDataCounter(int index, uint16_t counter) = 0; // 0x18
-		virtual void ResetDataCounter(int index) = 0; // 0x20
+		virtual void ResetDataCounter(int index) = 0;                 // 0x20
 
 		// ...
 
-		int m_PlayerNeedAck;  // 0x08
+		int m_PlayerNeedAck;   // 0x08
 		int m_PlayersNeedSync; // 0x0C
 	};
 
@@ -66,27 +66,27 @@ namespace rage
 
 		virtual void _0x30() = 0;
 
-		virtual void _0x38() = 0; 
+		virtual void _0x38() = 0;
 
-		virtual void _0x40() = 0; 
+		virtual void _0x40() = 0;
 
-		virtual int _0x48(CNetGamePlayer* player, int max_size, uint32_t* a3, uint32_t* a4) = 0; 
+		virtual int _0x48(CNetGamePlayer* player, int max_size, uint32_t* a3, uint32_t* a4) = 0;
 
 		virtual int GetSize(CNetGamePlayer* player, int max_size, uint32_t element) = 0; // 0x50
 
 		virtual int PackArrayData(CNetGamePlayer* player, rage::datBitBuffer* bit_buffer, uint16_t counter, uint32_t* elem_start, bool silent) = 0; // 0x58
 
-		virtual void _0x60() = 0; 
+		virtual void _0x60() = 0;
 
 		virtual bool ShouldNotSendDataToPlayer(CNetGamePlayer* player) = 0;
 
-		virtual void _0x70() = 0; 
+		virtual void _0x70() = 0;
 
 		virtual bool CanSendUpdate(CNetGamePlayer* player) = 0; // 0x78
 
-		virtual void _0x80() = 0; 
+		virtual void _0x80() = 0;
 
-		virtual void _0x88(int) = 0; 
+		virtual void _0x88(int) = 0;
 
 		virtual netArrayIdentiferBase* GetIdentifier() = 0; // 0x90
 
@@ -98,21 +98,21 @@ namespace rage
 
 		virtual void _0xB0() = 0;
 
-		virtual void _0xB8() = 0; 
+		virtual void _0xB8() = 0;
 
 		virtual void ShouldSyncElement(uint32_t element) = 0; // 0xC0
 
-		virtual void _0xC8() = 0; 
+		virtual void _0xC8() = 0;
 
-		virtual void _0xD0() = 0; 
+		virtual void _0xD0() = 0;
 
 		virtual bool AreAllElementsInScope() = 0; // 0xD8
 
-		virtual void _0xE0() = 0; 
+		virtual void _0xE0() = 0;
 
 		virtual void VerifyArrayData() = 0; // 0xE8
 
-		virtual void VerifyArrayDataAck(CNetGamePlayer* player, int checksum) = 0; 
+		virtual void VerifyArrayDataAck(CNetGamePlayer* player, int checksum) = 0;
 
 		virtual char* GetDebugName() = 0; // 0xF8
 
@@ -177,17 +177,17 @@ namespace rage
 
 		virtual void _0x1E8(bool) = 0;
 
-		void* m_Something;                 // 0x8
-		netArrayHandlerBase* m_Next;       // 0x10
-		uint8_t _m_pad[0x4C];              // 0x18
-		uint32_t m_Hash;                   // 0x64?
-		uint8_t _m_pad2[0x8C];             // 0x68?
-		uint16_t m_ArrayIndex;             // 0xF4
-		uint16_t m_MaxElements;            // 0xF6
-		uint8_t m_NumElements;             // 0xF8
-		uint8_t m_ElementSize;             // 0xF9
-		uint8_t m_ElementSize2;            // 0xFA
-		uint8_t _m_pad3[13];               // 0xFB
+		void* m_Something;           // 0x8
+		netArrayHandlerBase* m_Next; // 0x10
+		uint8_t _m_pad[0x4C];        // 0x18
+		uint32_t m_Hash;             // 0x64?
+		uint8_t _m_pad2[0x8C];       // 0x68?
+		uint16_t m_ArrayIndex;       // 0xF4
+		uint16_t m_MaxElements;      // 0xF6
+		uint8_t m_NumElements;       // 0xF8
+		uint8_t m_ElementSize;       // 0xF9
+		uint8_t m_ElementSize2;      // 0xFA
+		uint8_t _m_pad3[13];         // 0xFB
 	};
 	static_assert(sizeof(netArrayHandlerBase) == 0x108);
 }

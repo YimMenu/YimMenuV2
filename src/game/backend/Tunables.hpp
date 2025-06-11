@@ -89,13 +89,13 @@ namespace YimMenu
 
 	public:
 		constexpr Tunable(joaat_t hash) :
-			m_Hash(hash),
-			m_Global(std::nullopt)
+		    m_Hash(hash),
+		    m_Global(std::nullopt)
 		{
 		}
 
 		bool IsReady();
-	
+
 		// make sure to call IsReady before accessing tunables
 		template<typename T>
 		T Get()

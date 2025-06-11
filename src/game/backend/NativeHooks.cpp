@@ -20,7 +20,7 @@ namespace YimMenu
 
 	void NativeHooks::Program::Apply(Hook hook)
 	{
-		auto old_native      = NativeInvoker::GetNativeHandler(hook.m_Index);
+		auto old_native = NativeInvoker::GetNativeHandler(hook.m_Index);
 		auto old_native_addr = m_Program->GetAddressOfNativeEntrypoint(old_native);
 		if (old_native_addr)
 			*old_native_addr = hook.m_Replacement;
@@ -45,7 +45,7 @@ namespace YimMenu
 	    m_RegisteredPrograms(),
 	    m_RegisteredHooks()
 	{
-		m_RegisteredHooks.emplace(ALL_SCRIPTS, std::vector<Hook>());		
+		m_RegisteredHooks.emplace(ALL_SCRIPTS, std::vector<Hook>());
 	}
 
 	void NativeHooks::RunScriptImpl()

@@ -41,9 +41,9 @@ namespace YimMenu::Features
 			}
 
 			WARDROBE_LAUNCH_DATA launchData;
-			launchData.Type     = 7;
+			launchData.Type = 7;
 			launchData.Position = Self::GetPed().GetPosition();
-			launchData.Heading  = Self::GetPed().GetHeading();
+			launchData.Heading = Self::GetPed().GetHeading();
 			if (!Scripts::StartScript("wardrobe_mp"_J, eStackSizes::SHOP, &launchData, SCR_SIZEOF(launchData)))
 			{
 				Notifications::Show("Wardrobe", "Failed to open the wardrobe.", NotificationType::Error);
@@ -115,7 +115,7 @@ namespace YimMenu::Features
 					isItemLockedByStatPatch3->Disable();
 
 					startedByUs = false;
-					distance    = 9999.f;
+					distance = 9999.f;
 				}
 			}
 		}

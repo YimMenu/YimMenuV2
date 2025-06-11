@@ -8,8 +8,8 @@ namespace YimMenu
 	class LoopedCommand;
 	class BoolCommand;
 
-	class Commands : 
-		private IStateSerializer
+	class Commands :
+	    private IStateSerializer
 	{
 	private:
 		std::unordered_map<joaat_t, Command*> m_Commands;
@@ -53,7 +53,7 @@ namespace YimMenu
 		{
 			return GetInstance().m_Commands;
 		};
-		
+
 		static std::vector<LoopedCommand*> GetLoopedCommands()
 		{
 			return GetInstance().m_LoopedCommands;
@@ -63,7 +63,7 @@ namespace YimMenu
 		{
 			GetInstance().MarkStateDirty();
 		}
-		
+
 		static void Shutdown()
 		{
 			GetInstance().ShutdownImpl();

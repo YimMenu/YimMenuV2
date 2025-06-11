@@ -5,8 +5,7 @@ namespace rage
 {
 	struct rlGetAvatarsPlayerList
 	{
-		union
-		{
+		union {
 			char m_PlayerNames[51][250];
 			char m_PlayerHandles[51][250];
 		};
@@ -46,7 +45,7 @@ namespace rage
 			LARGE = 4
 		};
 
-		virtual ~rlGetAvatarsContext() = default; 
+		virtual ~rlGetAvatarsContext() = default;
 
 		char m_Pad[80];                  // 0x08
 		void* m_Result;                  // 0x58

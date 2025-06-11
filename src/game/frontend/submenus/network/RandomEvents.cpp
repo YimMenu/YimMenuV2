@@ -46,15 +46,15 @@ namespace YimMenu::Submenus
 	};
 
 	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
-	static GPBD_FM_2* GPBDFM2                          = nullptr;
-	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
+	static GPBD_FM_2* GPBDFM2 = nullptr;
+	static GSBD_RandomEvents* GSBDRandomEvents = nullptr;
 	static RANDOM_EVENTS_FREEMODE_DATA* FMRandomEvents = nullptr;
-	static eRandomEvent selectedEvent                  = DRUG_VEHICLE;
-	static int selectedSubvariation                    = 0;
-	static int numSubvariations                        = 29;
-	static int setCooldown                             = 1800000;
-	static int setAvailability                         = 900000;
-	static bool applyInMinutes                         = false;
+	static eRandomEvent selectedEvent = DRUG_VEHICLE;
+	static int selectedSubvariation = 0;
+	static int numSubvariations = 29;
+	static int setCooldown = 1800000;
+	static int setAvailability = 900000;
+	static bool applyInMinutes = false;
 
 	static std::string GetEventStateString()
 	{
@@ -90,7 +90,7 @@ namespace YimMenu::Submenus
 	{
 		if (event == ARMOURED_TRUCK) // It doesn't have tunables
 		{
-			setCooldown     = *ScriptGlobal(262145).At(33719).As<int*>();
+			setCooldown = *ScriptGlobal(262145).At(33719).As<int*>();
 			setAvailability = *ScriptGlobal(262145).At(33720).As<int*>();
 		}
 		else
@@ -106,7 +106,7 @@ namespace YimMenu::Submenus
 	static void OnComboChange()
 	{
 		static ScriptFunction getNumFMMCVariations("freemode"_J, ScriptPointer("GetNumFMMCVariations", "5D ? ? ? 01 72 02 39 04").Add(1).Rip());
-		numSubvariations     = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
+		numSubvariations = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
 		selectedSubvariation = 0;
 		ResetEventTunables(selectedEvent);
 	}
@@ -149,11 +149,11 @@ namespace YimMenu::Submenus
 		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)
 			patch->Enable();
 
-		auto menu     = std::make_shared<Category>("Random Events");
+		auto menu = std::make_shared<Category>("Random Events");
 		auto settings = std::make_shared<Group>("Settings");
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
-			GPBDFM2          = GPBD_FM_2::Get();
+			GPBDFM2 = GPBD_FM_2::Get();
 			GSBDRandomEvents = GSBD_RandomEvents::Get();
 			if (!GPBDFM2 || !GSBDRandomEvents)
 				return ImGui::Text("Freemode global block is not loaded.");
@@ -223,8 +223,8 @@ namespace YimMenu::Submenus
 					if (GSBDRandomEvents->EventData[selectedEvent].State != eRandomEventState::ACTIVE)
 					{
 						SCRIPT_EVENT_REQUEST_RANDOM_EVENT eventData;
-						eventData.FMMCType      = FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType;
-						eventData.Subvariation  = selectedSubvariation;
+						eventData.FMMCType = FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType;
+						eventData.Subvariation = selectedSubvariation;
 						eventData.PlayersToSend = 1; // Set FORCE_LAUNCH bit of all players
 						eventData.Send();
 						ScriptMgr::Yield(100ms);

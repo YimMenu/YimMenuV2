@@ -149,8 +149,8 @@ namespace YimMenu
 
 	std::string Vehicle::GetFullName()
 	{
-		auto model          = ENTITY::GET_ENTITY_MODEL(GetHandle());
-		std::string gxt     = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
+		auto model = ENTITY::GET_ENTITY_MODEL(GetHandle());
+		std::string gxt = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 		std::string display = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(gxt.c_str());
 
 		std::string finalName = display == "NULL" ? gxt : display;
@@ -159,7 +159,7 @@ namespace YimMenu
 		if (maker != "NULL")
 			finalName = maker + " " + finalName;
 
-		int id    = VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(model);
+		int id = VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(model);
 		finalName = std::string(g_VehicleClassNames[id]) + " " + finalName;
 
 		return finalName;
@@ -179,7 +179,7 @@ namespace YimMenu
 
 		ownedMods[(int)CustomVehicleModType::MOD_PLATE_STYLE] = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT_INDEX(vehicle);
 		ownedMods[(int)CustomVehicleModType::MOD_WINDOW_TINT] = VEHICLE::GET_VEHICLE_WINDOW_TINT(vehicle);
-		ownedMods[(int)CustomVehicleModType::MOD_WHEEL_TYPE]  = VEHICLE::GET_VEHICLE_WHEEL_TYPE(vehicle);
+		ownedMods[(int)CustomVehicleModType::MOD_WHEEL_TYPE] = VEHICLE::GET_VEHICLE_WHEEL_TYPE(vehicle);
 
 		VEHICLE::GET_VEHICLE_COLOURS(vehicle, &ownedMods[(int)CustomVehicleModType::MOD_PRIMARY_COL], &ownedMods[(int)CustomVehicleModType::MOD_SECONDARY_COL]);
 		VEHICLE::GET_VEHICLE_EXTRA_COLOURS(vehicle, &ownedMods[(int)CustomVehicleModType::MOD_PEARLESCENT_COL], &ownedMods[(int)CustomVehicleModType::MOD_WHEEL_COL]);
@@ -217,7 +217,7 @@ namespace YimMenu
 		VEHICLE::GET_VEHICLE_NEON_COLOUR(vehicle, &ownedMods[(int)CustomVehicleModType::MOD_NEON_COL_R], &ownedMods[(int)CustomVehicleModType::MOD_NEON_COL_G], &ownedMods[(int)CustomVehicleModType::MOD_NEON_COL_B]);
 
 		ownedMods[(int)CustomVehicleModType::MOD_TIRE_CAN_BURST] = VEHICLE::GET_VEHICLE_TYRES_CAN_BURST(vehicle);
-		ownedMods[(int)CustomVehicleModType::MOD_DRIFT_TIRE]     = VEHICLE::GET_DRIFT_TYRES_SET(vehicle);
+		ownedMods[(int)CustomVehicleModType::MOD_DRIFT_TIRE] = VEHICLE::GET_DRIFT_TYRES_SET(vehicle);
 		ownedMods[(int)VehicleModType::MOD_TURBO] = VEHICLE::IS_TOGGLE_MOD_ON(vehicle, (int)VehicleModType::MOD_TURBO);
 
 		ownedMods[(int)CustomVehicleModType::MOD_FRONTWHEEL_VAR] = VEHICLE::GET_VEHICLE_MOD_VARIATION(vehicle, (int)VehicleModType::MOD_FRONTWHEEL);

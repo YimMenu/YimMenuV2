@@ -167,7 +167,7 @@ namespace YimMenu::Scripts
 		}
 
 		return std::nullopt;
-  }
+	}
 
 	void ForceScriptHost(rage::scrThread* thread)
 	{

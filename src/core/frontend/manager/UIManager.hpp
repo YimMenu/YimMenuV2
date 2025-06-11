@@ -55,4 +55,3 @@ namespace YimMenu
 		ImFont* m_OptionsFont = nullptr;
 	};
 }
-

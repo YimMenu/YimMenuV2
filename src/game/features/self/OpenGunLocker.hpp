@@ -15,13 +15,12 @@ namespace YimMenu::Features
 			return instance;
 		}
 
-		rage::scrThread* m_Thread     = nullptr;
-		bool m_ShouldRunScript        = false;
+		rage::scrThread* m_Thread = nullptr;
+		bool m_ShouldRunScript = false;
 
 		void RunScriptImpl();
 
 	public:
-
 		static void RunScript()
 		{
 			GetInstance().RunScriptImpl();

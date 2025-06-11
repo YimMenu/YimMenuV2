@@ -5,7 +5,7 @@ namespace rage
 	class fwVehiclePool
 	{
 	public:
-		virtual ~fwVehiclePool() = 0; 
+		virtual ~fwVehiclePool() = 0;
 
 		void** m_PoolAddress;
 		std::uint32_t m_Size;

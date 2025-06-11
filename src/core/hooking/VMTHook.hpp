@@ -23,9 +23,9 @@ namespace YimMenu
 		VMTHook(const std::string_view name, T* vmtAddress, int numEntries);
 		~VMTHook();
 
-		VMTHook(VMTHook&& that)            = delete;
+		VMTHook(VMTHook&& that) = delete;
 		VMTHook& operator=(VMTHook&& that) = delete;
-		VMTHook(VMTHook const&)            = delete;
+		VMTHook(VMTHook const&) = delete;
 		VMTHook& operator=(VMTHook const&) = delete;
 
 		virtual void Enable();
@@ -68,7 +68,7 @@ namespace YimMenu
 		if (m_Enabled)
 			return;
 
-		m_Enabled     = true;
+		m_Enabled = true;
 		*m_VMTAddress = m_NewVMT;
 		return;
 	}
@@ -80,7 +80,7 @@ namespace YimMenu
 			return;
 
 		*m_VMTAddress = m_OriginalVMT;
-		m_Enabled     = false;
+		m_Enabled = false;
 		return;
 	}
 

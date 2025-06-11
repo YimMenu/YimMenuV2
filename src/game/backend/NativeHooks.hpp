@@ -22,8 +22,8 @@ namespace YimMenu
 
 		class Program final
 		{
-			rage::scrProgram* m_Program            = nullptr;
-			std::unique_ptr<VMTHook> m_Hook        = nullptr;
+			rage::scrProgram* m_Program = nullptr;
+			std::unique_ptr<VMTHook> m_Hook = nullptr;
 			rage::scrNativeHandler* m_OrigHandlers = nullptr;
 
 		public:

@@ -23,12 +23,12 @@ namespace YimMenu::Features
 
 	static void BroadcastHook(rage::scrNativeCallContext* ctx)
 	{
-		if (!_FastJoin.GetState() 
-			|| NETWORK::NETWORK_IS_ACTIVITY_SESSION() 
-			|| NETWORK::NETWORK_IS_IN_TRANSITION() 
-			|| NETWORK::NETWORK_IS_TRANSITION_TO_GAME() 
-			|| NETWORK::NETWORK_IS_HOST_OF_THIS_SCRIPT()
-			|| !STREAMING::IS_PLAYER_SWITCH_IN_PROGRESS()) // if there's no player switch, we're most likely loading into a job
+		if (!_FastJoin.GetState()
+		    || NETWORK::NETWORK_IS_ACTIVITY_SESSION()
+		    || NETWORK::NETWORK_IS_IN_TRANSITION()
+		    || NETWORK::NETWORK_IS_TRANSITION_TO_GAME()
+		    || NETWORK::NETWORK_IS_HOST_OF_THIS_SCRIPT()
+		    || !STREAMING::IS_PLAYER_SWITCH_IN_PROGRESS()) // if there's no player switch, we're most likely loading into a job
 		{
 			return ctx->SetReturnValue(NETWORK::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA());
 		}

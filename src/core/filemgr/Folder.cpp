@@ -3,11 +3,10 @@
 
 namespace YimMenu
 {
-    Folder::Folder(const std::filesystem::path& path) :
-        BaseObj(path)
-    {
-
-    }
+	Folder::Folder(const std::filesystem::path& path) :
+	    BaseObj(path)
+	{
+	}
 
 	File Folder::GetFile(std::filesystem::path file_path) const
 	{

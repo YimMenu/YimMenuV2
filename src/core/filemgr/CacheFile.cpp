@@ -3,10 +3,10 @@
 namespace YimMenu
 {
 	CacheFile::CacheFile(File cacheFile) :
-		m_CacheFile(cacheFile),
-		m_Data(nullptr),
-		m_CacheVersion(0),
-		m_CacheHeader()
+	    m_CacheFile(cacheFile),
+	    m_Data(nullptr),
+	    m_CacheVersion(0),
+	    m_CacheHeader()
 	{
 	}
 
@@ -82,7 +82,7 @@ namespace YimMenu
 	void CacheFile::SetHeaderVersion(std::uint32_t fileVersion)
 	{
 		m_CacheHeader.m_CacheVersion = m_CacheVersion;
-		m_CacheHeader.m_FileVersion  = fileVersion;
+		m_CacheHeader.m_FileVersion = fileVersion;
 	}
 
 	void CacheFile::SetCacheVersion(std::uint32_t cacheVersion)

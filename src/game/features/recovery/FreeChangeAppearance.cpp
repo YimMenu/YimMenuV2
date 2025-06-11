@@ -12,7 +12,8 @@ namespace YimMenu::Features
 
 		virtual void OnEnable() override
 		{
-			if(m_CharacterAppearanceCharge.IsReady()) m_CharacterAppearanceCharge.Set(0);
+			if (m_CharacterAppearanceCharge.IsReady())
+				m_CharacterAppearanceCharge.Set(0);
 		}
 
 		virtual void OnDisable() override

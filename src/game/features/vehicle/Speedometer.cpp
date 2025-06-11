@@ -31,7 +31,7 @@ namespace YimMenu::Features
 		virtual void OnTick() override
 		{
 			auto veh = Self::GetVehicle();
-			
+
 			if (!veh || !EnsureScaleformLoaded() || STREAMING::IS_PLAYER_SWITCH_IN_PROGRESS())
 				return;
 

@@ -12,12 +12,12 @@ namespace rage
 	{
 	public:
 		virtual ~netPlayerMgrBase() = default;
-		virtual void Initialize() = 0; // 0x8
-		virtual void Shutdown() = 0; // 0x10
-		virtual void Update() = 0; // updates something every X seconds (0x18)
-		virtual CNetGamePlayer* AddPlayer(rage::rlGamerInfo* gamer_info, uint32_t a2, CNetGamePlayerDataMsg* player_data, CNonPhysicalPlayerData* non_physical_player_data) = 0; // 0x20
-		virtual void RemovePlayer(CNetGamePlayer* player) = 0; // 0x28
-		virtual void UpdatePlayerListsForPlayer(CNetGamePlayer* player) = 0; // 0x30
+		virtual void Initialize() = 0;                                                                                                                                            // 0x8
+		virtual void Shutdown() = 0;                                                                                                                                              // 0x10
+		virtual void Update() = 0;                                                                                                                                                // updates something every X seconds (0x18)
+		virtual CNetGamePlayer* AddPlayer(rage::rlGamerInfo* gamer_info, uint32_t a2, CNetGamePlayerDataMsg* player_data, CNonPhysicalPlayerData* non_physical_player_data) = 0;  // 0x20
+		virtual void RemovePlayer(CNetGamePlayer* player) = 0;                                                                                                                    // 0x28
+		virtual void UpdatePlayerListsForPlayer(CNetGamePlayer* player) = 0;                                                                                                      // 0x30
 		virtual CNetGamePlayer* AddPlayer2(rage::rlGamerInfo* gamer_info, uint32_t a3, CNetGamePlayerDataMsg* player_data, CNonPhysicalPlayerData* non_physical_player_data) = 0; // 0x38
 		// TODO: reverse the rest
 
@@ -31,7 +31,7 @@ namespace rage
 		char pad_028C[4];                               // 0x28C
 		int m_UnloadedPlayerCount;                      // 0x290 seems like the inverse of the below thing
 		int m_LoadedPlayerCount;                        // 0x294
-		int m_LoadedNonLocalPlayerCount;                // 0x298 
+		int m_LoadedNonLocalPlayerCount;                // 0x298
 		int m_PhysicalPlayerCount;                      // 0x29C
 		int m_LocalPhysicalPlayerCount;                 // 0x2A0 lol? should always be one
 		int m_NonLocalPhysicalPlayerCount;              // 0x2A4

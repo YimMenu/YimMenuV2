@@ -39,7 +39,7 @@ namespace rage
 		virtual State Run() = 0;
 		virtual void Kill() = 0;
 		virtual void GetInfo(void* info) = 0; // new in Enhanced, more research needed
-											  // I'm not sure what's going on with this func, best to not touch it
+		                                      // I'm not sure what's going on with this func, best to not touch it
 
 		Context m_Context;             // 0x08
 		void* m_Stack;                 // 0xB8

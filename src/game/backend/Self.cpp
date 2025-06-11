@@ -9,7 +9,7 @@ namespace YimMenu
 {
 	Self::Self() :
 	    m_SelfPed(nullptr),
-		m_SelfPlayer(nullptr),
+	    m_SelfPlayer(nullptr),
 	    m_Vehicle(nullptr)
 	{
 	}

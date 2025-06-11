@@ -83,7 +83,7 @@ namespace YimMenu
 		}
 
 		if (IsValidSessionType(saved_data.m_FetchedData->m_GameState) && IsValidSessionType(fetched_data.m_GameState)
-			&& saved_data.m_FetchedData->m_GameState != fetched_data.m_GameState && Features::_NotifyOnSessionTypeChange.GetState())
+		    && saved_data.m_FetchedData->m_GameState != fetched_data.m_GameState && Features::_NotifyOnSessionTypeChange.GetState())
 		{
 			Notifications::Show("Player Tracker", std::format("{} is now in a {} session", saved_data.m_Name, FetchedPlayerData::GameStateToString(fetched_data.m_GameState)));
 		}
@@ -175,15 +175,15 @@ namespace YimMenu
 
 		// setup base context first
 		static std::array base_contexts = {
-		    rage::rlQueryPresenceAttributesContext("gstype", rage::rlQueryPresenceAttributesContext::Type::INT, -1),               // 0
-		    rage::rlQueryPresenceAttributesContext("gsinfo", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),            // 1
-		    rage::rlQueryPresenceAttributesContext("sctv", rage::rlQueryPresenceAttributesContext::Type::INT, 0ull),               // 2
-		    rage::rlQueryPresenceAttributesContext("gshost", rage::rlQueryPresenceAttributesContext::Type::INT, 0ull),             // 3
-		    rage::rlQueryPresenceAttributesContext("trinfo", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),            // 4
-		    rage::rlQueryPresenceAttributesContext("trhost", rage::rlQueryPresenceAttributesContext::Type::INT, 0ull),             // 5
-		    rage::rlQueryPresenceAttributesContext("mp_mis_str", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),        // 6
-		    rage::rlQueryPresenceAttributesContext("mp_mis_id", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),         // 7
-		    rage::rlQueryPresenceAttributesContext("mp_curr_gamemode", rage::rlQueryPresenceAttributesContext::Type::INT, -1),     // 8
+		    rage::rlQueryPresenceAttributesContext("gstype", rage::rlQueryPresenceAttributesContext::Type::INT, -1),           // 0
+		    rage::rlQueryPresenceAttributesContext("gsinfo", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),        // 1
+		    rage::rlQueryPresenceAttributesContext("sctv", rage::rlQueryPresenceAttributesContext::Type::INT, 0ull),           // 2
+		    rage::rlQueryPresenceAttributesContext("gshost", rage::rlQueryPresenceAttributesContext::Type::INT, 0ull),         // 3
+		    rage::rlQueryPresenceAttributesContext("trinfo", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),        // 4
+		    rage::rlQueryPresenceAttributesContext("trhost", rage::rlQueryPresenceAttributesContext::Type::INT, 0ull),         // 5
+		    rage::rlQueryPresenceAttributesContext("mp_mis_str", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),    // 6
+		    rage::rlQueryPresenceAttributesContext("mp_mis_id", rage::rlQueryPresenceAttributesContext::Type::STRING, ""),     // 7
+		    rage::rlQueryPresenceAttributesContext("mp_curr_gamemode", rage::rlQueryPresenceAttributesContext::Type::INT, -1), // 8
 		};
 
 		for (auto& bucket : player_buckets)
@@ -209,7 +209,7 @@ namespace YimMenu
 					for (int i = 0; i < bucket.size(); i++)
 					{
 						auto player = GetPlayerData(bucket[i].m_RockstarId);
-						
+
 						if (!player)
 							continue;
 
@@ -252,7 +252,7 @@ namespace YimMenu
 	{
 		if (auto it = m_SavedPlayers.find(id); it != m_SavedPlayers.end())
 			return &it->second;
-		
+
 		return nullptr;
 	}
 

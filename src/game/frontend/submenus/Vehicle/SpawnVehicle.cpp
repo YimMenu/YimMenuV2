@@ -16,7 +16,7 @@ namespace YimMenu::Submenus
 		{
 			Vector3 min, max, result;
 			MISC::GET_MODEL_DIMENSIONS(hash, &min, &max);
-			result   = max - min;
+			result = max - min;
 			y_offset = result.y;
 		}
 		else if (!spawnInside)
@@ -44,10 +44,10 @@ namespace YimMenu::Submenus
 
 					for (auto& veh : g_VehicleHashes)
 					{
-						std::string gxt     = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(veh);
+						std::string gxt = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(veh);
 						std::string display = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(gxt.c_str());
 
-						int& count            = nameCount[display == "NULL" ? gxt : display];
+						int& count = nameCount[display == "NULL" ? gxt : display];
 						std::string finalName = display == "NULL" ? gxt : display;
 						if (count > 0)
 						{
@@ -94,7 +94,7 @@ namespace YimMenu::Submenus
 				ImGui::EndCombo();
 			}
 
-			const int visible  = std::min(10, static_cast<int>(vehicleNames.size()));
+			const int visible = std::min(10, static_cast<int>(vehicleNames.size()));
 			const float height = visible * ImGui::GetTextLineHeightWithSpacing();
 			if (ImGui::BeginListBox("##vehicles", {300.f, height}))
 			{
@@ -105,13 +105,13 @@ namespace YimMenu::Submenus
 					if (vehicleNames[veh].empty())
 						continue;
 
-					auto hash      = g_VehicleHashes[veh];
-					auto name      = vehicleNames[veh];
+					auto hash = g_VehicleHashes[veh];
+					auto name = vehicleNames[veh];
 					auto lowerName = name;
 					std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
 					bool matchesSearch = lowerName.find(lower) != std::string::npos;
-					bool matchesClass  = selectedClass == -1 || vehicleClasses[veh] == selectedClass;
+					bool matchesClass = selectedClass == -1 || vehicleClasses[veh] == selectedClass;
 					if (matchesSearch && matchesClass)
 					{
 						ImGui::PushID(hash);

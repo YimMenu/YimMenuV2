@@ -21,7 +21,7 @@ namespace YimMenu
 			return;
 		}
 
-		int value  = m_Command->GetState();
+		int value = m_Command->GetState();
 		auto label = m_LabelOverride.has_value() ? m_LabelOverride.value().c_str() : m_Command->GetLabel().c_str();
 		if (!m_Command->GetMinimum().has_value() || !m_Command->GetMaximum().has_value() || !m_useSlider)
 		{

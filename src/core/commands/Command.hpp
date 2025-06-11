@@ -24,8 +24,8 @@ namespace YimMenu
 		Command(std::string name, std::string label, std::string description, int num_args = 0);
 		void Call();
 
-		virtual void SaveState(nlohmann::json& value){};
-		virtual void LoadState(nlohmann::json& value){};
+		virtual void SaveState(nlohmann::json& value) {};
+		virtual void LoadState(nlohmann::json& value) {};
 
 		const std::string& GetName()
 		{

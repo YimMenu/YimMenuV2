@@ -26,7 +26,7 @@ namespace YimMenu::Features
 
 			if (!m_Thread)
 			{
-				int id   = Scripts::StartScript("AM_MP_AUTO_SHOP"_J, eStackSizes::WAREHOUSE);
+				int id = Scripts::StartScript("AM_MP_AUTO_SHOP"_J, eStackSizes::WAREHOUSE);
 				m_Thread = Scripts::FindScriptThreadByID(id);
 				if (m_Thread)
 				{
@@ -54,8 +54,8 @@ namespace YimMenu::Features
 				skipGunLockerMenuChecksPatch->Disable();
 				m_Thread->Kill();
 				m_Thread->m_Context.m_State = rage::scrThread::State::KILLED;
-				m_Thread                    = nullptr;
-				m_ShouldRunScript           = false;
+				m_Thread = nullptr;
+				m_ShouldRunScript = false;
 			}
 		}
 	}

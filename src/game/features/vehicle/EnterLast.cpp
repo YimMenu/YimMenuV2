@@ -6,7 +6,7 @@ namespace YimMenu::Features
 	class EnterLastVehicle : Command
 	{
 		using Command::Command;
-			
+
 		virtual void OnCall() override
 		{
 			if (auto last_veh = Self::GetPed().GetLastVehicle())

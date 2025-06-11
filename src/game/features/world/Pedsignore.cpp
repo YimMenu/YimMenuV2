@@ -14,14 +14,12 @@ namespace YimMenu::Features
 			PLAYER::SET_POLICE_IGNORE_PLAYER(Self::GetPlayer().GetId(), TRUE);
 			PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS_FOR_AMBIENT_PEDS_THIS_FRAME(TRUE);
 			PED::SET_PED_RESET_FLAG(Self::GetPed().GetHandle(), 124, true);
-
 		}
 
 		virtual void OnDisable() override
 		{
 			PLAYER::SET_EVERYONE_IGNORE_PLAYER(Self::GetPlayer().GetId(), FALSE);
 			PLAYER::SET_POLICE_IGNORE_PLAYER(Self::GetPlayer().GetId(), FALSE);
-
 		}
 	};
 

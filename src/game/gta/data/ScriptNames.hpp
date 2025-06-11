@@ -2,8 +2,7 @@
 
 namespace YimMenu
 {
-	static constexpr auto scriptNames = std::to_array({
-	    "abigail1",
+	static constexpr auto scriptNames = std::to_array({"abigail1",
 	    "abigail2",
 	    "achievement_controller",
 	    "activity_creator_prototype_launcher",
@@ -1102,6 +1101,5 @@ namespace YimMenu
 	    "word_hack",
 	    "wp_partyboombox",
 	    "xml_menus",
-	    "yoga"
-	});
+	    "yoga"});
 }

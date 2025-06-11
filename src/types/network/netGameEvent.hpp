@@ -104,13 +104,28 @@ namespace rage
 
 		virtual ~netGameEvent() {};
 
-		virtual const char* GetName() { return nullptr; };
-		virtual bool IsInScope(netPlayer* player) { return {}; };
-		virtual bool TimeToResend(uint32_t time)  { return {}; };
-		virtual bool CanChangeScope() { return {}; };
+		virtual const char* GetName()
+		{
+			return nullptr;
+		};
+		virtual bool IsInScope(netPlayer* player)
+		{
+			return {};
+		};
+		virtual bool TimeToResend(uint32_t time)
+		{
+			return {};
+		};
+		virtual bool CanChangeScope()
+		{
+			return {};
+		};
 		virtual void PrepareData(datBitBuffer* buffer, netPlayer* source_player, netPlayer* target_player) {};
 		virtual void HandleData(datBitBuffer* buffer, netPlayer* source_player, netPlayer* target_player) {};
-		virtual bool Decide(netPlayer* source_player, netPlayer* target_player) { return false; };
+		virtual bool Decide(netPlayer* source_player, netPlayer* target_player)
+		{
+			return false;
+		};
 		virtual void PrepareReply(datBitBuffer* buffer, netPlayer* reply_player) {};
 		virtual void HandleReply(datBitBuffer* buffer, netPlayer* souce_player) {};
 		virtual void PrepareExtraData(datBitBuffer* buffer, bool is_reply, netPlayer* player, netPlayer* player2) {};
@@ -123,12 +138,27 @@ namespace rage
 		virtual void unk_0x78() {};
 
 	public:
-		virtual bool operator==(netGameEvent const& other) { return {}; };
-		virtual bool operator!=(netGameEvent const& other) { return {}; };
+		virtual bool operator==(netGameEvent const& other)
+		{
+			return {};
+		};
+		virtual bool operator!=(netGameEvent const& other)
+		{
+			return {};
+		};
 
-		virtual bool MustPersist() { return {}; };
-		virtual bool MustPersistWhenOutOfScope() { return {}; };
-		virtual bool HasTimedOut() { return {}; };
+		virtual bool MustPersist()
+		{
+			return {};
+		};
+		virtual bool MustPersistWhenOutOfScope()
+		{
+			return {};
+		};
+		virtual bool HasTimedOut()
+		{
+			return {};
+		};
 
 	public:
 		Type m_Type;          // 0x08

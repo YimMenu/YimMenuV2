@@ -150,8 +150,8 @@ namespace ImGui
 		inline static ImColor YellowGreen{0.60f, 0.80f, 0.20f, 1.0f};          // ARGB: #FF9ACD32
 
 		// others
-		inline static ImColor Freemode{0.17647f, 0.43137f, 0.72549, 1.0f};     // ARGB: #FF2D6EB9
-		inline static ImColor IngameBg{0.0f, 0.0f, 0.0f, 0.54901f};            // ARGB: #8C000000
-		inline static ImColor DisabledText{0.0f, 0.0f, 0.0f, 0.8f};            // ARGB: #CC000000
+		inline static ImColor Freemode{0.17647f, 0.43137f, 0.72549, 1.0f}; // ARGB: #FF2D6EB9
+		inline static ImColor IngameBg{0.0f, 0.0f, 0.0f, 0.54901f};        // ARGB: #8C000000
+		inline static ImColor DisabledText{0.0f, 0.0f, 0.0f, 0.8f};        // ARGB: #CC000000
 	};
 }

@@ -5,7 +5,7 @@
 namespace YimMenu
 {
 	ScriptPointers::ScriptPointers() :
-	    m_CacheFile(FileMgr::GetProjectFile("./scr_pointers.bin"), 1)
+	    m_CacheFile(FileMgr::GetProjectFile("./scr_pointers.bin"), 2)
 	{
 	}
 
@@ -62,7 +62,7 @@ namespace YimMenu
 		auto data = std::make_unique<uint8_t[]>(dataSize);
 		auto dataPtr = data.get();
 
-		auto numPtrsAddr = (std::uint32_t*)dataPtr;
+		*(std::uint32_t*)dataPtr = savedPointers.size();
 		dataPtr += sizeof(std::uint32_t);
 		memcpy(dataPtr, savedPointers.data(), sizeof(scrPointerSaveStruct) * savedPointers.size());
 

@@ -10,13 +10,13 @@ namespace rage
 	public:
 		datBitBuffer(void* data, uint32_t size, bool read = false)
 		{
-			m_Data            = data;
-			m_BitOffset       = 0;
-			m_MaxBit          = size * 8;
-			m_BitsRead        = 0;
-			m_CurBit          = 0;
+			m_Data = data;
+			m_BitOffset = 0;
+			m_MaxBit = size * 8;
+			m_BitsRead = 0;
+			m_CurBit = 0;
 			m_HighestBitsRead = 0;
-			m_FlagBits        = read ? 1 : 0;
+			m_FlagBits = read ? 1 : 0;
 		}
 
 		static void ReadBitsSingle(uint8_t* data, int* out, int size, int offset)
@@ -70,13 +70,13 @@ namespace rage
 			__int64 v10;     // rdx
 			char v11;        // cl
 
-			v4  = &data[(__int64)offset >> 3];
-			v5  = offset & 7;
-			v6  = value << (32 - size);
+			v4 = &data[(__int64)offset >> 3];
+			v5 = offset & 7;
+			v6 = value << (32 - size);
 			*v4 = ((v6 >> 24) >> v5) | *v4 & ~((unsigned int)(-1 << (32 - size)) >> 24 >> v5);
-			v7  = v4 + 1;
-			v8  = v6 << (8 - v5);
-			v9  = -1 << (32 - size) << (8 - v5);
+			v7 = v4 + 1;
+			v8 = v6 << (8 - v5);
+			v9 = -1 << (32 - size) << (8 - v5);
 			if (8 - v5 < size)
 			{
 				v10
@@ -92,187 +92,188 @@ namespace rage
 			}
 		}
 
-	// copied IDA code, please improve!
-	// TODO: this appears to be ARM code, not sure how FiveM got this or if this works with x64
-	inline bool CopyBits(const void* dest, const void* source, int length, int destBitOffset, int sourceBitOffset)
-	{
-		auto result = (uint64_t)dest;
-		auto a2 = source;
-		auto a3 = length;
-		int a4 = destBitOffset;
-		auto a5 = sourceBitOffset;
-
-		uint64_t v5; // x21
-		int v6; // w20
-		uint64_t v7; // x19
-		int v8; // w11
-		uint8_t* v9; // x22
-		int v10; // w8
-		int v11; // w10
-		unsigned int v12; // w9
-		unsigned int v13; // w14
-		unsigned int v14; // w9
-		unsigned int v15; // w10
-		int v16; // w11
-		uint64_t v17; // x11
-		uint8_t* v18; // x12
-		int v19; // w13
-		unsigned int v20; // w8
-		char v21; // w9
-		char* v22; // x0
-		int v23; // w14
-		char v24; // t1
-		char v25; // w10
-		unsigned int v26; // w11
-		int64_t v27; // x23
-		uint8_t* v28; // x13
-		int v29; // w16
-		int v30; // t1
-		unsigned int v31; // w10
-		uint64_t v32; // x11
-		int v33; // w8
-		unsigned int v34; // w9
-		unsigned int v35; // w10
-		unsigned int v36; // w9
-		unsigned int v37; // w10
-		uint8_t* v38; // x11
-		int v39; // w12
-		int64_t v40; // x11
-		int v41; // w12
-		unsigned int v42; // w8
-		unsigned int v43; // w9
-		char v44; // w13
-		unsigned int v45; // w8
-		unsigned int v46; // w9
-		uint64_t v47; // x10
-		uint8_t* v48; // x11
-		int v49; // w12
-
-		v5 = a4;
-		v6 = (signed int)a3;
-		v7 = result;
-		v8 = a5 & 7;
-		v9 = (uint8_t*)a2 + (a5 >> 3);
-		if (a5 & 7)
+		// copied IDA code, please improve!
+		// TODO: this appears to be ARM code, not sure how FiveM got this or if this works with x64
+		inline bool CopyBits(const void* dest, const void* source, int length, int destBitOffset, int sourceBitOffset)
 		{
-			v10 = 8 - v8;
-			if (8 - v8 > (signed int)a3)
-				v10 = (signed int)a3;
-			v11 = 8 - (v5 & 7);
-			v12 = -1 << (32 - v10);
-			v13 = ((*v9 << v8) & 0xFFu) >> (8 - v10) << (32 - v10);
-			*(uint8_t*)(result + ((int64_t)((uint64_t)a4 << 32) >> 35)) = (v13 >> 24 >> (v5 & 7)) | *(uint8_t*)(result + ((int64_t)((uint64_t)a4 << 32) >> 35)) & ~(v12 >> 24 >> (v5 & 7));
-			if (v11 < v10)
-			{
-				v14 = v12 << v11;
-				v15 = v13 << v11;
-				v16 = v8 - 9;
-				if (v16 < ~(uint32_t)a3)
-					v16 = !(uint32_t)a3;
-				v17 = (((unsigned int)(v5 & 7) - 10 - v16) >> 3) + 1;
-				v18 = (uint8_t*)(result + ((int64_t)((uint64_t)a4 << 32) >> 35) + 1);
-				do
-				{
-					--v17;
-					v19 = *v18 & ~(v14 >> 24) | (v15 >> 24);
-					v15 <<= 8;
-					*v18++ = v19;
-					v14 <<= 8;
-				}
-				while (v17);
-			}
-			++v9;
-			v6 = (uint32_t)a3 - v10;
-			v5 = (unsigned int)(v10 + v5);
-		}
-		if (v6 >= 1)
-		{
-			v20 = (unsigned int)v6 >> 3;
-			if ((unsigned int)v6 >> 3)
-			{
-				v21 = v5 & 7;
-				v22 = (char*)(result + (v5 << 32 >> 35));
-				if (v5 & 7)
-				{
-					v24 = *v22;
-					result = (uint64_t)(v22 + 1);
-					v23 = v24;
-					v25 = 8 - v21;
-					v26 = 0xFFu >> v21;
-					v27 = v20 - 1 + 1LL;
-					v28 = v9;
-					do
-					{
-						v29 = *(int8_t*)result;
-						--v20;
-						*(uint8_t*)(result - 1) = ((unsigned int)*v28 >> v21) | (255 << (8 - v21)) & v23;
-						v30 = *v28++;
-						v23 = (v30 << v25) | v26 & v29;
-						*(uint8_t*)result++ = ((uint8_t)v30 << v25) | v26 & v29;
-					}
-					while (v20);
-					v31 = v6 & 7;
-					if (!(v6 & 7))
-						return true;
-				}
-				else
-				{
-					v27 = v20;
-					result = (long long)memcpy(v22, v9, v20);
-					v31 = v6 & 7;
-					if (!(v6 & 7))
-						return true;
-				}
-				v40 = (int64_t)((uint64_t)((unsigned int)v5 + (v6 & 0xFFFFFFF8)) << 32) >> 35;
-				v41 = ((uint8_t)v5 + (v6 & 0xF8)) & 7;
-				v42 = -1 << (32 - v31);
-				v43 = v9[v27] >> (8 - v31) << (32 - v31);
-				v44 = 8 - v41;
-				*(uint8_t*)(v7 + v40) = (v43 >> 24 >> v41) | *(uint8_t*)(v7 + v40) & ~(v42 >> 24 >> v41);
-				if (8 - v41 < v31)
-				{
-					v45 = v42 << v44;
-					v46 = v43 << v44;
-					v47 = ((v31 + v41 - 9) >> 3) + 1;
-					v48 = (uint8_t*)(v7 + v40 + 1);
-					do
-					{
-						--v47;
-						v49 = *v48 & ~(v45 >> 24) | (v46 >> 24);
-						v46 <<= 8;
-						*v48++ = v49;
-						v45 <<= 8;
-					}
-					while (v47);
-				}
-			}
-			else
-			{
-				v32 = v5 << 32 >> 35;
-				v33 = 8 - (v5 & 7);
-				v34 = -1 << (32 - v6);
-				v35 = (unsigned int)*v9 >> (8 - v6) << (32 - v6);
-				*(uint8_t*)(result + v32) = (v35 >> 24 >> (v5 & 7)) | *(uint8_t*)(result + v32) & ~(v34 >> 24 >> (v5 & 7));
-				if (v33 < v6)
-				{
-					v36 = v34 << v33;
-					v37 = v35 << v33;
-					v38 = (uint8_t*)(result + v32 + 1);
-					do
-					{
-						v33 += 8;
-						v39 = *v38 & ~(v36 >> 24) | (v37 >> 24);
-						v37 <<= 8;
-						*v38++ = v39;
-						v36 <<= 8;
-					}
-					while (v33 < v6);
-				}
-			}
-		}
+			auto result = (uint64_t)dest;
+			auto a2 = source;
+			auto a3 = length;
+			int a4 = destBitOffset;
+			auto a5 = sourceBitOffset;
 
-		return true;
-	}
+			uint64_t v5;      // x21
+			int v6;           // w20
+			uint64_t v7;      // x19
+			int v8;           // w11
+			uint8_t* v9;      // x22
+			int v10;          // w8
+			int v11;          // w10
+			unsigned int v12; // w9
+			unsigned int v13; // w14
+			unsigned int v14; // w9
+			unsigned int v15; // w10
+			int v16;          // w11
+			uint64_t v17;     // x11
+			uint8_t* v18;     // x12
+			int v19;          // w13
+			unsigned int v20; // w8
+			char v21;         // w9
+			char* v22;        // x0
+			int v23;          // w14
+			char v24;         // t1
+			char v25;         // w10
+			unsigned int v26; // w11
+			int64_t v27;      // x23
+			uint8_t* v28;     // x13
+			int v29;          // w16
+			int v30;          // t1
+			unsigned int v31; // w10
+			uint64_t v32;     // x11
+			int v33;          // w8
+			unsigned int v34; // w9
+			unsigned int v35; // w10
+			unsigned int v36; // w9
+			unsigned int v37; // w10
+			uint8_t* v38;     // x11
+			int v39;          // w12
+			int64_t v40;      // x11
+			int v41;          // w12
+			unsigned int v42; // w8
+			unsigned int v43; // w9
+			char v44;         // w13
+			unsigned int v45; // w8
+			unsigned int v46; // w9
+			uint64_t v47;     // x10
+			uint8_t* v48;     // x11
+			int v49;          // w12
+
+			v5 = a4;
+			v6 = (signed int)a3;
+			v7 = result;
+			v8 = a5 & 7;
+			v9 = (uint8_t*)a2 + (a5 >> 3);
+			if (a5 & 7)
+			{
+				v10
+					= 8 - v8;
+					if (8 - v8 > (signed int)a3)
+						v10
+							= (signed int)a3;
+							v11 = 8 - (v5 & 7);
+							v12 = -1 << (32 - v10);
+							v13 = ((*v9 << v8) & 0xFFu) >> (8 - v10) << (32 - v10);
+							*(uint8_t*)(result + ((int64_t)((uint64_t)a4 << 32) >> 35)) = (v13 >> 24 >> (v5 & 7)) | *(uint8_t*)(result + ((int64_t)((uint64_t)a4 << 32) >> 35)) & ~(v12 >> 24 >> (v5 & 7));
+							if (v11 < v10)
+							{
+								v14 = v12 << v11;
+								v15 = v13 << v11;
+								v16 = v8 - 9;
+								if (v16 < ~(uint32_t)a3)
+									v16 = !(uint32_t)a3;
+								v17 = (((unsigned int)(v5 & 7) - 10 - v16) >> 3) + 1;
+								v18 = (uint8_t*)(result + ((int64_t)((uint64_t)a4 << 32) >> 35) + 1);
+								do
+								{
+									--v17;
+									v19 = *v18 & ~(v14 >> 24) | (v15 >> 24);
+									v15 <<= 8;
+									*v18++ = v19;
+									v14 <<= 8;
+								} while (v17);
+							}
+							++v9;
+							v6 = (uint32_t)a3 - v10;
+							v5 = (unsigned int)(v10 + v5);
+			}
+			if (v6 >= 1)
+			{
+				v20
+					= (unsigned int)v6 >> 3;
+					if ((unsigned int)v6 >> 3)
+					{
+						v21 = v5 & 7;
+						v22 = (char*)(result + (v5 << 32 >> 35));
+						if (v5 & 7)
+						{
+							v24 = *v22;
+							result = (uint64_t)(v22 + 1);
+							v23 = v24;
+							v25 = 8 - v21;
+							v26 = 0xFFu >> v21;
+							v27 = v20 - 1 + 1LL;
+							v28 = v9;
+							do
+							{
+								v29 = *(int8_t*)result;
+								--v20;
+								*(uint8_t*)(result - 1) = ((unsigned int)*v28 >> v21) | (255 << (8 - v21)) & v23;
+								v30
+									= *v28++;
+									v23 = (v30 << v25) | v26 & v29;
+									*(uint8_t*)result++ = ((uint8_t)v30 << v25) | v26 & v29;
+							} while (v20);
+							v31 = v6 & 7;
+							if (!(v6 & 7))
+								return true;
+						}
+						else
+						{
+							v27 = v20;
+							result = (long long)memcpy(v22, v9, v20);
+							v31 = v6 & 7;
+							if (!(v6 & 7))
+								return true;
+						}
+						v40
+							= (int64_t)((uint64_t)((unsigned int)v5 + (v6 & 0xFFFFFFF8)) << 32) >> 35;
+							v41 = ((uint8_t)v5 + (v6 & 0xF8)) & 7;
+							v42 = -1 << (32 - v31);
+							v43 = v9[v27] >> (8 - v31) << (32 - v31);
+							v44 = 8 - v41;
+							*(uint8_t*)(v7 + v40) = (v43 >> 24 >> v41) | *(uint8_t*)(v7 + v40) & ~(v42 >> 24 >> v41);
+							if (8 - v41 < v31)
+							{
+								v45 = v42 << v44;
+								v46 = v43 << v44;
+								v47 = ((v31 + v41 - 9) >> 3) + 1;
+								v48 = (uint8_t*)(v7 + v40 + 1);
+								do
+								{
+									--v47;
+									v49 = *v48 & ~(v45 >> 24) | (v46 >> 24);
+									v46 <<= 8;
+									*v48++ = v49;
+									v45 <<= 8;
+								} while (v47);
+							}
+					}
+					else
+					{
+						v32 = v5 << 32 >> 35;
+						v33 = 8 - (v5 & 7);
+						v34 = -1 << (32 - v6);
+						v35 = (unsigned int)*v9 >> (8 - v6) << (32 - v6);
+						*(uint8_t*)(result + v32) = (v35 >> 24 >> (v5 & 7)) | *(uint8_t*)(result + v32) & ~(v34 >> 24 >> (v5 & 7));
+						if (v33 < v6)
+						{
+							v36 = v34 << v33;
+							v37 = v35 << v33;
+							v38 = (uint8_t*)(result + v32 + 1);
+							do
+							{
+								v33 += 8;
+								v39 = *v38 & ~(v36 >> 24) | (v37 >> 24);
+								v37 <<= 8;
+								*v38++ = v39;
+								v36 <<= 8;
+							} while (v33 < v6);
+						}
+					}
+			}
+
+			return true;
+		}
 
 		inline bool IsReadBuffer() const
 		{
@@ -340,7 +341,7 @@ namespace rage
 			if (size <= 32)
 				return WriteDword(static_cast<uint32_t>(value), size);
 
-			int low  = (int)(value) & 0xFFFFFFFF;
+			int low = (int)(value) & 0xFFFFFFFF;
 			int high = (int)((uint64_t)value >> 32);
 
 			return WriteDword(low, 32) && WriteDword(high, size - 32);
@@ -419,7 +420,7 @@ namespace rage
 		{
 			if (!IsReadBuffer())
 				return;
-			
+
 			if (!IsSizeCalculator())
 				CopyBits(array, reinterpret_cast<void*>(reinterpret_cast<std::uint64_t>(m_Data) + (m_BitOffset >> 3)), bits, 0, m_BitsRead + (m_BitOffset & 7));
 			Seek(bits);
@@ -461,7 +462,7 @@ namespace rage
 
 		void WriteFloat(int size, float divisor, float value)
 		{
-			float max   = (1 << size) - 1;
+			float max = (1 << size) - 1;
 			int integer = (int)((value / divisor) * max);
 
 			Write<int>(integer, size);
@@ -477,7 +478,7 @@ namespace rage
 
 		void WriteSignedFloat(int size, float divisor, float value)
 		{
-			float max   = (1 << (size - 1)) - 1;
+			float max = (1 << (size - 1)) - 1;
 			int integer = (int)((value / divisor) * max);
 
 			Write<int>(integer, size, true);

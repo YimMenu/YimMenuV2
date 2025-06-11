@@ -21,7 +21,7 @@ namespace YimMenu
 
 	void Players::ShutdownImpl()
 	{
-		m_SelectedPlayer = nullptr; 
+		m_SelectedPlayer = nullptr;
 		m_Players.clear();
 		m_PlayerDatas.clear();
 	}

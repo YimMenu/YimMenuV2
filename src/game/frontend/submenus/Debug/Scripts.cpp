@@ -17,58 +17,57 @@
 namespace YimMenu::Submenus
 {
 	static constexpr std::pair<const char*, int> stackSizes[] = {
-		{"MICRO", static_cast<int>(eStackSizes::MICRO)},
-		{"MINI", static_cast<int>(eStackSizes::MINI)},
-		{"DEFAULT", static_cast<int>(eStackSizes::DEFAULT)},
-		{"SPECIAL_ABILITY", static_cast<int>(eStackSizes::SPECIAL_ABILITY)},
-		{"FRIEND", static_cast<int>(eStackSizes::FRIEND)},
-		{"SHOP", static_cast<int>(eStackSizes::SHOP)},
-		{"CELLPHONE", static_cast<int>(eStackSizes::CELLPHONE)},
-		{"VEHICLE_SPAWN", static_cast<int>(eStackSizes::VEHICLE_SPAWN)},
-		{"CAR_MOD_SHOP", static_cast<int>(eStackSizes::CAR_MOD_SHOP)},
-		{"PAUSE_MENU_SCRIPT", static_cast<int>(eStackSizes::PAUSE_MENU_SCRIPT)},
-		{"APP_INTERNET", static_cast<int>(eStackSizes::APP_INTERNET)},
-		{"MULTIPLAYER_MISSION", static_cast<int>(eStackSizes::MULTIPLAYER_MISSION)},
-		{"CONTACTS_APP", static_cast<int>(eStackSizes::CONTACTS_APP)},
-		{"INTERACTION_MENU", static_cast<int>(eStackSizes::INTERACTION_MENU)},
-		{"SCRIPT_XML", static_cast<int>(eStackSizes::SCRIPT_XML)},
-		{"PROPERTY_INT", static_cast<int>(eStackSizes::PROPERTY_INT)},
-		{"ACTIVITY_CREATOR_INT", static_cast<int>(eStackSizes::ACTIVITY_CREATOR_INT)},
-		{"SMPL_INTERIOR", static_cast<int>(eStackSizes::SMPL_INTERIOR)},
-		{"WAREHOUSE", static_cast<int>(eStackSizes::WAREHOUSE)},
-		{"IE_DELIVERY", static_cast<int>(eStackSizes::IE_DELIVERY)},
-		{"SHOP_CONTROLLER", static_cast<int>(eStackSizes::SHOP_CONTROLLER)},
-		{"AM_MP_YACHT", static_cast<int>(eStackSizes::AM_MP_YACHT)},
-		{"INGAMEHUD", static_cast<int>(eStackSizes::INGAMEHUD)},
-		{"TRANSITION", static_cast<int>(eStackSizes::TRANSITION)},
-		{"FMMC_LAUNCHER", static_cast<int>(eStackSizes::FMMC_LAUNCHER)},
-		{"MULTIPLAYER_FREEMODE", static_cast<int>(eStackSizes::MULTIPLAYER_FREEMODE)},
-		{"MISSION", static_cast<int>(eStackSizes::MISSION)},
-		{"MP_LAUNCH_SCRIPT", static_cast<int>(eStackSizes::MP_LAUNCH_SCRIPT)}
-	};
+	    {"MICRO", static_cast<int>(eStackSizes::MICRO)},
+	    {"MINI", static_cast<int>(eStackSizes::MINI)},
+	    {"DEFAULT", static_cast<int>(eStackSizes::DEFAULT)},
+	    {"SPECIAL_ABILITY", static_cast<int>(eStackSizes::SPECIAL_ABILITY)},
+	    {"FRIEND", static_cast<int>(eStackSizes::FRIEND)},
+	    {"SHOP", static_cast<int>(eStackSizes::SHOP)},
+	    {"CELLPHONE", static_cast<int>(eStackSizes::CELLPHONE)},
+	    {"VEHICLE_SPAWN", static_cast<int>(eStackSizes::VEHICLE_SPAWN)},
+	    {"CAR_MOD_SHOP", static_cast<int>(eStackSizes::CAR_MOD_SHOP)},
+	    {"PAUSE_MENU_SCRIPT", static_cast<int>(eStackSizes::PAUSE_MENU_SCRIPT)},
+	    {"APP_INTERNET", static_cast<int>(eStackSizes::APP_INTERNET)},
+	    {"MULTIPLAYER_MISSION", static_cast<int>(eStackSizes::MULTIPLAYER_MISSION)},
+	    {"CONTACTS_APP", static_cast<int>(eStackSizes::CONTACTS_APP)},
+	    {"INTERACTION_MENU", static_cast<int>(eStackSizes::INTERACTION_MENU)},
+	    {"SCRIPT_XML", static_cast<int>(eStackSizes::SCRIPT_XML)},
+	    {"PROPERTY_INT", static_cast<int>(eStackSizes::PROPERTY_INT)},
+	    {"ACTIVITY_CREATOR_INT", static_cast<int>(eStackSizes::ACTIVITY_CREATOR_INT)},
+	    {"SMPL_INTERIOR", static_cast<int>(eStackSizes::SMPL_INTERIOR)},
+	    {"WAREHOUSE", static_cast<int>(eStackSizes::WAREHOUSE)},
+	    {"IE_DELIVERY", static_cast<int>(eStackSizes::IE_DELIVERY)},
+	    {"SHOP_CONTROLLER", static_cast<int>(eStackSizes::SHOP_CONTROLLER)},
+	    {"AM_MP_YACHT", static_cast<int>(eStackSizes::AM_MP_YACHT)},
+	    {"INGAMEHUD", static_cast<int>(eStackSizes::INGAMEHUD)},
+	    {"TRANSITION", static_cast<int>(eStackSizes::TRANSITION)},
+	    {"FMMC_LAUNCHER", static_cast<int>(eStackSizes::FMMC_LAUNCHER)},
+	    {"MULTIPLAYER_FREEMODE", static_cast<int>(eStackSizes::MULTIPLAYER_FREEMODE)},
+	    {"MISSION", static_cast<int>(eStackSizes::MISSION)},
+	    {"MP_LAUNCH_SCRIPT", static_cast<int>(eStackSizes::MP_LAUNCH_SCRIPT)}};
 
 	static void RenderBytecode(rage::scrProgram* program)
 	{
-		constexpr int bytesPerRow     = 16;
-		const std::uint32_t codeSize  = program->GetFullCodeSize();
+		constexpr int bytesPerRow = 16;
+		const std::uint32_t codeSize = program->GetFullCodeSize();
 		const std::uint32_t totalRows = (codeSize + bytesPerRow - 1) / bytesPerRow;
 
-		static bool shouldJump      = false;
-		static float targetScroll   = -1.0f;
-		static char offsetInput[9]  = "";
+		static bool shouldJump = false;
+		static float targetScroll = -1.0f;
+		static char offsetInput[9] = "";
 
 		ImGui::SetNextItemWidth(150);
 		ImGui::InputText("##jumpoffset", offsetInput, IM_ARRAYSIZE(offsetInput));
 		ImGui::SameLine();
 		if (ImGui::Button("Jump to Offset"))
 		{
-			char* end            = nullptr;
+			char* end = nullptr;
 			std::uint32_t offset = strtoul(offsetInput, &end, 0);
 			if (end != offsetInput && offset < codeSize)
 			{
 				std::uint32_t row = offset / bytesPerRow;
-				targetScroll      = row * ImGui::GetFrameHeightWithSpacing();
-				shouldJump        = true;
+				targetScroll = row * ImGui::GetFrameHeightWithSpacing();
+				shouldJump = true;
 			}
 		}
 
@@ -106,7 +105,7 @@ namespace YimMenu::Submenus
 						ImGui::PushID(index);
 						if (ImGui::InputText("##byte", hexStr, sizeof(hexStr), ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
 						{
-							char* end           = nullptr;
+							char* end = nullptr;
 							std::uint8_t newVal = static_cast<std::uint8_t>(strtoul(hexStr, &end, 16));
 							if (end != hexStr)
 								*byte = newVal; // this will conflict with the ScriptPatches class, but still useful to keep for quick testings
@@ -131,15 +130,15 @@ namespace YimMenu::Submenus
 		auto menu = std::make_unique<Category>("Scripts");
 
 		auto threads = std::make_unique<TabItem>("Threads");
-		auto script  = std::make_unique<TabItem>("Start Script");
+		auto script = std::make_unique<TabItem>("Start Script");
 
 		threads->AddItem(std::make_unique<ImGuiItem>([] {
-			static rage::scrThread* curThread   = nullptr;
+			static rage::scrThread* curThread = nullptr;
 			static rage::scrProgram* curProgram = nullptr;
 
 			if (!Pointers.ScriptThreads || Pointers.ScriptThreads->size() == 0)
 			{
-				curThread  = nullptr;
+				curThread = nullptr;
 				curProgram = nullptr;
 				return ImGui::TextDisabled("None");
 			}
@@ -157,7 +156,7 @@ namespace YimMenu::Submenus
 
 						if (ImGui::Selectable(thread->m_ScriptName, curThread == thread))
 						{
-							curThread  = thread;
+							curThread = thread;
 							curProgram = Scripts::FindScriptProgram(thread->m_ScriptHash);
 						}
 
@@ -173,7 +172,7 @@ namespace YimMenu::Submenus
 
 			if (!curThread || !curProgram || !curProgram->IsValid() || curProgram->m_RefCount == 0)
 			{
-				curThread  = nullptr;
+				curThread = nullptr;
 				curProgram = nullptr;
 				return;
 			}
@@ -248,14 +247,14 @@ namespace YimMenu::Submenus
 		}));
 
 		script->AddItem(std::make_unique<ImGuiItem>([] {
-			static std::string scriptSearch  = "";
-			static std::string scriptName    = "";
+			static std::string scriptSearch = "";
+			static std::string scriptName = "";
 			static std::string stackSizeName = stackSizes[0].first;
-			static int stackSize             = 0;
-			static std::int64_t* args        = nullptr;
-			static int argCount              = 0;
-			static int previousArgCount      = 0;
-			static bool pauseAfterStarting   = false;
+			static int stackSize = 0;
+			static std::int64_t* args = nullptr;
+			static int argCount = 0;
+			static int previousArgCount = 0;
+			static bool pauseAfterStarting = false;
 
 			ImGui::InputTextWithHint("Script Name", "Search", &scriptSearch);
 
@@ -266,7 +265,7 @@ namespace YimMenu::Submenus
 					if (ImGui::Selectable(std::format("{} ({})", p.first, (int)p.second).data(), stackSize == p.second))
 					{
 						stackSizeName = p.first;
-						stackSize     = p.second;
+						stackSize = p.second;
 					}
 
 					if (p.second == stackSize)
@@ -291,7 +290,7 @@ namespace YimMenu::Submenus
 						std::memcpy(temp, args, sizeof(int64_t) * std::min(argCount, previousArgCount));
 				}
 				delete[] args;
-				args             = temp;
+				args = temp;
 				previousArgCount = argCount;
 			}
 			for (int i = 0; i < argCount; i++)
@@ -316,7 +315,7 @@ namespace YimMenu::Submenus
 						if (ImGui::Selectable(script, scriptName == script))
 						{
 							scriptSearch = script;
-							scriptName   = script;
+							scriptName = script;
 						}
 					}
 				}

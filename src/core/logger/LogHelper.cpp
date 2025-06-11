@@ -39,8 +39,8 @@ namespace YimMenu
 
 	bool LogHelper::InitImpl(const std::string_view consoleName, const std::filesystem::path& file, const bool attachConsole)
 	{
-		m_ConsoleTitle  = consoleName;
-		m_File          = file;
+		m_ConsoleTitle = consoleName;
+		m_File = file;
 		m_AttachConsole = attachConsole;
 
 		if (m_AttachConsole)

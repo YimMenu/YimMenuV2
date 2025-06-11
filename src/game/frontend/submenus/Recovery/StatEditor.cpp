@@ -32,8 +32,7 @@ namespace YimMenu::Submenus
 		}
 	};
 
-	union StatValue
-	{
+	union StatValue {
 		float m_AsFloat;
 		int m_AsInt;
 		bool m_AsBool;
@@ -95,25 +94,25 @@ namespace YimMenu::Submenus
 
 		switch (data->GetType())
 		{
-		case sStatData::Type::_BOOL: 
+		case sStatData::Type::_BOOL:
 			value.m_AsBool = data->GetBool();
 			return;
-		case sStatData::Type::FLOAT: 
+		case sStatData::Type::FLOAT:
 			value.m_AsFloat = data->GetFloat();
 			return;
 		case sStatData::Type::INT:
-		case sStatData::Type::UINT32: 
+		case sStatData::Type::UINT32:
 		case sStatData::Type::UINT16:
-		case sStatData::Type::UINT8: 
+		case sStatData::Type::UINT8:
 			value.m_AsInt = data->GetInt();
 			return;
-		case sStatData::Type::INT64: 
+		case sStatData::Type::INT64:
 			value.m_AsU64 = data->GetInt64();
 			return;
-		case sStatData::Type::UINT64: 
+		case sStatData::Type::UINT64:
 			value.m_AsU64 = data->GetUInt64();
 			return;
-		case sStatData::Type::STRING: 
+		case sStatData::Type::STRING:
 			strncpy(value.m_AsString, data->GetString(), sizeof(value.m_AsString));
 			return;
 		default:
@@ -128,23 +127,23 @@ namespace YimMenu::Submenus
 		case sStatData::Type::_BOOL:
 			STATS::STAT_SET_BOOL(hash, value.m_AsBool, true);
 			break;
-		case sStatData::Type::FLOAT: 
+		case sStatData::Type::FLOAT:
 			STATS::STAT_SET_FLOAT(hash, value.m_AsFloat, true);
 			return;
 		case sStatData::Type::INT:
-		case sStatData::Type::UINT32: 
+		case sStatData::Type::UINT32:
 		case sStatData::Type::UINT16:
-		case sStatData::Type::UINT8: 
+		case sStatData::Type::UINT8:
 			STATS::STAT_SET_INT(hash, value.m_AsInt, true);
 			return;
-		case sStatData::Type::INT64: 
+		case sStatData::Type::INT64:
 			data->SetInt64(value.m_AsU64); // TODO this isn't a good idea! natives can't set this
 			return;
-		case sStatData::Type::UINT64: 
+		case sStatData::Type::UINT64:
 			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)value.m_AsU64, 0, 32, true);
 			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)(value.m_AsU64 >> 32), 32, 32, true);
 			return;
-		case sStatData::Type::STRING: 
+		case sStatData::Type::STRING:
 			STATS::STAT_SET_STRING(hash, value.m_AsString, true);
 			return;
 		default:
@@ -157,23 +156,23 @@ namespace YimMenu::Submenus
 		ImGui::SetNextItemWidth(150.f);
 		switch (data->GetType())
 		{
-		case sStatData::Type::_BOOL: 
+		case sStatData::Type::_BOOL:
 			return ImGui::Checkbox("Value", &value.m_AsBool);
-		case sStatData::Type::FLOAT: 
+		case sStatData::Type::FLOAT:
 			return ImGui::InputFloat("Value", &value.m_AsFloat);
 		case sStatData::Type::INT:
 			return ImGui::InputInt("Value", &value.m_AsInt);
-		case sStatData::Type::UINT32: 
+		case sStatData::Type::UINT32:
 			return ImGui::InputScalar("Value", ImGuiDataType_U32, &value.m_AsInt);
 		case sStatData::Type::UINT16:
 			return ImGui::InputScalar("Value", ImGuiDataType_U16, &value.m_AsInt);
-		case sStatData::Type::UINT8: 
+		case sStatData::Type::UINT8:
 			return ImGui::InputScalar("Value", ImGuiDataType_U8, &value.m_AsInt);
-		case sStatData::Type::INT64: 
+		case sStatData::Type::INT64:
 			return ImGui::InputScalar("Value", ImGuiDataType_S64, &value.m_AsInt);
-		case sStatData::Type::UINT64: 
+		case sStatData::Type::UINT64:
 			return ImGui::InputScalar("Value", ImGuiDataType_U64, &value.m_AsInt);
-		case sStatData::Type::STRING: 
+		case sStatData::Type::STRING:
 			return ImGui::InputText("Value", value.m_AsString, sizeof(value.m_AsString));
 		default:
 			ImGui::BeginDisabled();
@@ -230,7 +229,7 @@ namespace YimMenu::Submenus
 	static bool RenderPackedStatEditor(StatValue& value, const PackedStatInfo& info)
 	{
 		ImGui::SetNextItemWidth(150.f);
-		if (info.m_IsBoolStat) 
+		if (info.m_IsBoolStat)
 			return ImGui::Checkbox("Value##packed", &value.m_AsBool);
 		else
 			return ImGui::InputScalar("Value##packed", ImGuiDataType_U8, &value.m_AsInt);
@@ -294,7 +293,7 @@ namespace YimMenu::Submenus
 			// TODO: improve packed stat editor
 			static PackedStatInfo current_info{0, false, true};
 			static StatValue value{};
-	
+
 			ImGui::SetNextItemWidth(200.f);
 			if (ImGui::InputInt("Index", &current_info.m_Index))
 			{

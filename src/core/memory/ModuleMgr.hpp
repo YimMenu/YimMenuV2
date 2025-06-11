@@ -9,11 +9,11 @@ namespace YimMenu
 	class ModuleMgr
 	{
 	public:
-		ModuleMgr()                                = default;
-		virtual ~ModuleMgr()                       = default;
-		ModuleMgr(const ModuleMgr&)                = delete;
-		ModuleMgr(ModuleMgr&&) noexcept            = delete;
-		ModuleMgr& operator=(const ModuleMgr&)     = delete;
+		ModuleMgr() = default;
+		virtual ~ModuleMgr() = default;
+		ModuleMgr(const ModuleMgr&) = delete;
+		ModuleMgr(ModuleMgr&&) noexcept = delete;
+		ModuleMgr& operator=(const ModuleMgr&) = delete;
 		ModuleMgr& operator=(ModuleMgr&&) noexcept = delete;
 
 		Module* Get(const std::string_view name);

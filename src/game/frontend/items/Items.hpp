@@ -64,10 +64,11 @@ namespace YimMenu
 	class IntCommandItem : public UIItem
 	{
 	public:
-		explicit IntCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt);
+		explicit IntCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt, bool use_slider = true);
 		void Draw() override;
 
 	private:
+		bool m_useSlider;
 		IntCommand* m_Command;
 		std::optional<std::string> m_LabelOverride;
 	};
@@ -75,10 +76,11 @@ namespace YimMenu
 	class FloatCommandItem : public UIItem
 	{
 	public:
-		explicit FloatCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt);
+		explicit FloatCommandItem(joaat_t id, std::optional<std::string> label_override = std::nullopt, bool use_slider = true);
 		void Draw() override;
 
 	private:
+		bool m_useSlider;
 		FloatCommand* m_Command;
 		std::optional<std::string> m_LabelOverride;
 	};
@@ -135,7 +137,6 @@ namespace YimMenu
 	class HotkeySetter : public UIItem
 	{
 	public:
-
 		explicit HotkeySetter(joaat_t);
 		void Draw() override;
 
@@ -148,7 +149,7 @@ namespace YimMenu
 	public:
 		explicit Group(const std::string& name, int items_per_row = 7);
 		void Draw() override;
-		
+
 		void AddItem(std::shared_ptr<UIItem>&& item)
 		{
 			m_Items.push_back(std::move(item));

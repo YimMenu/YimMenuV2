@@ -81,7 +81,7 @@ namespace YimMenu::Submenus
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("forcescripthost"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("pausegame"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("nocalls"_J));
-	
+
 		session->AddItem(joinGroup);
 		session->AddItem(bountyGroup);
 		session->AddItem(trollGroup);
@@ -97,7 +97,7 @@ namespace YimMenu::Submenus
 		spoofMMRegion->AddItem(std::make_shared<ConditionalItem>("spoofmmregion"_J, std::make_shared<ListCommandItem>("mmregion"_J, "##mmregion")));
 		matchmakingGroup->AddItem(std::make_shared<ConditionalItem>("cheaterpool"_J, spoofMMRegion, true));
 		spoofing->AddItem(matchmakingGroup);
-	
+
 		AddCategory(std::move(session));
 		AddCategory(std::move(spoofing));
 		AddCategory(std::move(BuildSavedPlayersMenu()));

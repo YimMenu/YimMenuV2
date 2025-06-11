@@ -34,7 +34,7 @@ namespace YimMenu::Submenus
 		auto globals = std::make_unique<Category>("Globals");
 
 		auto editor = std::make_unique<Group>("Editor");
-		auto saved  = std::make_unique<Group>("Saved");
+		auto saved = std::make_unique<Group>("Saved");
 
 		static bool ensureVarsLoaded = ([] {
 			SavedVariables::Init();

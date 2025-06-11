@@ -1,7 +1,7 @@
 BasedOnStyle: Microsoft
 AccessModifierOffset: '-4'
 AlignAfterOpenBracket: DontAlign
-AlignConsecutiveAssignments: 'true'
+AlignConsecutiveAssignments: 'false'
 AlignEscapedNewlines: Left
 AlignOperands: 'false'
 AlignTrailingComments: 'true'
@@ -24,6 +24,7 @@ BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
 BreakStringLiterals: 'false'
 CompactNamespaces: 'false'
+ColumnLimit: '0' 
 ConstructorInitializerAllOnOneLineOrOnePerLine: 'false'
 ConstructorInitializerIndentWidth: '4'
 Cpp11BracedListStyle: 'true'
@@ -44,7 +45,7 @@ PenaltyExcessCharacter: '0'
 PenaltyReturnTypeOnItsOwnLine: '0'
 PointerAlignment: Left
 ReflowComments: 'false'
-SortIncludes: 'true'
+SortIncludes: 'false'
 SortUsingDeclarations: 'true'
 SpaceAfterCStyleCast: 'false'
 SpaceAfterLogicalNot: 'false'

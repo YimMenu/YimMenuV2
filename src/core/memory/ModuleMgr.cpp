@@ -33,7 +33,7 @@ namespace YimMenu
 			return false;
 
 		const auto moduleList = &ldrData->InMemoryOrderModuleList;
-		auto moduleEntry      = moduleList->Flink;
+		auto moduleEntry = moduleList->Flink;
 		for (; moduleList != moduleEntry; moduleEntry = moduleEntry->Flink)
 		{
 			const auto tableEntry = CONTAINING_RECORD(moduleEntry, LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks);

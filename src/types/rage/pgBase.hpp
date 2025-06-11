@@ -7,10 +7,10 @@ namespace rage
 	class pgBase
 	{
 	public:
-		virtual void ShutdownClass()                = 0;
+		virtual void ShutdownClass() = 0;
 		virtual void SetHandleIndex(uint32_t index) = 0;
-		virtual void Validate(uint32_t arg)         = 0;
-		virtual void InitClass(int arg)             = 0;
+		virtual void Validate(uint32_t arg) = 0;
+		virtual void InitClass(int arg) = 0;
 		virtual uint32_t GetHandleIndex() const
 		{
 			return 0;
@@ -29,7 +29,7 @@ namespace rage
 				return 0;
 
 			uintptr_t* metadataStart = reinterpret_cast<uintptr_t*>(nextPage + 16);
-			uintptr_t metadataCount  = *reinterpret_cast<uintptr_t*>(nextPage + 24);
+			uintptr_t metadataCount = *reinterpret_cast<uintptr_t*>(nextPage + 24);
 
 			for (uintptr_t i = 0; i < metadataCount; ++i)
 			{
@@ -55,7 +55,7 @@ namespace rage
 			if (pageStatus == 0)
 				return false;
 
-			nextPage        = 0;
+			nextPage = 0;
 			bool hasPageMap = (nextPage != 0);
 
 			return hasPageMap;

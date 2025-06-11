@@ -63,7 +63,7 @@ namespace YimMenu
 		GUI::Init();
 
 		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
-		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
+		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript));    // runs once
 		ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
@@ -93,7 +93,7 @@ namespace YimMenu
 		Hooking::Destroy();
 		CallSiteHook::Destroy();
 
-EARLY_UNLOAD:
+	EARLY_UNLOAD:
 		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();
@@ -108,7 +108,7 @@ EARLY_UNLOAD:
 BOOL WINAPI DllMain(HINSTANCE dllInstance, DWORD reason, void*)
 {
 	using namespace YimMenu;
-	
+
 	if (dllInstance)
 		DisableThreadLibraryCalls(dllInstance);
 

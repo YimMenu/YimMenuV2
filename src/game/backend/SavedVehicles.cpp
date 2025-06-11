@@ -40,7 +40,7 @@ namespace YimMenu
 		nlohmann::json vehicle_json;
 		int primary_color, secondary_color;
 		int pearlescent_color, wheel_color;
-		auto vehicle      = veh.GetHandle();
+		auto vehicle = veh.GetHandle();
 		Hash vehicle_hash = veh.GetModel();
 		std::map<int, int> vehicle_extras;
 		auto is_bennys = VehicleModel::IsBennys(vehicle);
@@ -53,7 +53,7 @@ namespace YimMenu
 				if (wheel_custom && is_bennys)
 					wheel_custom = 0;
 
-				int vehicle_mod[2]            = {VEHICLE::GET_VEHICLE_MOD(vehicle, slot), wheel_custom};
+				int vehicle_mod[2] = {VEHICLE::GET_VEHICLE_MOD(vehicle, slot), wheel_custom};
 				vehicle_json[mod_names[slot]] = vehicle_mod;
 			}
 			else if (VEHICLE::IS_TOGGLE_MOD_ON(vehicle, slot))
@@ -78,8 +78,8 @@ namespace YimMenu
 		VEHICLE::GET_VEHICLE_EXTRA_COLOURS(vehicle, &pearlescent_color, &wheel_color);
 
 		vehicle_json[vehicle_model_hash_key] = vehicle_hash;
-		vehicle_json[primary_color_key]      = primary_color;
-		vehicle_json[secondary_color_key]    = secondary_color;
+		vehicle_json[primary_color_key] = primary_color;
+		vehicle_json[secondary_color_key] = secondary_color;
 
 		if (VEHICLE::GET_IS_VEHICLE_PRIMARY_COLOUR_CUSTOM(vehicle))
 		{
@@ -96,11 +96,11 @@ namespace YimMenu
 		}
 
 		vehicle_json[vehicle_window_tint_key] = VEHICLE::GET_VEHICLE_WINDOW_TINT(vehicle);
-		vehicle_json[pearlescent_color_key]   = pearlescent_color;
-		vehicle_json[wheel_color_key]         = wheel_color;
-		vehicle_json[tire_can_burst]          = VEHICLE::GET_VEHICLE_TYRES_CAN_BURST(vehicle);
-		vehicle_json[vehicle_extras_key]      = vehicle_extras;
-		vehicle_json[wheel_type_key]          = VEHICLE::GET_VEHICLE_WHEEL_TYPE(vehicle);
+		vehicle_json[pearlescent_color_key] = pearlescent_color;
+		vehicle_json[wheel_color_key] = wheel_color;
+		vehicle_json[tire_can_burst] = VEHICLE::GET_VEHICLE_TYRES_CAN_BURST(vehicle);
+		vehicle_json[vehicle_extras_key] = vehicle_extras;
+		vehicle_json[wheel_type_key] = VEHICLE::GET_VEHICLE_WHEEL_TYPE(vehicle);
 
 		if ((VEHICLE::GET_VEHICLE_LIVERY_COUNT(vehicle) > 1) && VEHICLE::GET_VEHICLE_LIVERY(vehicle) >= 0)
 			vehicle_json[vehicle_livery_key] = VEHICLE::GET_VEHICLE_LIVERY(vehicle);
@@ -118,13 +118,13 @@ namespace YimMenu
 			VEHICLE::GET_VEHICLE_EXTRA_COLOUR_5(vehicle, &interior_color);
 			VEHICLE::GET_VEHICLE_EXTRA_COLOUR_6(vehicle, &dashboard_color);
 
-			vehicle_json[plate_text_key]       = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle);
+			vehicle_json[plate_text_key] = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle);
 			vehicle_json[plate_text_index_key] = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT_INDEX(vehicle);
-			vehicle_json[drift_tires]          = VEHICLE::GET_DRIFT_TYRES_SET(vehicle);
-			vehicle_json[neon_color_key]       = neon_color;
-			vehicle_json[neon_lights_key]      = neon_lights;
-			vehicle_json[interior_color_key]   = interior_color;
-			vehicle_json[dash_color_key]       = dashboard_color;
+			vehicle_json[drift_tires] = VEHICLE::GET_DRIFT_TYRES_SET(vehicle);
+			vehicle_json[neon_color_key] = neon_color;
+			vehicle_json[neon_lights_key] = neon_lights;
+			vehicle_json[interior_color_key] = interior_color;
+			vehicle_json[dash_color_key] = dashboard_color;
 		}
 
 		return vehicle_json;

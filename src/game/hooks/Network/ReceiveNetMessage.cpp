@@ -32,7 +32,7 @@ namespace YimMenu::Hooks
 		// TODO: port security ID stuff from V1
 		auto fr_evt = reinterpret_cast<rage::netEventFrameReceived*>(event);
 		rage::datBitBuffer buffer(fr_evt->m_Data, fr_evt->m_Length, true);
-		
+
 		rage::netMessage::Type type = ReadType(buffer).value_or(rage::netMessage::Type::Invalid);
 
 		switch (type)
@@ -55,7 +55,7 @@ namespace YimMenu::Hooks
 			if (!player)
 				break;
 
-			uint32_t count       = buffer.Read<uint32_t>(5);
+			uint32_t count = buffer.Read<uint32_t>(5);
 			uint32_t buffer_size = buffer.Read<uint32_t>(15);
 
 			if (buffer_size > 7296)
@@ -68,7 +68,7 @@ namespace YimMenu::Hooks
 				int bits_read = buffer.m_BitsRead;
 
 				uint16_t event_id = buffer.Read<uint16_t>(7);
-				uint32_t event_index  = buffer.Read<uint32_t>(9);
+				uint32_t event_index = buffer.Read<uint32_t>(9);
 				uint32_t event_handled_bits = buffer.Read<uint32_t>(8);
 				uint32_t event_data_size = buffer.Read<uint32_t>(15);
 
@@ -114,12 +114,12 @@ namespace YimMenu::Hooks
 			{
 				if (auto num_msgs = buffer.Read<int>(5))
 				{
-					auto sz      = buffer.Read<std::uint32_t>(13);
+					auto sz = buffer.Read<std::uint32_t>(13);
 					auto pos_now = buffer.m_BitsRead;
 					while (pos_now + sz > buffer.m_BitsRead)
 					{
-						auto id     = buffer.Read<std::uint16_t>(13);
-						auto token  = buffer.Read<int>(5);
+						auto id = buffer.Read<std::uint16_t>(13);
+						auto token = buffer.Read<int>(5);
 						bool reject = false;
 
 						if (Self::GetPed().GetPointer<void*>() && Self::GetPed().GetNetworkObjectId() == id)
@@ -201,7 +201,7 @@ namespace YimMenu::Hooks
 			}
 			break;
 		}
-		default: 
+		default:
 			break;
 		}
 

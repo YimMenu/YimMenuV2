@@ -9,11 +9,11 @@ namespace YimMenu
 		std::vector<int> m_Chain{};
 		bool m_BeingModified = false;
 
-		CommandLink(){};
+		CommandLink() {};
 	};
 
-	class HotkeySystem : 
-		private IStateSerializer
+	class HotkeySystem :
+	    private IStateSerializer
 	{
 		std::chrono::system_clock::time_point m_LastHotkeyTriggerTime;
 

@@ -7,13 +7,13 @@
 namespace YimMenu::Submenus
 {
 	Vehicle::Vehicle() :
-		Submenu::Submenu("Vehicle")
+	    Submenu::Submenu("Vehicle")
 	{
 		auto main = std::make_shared<Category>("Main");
 
 		auto globals = std::make_shared<Group>("Globals");
-		auto tools   = std::make_shared<Group>("Tools", 1);
-		auto misc    = std::make_shared<Group>("Misc");
+		auto tools = std::make_shared<Group>("Tools", 1);
+		auto misc = std::make_shared<Group>("Misc");
 
 		globals->AddItem(std::make_shared<BoolCommandItem>("vehiclegodmode"_J, "Godmode"));
 		globals->AddItem(std::make_shared<BoolCommandItem>("keepfixed"_J, "Keep Fixed"));

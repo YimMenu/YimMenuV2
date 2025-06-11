@@ -105,7 +105,7 @@ namespace YimMenu
 					m_NumTunables = program->m_GlobalCount - TUNABLE_BASE_ADDRESS;
 
 					TUNABLES_LAUNCH_DATA args;
-					args.Context         = 6;  // BASE_GLOBALS
+					args.Context = 6;          // BASE_GLOBALS
 					args.ContentModifier = 27; // MP_FM_RANDOM
 					if (!BUILTIN::START_NEW_SCRIPT_WITH_NAME_HASH_AND_ARGS("tuneables_processing"_J, &args, SCR_SIZEOF(args), static_cast<int>(eStackSizes::DEFAULT)))
 					{
@@ -157,16 +157,16 @@ namespace YimMenu
 	void Tunables::Save()
 	{
 		auto dataSize = sizeof(std::uint32_t) + sizeof(TunableSaveStruct) * m_Tunables.size();
-		auto data     = std::make_unique<uint8_t[]>(dataSize);
-		auto dataPtr  = data.get();
+		auto data = std::make_unique<uint8_t[]>(dataSize);
+		auto dataPtr = data.get();
 
 		*(std::uint32_t*)dataPtr = m_Tunables.size();
 		dataPtr += sizeof(std::uint32_t);
 
 		for (auto& [hash, val] : m_Tunables)
 		{
-			auto saveStruct      = (TunableSaveStruct*)dataPtr;
-			saveStruct->m_Hash   = hash;
+			auto saveStruct = (TunableSaveStruct*)dataPtr;
+			saveStruct->m_Hash = hash;
 			saveStruct->m_Offset = val;
 			dataPtr += sizeof(TunableSaveStruct);
 		}
@@ -191,7 +191,7 @@ namespace YimMenu
 		}
 
 		m_Initialized = true;
-		m_Loading     = false;
+		m_Loading = false;
 
 		LOG(INFO) << "Loaded " << m_Tunables.size() << " tunables from cache.";
 	}

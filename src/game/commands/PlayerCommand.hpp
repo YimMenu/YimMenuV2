@@ -26,6 +26,6 @@ namespace YimMenu
 	public:
 		PlayerCommand(std::string name, std::string label, std::string description, int num_args = 0, bool all_version = true);
 		void Call(Player target);
-		void Call(const std::vector<Player>& targets); 
+		void Call(const std::vector<Player>& targets);
 	};
 }

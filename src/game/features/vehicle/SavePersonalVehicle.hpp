@@ -17,8 +17,8 @@ namespace YimMenu::Features
 
 		void RunScriptImpl();
 
-		bool m_ShouldRunScript    = false;
-		bool m_StartedByUs        = false;
+		bool m_ShouldRunScript = false;
+		bool m_StartedByUs = false;
 		rage::scrThread* m_Thread = nullptr;
 
 	public:

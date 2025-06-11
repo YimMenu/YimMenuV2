@@ -39,7 +39,7 @@ namespace YimMenu
 	{
 		auto ped = Self::GetPed();
 		drawable = PED::GET_PED_DRAWABLE_VARIATION(static_cast<int>(ped.GetHandle()), slot);
-		texture  = PED::GET_PED_TEXTURE_VARIATION(static_cast<int>(ped.GetHandle()), slot);
+		texture = PED::GET_PED_TEXTURE_VARIATION(static_cast<int>(ped.GetHandle()), slot);
 	}
 
 	void GetPropSlot(int slot, int& drawable, int& texture)
@@ -49,7 +49,7 @@ namespace YimMenu
 		if (drawable == -1)
 		{
 			drawable = 0;
-			texture  = 0;
+			texture = 0;
 			return;
 		}
 		texture = PED::GET_PED_PROP_TEXTURE_INDEX(static_cast<int>(ped.GetHandle()), slot);
@@ -73,7 +73,7 @@ namespace YimMenu
 		ImGui::Text("%s", text);
 		ImVec2 min = ImGui::GetItemRectMin();
 		ImVec2 max = ImGui::GetItemRectMax();
-		min.y      = max.y;
+		min.y = max.y;
 		ImGui::GetWindowDrawList()->AddLine(min, max, ImGui::GetColorU32(ImGui::GetStyle().Colors[ImGuiCol_Text]));
 	}
 
@@ -101,7 +101,7 @@ namespace YimMenu
 			// Create two columns layout
 			const float windowWidth = ImGui::GetContentRegionAvail().x;
 			const float columnWidth = windowWidth * 0.5f;
-			const float inputWidth  = 120.0f; // Minimal width for number input
+			const float inputWidth = 120.0f; // Minimal width for number input
 
 			ImGui::Columns(2, "OutfitColumns", false);
 			ImGui::SetColumnWidth(0, columnWidth);
@@ -210,9 +210,9 @@ namespace YimMenu
 					int maxDrawable = GetMaxDrawable(i);
 					if (maxDrawable > 0)
 					{
-						int drawable   = std::uniform_int_distribution<>(0, maxDrawable - 1)(gen);
+						int drawable = std::uniform_int_distribution<>(0, maxDrawable - 1)(gen);
 						int maxTexture = GetMaxTexture(i, drawable);
-						int texture    = maxTexture > 0 ? std::uniform_int_distribution<>(0, maxTexture - 1)(gen) : 0;
+						int texture = maxTexture > 0 ? std::uniform_int_distribution<>(0, maxTexture - 1)(gen) : 0;
 						SetOutfitSlot(i, drawable, texture);
 					}
 				}
@@ -223,9 +223,9 @@ namespace YimMenu
 					int maxDrawable = GetMaxPropDrawable(i);
 					if (maxDrawable > 0)
 					{
-						int drawable   = std::uniform_int_distribution<>(0, maxDrawable - 1)(gen);
+						int drawable = std::uniform_int_distribution<>(0, maxDrawable - 1)(gen);
 						int maxTexture = GetMaxPropTexture(i, drawable);
-						int texture    = maxTexture > 0 ? std::uniform_int_distribution<>(0, maxTexture - 1)(gen) : 0;
+						int texture = maxTexture > 0 ? std::uniform_int_distribution<>(0, maxTexture - 1)(gen) : 0;
 						SetPropSlot(i, drawable, texture);
 					}
 				}

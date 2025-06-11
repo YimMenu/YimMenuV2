@@ -17,7 +17,7 @@ namespace YimMenu::Features
 			{
 				NETWORK::NETWORK_SET_IN_SPECTATOR_MODE(false, 0);
 				HUD::SET_MINIMAP_IN_SPECTATOR_MODE(false, 0);
-				
+
 				m_SpectatingPlayer = selected;
 			}
 

@@ -8,7 +8,7 @@ namespace YimMenu
 	inline std::string TrimString(std::string& str)
 	{
 		auto start = str.begin();
-		auto end   = str.end();
+		auto end = str.end();
 
 		// Find the first non-whitespace character from the start
 		while (start != end && std::isspace(*start))

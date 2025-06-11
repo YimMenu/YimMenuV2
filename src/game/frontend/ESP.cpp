@@ -15,18 +15,18 @@
 namespace
 {
 	// Human
-	constexpr int headBone          = 31086;
-	constexpr int neckBone          = 39317;
-	constexpr int torsoBone         = 23553;
-	constexpr int leftHandBone      = 18905;
-	constexpr int rightHandBone     = 57005;
-	constexpr int leftFootBone      = 14201;
-	constexpr int rightFootBone     = 52301;
-	constexpr int leftElbowBone     = 22711;
-	constexpr int rightElbowBone    = 2992;
-	constexpr int leftKneeBone      = 46078;
-	constexpr int rightKneeBone     = 16335;
-	constexpr int leftShoulderBone  = 61163; // TODO verify all the bones
+	constexpr int headBone = 31086;
+	constexpr int neckBone = 39317;
+	constexpr int torsoBone = 23553;
+	constexpr int leftHandBone = 18905;
+	constexpr int rightHandBone = 57005;
+	constexpr int leftFootBone = 14201;
+	constexpr int rightFootBone = 52301;
+	constexpr int leftElbowBone = 22711;
+	constexpr int rightElbowBone = 2992;
+	constexpr int leftKneeBone = 46078;
+	constexpr int rightKneeBone = 16335;
+	constexpr int leftShoulderBone = 61163; // TODO verify all the bones
 	constexpr int rightShoulderBone = 28252;
 }
 
@@ -68,23 +68,22 @@ namespace YimMenu::Features
 
 namespace YimMenu
 {
-	static ImVec4 death_bg         = ImVec4(0.117f, 0.113f, 0.172f, .75f);
-	static ImVec4 armor_blue_bg    = ImVec4(0.36f, 0.71f, 0.89f, .75f);
-	static ImVec4 armor_blue       = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
-	static ImVec4 health_green_bg  = ImVec4(0.29f, 0.69f, 0.34f, .75f);
-	static ImVec4 health_green     = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
+	static ImVec4 death_bg = ImVec4(0.117f, 0.113f, 0.172f, .75f);
+	static ImVec4 armor_blue_bg = ImVec4(0.36f, 0.71f, 0.89f, .75f);
+	static ImVec4 armor_blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
+	static ImVec4 health_green_bg = ImVec4(0.29f, 0.69f, 0.34f, .75f);
+	static ImVec4 health_green = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
 	static ImVec4 health_yellow_bg = ImVec4(0.69f, 0.49f, 0.29f, .75f);
-	static ImVec4 health_yellow    = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
-	static ImVec4 health_red_bg    = ImVec4(0.69f, 0.29f, 0.29f, .75f);
-	static ImVec4 health_red       = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
-	static ImVec4 Green            = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
-	static ImVec4 Orange           = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
-	static ImVec4 Red              = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
-	static ImVec4 Blue             = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
-	static ImVec4 White            = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	static ImVec4 health_yellow = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
+	static ImVec4 health_red_bg = ImVec4(0.69f, 0.29f, 0.29f, .75f);
+	static ImVec4 health_red = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
+	static ImVec4 Green = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
+	static ImVec4 Orange = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
+	static ImVec4 Red = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
+	static ImVec4 Blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
+	static ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	static auto worldToScreen = [](rage::fvector3 coords) 
-	{
+	static auto worldToScreen = [](rage::fvector3 coords) {
 		float screen_x{}, screen_y{};
 
 		GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(coords.x, coords.y, coords.z, &screen_x, &screen_y);
@@ -123,7 +122,7 @@ namespace YimMenu
 		    || (plyr.GetPed().IsDead() && !Features::_ESPDrawDeadPlayers.GetState()))
 			return;
 
-		float distanceToPlayer   = Self::GetPed().GetPosition().GetDistance(plyr.GetPed().GetBonePosition(torsoBone));
+		float distanceToPlayer = Self::GetPed().GetPosition().GetDistance(plyr.GetPed().GetBonePosition(torsoBone));
 		int alphaBasedOnDistance = 255;
 		ImColor colorBasedOnDistance = Red;
 
@@ -169,7 +168,7 @@ namespace YimMenu
 		if (auto local = Self::GetPed())
 			distanceToPed = local.GetPosition().GetDistance(ped.GetBonePosition(torsoBone));
 
-		int alphaBasedOnDistance     = 255;
+		int alphaBasedOnDistance = 255;
 		ImColor colorBasedOnDistance = Red;
 
 		if (distanceToPed < 100.f)
@@ -186,13 +185,13 @@ namespace YimMenu
 			//if (auto it = Data::g_PedModels.find(ped.GetModel()); it != Data::g_PedModels.end())
 			//	info += std::format("{} ", it->second);
 			//else
-				info += std::format("0x{:08X} ", (joaat_t)ped.GetModel());
+			info += std::format("0x{:08X} ", (joaat_t)ped.GetModel());
 		}
 
 		if (Features::_ESPNetworkInfoPeds.GetState() && ped.IsNetworked())
 		{
 			auto owner = Player(ped.GetOwner());
-			auto id    = ped.GetNetworkObjectId();
+			auto id = ped.GetNetworkObjectId();
 
 			info += std::format("{} {} ", id, owner.GetName());
 		}
@@ -245,7 +244,7 @@ namespace YimMenu
 		if (auto local = Self::GetPed())
 			distanceToObject = local.GetPosition().GetDistance(object.GetPosition());
 
-		int alphaBasedOnDistance     = 255;
+		int alphaBasedOnDistance = 255;
 		ImColor colorBasedOnDistance = Red;
 
 		if (distanceToObject < 100.f)
@@ -256,14 +255,14 @@ namespace YimMenu
 			colorBasedOnDistance = Red, alphaBasedOnDistance = 125;
 
 		Vector3 coords = object.GetPosition();
-		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
+		float distance = Self::GetPed().GetPosition().GetDistance(coords);
 		ImColor color = ImGui::ColorConvertFloat4ToU32(Features::_HashColorObjects.GetState());
 		std::string info = std::format("0x{:08X} ", (joaat_t)object.GetModel());
 
 		if (Features::_ESPNetworkInfoObjects.GetState() && object.IsNetworked())
 		{
 			auto owner = Player(object.GetOwner());
-			auto id    = object.GetNetworkObjectId();
+			auto id = object.GetNetworkObjectId();
 
 			info += std::format("{} {} ", id, owner.GetName());
 		}
@@ -290,7 +289,7 @@ namespace YimMenu
 		{
 			info += " (Mission)";
 		}
-		
+
 		drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, info.c_str());
 
 		if (Features::_ESPDistanceObjects.GetState())
@@ -309,7 +308,7 @@ namespace YimMenu
 			return;
 
 		const auto originalFontSize = ImGui::GetFont()->Scale;
-		auto* currentFont           = ImGui::GetFont();
+		auto* currentFont = ImGui::GetFont();
 		currentFont->Scale *= 1.2;
 		ImGui::PushFont(ImGui::GetFont());
 

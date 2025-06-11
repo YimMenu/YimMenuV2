@@ -89,7 +89,6 @@ namespace YimMenu
 		if (auto ptr = GetPointer<rage::fwEntity*>())
 			return ptr->IsPed();
 		return false;
-
 	}
 
 	bool Entity::IsVehicle()
@@ -118,7 +117,7 @@ namespace YimMenu
 
 
 	bool Entity::IsMissionEntity()
-	{ 
+	{
 		ENTITY_ASSERT_VALID();
 		return ENTITY::IS_ENTITY_A_MISSION_ENTITY(GetHandle()); // TODO: detect more mission states
 	}
@@ -255,7 +254,7 @@ namespace YimMenu
 		pack.GetBuffer().Write(msgs_written, 5);
 		pack.GetBuffer().Write(remove_buf.m_BitsRead, 13);
 		pack.GetBuffer().WriteArray(buf, remove_buf.m_BitsRead);
-		
+
 		if (for_player)
 		{
 			if (for_player->IsValid())
@@ -299,8 +298,8 @@ namespace YimMenu
 		return GetPointer<CDynamicEntity*>()->m_NetObject;
 	}
 
-	int Entity::GetOwner() 
-	{ 
+	int Entity::GetOwner()
+	{
 		if (!IsNetworked())
 			return -1;
 
@@ -435,7 +434,7 @@ namespace YimMenu
 			if (!ptr || !local)
 				return;
 
-			Pointers.TriggerWeaponDamageEvent(local, ptr, &pos, 0, true, weapon, 9999.9f, 2, 0, (1<<4)|0x80000, 0, 0, 0, false, false, true, true, nullptr);
+			Pointers.TriggerWeaponDamageEvent(local, ptr, &pos, 0, true, weapon, 9999.9f, 2, 0, (1 << 4) | 0x80000, 0, 0, 0, false, false, true, true, nullptr);
 		}
 	}
 

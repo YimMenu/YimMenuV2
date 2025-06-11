@@ -17,7 +17,7 @@ namespace YimMenu
 
 	void ColorCommand::SaveState(nlohmann::json& value)
 	{
-		value      = nlohmann::json::object();
+		value = nlohmann::json::object();
 		value["r"] = m_State.x;
 		value["g"] = m_State.y;
 		value["b"] = m_State.z;

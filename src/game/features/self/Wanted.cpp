@@ -40,7 +40,7 @@ namespace YimMenu::Features
 
 		virtual void OnDisable() override
 		{
-			PLAYER::SET_MAX_WANTED_LEVEL(6);		
+			PLAYER::SET_MAX_WANTED_LEVEL(6);
 		}
 	};
 

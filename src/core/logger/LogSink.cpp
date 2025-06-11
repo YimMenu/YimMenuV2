@@ -31,8 +31,8 @@ namespace YimMenu
 
 		const auto timestamp = std::format("{0:%H:%M:%S}", msg->Timestamp());
 		const auto& location = msg->Location();
-		const auto level     = msg->Level();
-		const auto color     = LogSink::GetColor(level);
+		const auto level = msg->Level();
+		const auto color = LogSink::GetColor(level);
 
 		const auto file = std::filesystem::path(location.file_name()).filename().string();
 
@@ -48,8 +48,8 @@ namespace YimMenu
 
 		const auto timestamp = std::format("{0:%H:%M:%S}", msg->Timestamp());
 		const auto& location = msg->Location();
-		const auto level     = msg->Level();
-		const auto file      = std::filesystem::path(location.file_name()).filename().string();
+		const auto level = msg->Level();
+		const auto file = std::filesystem::path(location.file_name()).filename().string();
 
 		out << "[" << timestamp << "]"
 		    << "[" << GetLevelStr(level) << "/" << file << ":" << location.line() << "] " << msg->Message();

@@ -95,7 +95,7 @@ namespace YimMenu::Submenus
 						auto file_name = pair.c_str();
 						if (ImGui::Selectable(file_name, file == pair, ImGuiSelectableFlags_AllowItemOverlap))
 						{
-							file       = pair;
+							file = pair;
 							open_modal = true;
 						}
 					}

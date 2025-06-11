@@ -30,7 +30,7 @@ namespace YimMenu
 			}
 		}
 		ImGui::EndChild();
-		
+
 		ImGui::Text("YimMenuV2");
 
 		pos.y -= 28;

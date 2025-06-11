@@ -2,8 +2,8 @@
 
 namespace YimMenu
 {
-	static inline float m_CardSizeX          = 350.f;
-	static inline float m_CardSizeY          = 100.f;
+	static inline float m_CardSizeX = 350.f;
+	static inline float m_CardSizeY = 100.f;
 	static inline float m_CardAnimationSpeed = 50.f;
 
 	enum class NotificationType

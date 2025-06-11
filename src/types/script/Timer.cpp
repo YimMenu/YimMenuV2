@@ -48,12 +48,12 @@ int TIMER::GetRemainingTime(int ms, bool localTimer)
 
 std::string TIMER::GetRemainingTimeStr(int ms, bool localTimer)
 {
-	int timePassed   = (*YimMenu::Pointers.IsSessionStarted && !localTimer) ? (*YimMenu::Pointers.NetworkTime - Time) : (*YimMenu::Pointers.GameTimer - Time);
-	int difference   = (ms - timePassed);
+	int timePassed = (*YimMenu::Pointers.IsSessionStarted && !localTimer) ? (*YimMenu::Pointers.NetworkTime - Time) : (*YimMenu::Pointers.GameTimer - Time);
+	int difference = (ms - timePassed);
 	int totalSeconds = difference / 1000;
-	int hours        = totalSeconds / 3600;
-	int minutes      = (totalSeconds % 3600) / 60;
-	int seconds      = totalSeconds % 60;
+	int hours = totalSeconds / 3600;
+	int minutes = (totalSeconds % 3600) / 60;
+	int seconds = totalSeconds % 60;
 
 	if (hours < 1)
 		return std::format("{:02}:{:02}", minutes, seconds);

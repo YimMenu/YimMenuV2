@@ -14,7 +14,7 @@ namespace YimMenu::Network
 		CLOSED_CREW,
 		CREW,
 		CLOSED_FRIENDS = 6,
-		FIND_FRIEND    = 9,
+		FIND_FRIEND = 9,
 		SOLO,
 		INVITE_ONLY,
 		JOIN_CREW,

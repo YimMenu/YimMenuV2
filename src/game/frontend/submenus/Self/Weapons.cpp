@@ -17,6 +17,33 @@ namespace YimMenu::Submenus
 		joaat_t hash;
 	};
 
+	static void FetchWeaponStats(joaat_t weaponHash, int& kills, int& deaths, float& kd, int& headshots, int& accuracy)
+	{
+		uint64_t garbage[4]{};
+		if (auto id = Scripts::StartScript("mp_weapons"_J, eStackSizes::PAUSE_MENU_SCRIPT, &garbage, 4))
+		{
+			if (auto thread = Scripts::FindScriptThreadByID(id))
+			{
+				thread->m_Context.m_State = rage::scrThread::State::PAUSED;
+
+				static ScriptFunction getWeaponKills("mp_weapons"_J, ScriptPointer("GetWeaponKills", "5D ? ? ? 39 0F 38 00").Add(1).Rip());
+				static ScriptFunction getWeaponDeaths("mp_weapons"_J, ScriptPointer("GetWeaponDeaths", "5D ? ? ? 39 10").Add(1).Rip());
+				static ScriptFunction getWeaponKDRatio("mp_weapons"_J, ScriptPointer("GetWeaponKDRatio", "5D ? ? ? 39 12").Add(1).Rip());
+				static ScriptFunction getWeaponHeadshots("mp_weapons"_J, ScriptPointer("GetWeaponHeadshots", "5D ? ? ? 39 11").Add(1).Rip());
+				static ScriptFunction getWeaponAccuracy("mp_weapons"_J, ScriptPointer("GetWeaponAccuracy", "2D 01 09 00 00"));
+
+				kills     = getWeaponKills.Call<int>(weaponHash, -1);
+				deaths    = getWeaponDeaths.Call<int>(weaponHash, -1);
+				kd        = getWeaponKDRatio.Call<float>(weaponHash, -1);
+				headshots = getWeaponHeadshots.Call<int>(weaponHash, -1);
+				accuracy  = static_cast<int>(getWeaponAccuracy.Call<float>(weaponHash));
+
+				thread->Kill();
+				thread->m_Context.m_State = rage::scrThread::State::KILLED;
+			}
+		}
+	}
+
 	static void RenderAmmuNationMenu()
 	{
 		static std::vector<WeaponDisplay> weaponDisplays;
@@ -24,12 +51,19 @@ namespace YimMenu::Submenus
 		static joaat_t selectedWeaponHash{};
 		static char searchWeapon[64];
 
+		static int kills{};
+		static int deaths{};
+		static float kdRatio{};
+		static int headshots{};
+		static int accuracy{};
+
 		static bool init = [] {
 			FiberPool::Push([] {
 				while (Scripts::IsScriptActive("startup"_J))
 					ScriptMgr::Yield();
 
-				if (auto id = Scripts::StartScript("mp_weapons"_J))
+				uint64_t garbage[4]{};
+				if (auto id = Scripts::StartScript("mp_weapons"_J, eStackSizes::PAUSE_MENU_SCRIPT, &garbage, 4))
 				{
 					if (auto thread = Scripts::FindScriptThreadByID(id))
 					{
@@ -85,8 +119,11 @@ namespace YimMenu::Submenus
 					ImGui::PushID(weap.hash);
 					if (ImGui::Selectable(weap.name.c_str()))
 					{
-						selectedWeapon = weap.name;
-						selectedWeaponHash = weap.hash;
+						FiberPool::Push([weap] {
+							selectedWeapon = weap.name;
+							selectedWeaponHash = weap.hash;
+							FetchWeaponStats(selectedWeaponHash, kills, deaths, kdRatio, headshots, accuracy);
+						});
 					}
 					ImGui::PopID();
 					if (ImGui::IsItemHovered() && !weap.desc.empty())
@@ -114,6 +151,15 @@ namespace YimMenu::Submenus
 			FiberPool::Push([] {
 				Self::GetPed().RemoveWeapon(selectedWeaponHash);
 			});
+		}
+
+		if (*Pointers.IsSessionStarted && selectedWeaponHash != NULL)
+		{
+			ImGui::Text("Kills With: %d", kills);
+			ImGui::Text("Deaths By: %d", deaths);
+			ImGui::Text("K/D Ratio: %.2f", kdRatio);
+			ImGui::Text("Headshots: %d", headshots);
+			ImGui::Text("Accuracy: %d%%", accuracy);
 		}
 	}
 

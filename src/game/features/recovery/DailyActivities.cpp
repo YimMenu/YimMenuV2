@@ -6,6 +6,7 @@
 #include "game/backend/Self.hpp"
 #include "game/backend/ScriptPatches.hpp"
 #include "game/backend/Tunables.hpp"
+#include "game/gta/Ped.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Scripts.hpp"
 #include "game/gta/Stats.hpp"
@@ -78,6 +79,36 @@ namespace YimMenu::Features
 		"Selected LS Tag",
 		{{0, "LS Tag 1"}, {1, "LS Tag 2"}, {2, "LS Tag 3"}, {3, "LS Tag 4"}, {4, "LS Tag 5"}}
 	};
+
+	static ListCommand animalIndex = {
+	    "animalindex",
+	    "Animal",
+	    "Selected Animal",
+	    {{0, "Animal 1"}, {1, "Animal 2"}, {2, "Animal 3"}}
+	};
+
+	static constexpr auto wildlifePhotographyAnimalHashes = std::to_array({
+	    "A_C_Boar"_J,
+	    "A_C_Cat_01"_J,
+	    "A_C_Cow"_J,
+	    "A_C_Coyote"_J,
+	    "A_C_Deer"_J,
+	    "A_C_Husky"_J,
+	    "A_C_MtLion"_J,
+	    "A_C_Pig"_J,
+	    "A_C_Poodle"_J,
+	    "A_C_Pug"_J,
+	    "A_C_Rabbit_01"_J,
+	    "A_C_Retriever"_J,
+	    "A_C_Rottweiler"_J,
+	    "A_C_shepherd"_J,
+	    "A_C_Westy"_J,
+	    "A_C_Chickenhawk"_J,
+	    "A_C_Cormorant"_J,
+	    "A_C_Crow"_J,
+	    "A_C_Hen"_J,
+	    "A_C_Seagull"_J
+	});
 
 	static void SetAllDailyActivitiesCompleted(bool completed)
 	{
@@ -934,6 +965,56 @@ namespace YimMenu::Features
 		}
 	};
 
+	class SpawnAnimal : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+				return;
+
+			if (!Stats::GetPackedBool(42059 + animalIndex.GetState()))
+			{
+				int index = Stats::GetPackedInt(28091 + animalIndex.GetState());
+				if (index < 0 || index >= wildlifePhotographyAnimalHashes.size())
+					return;
+
+				Ped::Create(wildlifePhotographyAnimalHashes[index], Self::GetPed().GetPosition());
+			}
+			else
+			{
+				Notifications::Show("Shoot Animals Photography", "This animal has already been photographed.", NotificationType::Error);
+			}
+		}
+	};
+
+	class PhotographAnimal : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+				return;
+
+			if (!Stats::GetPackedBool(42059 + animalIndex.GetState()))
+			{
+				int index = Stats::GetPackedInt(28091 + animalIndex.GetState());
+				if (index < 0 || index >= wildlifePhotographyAnimalHashes.size())
+					return;
+
+				ScriptGlobal(2708543).At(544).As<SCR_BITSET<uint64_t>*>()->Set(6);
+				*ScriptGlobal(2708543).At(547).As<joaat_t*>() = wildlifePhotographyAnimalHashes[index];
+				*ScriptGlobal(2708543).At(548).As<int*>()     = *Pointers.GameTimer - 1; // bypass 2 sec delay
+			}
+			else
+			{
+				Notifications::Show("Shoot Animals Photography", "This animal has already been photographed.", NotificationType::Error);
+			}
+		}
+	};
+
 	static SetAllActivitiesCompleted _SetAllActivitiesCompleted{"setallactivitiescompleted", "Set All Activities Completed", "Switch session to apply the changes."};
 	static ResetAllActivities _ResetAllActivities{"resetallactivities", "Reset All Activities", "Switch session to apply the changes."};
 
@@ -976,4 +1057,7 @@ namespace YimMenu::Features
 
 	static TeleportToMadrazoHit _TeleportToMadrazoHit{"tptomadrazohit", "Teleport to Madrazo Hit", "Teleports to Madrazo Hit."};
 	static TeleportToMadrazoHitTarget _TeleportToMadrazoHitTarget{"tptomadrazohittarget", "Teleport to Madrazo Hit Target", "Teleports to Madrazo Hit Target."};
+
+	static SpawnAnimal _SpawnAnimal{"spawnanimal", "Spawn Animal", "Spawns the selected animal."};
+	static PhotographAnimal _PhotographAnimal{"photographanimal", "Photograph Animal", "Photographs the selected animal."};
 }

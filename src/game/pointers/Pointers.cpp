@@ -395,6 +395,11 @@ namespace YimMenu
 			GameSkeleton = ptr.Add(0x9).Add(3).Rip().As<rage::gameSkeleton*>();
 		});
 
+		constexpr auto SetExplosiveAmmoOnlinePatchPtrn = Pattern<"48 83 EC 28 80 3D ? ? ? ? 00 0F 85 ? ? ? ? E9 ? ? ? ? 48 8B 45 28">("SetExplosiveAmmoOnlinePatchPtrn");
+		scanner.Add(SetExplosiveAmmoOnlinePatchPtrn, [this](PointerCalculator ptr) {
+			BytePatches::Add(ptr.Add(0xB).As<std::uint16_t*>(), 0x04EB)->Apply();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

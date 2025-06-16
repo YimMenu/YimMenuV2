@@ -10,7 +10,7 @@ namespace YimMenu
 {
 	inline auto HashStackTrace(std::vector<uint64_t> stack_trace)
 	{
-		auto data        = reinterpret_cast<const char*>(stack_trace.data());
+		auto data = reinterpret_cast<const char*>(stack_trace.data());
 		std::size_t size = stack_trace.size() * sizeof(uint64_t);
 
 		return std::hash<std::string_view>()({data, size});

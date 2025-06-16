@@ -10,16 +10,16 @@ namespace rage
 	class netSyncNodeBase
 	{
 	public:
-		virtual ~netSyncNodeBase()                              = default; // 0x00
-		virtual bool IsDataNode()                               = 0;       // 0x08
-		virtual bool IsParentNode()                             = 0;       // 0x10
-		virtual void MoveCommonDataOpsVFT()                     = 0;       // 0x18
-		virtual void ClearChildren()                            = 0;       // 0x20
-		virtual void _0x28(void*, void*, void*, int* out_count) = 0;       // 0x28
+		virtual ~netSyncNodeBase() = default;                                                                                              // 0x00
+		virtual bool IsDataNode() = 0;                                                                                                     // 0x08
+		virtual bool IsParentNode() = 0;                                                                                                   // 0x10
+		virtual void MoveCommonDataOpsVFT() = 0;                                                                                           // 0x18
+		virtual void ClearChildren() = 0;                                                                                                  // 0x20
+		virtual void _0x28(void*, void*, void*, int* out_count) = 0;                                                                       // 0x28
 		virtual bool Serialize(int flags, int flags2, void*, rage::datBitBuffer* buffer, int, void*, bool, int*, int* num_serialized) = 0; // 0x30
-		virtual bool Deserialize(int flags, int flags2, rage::datBitBuffer* buffer, void*) = 0; // 0x38
-		virtual int CalculateSize(int flags, int flags2, void*)                            = 0; // 0x40
-		virtual int CalculateSize2(int flags, int flags2, bool)                            = 0; // 0x48
+		virtual bool Deserialize(int flags, int flags2, rage::datBitBuffer* buffer, void*) = 0;                                            // 0x38
+		virtual int CalculateSize(int flags, int flags2, void*) = 0;                                                                       // 0x40
+		virtual int CalculateSize2(int flags, int flags2, bool) = 0;                                                                       // 0x48
 
 		netSyncNodeBase* m_NextSibling; //0x0008
 		netSyncNodeBase* m_PrevSibling; //0x0010

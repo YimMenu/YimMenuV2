@@ -131,7 +131,7 @@ jobs:
           cat sha256.checksum
 
       - name: Nightly Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
           name: Nightly [${{ needs.build_nightly.outputs.short_sha }}]
           tag_name: nightly

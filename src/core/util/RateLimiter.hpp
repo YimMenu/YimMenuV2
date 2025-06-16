@@ -27,7 +27,7 @@ namespace YimMenu
 			}
 			else
 			{
-				m_LastEventTime      = std::chrono::system_clock::now();
+				m_LastEventTime = std::chrono::system_clock::now();
 				m_NumAttemptsAllowed = 1;
 			}
 			return false;

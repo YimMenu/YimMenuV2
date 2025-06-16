@@ -88,6 +88,5 @@ namespace YimMenu
 	        {{"coroner_int_on"}, {"coronertrash"}},
 	        {{"coroner_int_off"}},
 	        {{"coroner_int_off"}},
-	    }
-	};
+	    }};
 };

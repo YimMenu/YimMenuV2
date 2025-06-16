@@ -3,7 +3,7 @@
 #include <cstdint>
 #if 0
 
-#pragma pack(push, 1)
+	#pragma pack(push, 1)
 class ClonedTakeOffPedVariationInfo
 {
 public:
@@ -31,5 +31,5 @@ public:
 	uint8_t m_running_flags; //0x008F
 }; //Size: 0x0090
 static_assert(sizeof(ClonedTakeOffPedVariationInfo) == 0x90);
-#pragma pack(pop)
+	#pragma pack(pop)
 #endif

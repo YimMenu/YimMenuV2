@@ -6,9 +6,9 @@ namespace YimMenu::Submenus
 	World::World() :
 	    Submenu::Submenu("World")
 	{
-		auto main          = std::make_shared<Category>("Main");
+		auto main = std::make_shared<Category>("Main");
 		auto spawnersGroup = std::make_shared<Category>("Spawners");
-		auto iplsGroup     = std::make_shared<Category>("IPLs");
+		auto iplsGroup = std::make_shared<Category>("IPLs");
 
 		auto killPeds = std::make_shared<Group>("Kill", 1);
 		killPeds->AddItem(std::make_shared<CommandItem>("killallpeds"_J));
@@ -22,7 +22,7 @@ namespace YimMenu::Submenus
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringpeds"_J));
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringvehs"_J));
 		bringOpts->AddItem(std::make_shared<CommandItem>("bringobjs"_J));
-		
+
 		auto weatherOpts = std::make_shared<Group>("Weather", 1);
 		weatherOpts->AddItem(std::make_shared<ListCommandItem>("weather"_J));
 		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));

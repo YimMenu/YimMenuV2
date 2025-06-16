@@ -18,11 +18,11 @@ namespace YimMenu
 	{
 	public:
 		PoolType* m_Pool = nullptr;
-		uint32_t m_Index         = 0;
+		uint32_t m_Index = 0;
 
 		explicit PoolIterator(PoolType* pool, int32_t index = 0)
 		{
-			this->m_Pool  = pool;
+			this->m_Pool = pool;
 			this->m_Index = index;
 		}
 

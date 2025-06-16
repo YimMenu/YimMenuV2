@@ -71,7 +71,7 @@ namespace YimMenu::Features
 			if (!m_SnowEnabled)
 			{
 				STREAMING::REQUEST_NAMED_PTFX_ASSET("core_snow");
-				
+
 				// TODO: this native occasionally causes crashes
 				if (AUDIO::REQUEST_SCRIPT_AUDIO_BANK("SNOW_FOOTSTEPS", false, -1) && STREAMING::HAS_NAMED_PTFX_ASSET_LOADED("core_snow"))
 				{
@@ -107,7 +107,7 @@ namespace YimMenu::Features
 			{
 				m_ShopControllerWeatherPatch = ScriptPatches::AddPatch("shop_controller"_J, ScriptPointer("ShopControllerWeatherPatch", "2D 00 07 00 00 71 39 02 71").Add(5), {0x2E, 0x00, 0x00});
 			}
-			m_ShopControllerWeatherPatch->Enable();	
+			m_ShopControllerWeatherPatch->Enable();
 		}
 
 		virtual void OnTick() override
@@ -118,7 +118,6 @@ namespace YimMenu::Features
 				EnableSnow();
 			else
 				DisableSnow();
-			
 		}
 
 		virtual void OnDisable() override

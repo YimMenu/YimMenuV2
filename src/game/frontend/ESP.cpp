@@ -9,29 +9,24 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/gta/Pools.hpp"
 #include "game/gta/Scripts.hpp"
-//#include "game/gta/data/PedModels.hpp"
-#include "game/gta/data/RandomEvents.hpp"
 #include "game/gta/invoker/Invoker.hpp"
 #include "game/gta/Natives.hpp"
-#include "types/script/globals/GPBD_FM_2.hpp"
-#include "types/script/globals/GSBD_RandomEvents.hpp"
-#include "types/script/locals/FMRandomEvents.hpp"
 
 namespace
 {
 	// Human
-	constexpr int headBone          = 31086;
-	constexpr int neckBone          = 39317;
-	constexpr int torsoBone         = 23553;
-	constexpr int leftHandBone      = 18905;
-	constexpr int rightHandBone     = 57005;
-	constexpr int leftFootBone      = 14201;
-	constexpr int rightFootBone     = 52301;
-	constexpr int leftElbowBone     = 22711;
-	constexpr int rightElbowBone    = 2992;
-	constexpr int leftKneeBone      = 46078;
-	constexpr int rightKneeBone     = 16335;
-	constexpr int leftShoulderBone  = 61163; // TODO verify all the bones
+	constexpr int headBone = 31086;
+	constexpr int neckBone = 39317;
+	constexpr int torsoBone = 23553;
+	constexpr int leftHandBone = 18905;
+	constexpr int rightHandBone = 57005;
+	constexpr int leftFootBone = 14201;
+	constexpr int rightFootBone = 52301;
+	constexpr int leftElbowBone = 22711;
+	constexpr int rightElbowBone = 2992;
+	constexpr int leftKneeBone = 46078;
+	constexpr int rightKneeBone = 16335;
+	constexpr int leftShoulderBone = 61163; // TODO verify all the bones
 	constexpr int rightShoulderBone = 28252;
 }
 
@@ -62,9 +57,6 @@ namespace YimMenu::Features
 	ColorCommand _HashColorPeds("hashcolorpeds", "Ped Hash Color", "Changes the color of the hash ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 	ColorCommand _SkeletonColorPeds("skeletoncolorpeds", "Ped Skeleton Color", "Changes the color of the skeleton ESP for peds", ImVec4{1.0f, 1.0f, 1.0f, 1.0f});
 
-	// Random Events
-	BoolCommand _ESPDrawRandomEvents("esprandomevents", "Random Events ESP", "Should the ESP draw Random Events?"); // TODO: do we need this?
-
 	// Objects
 	BoolCommand _ESPDrawObjects("espdrawobjects", "Draw Special Objects", "Should the ESP draw special objects?");
 	BoolCommand _ESPNetworkInfoObjects("espnetinfoobjects", "Show Object Network Info", "Should the ESP draw network info?");
@@ -76,23 +68,22 @@ namespace YimMenu::Features
 
 namespace YimMenu
 {
-	static ImVec4 death_bg         = ImVec4(0.117f, 0.113f, 0.172f, .75f);
-	static ImVec4 armor_blue_bg    = ImVec4(0.36f, 0.71f, 0.89f, .75f);
-	static ImVec4 armor_blue       = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
-	static ImVec4 health_green_bg  = ImVec4(0.29f, 0.69f, 0.34f, .75f);
-	static ImVec4 health_green     = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
+	static ImVec4 death_bg = ImVec4(0.117f, 0.113f, 0.172f, .75f);
+	static ImVec4 armor_blue_bg = ImVec4(0.36f, 0.71f, 0.89f, .75f);
+	static ImVec4 armor_blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
+	static ImVec4 health_green_bg = ImVec4(0.29f, 0.69f, 0.34f, .75f);
+	static ImVec4 health_green = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
 	static ImVec4 health_yellow_bg = ImVec4(0.69f, 0.49f, 0.29f, .75f);
-	static ImVec4 health_yellow    = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
-	static ImVec4 health_red_bg    = ImVec4(0.69f, 0.29f, 0.29f, .75f);
-	static ImVec4 health_red       = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
-	static ImVec4 Green            = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
-	static ImVec4 Orange           = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
-	static ImVec4 Red              = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
-	static ImVec4 Blue             = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
-	static ImVec4 White            = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	static ImVec4 health_yellow = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
+	static ImVec4 health_red_bg = ImVec4(0.69f, 0.29f, 0.29f, .75f);
+	static ImVec4 health_red = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
+	static ImVec4 Green = ImVec4(0.29f, 0.69f, 0.34f, 1.f);
+	static ImVec4 Orange = ImVec4(0.69f, 0.49f, 0.29f, 1.f);
+	static ImVec4 Red = ImVec4(0.69f, 0.29f, 0.29f, 1.f);
+	static ImVec4 Blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
+	static ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	static auto worldToScreen = [](rage::fvector3 coords) 
-	{
+	static auto worldToScreen = [](rage::fvector3 coords) {
 		float screen_x{}, screen_y{};
 
 		GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(coords.x, coords.y, coords.z, &screen_x, &screen_y);
@@ -131,7 +122,7 @@ namespace YimMenu
 		    || (plyr.GetPed().IsDead() && !Features::_ESPDrawDeadPlayers.GetState()))
 			return;
 
-		float distanceToPlayer   = Self::GetPed().GetPosition().GetDistance(plyr.GetPed().GetBonePosition(torsoBone));
+		float distanceToPlayer = Self::GetPed().GetPosition().GetDistance(plyr.GetPed().GetBonePosition(torsoBone));
 		int alphaBasedOnDistance = 255;
 		ImColor colorBasedOnDistance = Red;
 
@@ -177,7 +168,7 @@ namespace YimMenu
 		if (auto local = Self::GetPed())
 			distanceToPed = local.GetPosition().GetDistance(ped.GetBonePosition(torsoBone));
 
-		int alphaBasedOnDistance     = 255;
+		int alphaBasedOnDistance = 255;
 		ImColor colorBasedOnDistance = Red;
 
 		if (distanceToPed < 100.f)
@@ -194,13 +185,13 @@ namespace YimMenu
 			//if (auto it = Data::g_PedModels.find(ped.GetModel()); it != Data::g_PedModels.end())
 			//	info += std::format("{} ", it->second);
 			//else
-				info += std::format("0x{:08X} ", (joaat_t)ped.GetModel());
+			info += std::format("0x{:08X} ", (joaat_t)ped.GetModel());
 		}
 
 		if (Features::_ESPNetworkInfoPeds.GetState() && ped.IsNetworked())
 		{
 			auto owner = Player(ped.GetOwner());
-			auto id    = ped.GetNetworkObjectId();
+			auto id = ped.GetNetworkObjectId();
 
 			info += std::format("{} {} ", id, owner.GetName());
 		}
@@ -236,43 +227,16 @@ namespace YimMenu
 		}
 	}
 
-	static void DrawRandomEvent(int event, ImDrawList* drawList)
-	{
-		if (SCRIPT::GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH("freemode"_J) == 0 || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
-			return;
-
-		if (GPBD_FM_2::Get()->Entries[Self::GetPlayer().GetId()].RandomEventsClientData.InitState != eRandomEventClientInitState::INITIALIZED)
-			return;
-
-		auto state        = GSBD_RandomEvents::Get()->EventData[event].State;
-		auto coords       = GSBD_RandomEvents::Get()->EventData[event].TriggerPosition;
-		auto range        = GSBD_RandomEvents::Get()->EventData[event].TriggerRange;
-		auto timer        = GSBD_RandomEvents::Get()->EventData[event].TimerState;
-		auto availability = RANDOM_EVENTS_FREEMODE_DATA::Get(Scripts::FindScriptThread("freemode"_J))->EventData[event].AvailableTime;
-		auto timeLeft     = GSBD_RandomEvents::Get()->EventData[event].TimerState.GetRemainingTimeStr(availability);
-		if (state != eRandomEventState::INACTIVE && coords != Vector3(0.0f, 0.0f, 0.0f))
-		{
-			float distance          = Self::GetPed().GetPosition().GetDistance(coords);
-			float formattedDistance = (distance < 1000.0f) ? distance : (distance / 1000.0f);
-			std::string unit        = (distance < 1000.0f) ? "m" : "km";
-			std::string text        = std::format("{}\n{:.2f}{} {}", randomEventNames[event], formattedDistance, unit, (state == eRandomEventState::AVAILABLE ? timeLeft : ""));
-			ImColor color           = (state == eRandomEventState::ACTIVE) ? Green : White;
-
-			drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, text.c_str());
-		}
-	}
-
 	static void DrawObject(Object object, ImDrawList* drawList)
 	{
 		if (!object.IsValid())
 			return;
 
 		bool is_camera = object.IsCamera();
-		bool is_cache = object.IsCache();
 		bool is_signal_jammer = object.IsSignalJammer();
 		bool is_mission_object = object.IsMissionEntity();
 
-		if (!is_camera && !is_cache && !is_signal_jammer && !is_mission_object)
+		if (!is_camera && !is_signal_jammer && !is_mission_object)
 			return;
 
 		float distanceToObject = 0.0f;
@@ -280,7 +244,7 @@ namespace YimMenu
 		if (auto local = Self::GetPed())
 			distanceToObject = local.GetPosition().GetDistance(object.GetPosition());
 
-		int alphaBasedOnDistance     = 255;
+		int alphaBasedOnDistance = 255;
 		ImColor colorBasedOnDistance = Red;
 
 		if (distanceToObject < 100.f)
@@ -291,14 +255,14 @@ namespace YimMenu
 			colorBasedOnDistance = Red, alphaBasedOnDistance = 125;
 
 		Vector3 coords = object.GetPosition();
-		float distance   = Self::GetPed().GetPosition().GetDistance(coords);
+		float distance = Self::GetPed().GetPosition().GetDistance(coords);
 		ImColor color = ImGui::ColorConvertFloat4ToU32(Features::_HashColorObjects.GetState());
 		std::string info = std::format("0x{:08X} ", (joaat_t)object.GetModel());
 
 		if (Features::_ESPNetworkInfoObjects.GetState() && object.IsNetworked())
 		{
 			auto owner = Player(object.GetOwner());
-			auto id    = object.GetNetworkObjectId();
+			auto id = object.GetNetworkObjectId();
 
 			info += std::format("{} {} ", id, owner.GetName());
 		}
@@ -316,11 +280,6 @@ namespace YimMenu
 			color = Red;
 			info += " (Camera)";
 		}
-		else if (is_cache)
-		{
-			color = Orange;
-			info += " (Cache)";
-		}
 		else if (is_signal_jammer)
 		{
 			color = Red;
@@ -330,7 +289,7 @@ namespace YimMenu
 		{
 			info += " (Mission)";
 		}
-		
+
 		drawList->AddText({worldToScreen(coords).x, worldToScreen(coords).y}, color, info.c_str());
 
 		if (Features::_ESPDistanceObjects.GetState())
@@ -349,7 +308,7 @@ namespace YimMenu
 			return;
 
 		const auto originalFontSize = ImGui::GetFont()->Scale;
-		auto* currentFont           = ImGui::GetFont();
+		auto* currentFont = ImGui::GetFont();
 		currentFont->Scale *= 1.2;
 		ImGui::PushFont(ImGui::GetFont());
 
@@ -371,13 +330,6 @@ namespace YimMenu
 					{
 						if (ped && ped.GetPointer<void*>())
 							DrawPed(ped, drawList);
-					}
-				}
-				if (Features::_ESPDrawRandomEvents.GetState())
-				{
-					for (int event = 0; event < 21; event++)
-					{
-						DrawRandomEvent(event, drawList);
 					}
 				}
 				if (Features::_ESPDrawObjects.GetState() && GetObjectPool())

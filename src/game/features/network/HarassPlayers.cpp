@@ -21,22 +21,22 @@ namespace YimMenu::Features
 			if (!m_PedGameStateHook)
 			{
 				m_PedGameStateHook = NodeHooks::AddHook(
-					"CPedGameStateDataNode", 
-					[] (rage::netObject* object, Player target) 
-					{
+				    "CPedGameStateDataNode",
+				    [](rage::netObject* object, Player target) {
 					    return object == Self::GetPed().GetNetworkObject();
-					},
-					[] (rage::netObject* object, Player target, CProjectBaseSyncDataNode* node) 
-					{
-						auto ped_game_state = reinterpret_cast<CPedGameStateDataNode*>(node);
-						if (auto player_ped = target.GetPed(); player_ped && player_ped.GetNetworkObject())
-						{
+				    },
+				    [](rage::netObject* object, Player target, CProjectBaseSyncDataNode* node) {
+					    auto ped_game_state = reinterpret_cast<CPedGameStateDataNode*>(node);
+					    if (auto player_ped = target.GetPed(); player_ped && player_ped.GetNetworkObject())
+					    {
 						    ped_game_state->m_VehicleId = player_ped.GetVehicleObjectId();
 						    ped_game_state->m_VehicleSeat = 2;
-							ped_game_state->m_InVehicle = true;
-							ped_game_state->m_InSeat = true;
-						}
-					}, true, true);
+						    ped_game_state->m_InVehicle = true;
+						    ped_game_state->m_InSeat = true;
+					    }
+				    },
+				    true,
+				    true);
 			}
 
 			if (!m_SectorDataNodeHook)
@@ -52,7 +52,7 @@ namespace YimMenu::Features
 					    {
 						    auto pos = player_ped.GetPosition();
 
-							sector_data->m_SectorX = int((pos.x / 54.0f) + 512.0f);
+						    sector_data->m_SectorX = int((pos.x / 54.0f) + 512.0f);
 						    sector_data->m_SectorY = int((pos.y / 54.0f) + 512.0f);
 						    sector_data->m_SectorZ = int((pos.z + 1700.0f) / 69.0f);
 					    }
@@ -78,11 +78,11 @@ namespace YimMenu::Features
 						    int sectorY = int((pos.y / 54.0f) + 512.0f);
 						    int sectorZ = int((pos.z + 1700.0f) / 69.0f);
 
-							sector_pos_data->m_SectorPosX = pos.x - ((sectorX - 512.0f) * 54.0f);
+						    sector_pos_data->m_SectorPosX = pos.x - ((sectorX - 512.0f) * 54.0f);
 						    sector_pos_data->m_SectorPosY = pos.y - ((sectorY - 512.0f) * 54.0f);
 						    sector_pos_data->m_SectorPosZ = pos.z - ((sectorZ * 69.0f) - 1700.0f);
 
-							sector_pos_data->m_IsStandingOnEntity = false;
+						    sector_pos_data->m_IsStandingOnEntity = false;
 					    }
 				    },
 				    true,

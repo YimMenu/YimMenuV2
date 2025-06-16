@@ -34,13 +34,13 @@ namespace YimMenu::Submenus
 	Settings::Settings() :
 	    Submenu::Submenu("Settings")
 	{
-		auto hotkeys           = std::make_shared<Category>("Hotkeys");
-		auto gui               = std::make_shared<Category>("GUI");
-		auto playerEsp         = std::make_shared<Group>("Player ESP", 10);
-		auto pedEsp            = std::make_shared<Group>("Ped ESP", 10);
-		auto objectEsp         = std::make_shared<Group>("Object ESP");
-		auto overlay           = std::make_shared<Group>("Overlay");
-		auto chat           = std::make_shared<Group>("Chat");
+		auto hotkeys = std::make_shared<Category>("Hotkeys");
+		auto gui = std::make_shared<Category>("GUI");
+		auto playerEsp = std::make_shared<Group>("Player ESP", 10);
+		auto pedEsp = std::make_shared<Group>("Ped ESP", 10);
+		auto objectEsp = std::make_shared<Group>("Object ESP");
+		auto overlay = std::make_shared<Group>("Overlay");
+		auto chat = std::make_shared<Group>("Chat");
 
 		hotkeys->AddItem(std::make_shared<ImGuiItem>(Hotkeys));
 

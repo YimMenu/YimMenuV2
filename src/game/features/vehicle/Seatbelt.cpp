@@ -8,9 +8,9 @@ namespace YimMenu::Features
 	class Seatbelt : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
-		
-		static constexpr int VEHICLE_KNOCK_OFF_NEVER	= 1;
-		static constexpr int VEHICLE_KNOCK_OFF_DEFAULT	= 0;
+
+		static constexpr int VEHICLE_KNOCK_OFF_NEVER = 1;
+		static constexpr int VEHICLE_KNOCK_OFF_DEFAULT = 0;
 
 		virtual void OnTick() override
 		{

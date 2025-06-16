@@ -7,7 +7,7 @@ namespace YimMenu::Features
 	class UnlockGTAPlus : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
-		
+
 		bool m_OldGTAPlus;
 
 		virtual void OnEnable() override
@@ -24,7 +24,7 @@ namespace YimMenu::Features
 
 		virtual void OnDisable() override
 		{
-			*Pointers.HasGTAPlus = m_OldGTAPlus;		
+			*Pointers.HasGTAPlus = m_OldGTAPlus;
 		}
 	};
 

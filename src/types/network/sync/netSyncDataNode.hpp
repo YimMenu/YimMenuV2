@@ -8,8 +8,8 @@ namespace rage
 	{
 	public:
 		uint32_t m_Flags4; //0x40
-		uint32_t pad3;  //0x44
-		uint64_t pad4;  //0x48
+		uint32_t pad3;     //0x44
+		uint64_t pad4;     //0x48
 
 		netSyncDataNode* m_ParentData;  //0x50
 		uint32_t m_ChildCount;          //0x58

@@ -5,29 +5,29 @@
 
 enum class eMissionDataFlags
 {
-	kMissionLaunched      = 0,
-	kJobDownloaded        = 2,
-	kStartingJob          = 3,
-	kRequestingScript     = 4,
-	kLaunchedScript       = 6, // should be set if kMissionLaunched is set
+	kMissionLaunched = 0,
+	kJobDownloaded = 2,
+	kStartingJob = 3,
+	kRequestingScript = 4,
+	kLaunchedScript = 6,       // should be set if kMissionLaunched is set
 	kAutoStartOnProximity = 7, // used by gang attack
-	kNJVSQuickMatch       = 8,
-	kVoteLiked            = 10,
-	kVoteDisliked         = 11,
-	kNoVote               = 25
+	kNJVSQuickMatch = 8,
+	kVoteLiked = 10,
+	kVoteDisliked = 11,
+	kNoVote = 25
 }; // TODO
 
 enum class eTutorialBitset
 {
-	kInTutorialRace     = 0,
+	kInTutorialRace = 0,
 	kTutorialRaceActive = 2,
-	kShowCredits        = 4,
-	kNeedFreeVehicle    = 6
+	kShowCredits = 4,
+	kNeedFreeVehicle = 6
 };
 
 enum class eGangCallServices
 {
-	kMugger    = 0,
+	kMugger = 0,
 	kMercenary = 1
 };
 
@@ -81,40 +81,40 @@ enum class eStatState
 
 enum class ePropertyInteriorFlags
 {
-	kOwnerOfInterior         = 0,
-	kVisitorOfInterior       = 1, // mutually exclusive with above flag
-	kConcealWhenDead         = 12,
-	kRenovatingProperty      = 19,
-	kPreviewingDecor         = 20,
-	kRenovatingClubhouse     = 21,
-	kUsingYachtRmBath1       = 22,
-	kUsingYachtRmBath3       = 23,
+	kOwnerOfInterior = 0,
+	kVisitorOfInterior = 1, // mutually exclusive with above flag
+	kConcealWhenDead = 12,
+	kRenovatingProperty = 19,
+	kPreviewingDecor = 20,
+	kRenovatingClubhouse = 21,
+	kUsingYachtRmBath1 = 22,
+	kUsingYachtRmBath3 = 23,
 	kUsingYachtRmWeeBathroom = 25,
-	kGunLockerOpen           = 27,
-	kOfficeSafeOpen          = 28,
-	kOfficeAssistantMale     = 29
+	kGunLockerOpen = 27,
+	kOfficeSafeOpen = 28,
+	kOfficeAssistantMale = 29
 };
 
 enum class eInteriorStyleFlags
 {
-	kGunLockerShowPumpShotgun              = 0,
-	kGunLockerShowMicroSMG                 = 1,
-	kGunLockerShowC4                       = 2, // proximity or sticky
-	kGunLockerShowGrenade                  = 3,
-	kGunLockerShowCombatMG                 = 4,
-	kGunLockerShowMarksmanRifle            = 5,
-	kPurchasedSnacks                       = 6,
-	kPurchasedInteriorRenovations          = 7,
-	kForceOfficeAssistantSpawn             = 8,
-	kAssistantAnimationOver                = 9,
-	kChangeInteriorDecorOfficeHelpShown    = 11,
+	kGunLockerShowPumpShotgun = 0,
+	kGunLockerShowMicroSMG = 1,
+	kGunLockerShowC4 = 2, // proximity or sticky
+	kGunLockerShowGrenade = 3,
+	kGunLockerShowCombatMG = 4,
+	kGunLockerShowMarksmanRifle = 5,
+	kPurchasedSnacks = 6,
+	kPurchasedInteriorRenovations = 7,
+	kForceOfficeAssistantSpawn = 8,
+	kAssistantAnimationOver = 9,
+	kChangeInteriorDecorOfficeHelpShown = 11,
 	kChangeInteriorDecorApartmentHelpShown = 12,
-	kOwnsOfficeBedroom                     = 13,
-	kOwnsClubhouseBikeShop                 = 16,
-	kOwnsOfficeGunLocker                   = 17,
-	KOwnsClubhouseWalls                    = 18, // ???
-	kOwnsClubhouseFurnishings              = 19,
-	kOwnsClubhouseDecors                   = 20
+	kOwnsOfficeBedroom = 13,
+	kOwnsClubhouseBikeShop = 16,
+	kOwnsOfficeGunLocker = 17,
+	KOwnsClubhouseWalls = 18, // ???
+	kOwnsClubhouseFurnishings = 19,
+	kOwnsClubhouseDecors = 20
 };
 
 enum class eBusinessHubProductIndex
@@ -143,7 +143,7 @@ static_assert(sizeof(PLAYLIST_DATA) == 6 * 8);
 struct JOB_SETTINGS
 {
 	SCR_ARRAY<uint64_t, 31> Settings; // indices vary based on job type. take a look at func_8988 in fmmc_launcher if you wish to change them
-	SCR_INT NumPlayers; // verify
+	SCR_INT NumPlayers;               // verify
 	SCR_INT PAD_0033;
 	SCR_INT SpawnSimpleInteriorIndex;
 	SCR_INT PAD_0035; // unused
@@ -481,7 +481,7 @@ struct FIELD_HANGAR_DATA
 static_assert(sizeof(FIELD_HANGAR_DATA) == 2 * 8);
 
 #define NUM_PROPERTY_INTERIORS \
-	33  // (30 -> 31) b3095    \
+	33 // (30 -> 31) b3095    \
 	    // (31 -> 32) b3258    \
 	    // (32 -> 33) b3407
 
@@ -644,7 +644,7 @@ struct GPBD_FM_Entry
 	SCR_INT FMMCState;
 	SCR_INT PAD_0193; // TODO
 	SCR_INT KillStreak;
-	SCR_INT NumSuicides; // deducts RP reward in missions
+	SCR_INT NumSuicides;      // deducts RP reward in missions
 	SCR_INT DeathmatchBounty; // "You have been deducted $~1~ for being idle for too long, and you now have a bounty placed on you."
 	SCR_BOOL CollectedBounty;
 	SCR_INT AliveDeathmatchPlayers;

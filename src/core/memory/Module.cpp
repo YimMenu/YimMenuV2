@@ -35,7 +35,7 @@ namespace YimMenu
 				continue;
 
 			auto firstThunk = m_Base.Add(importDescriptor->FirstThunk).As<IMAGE_THUNK_DATA*>();
-			auto origThunk  = m_Base.Add(importDescriptor->OriginalFirstThunk).As<IMAGE_THUNK_DATA*>();
+			auto origThunk = m_Base.Add(importDescriptor->OriginalFirstThunk).As<IMAGE_THUNK_DATA*>();
 			for (; origThunk->u1.AddressOfData != 0; firstThunk++, origThunk++)
 			{
 				if (const auto importData = m_Base.Add(origThunk->u1.AddressOfData).As<IMAGE_IMPORT_BY_NAME*>();

@@ -15,7 +15,7 @@ namespace YimMenu
 
 		// vehicles
 		Vehicle GetVehicle();
-		Vehicle GetLastVehicle(); // only returns a valid handle if the ped isn't already in a vehicle
+		Vehicle GetLastVehicle();           // only returns a valid handle if the ped isn't already in a vehicle
 		std::uint16_t GetVehicleObjectId(); // works even if the vehicle isn't cloned
 		void SetInVehicle(Vehicle veh, int seat = -1);
 

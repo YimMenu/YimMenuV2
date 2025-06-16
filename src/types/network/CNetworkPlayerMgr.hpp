@@ -4,5 +4,4 @@
 class CNetworkPlayerMgr : public rage::netPlayerMgrBase
 {
 public:
-	
-}; 
+};

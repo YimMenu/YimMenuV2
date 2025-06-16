@@ -22,6 +22,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/features/vehicle/SavePersonalVehicle.hpp"
 #include "game/features/self/OpenGunLocker.hpp"
+#include "game/features/recovery/DailyActivities.hpp"
 
 namespace YimMenu
 {
@@ -31,6 +32,8 @@ namespace YimMenu
 		FileMgr::Init(documents);
 
 		LogHelper::Init("YimMenuV2", FileMgr::GetProjectFile("./cout.log"));
+
+		LOGF(INFO, "Welcome to YimMenuV2! Build date: {} at {}", __DATE__, __TIME__);
 
 		g_HotkeySystem.RegisterCommands();
 		SavedLocations::FetchSavedLocations();
@@ -60,7 +63,7 @@ namespace YimMenu
 		GUI::Init();
 
 		ScriptMgr::AddScript(std::make_unique<Script>(&NativeHooks::RunScript)); // runs once
-		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript)); // runs once
+		ScriptMgr::AddScript(std::make_unique<Script>(&Tunables::RunScript));    // runs once
 		ScriptMgr::AddScript(std::make_unique<Script>(&AnticheatBypass::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
@@ -69,6 +72,7 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::SavePersonalVehicle::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenGunLocker::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenStreetDealerMenu::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
 
 		if (!Pointers.LateInit())
@@ -89,7 +93,7 @@ namespace YimMenu
 		Hooking::Destroy();
 		CallSiteHook::Destroy();
 
-EARLY_UNLOAD:
+	EARLY_UNLOAD:
 		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();
@@ -104,7 +108,7 @@ EARLY_UNLOAD:
 BOOL WINAPI DllMain(HINSTANCE dllInstance, DWORD reason, void*)
 {
 	using namespace YimMenu;
-	
+
 	if (dllInstance)
 		DisableThreadLibraryCalls(dllInstance);
 

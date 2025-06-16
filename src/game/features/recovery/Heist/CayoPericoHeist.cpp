@@ -49,28 +49,25 @@ namespace YimMenu::Features
 		};
 
 		static std::vector<std::pair<int, const char*>> cayoPericoHeistDifficulty = {
-			{126823, "Normal"},
-			{131055, "Hard"}
-		};
+		    {126823, "Normal"},
+		    {131055, "Hard"}};
 		static ListCommand _CayoPericoHeistDifficulty{"cayopericoheistdifficulty", "Difficulty", "Heist difficulty", cayoPericoHeistDifficulty, 126823};
 
 		static std::vector<std::pair<int, const char*>> cayoPericoHeistPrimaryTarget = {
-			{5, "Panther Statue"},
-			{3, "Pink Diamond"},
-			{4, "Madrazo Files"},
-			{2, "Bearer Bonds"},
-			{1, "Ruby Necklace"},
-			{0, "Sinsimito Tequila"}
-		};
+		    {5, "Panther Statue"},
+		    {3, "Pink Diamond"},
+		    {4, "Madrazo Files"},
+		    {2, "Bearer Bonds"},
+		    {1, "Ruby Necklace"},
+		    {0, "Sinsimito Tequila"}};
 		static ListCommand _CayoPericoHeistPrimaryTarget{"cayopericoheistprimarytarget", "Primary Target", "Primary target", cayoPericoHeistPrimaryTarget, 5};
 
 		static std::vector<std::pair<int, const char*>> cayoPericoHeistWeapon = {
-			{1, "Aggressor"},
-			{2, "Conspirator"},
-			{3, "Crack Shot"},
-			{4, "Saboteur"},
-			{5, "Marksman"}
-		};
+		    {1, "Aggressor"},
+		    {2, "Conspirator"},
+		    {3, "Crack Shot"},
+		    {4, "Saboteur"},
+		    {5, "Marksman"}};
 		static ListCommand _CayoPericoHeistWeapon{"cayopericoheistweapon", "Weapon", "Weapon category", cayoPericoHeistWeapon, 1};
 
 		class Setup : public Command
@@ -237,7 +234,7 @@ namespace YimMenu::Features
 				if (!ped)
 					return;
 
-				auto pos     = ped.GetPosition();
+				auto pos = ped.GetPosition();
 				auto heading = ped.GetHeading();
 				auto primary_target = Stats::GetInt("MPX_H4CNF_TARGET");
 

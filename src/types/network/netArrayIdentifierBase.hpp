@@ -23,7 +23,7 @@ namespace rage
 		virtual int GetUnkIdSize() = 0;                                // 0x80 (zero for script host identifiers)
 
 		CNetGamePlayer* m_Owner; // 0x8
-		int m_UnkId;             // 0x10 
+		int m_UnkId;             // 0x10
 	};
 	static_assert(sizeof(netArrayIdentifierBase) == 0x18);
 }

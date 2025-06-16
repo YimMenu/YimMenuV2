@@ -1,6 +1,7 @@
 #include "GPBD_FM.hpp"
 #include "GPBD_FM_2.hpp"
 #include "GPBD_FM_3.hpp"
+#include "GPBD_Flow.hpp"
 #include "GPBD_Kicking.hpp"
 #include "GPBD_MissionName.hpp"
 #include "GSBD.hpp"
@@ -15,6 +16,9 @@
 #include "MPSV.hpp"
 #include "g_SavedMPGlobals.hpp"
 #include "FreemodeGeneral.hpp"
+#include "DailyObjectivesState.hpp"
+#include "WeeklyChallenge.hpp"
+#include "FreemodeDelivery.hpp"
 #include "game/gta/ScriptGlobal.hpp"
 
 #define DEFINE_GLOBAL_ACCESSOR(str, global)       \
@@ -30,6 +34,7 @@ DEFINE_GLOBAL_ACCESSOR(GlobalPlayerBD, 2657994);
 DEFINE_GLOBAL_ACCESSOR(GPBD_FM, 1845270);
 DEFINE_GLOBAL_ACCESSOR(GPBD_FM_2, 1882925);
 DEFINE_GLOBAL_ACCESSOR(GPBD_FM_3, 1887694);
+DEFINE_GLOBAL_ACCESSOR(GPBD_Flow, 1977875);
 DEFINE_GLOBAL_ACCESSOR(GPBD_Kicking, 1874328);
 DEFINE_GLOBAL_ACCESSOR(GPBD_MissionName, 1873815);
 DEFINE_GLOBAL_ACCESSOR(GSBD, 2648917);
@@ -43,3 +48,6 @@ DEFINE_GLOBAL_ACCESSOR(GSBD_RandomEvents, 1882524);
 DEFINE_GLOBAL_ACCESSOR(MPSV, 1586543);
 DEFINE_GLOBAL_ACCESSOR(g_SavedMPGlobals, 2359296);
 DEFINE_GLOBAL_ACCESSOR(FreemodeGeneral, 2739945);
+DEFINE_GLOBAL_ACCESSOR(DailyObjectivesState, 1574744);
+DEFINE_GLOBAL_ACCESSOR(WeeklyChallenge, 2738999);
+DEFINE_GLOBAL_ACCESSOR(FreemodeDelivery, 1950961);

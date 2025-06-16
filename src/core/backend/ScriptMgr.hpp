@@ -30,9 +30,9 @@ namespace YimMenu
 			DestroyImpl();
 		};
 
-		ScriptMgr(const ScriptMgr&)                = delete;
-		ScriptMgr(ScriptMgr&&) noexcept            = delete;
-		ScriptMgr& operator=(const ScriptMgr&)     = delete;
+		ScriptMgr(const ScriptMgr&) = delete;
+		ScriptMgr(ScriptMgr&&) noexcept = delete;
+		ScriptMgr& operator=(const ScriptMgr&) = delete;
 		ScriptMgr& operator=(ScriptMgr&&) noexcept = delete;
 
 		static void Init()

@@ -69,7 +69,7 @@ namespace YimMenu
 			ImGui::SameLine();
 			ImGui::BeginGroup();
 			ImGui::Text("Locations");
-			if (ImGui::BeginListBox("##saved_locs", {200, max_length})) 
+			if (ImGui::BeginListBox("##saved_locs", {200, max_length}))
 			{
 				if (SavedLocations::GetAllSavedLocations().find(m_CurrentCategory) != SavedLocations::GetAllSavedLocations().end())
 				{

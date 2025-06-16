@@ -1,11 +1,11 @@
 #include "core/commands/Command.hpp"
-#include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
+#include "types/blip/BlipSprite.hpp"
 
 namespace YimMenu::Features
 {
-	bool GetBlipLocationOfType(Vector3& location, int sprite)
+	static bool GetBlipLocationOfType(Vector3& location, int sprite)
 	{
 		Blip blip = HUD::GET_CLOSEST_BLIP_INFO_ID(sprite);
 		if (blip)
@@ -24,11 +24,11 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			static const auto sprites = {1, 0, 2, 38, 143, 144, 145, 146, 161, 478, 501, 514, 521, 535, 536, 537, 538, 539, 540, 541, 542, 549, 556, 568, 615, 761, 762, 763, 764, 765, 780, 817, 842, 844, 845, 850};
+			static constexpr BlipSprite sprites[] = {BlipSprite::RADAR_LEVEL, BlipSprite::RADAR_HIGHER, BlipSprite::RADAR_LOWER, BlipSprite::RADAR_OBJECTIVE_BLUE, BlipSprite::RADAR_OBJECTIVE_GREEN, BlipSprite::RADAR_OBJECTIVE_RED, BlipSprite::RADAR_OBJECTIVE_YELLOW, BlipSprite::RADAR_CONTRABAND, BlipSprite::RADAR_TARGET_A, BlipSprite::RADAR_TARGET_B, BlipSprite::RADAR_TARGET_C, BlipSprite::RADAR_TARGET_D, BlipSprite::RADAR_TARGET_E, BlipSprite::RADAR_TARGET_F, BlipSprite::RADAR_TARGET_G, BlipSprite::RADAR_TARGET_H, BlipSprite::RADAR_PICKUP_MACHINEGUN};
 			Vector3 location;
 			for (const auto sprite : sprites)
 			{
-				if (GetBlipLocationOfType(location, sprite))
+				if (GetBlipLocationOfType(location, static_cast<int>(sprite)))
 				{
 					Self::GetPed().TeleportTo(location);
 					return;

@@ -70,9 +70,9 @@ namespace YimMenu
 			return nullptr;
 
 		const auto imageDataDirectory = ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-		const auto exportDirectory    = m_Base.Add(imageDataDirectory.VirtualAddress).As<IMAGE_EXPORT_DIRECTORY*>();
-		const auto namesOffsets       = m_Base.Add(exportDirectory->AddressOfNames).As<DWORD*>();
-		const auto funcOffsets        = m_Base.Add(exportDirectory->AddressOfFunctions).As<DWORD*>();
+		const auto exportDirectory = m_Base.Add(imageDataDirectory.VirtualAddress).As<IMAGE_EXPORT_DIRECTORY*>();
+		const auto namesOffsets = m_Base.Add(exportDirectory->AddressOfNames).As<DWORD*>();
+		const auto funcOffsets = m_Base.Add(exportDirectory->AddressOfFunctions).As<DWORD*>();
 
 		for (std::size_t i = 0; i < exportDirectory->NumberOfFunctions; i++)
 		{
@@ -95,9 +95,9 @@ namespace YimMenu
 			return nullptr;
 
 		const auto imageDataDirectory = ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-		const auto exportDirectory    = m_Base.Add(imageDataDirectory.VirtualAddress).As<IMAGE_EXPORT_DIRECTORY*>();
-		const auto ordinalOffsets     = m_Base.Add(exportDirectory->AddressOfNameOrdinals).As<uint16_t*>();
-		const auto funcOffsets        = m_Base.Add(exportDirectory->AddressOfFunctions).As<DWORD*>();
+		const auto exportDirectory = m_Base.Add(imageDataDirectory.VirtualAddress).As<IMAGE_EXPORT_DIRECTORY*>();
+		const auto ordinalOffsets = m_Base.Add(exportDirectory->AddressOfNameOrdinals).As<uint16_t*>();
+		const auto funcOffsets = m_Base.Add(exportDirectory->AddressOfFunctions).As<DWORD*>();
 
 		for (std::size_t i = 0; i < exportDirectory->NumberOfFunctions; i++)
 		{

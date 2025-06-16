@@ -24,7 +24,7 @@ namespace YimMenu
 			    m_Base(reinterpret_cast<uintptr_t>(base))
 			{
 				const auto dos_header = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
-				const auto nt_header  = reinterpret_cast<IMAGE_NT_HEADERS*>(m_Base + dos_header->e_lfanew);
+				const auto nt_header = reinterpret_cast<IMAGE_NT_HEADERS*>(m_Base + dos_header->e_lfanew);
 
 				m_Size = nt_header->OptionalHeader.SizeOfCode;
 			}

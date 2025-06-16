@@ -19,11 +19,11 @@ namespace
 		int font_flags = 256;
 		font_flags |= 64;
 		MISC::NEXT_ONSCREEN_KEYBOARD_RESULT_WILL_DISPLAY_USING_THESE_FONTS(font_flags);
-		MISC::DISPLAY_ONSCREEN_KEYBOARD(0, title.data(), nullptr, buf, nullptr, nullptr, nullptr, max_length); 
+		MISC::DISPLAY_ONSCREEN_KEYBOARD(0, title.data(), nullptr, buf, nullptr, nullptr, nullptr, max_length);
 
 		while (true)
 		{
-			YimMenu::ChatDisplay::MarkAccessed(); 
+			YimMenu::ChatDisplay::MarkAccessed();
 			YimMenu::ScriptMgr::Yield();
 			int update_res = MISC::UPDATE_ONSCREEN_KEYBOARD();
 

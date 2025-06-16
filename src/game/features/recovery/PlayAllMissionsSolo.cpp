@@ -26,7 +26,7 @@ namespace YimMenu::Features
 		ScriptPatch m_EnsureMissionPassedPatch{};
 		ScriptPatch m_ProcessPhoneHackingPatch{};
 		ScriptPatch m_QuickRestartPatch1{};
-		ScriptPatch m_QuickRestartPatch2{}; 
+		ScriptPatch m_QuickRestartPatch2{};
 
 		virtual void OnEnable() override
 		{
@@ -78,7 +78,7 @@ namespace YimMenu::Features
 				m_HeistTeamsPatch1 = ScriptPatches::AddPatch("fmmc_launcher"_J, ScriptPointer("HeistTeamsPatch1", "47 ? ? 5B 7B 00 38 04"), {0x2B, 0x2B, 0x00, 0x55}); // TODO: doesn't work for doomsday heist
 			}
 			m_HeistTeamsPatch1->Enable();
-	
+
 			if (!m_HeistTeamsPatch2)
 			{
 				m_HeistTeamsPatch2 = ScriptPatches::AddPatch("fmmc_launcher"_J, ScriptPointer("HeistTeamsPatch2", "2D 01 05 00 00 25 5D").Add(5), {0x72, 0x2E, 0x01, 0x01});
@@ -90,7 +90,7 @@ namespace YimMenu::Features
 				m_ShouldFailMissionPatch1 = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("ShouldFailMissionPatch1", "50 ? ? 78 82 06 1F 56 ? ? 38 02"), {0x00, 0x00, 0x00, 0x72, 0x00});
 			}
 			m_ShouldFailMissionPatch1->Enable();
-			
+
 			if (m_ShouldFailMissionPatches.empty())
 			{
 				// TODO: this is a very bad idea that can break anytime
@@ -128,7 +128,7 @@ namespace YimMenu::Features
 				m_IsTeamValidPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("IsTeamValidPatch", "2D 01 03 00 00 38 00 71 57 1D 00").Add(5), {0x72, 0x2E, 0x01, 0x01});
 			}
 			m_IsTeamValidPatch->Enable();
-			
+
 			if (!m_EnsureMissionPassedPatch)
 			{
 				m_EnsureMissionPassedPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("EnsureMissionPassedPatch", "55 C8 FF 61").Add(3), {0x2E, 0x00, 0x00}); // the game does one final check to ensure all players exist before the mission is passed
@@ -137,12 +137,12 @@ namespace YimMenu::Features
 
 			if (!m_ProcessPhoneHackingPatch)
 			{
-				m_ProcessPhoneHackingPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("ProcessPhoneHackingPatch", "58 13 00 38 00 4F ? ? 48"), {0x2B, 0x00, 0x00}); 
+				m_ProcessPhoneHackingPatch = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("ProcessPhoneHackingPatch", "58 13 00 38 00 4F ? ? 48"), {0x2B, 0x00, 0x00});
 			}
 
 			if (!m_QuickRestartPatch1)
 			{
-				m_QuickRestartPatch1 = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("QuickRestartPatch1", "2D 00 07 00 00 62 ? ? ? 56 04 00").Add(5),  {0x72, 0x2E, 0x00, 0x01});
+				m_QuickRestartPatch1 = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("QuickRestartPatch1", "2D 00 07 00 00 62 ? ? ? 56 04 00").Add(5), {0x72, 0x2E, 0x00, 0x01});
 			}
 			m_QuickRestartPatch1->Enable();
 

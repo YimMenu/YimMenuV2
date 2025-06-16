@@ -67,11 +67,11 @@ namespace YimMenu
 	{
 	public:
 		constexpr IPattern() = default;
-		virtual ~IPattern()  = default;
+		virtual ~IPattern() = default;
 
-		virtual const std::string_view Name() const                                      = 0;
+		virtual const std::string_view Name() const = 0;
 		virtual constexpr std::span<const std::optional<std::uint8_t>> Signature() const = 0;
-		virtual const PatternHash Hash() const                                           = 0;
+		virtual const PatternHash Hash() const = 0;
 	};
 
 	template<Signature S>

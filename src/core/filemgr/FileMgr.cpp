@@ -4,21 +4,21 @@
 
 namespace YimMenu
 {
-    void FileMgr::Init(const std::filesystem::path& rootFolder)
-    {
-        GetInstance().InitImpl(rootFolder);
-    }
+	void FileMgr::Init(const std::filesystem::path& rootFolder)
+	{
+		GetInstance().InitImpl(rootFolder);
+	}
 
-    void FileMgr::InitImpl(const std::filesystem::path& rootFolder)
-    {
-        m_RootFolder = rootFolder;
+	void FileMgr::InitImpl(const std::filesystem::path& rootFolder)
+	{
+		m_RootFolder = rootFolder;
 
-        CreateFolderIfNotExists(m_RootFolder);
-    }
+		CreateFolderIfNotExists(m_RootFolder);
+	}
 
-    const std::filesystem::path& FileMgr::CreateFolderIfNotExists(const std::filesystem::path &folder)
-    {
-        bool create_path = !exists(folder);
+	const std::filesystem::path& FileMgr::CreateFolderIfNotExists(const std::filesystem::path& folder)
+	{
+		bool create_path = !exists(folder);
 
 		if (!create_path && !is_directory(folder))
 		{
@@ -28,30 +28,30 @@ namespace YimMenu
 		if (create_path)
 			create_directory(folder);
 
-        return folder;
-    }
+		return folder;
+	}
 
-    const std::filesystem::path& FileMgr::EnsureFileCanBeCreated(const std::filesystem::path &file)
-    {
-        return FileMgr::CreateFolderIfNotExists(file.parent_path());
-    }
+	const std::filesystem::path& FileMgr::EnsureFileCanBeCreated(const std::filesystem::path& file)
+	{
+		return FileMgr::CreateFolderIfNotExists(file.parent_path());
+	}
 
-    File FileMgr::GetProjectFileImpl(const std::filesystem::path& file) const
-    {
-        if (file.is_absolute())
-            throw std::invalid_argument("FileMgr::GetProjectFile expects a relative path.");
+	File FileMgr::GetProjectFileImpl(const std::filesystem::path& file) const
+	{
+		if (file.is_absolute())
+			throw std::invalid_argument("FileMgr::GetProjectFile expects a relative path.");
 
-        auto projFile = File(m_RootFolder / file);
-        EnsureFileCanBeCreated(file);
+		auto projFile = File(m_RootFolder / file);
+		EnsureFileCanBeCreated(file);
 
-        return projFile;
-    }
+		return projFile;
+	}
 
-    Folder FileMgr::GetProjectFolderImpl(const std::filesystem::path &folder) const
-    {
-        if (folder.is_absolute())
-            throw std::invalid_argument("FileMgr::GetProjectFolder expects a relative path.");
+	Folder FileMgr::GetProjectFolderImpl(const std::filesystem::path& folder) const
+	{
+		if (folder.is_absolute())
+			throw std::invalid_argument("FileMgr::GetProjectFolder expects a relative path.");
 
-        return CreateFolderIfNotExists(m_RootFolder / folder);
-    }
+		return CreateFolderIfNotExists(m_RootFolder / folder);
+	}
 }

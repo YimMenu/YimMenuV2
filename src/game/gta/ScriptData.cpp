@@ -13,10 +13,10 @@ namespace YimMenu
 			std::memcpy(pages[i], program->GetCodePage(i), program->GetCodePageSize(i));
 		}
 
-		m_Data  = pages;
+		m_Data = pages;
 		m_Pages = program->GetNumCodePages();
-		m_Size  = program->GetFullCodeSize();
-		m_Name  = program->m_Name;
+		m_Size = program->GetFullCodeSize();
+		m_Name = program->m_Name;
 	}
 
 	ScriptData::~ScriptData()

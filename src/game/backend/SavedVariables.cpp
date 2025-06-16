@@ -83,7 +83,7 @@ namespace YimMenu
 		}
 
 		m_SavedGlobals = vars["globals"];
-		m_SavedLocals  = vars["locals"];
+		m_SavedLocals = vars["locals"];
 	}
 
 	void SavedVariables::SaveImpl()
@@ -91,8 +91,8 @@ namespace YimMenu
 		nlohmann::json vars{};
 
 		vars["globals"] = m_SavedGlobals;
-		vars["locals"]  = m_SavedLocals;
-		auto file       = FileMgr::GetProjectFile("./saved_variables.json");
+		vars["locals"] = m_SavedLocals;
+		auto file = FileMgr::GetProjectFile("./saved_variables.json");
 		std::ofstream offstream_file(file.Path(), std::ios::out | std::ios::trunc);
 		offstream_file << vars.dump(4);
 		offstream_file.close();

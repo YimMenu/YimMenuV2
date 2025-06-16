@@ -3,8 +3,7 @@
 
 namespace rage
 {
-	union rlPresenceAttributeValue
-	{
+	union rlPresenceAttributeValue {
 		char m_StringValue[256];
 		uint64_t m_IntValue;
 

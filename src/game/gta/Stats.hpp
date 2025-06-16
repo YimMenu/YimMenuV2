@@ -16,7 +16,7 @@ namespace YimMenu::Stats
 	extern float GetFloat(std::string statName);
 	extern Date GetDate(std::string statName);
 	extern const char* GetString(std::string statName);
-	
+
 	extern void SetPackedBool(int index, bool value);
 	extern void SetPackedInt(int index, int value);
 	extern bool GetPackedBool(int index);

@@ -12,7 +12,6 @@ namespace YimMenu::Features
 		virtual void OnTick() override
 		{
 			MISC::SET_EXPLOSIVE_AMMO_THIS_FRAME(Self::GetPlayer().GetId());
-		
 		}
 	};
 

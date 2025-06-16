@@ -13,14 +13,14 @@ namespace YimMenu
 
 		constexpr SyncNodeId()
 		{
-			id   = 0;
+			id = 0;
 			name = "INVALID NODE ID!";
 		}
 
 		template<size_t N>
 		constexpr SyncNodeId(char const (&pp)[N])
 		{
-			id   = Joaat(pp);
+			id = Joaat(pp);
 			name = pp;
 		}
 
@@ -75,7 +75,7 @@ namespace YimMenu
 		static void Reset()
 		{
 			std::lock_guard guard(GetInstance().m_InitMutex);
-			GetInstance().m_Finder.m_SyncNodeMap   = {};
+			GetInstance().m_Finder.m_SyncNodeMap = {};
 			GetInstance().m_Finder.m_GlobalNodeIds = {};
 			GetInstance().m_Initialized = false;
 		}

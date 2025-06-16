@@ -8,14 +8,14 @@ namespace YimMenu::Features
 		using LoopedCommand::LoopedCommand;
 
 		std::array<Tunable, 8> m_Tunables = std::to_array({
-			Tunable("IDLEKICK_WARNING1"_J), 
-			Tunable("IDLEKICK_WARNING2"_J), 
-			Tunable("IDLEKICK_WARNING3"_J), 
-			Tunable("IDLEKICK_KICK"_J), 
-			Tunable("ConstrainedKick_Warning1"_J), 
-			Tunable("ConstrainedKick_Warning2"_J), 
-			Tunable("ConstrainedKick_Warning3"_J), 
-			Tunable("ConstrainedKick_Kick"_J),
+		    Tunable("IDLEKICK_WARNING1"_J),
+		    Tunable("IDLEKICK_WARNING2"_J),
+		    Tunable("IDLEKICK_WARNING3"_J),
+		    Tunable("IDLEKICK_KICK"_J),
+		    Tunable("ConstrainedKick_Warning1"_J),
+		    Tunable("ConstrainedKick_Warning2"_J),
+		    Tunable("ConstrainedKick_Warning3"_J),
+		    Tunable("ConstrainedKick_Kick"_J),
 		});
 
 		static constexpr auto m_DefaultValues = std::to_array({120000, 300000, 600000, 900000, 30000, 60000, 90000, 120000});

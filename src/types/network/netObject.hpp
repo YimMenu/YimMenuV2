@@ -25,21 +25,21 @@ namespace rage
 			PLAYER,
 			TRAILER,
 			TRAIN,
-			GLASS_PANE, // new in Enhanced, but doesn't actually seem to have a sync tree associated with it
+			GLASS_PANE,      // new in Enhanced, but doesn't actually seem to have a sync tree associated with it
 			MAX = GLASS_PANE // for compatibility
 		};
 
-		Type m_ObjectType;            //0x0008
-		int16_t m_ObjectId;           //0x000A
-		char pad_000C[61];            //0x000C
-		int8_t m_OwnerId;             //0x0049
-		int8_t m_NextOwnerId;         //0x004A
-		bool m_IsRemote;              //0x004B
-		uint16_t m_Flags;             //0x004C
-		uint16_t m_Flags2;            //0x004E
-		class CObject* m_GameObject;  //0x0050
-		char pad_0058[48];            //0x0058
-		uint32_t m_OwnershipToken;    //0x0088
+		Type m_ObjectType;           //0x0008
+		int16_t m_ObjectId;          //0x000A
+		char pad_000C[61];           //0x000C
+		int8_t m_OwnerId;            //0x0049
+		int8_t m_NextOwnerId;        //0x004A
+		bool m_IsRemote;             //0x004B
+		uint16_t m_Flags;            //0x004C
+		uint16_t m_Flags2;           //0x004E
+		class CObject* m_GameObject; //0x0050
+		char pad_0058[48];           //0x0058
+		uint32_t m_OwnershipToken;   //0x0088
 
 		DEFINE_RAGE_RTTI(rage::netObject);
 

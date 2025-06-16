@@ -17,9 +17,9 @@ namespace rage
 	class rlGamerHandle
 	{
 	public:
-		int64_t m_RockstarId;      // 0x00
-		uint8_t m_Platform;        // 0x08
-		uint8_t m_ProfileIndex;    // 0x09 (maybe, or some kind of discriminator)
+		int64_t m_RockstarId;   // 0x00
+		uint8_t m_Platform;     // 0x08
+		uint8_t m_ProfileIndex; // 0x09 (maybe, or some kind of discriminator)
 
 		inline rlGamerHandle() = default;
 

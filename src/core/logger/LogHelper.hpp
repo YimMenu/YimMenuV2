@@ -12,10 +12,10 @@ namespace YimMenu
 	class LogHelper final
 	{
 	public:
-		LogHelper(const LogHelper&)            = delete;
-		LogHelper(LogHelper&&)                 = delete;
+		LogHelper(const LogHelper&) = delete;
+		LogHelper(LogHelper&&) = delete;
 		LogHelper& operator=(const LogHelper&) = delete;
-		LogHelper& operator=(LogHelper&&)      = delete;
+		LogHelper& operator=(LogHelper&&) = delete;
 
 		static void Destroy();
 		static bool Init(const std::string_view consoleName, const std::filesystem::path& file, const bool attachConsole = true);
@@ -23,7 +23,7 @@ namespace YimMenu
 		static void ToggleConsole(bool toggle);
 
 	private:
-		LogHelper(){};
+		LogHelper() {};
 		~LogHelper();
 
 		static LogHelper& GetInstance()

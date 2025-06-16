@@ -46,15 +46,15 @@ namespace YimMenu::Submenus
 	};
 
 	static std::vector<ScriptPatch> sendUpdateRECoordsTSECooldownPatches{};
-	static GPBD_FM_2* GPBDFM2                          = nullptr;
-	static GSBD_RandomEvents* GSBDRandomEvents         = nullptr;
+	static GPBD_FM_2* GPBDFM2 = nullptr;
+	static GSBD_RandomEvents* GSBDRandomEvents = nullptr;
 	static RANDOM_EVENTS_FREEMODE_DATA* FMRandomEvents = nullptr;
-	static eRandomEvent selectedEvent                  = DRUG_VEHICLE;
-	static int selectedSubvariation                    = 0;
-	static int numSubvariations                        = 29;
-	static int setCooldown                             = 1800000;
-	static int setAvailability                         = 900000;
-	static bool applyInMinutes                         = false;
+	static eRandomEvent selectedEvent = DRUG_VEHICLE;
+	static int selectedSubvariation = 0;
+	static int numSubvariations = 29;
+	static int setCooldown = 1800000;
+	static int setAvailability = 900000;
+	static bool applyInMinutes = false;
 
 	static std::string GetEventStateString()
 	{
@@ -90,7 +90,7 @@ namespace YimMenu::Submenus
 	{
 		if (event == ARMOURED_TRUCK) // It doesn't have tunables
 		{
-			setCooldown     = *ScriptGlobal(262145).At(33719).As<int*>();
+			setCooldown = *ScriptGlobal(262145).At(33719).As<int*>();
 			setAvailability = *ScriptGlobal(262145).At(33720).As<int*>();
 		}
 		else
@@ -106,27 +106,25 @@ namespace YimMenu::Submenus
 	static void OnComboChange()
 	{
 		static ScriptFunction getNumFMMCVariations("freemode"_J, ScriptPointer("GetNumFMMCVariations", "5D ? ? ? 01 72 02 39 04").Add(1).Rip());
-		numSubvariations     = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
+		numSubvariations = getNumFMMCVariations.Call<int>(FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType, 0) - 1;
 		selectedSubvariation = 0;
 		ResetEventTunables(selectedEvent);
 	}
 
 	static void KillActiveEvent()
 	{
-		if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
+		if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[static_cast<int>(selectedEvent)]))
 		{
 			if (auto NetComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
 			{
 				if (NetComponent->IsLocalPlayerHost())
 				{
-					std::string ptrName = "SetFMContentScriptServerState" + std::to_string(selectedEvent);
-					ScriptFunction setFMContentScriptServerState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
+					ScriptFunction setFMContentScriptServerState(randomEventScripts[static_cast<int>(selectedEvent)], ScriptPointer("SetFMContentScriptServerState", "5D ? ? ? 55 2E 00 5D").Add(1).Rip());
 					setFMContentScriptServerState.Call<void>(3);
 				}
 				else
 				{
-					std::string ptrName = "SetFMContentScriptClientState" + std::to_string(selectedEvent);
-					ScriptFunction setFMContentScriptClientState(randomEventScripts[(int)selectedEvent], ScriptPointer(ptrName, "5D ? ? ? 55 08 00 74").Add(1).Rip());
+					ScriptFunction setFMContentScriptClientState(randomEventScripts[static_cast<int>(selectedEvent)], ScriptPointer("SetFMContentScriptClientState", "5D ? ? ? 55 08 00 74").Add(1).Rip());
 					setFMContentScriptClientState.Call<void>(3);
 				}
 			}
@@ -143,19 +141,17 @@ namespace YimMenu::Submenus
 		{
 			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
 			{
-				std::string ptrName = "SendUpdateRECoordsTSECooldownPatch" + std::to_string(event);
-				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], ScriptPointer(ptrName, "43 88 13 2E 00 01"), {0x71, 0x00, 0x00}));
+				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], ScriptPointer("SendUpdateRECoordsTSECooldownPatch", "43 88 13 2E 00 01"), {0x71, 0x00, 0x00}));
 			}
 		}
 
 		for (auto& patch : sendUpdateRECoordsTSECooldownPatches)
 			patch->Enable();
 
-		auto menu     = std::make_shared<Category>("Random Events");
-		auto settings = std::make_shared<Group>("Settings");
+		auto menu = std::make_shared<Category>("Random Events");
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
-			GPBDFM2          = GPBD_FM_2::Get();
+			GPBDFM2 = GPBD_FM_2::Get();
 			GSBDRandomEvents = GSBD_RandomEvents::Get();
 			if (!GPBDFM2 || !GSBDRandomEvents)
 				return ImGui::Text("Freemode global block is not loaded.");
@@ -225,8 +221,8 @@ namespace YimMenu::Submenus
 					if (GSBDRandomEvents->EventData[selectedEvent].State != eRandomEventState::ACTIVE)
 					{
 						SCRIPT_EVENT_REQUEST_RANDOM_EVENT eventData;
-						eventData.FMMCType      = FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType;
-						eventData.Subvariation  = selectedSubvariation;
+						eventData.FMMCType = FMRandomEvents->MissionData.FMMCData[selectedEvent].FMMCType;
+						eventData.Subvariation = selectedSubvariation;
 						eventData.PlayersToSend = 1; // Set FORCE_LAUNCH bit of all players
 						eventData.Send();
 						ScriptMgr::Yield(100ms);
@@ -271,8 +267,7 @@ namespace YimMenu::Submenus
 				FiberPool::Push([] {
 					if (GSBDRandomEvents->EventData[selectedEvent].State >= eRandomEventState::AVAILABLE)
 					{
-						auto coords = GSBDRandomEvents->EventData[selectedEvent].TriggerPosition;
-						if (coords != Vector3(0.f, 0.f, 0.f))
+						if (auto coords = GSBDRandomEvents->EventData[selectedEvent].TriggerPosition)
 						{
 							Self::GetPed().TeleportTo(coords);
 						}
@@ -290,7 +285,7 @@ namespace YimMenu::Submenus
 
 			if (GSBDRandomEvents->EventData[selectedEvent].State == eRandomEventState::ACTIVE)
 			{
-				if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[(int)selectedEvent]))
+				if (auto eventThread = Scripts::FindScriptThread(randomEventScripts[static_cast<int>(selectedEvent)]))
 				{
 					if (auto netComponent = reinterpret_cast<GtaThread*>(eventThread)->m_NetComponent)
 					{
@@ -349,9 +344,6 @@ namespace YimMenu::Submenus
 			ImGui::Checkbox("Apply in Minutes", &applyInMinutes);
 		}));
 
-		settings->AddItem(std::make_shared<BoolCommandItem>("esprandomevents"_J));
-
-		menu->AddItem(std::move(settings));
 		return menu;
 	}
 }

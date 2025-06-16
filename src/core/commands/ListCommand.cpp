@@ -1,4 +1,4 @@
-#include "ListCommand.hpp" 
+#include "ListCommand.hpp"
 #include "core/backend/FiberPool.hpp"
 
 namespace YimMenu

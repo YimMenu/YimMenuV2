@@ -87,7 +87,7 @@ namespace YimMenu
 	{
 		if (IsValid())
 			return m_Handle->IsHost();
-		
+
 		return false;
 	}
 
@@ -266,7 +266,7 @@ namespace YimMenu
 			    if (auto it = s_RemoteTeleports.find(object->m_ObjectId); it != s_RemoteTeleports.end() && it->second.m_Player == target)
 				    return true;
 
-				return false;
+			    return false;
 		    },
 		    [](rage::netObject* object, Player target, CProjectBaseSyncDataNode* node) {
 			    auto proximity_migration = reinterpret_cast<CVehicleProximityMigrationDataNode*>(node);
@@ -276,16 +276,16 @@ namespace YimMenu
 				    proximity_migration->m_HasOccupants[0] = true;
 				    proximity_migration->m_Occupants[0] = it->second.m_Player.GetPed().GetNetworkObjectId();
 				    proximity_migration->m_OverridePosition = true;
-					proximity_migration->m_Position = it->second.m_Position;
+				    proximity_migration->m_Position = it->second.m_Position;
 				    proximity_migration->m_VelocityX = 1; // seems to help
-				    proximity_migration->m_VelocityY = 1; 
-				    proximity_migration->m_VelocityZ = 1; 
+				    proximity_migration->m_VelocityY = 1;
+				    proximity_migration->m_VelocityZ = 1;
 			    }
 		    },
 		    true,
 		    true);
 		s_VehicleMigrationHook->Enable();
-		
+
 		auto player_id = this->GetId();
 		FiberPool::Push([player_id, coords] {
 			auto player = Player(player_id);

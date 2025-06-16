@@ -4,12 +4,12 @@
 
 enum class eFreemodeState
 {
-	NONE    = 0,
-	UNK_2   = 2,
+	NONE = 0,
+	UNK_2 = 2,
 	RUNNING = 4,
 	CLOSING = 5,
-	UNK_10  = 10,
-	UNK_11  = 11
+	UNK_10 = 10,
+	UNK_11 = 11
 };
 
 enum class eMissionType
@@ -28,24 +28,24 @@ enum class eMissionType
 
 enum class eAnimationBitset
 {
-	kCashRainActive       = 12,
+	kCashRainActive = 12,
 	kChampagneSprayActive = 13
 };
 
 enum class eBlipFlags
 {
 	// 0 is unused
-	kVisibleOnCutscene             = 1,
-	kFlashMinimapDisplay           = 2,
-	kFlashBlip                     = 3,
-	kMicroLightOTRActive           = 4,
-	kSkipTutorialSessionChecks     = 5,
-	kHideOnMinimap                 = 6, // needs testing
-	kHideOnMinimapWhenInterior     = 7, // needs testing
+	kVisibleOnCutscene = 1,
+	kFlashMinimapDisplay = 2,
+	kFlashBlip = 3,
+	kMicroLightOTRActive = 4,
+	kSkipTutorialSessionChecks = 5,
+	kHideOnMinimap = 6,                 // needs testing
+	kHideOnMinimapWhenInterior = 7,     // needs testing
 	kHideOnMinimapWhenBigMapActive = 9, // needs testing
-	kDontUsePassiveBlip            = 21,
-	kUseRampageBlip                = 24,
-	kHideWhenFading                = 25
+	kDontUsePassiveBlip = 21,
+	kUseRampageBlip = 24,
+	kHideWhenFading = 25
 };
 
 enum class eBlipType
@@ -149,21 +149,21 @@ enum class eBlipType
 
 enum class ePlayerStateFlags
 {
-	kScreenFadingOut             = 0,
-	kScreenFadedOut              = 1,
-	kCinematicNewsChannelActive  = 2,
+	kScreenFadingOut = 0,
+	kScreenFadedOut = 1,
+	kCinematicNewsChannelActive = 2,
 	kRepeatingPreviousCheckpoint = 3,
-	kCarModIntro                 = 4,
-	kPlayerSwitchStateAscent     = 5,
-	kPlayerSwitchStateInClouds   = 6,
-	kPlayerSwitchStatePan        = 7,
-	kPlayerSwitchStateDescent    = 8,
-	kModshopActive               = 9,
-	kModshopExitingVehicle       = 10,
-	kSpectating                  = 28,
-	kBeastActive                 = 29,
-	kPlayerNotInSCTV             = 30,
-	kPlayerInSCTV                = 31
+	kCarModIntro = 4,
+	kPlayerSwitchStateAscent = 5,
+	kPlayerSwitchStateInClouds = 6,
+	kPlayerSwitchStatePan = 7,
+	kPlayerSwitchStateDescent = 8,
+	kModshopActive = 9,
+	kModshopExitingVehicle = 10,
+	kSpectating = 28,
+	kBeastActive = 29,
+	kPlayerNotInSCTV = 30,
+	kPlayerInSCTV = 31
 };
 
 enum class ePlayerStateFlags2
@@ -174,40 +174,40 @@ enum class ePlayerStateFlags2
 enum class eActivityFlags
 {
 	kWatchingMovie = 0,
-	kInGangAttack  = 1,
+	kInGangAttack = 1,
 	kImpromptuRace = 2,
 	kCrateDrop = 4, // tf is this? "~s~A plane is on its way to drop a Crate ~HUD_COLOUR_GREEN~~BLIP_CRATEDROP~ ~s~which contains useful equipment. Be the first to collect it."
 	kDeliveringSimeonVehicle = 6,
-	kInLapDance              = 7,
-	kHoldUpTutorial          = 8,
-	kJoyrider                = 9, // uh what is this?
-	kCarModTutorial          = 10,
-	kMissionLauncher         = 11, // ???
-	kLesterCutsceneActive    = 12,
-	kTrevorCutsceneActive    = 13,
-	kHeistIntro              = 14,
-	kPlaneTakedown           = 15, // not sure what this is
-	kDistractCops = 16, // "Great. Thank you for your help. Now some horrible criminals are in jail for a crime they did commit and it's all your fault!!" ???
-	kDestroyVehicle             = 17, // ???
-	kPartakingInHotTarget       = 18,
-	kPartakingInKillList        = 19,
-	kTimeTrialStarted           = 21,
-	kPartakingInCheckpoints     = 22,
-	kPartakingInChallenge       = 23,
-	kPennedInActive             = 24,
-	kRCTimeTrialStarted         = 25,
-	kPartakingInHotProperty     = 27,
+	kInLapDance = 7,
+	kHoldUpTutorial = 8,
+	kJoyrider = 9, // uh what is this?
+	kCarModTutorial = 10,
+	kMissionLauncher = 11, // ???
+	kLesterCutsceneActive = 12,
+	kTrevorCutsceneActive = 13,
+	kHeistIntro = 14,
+	kPlaneTakedown = 15,  // not sure what this is
+	kDistractCops = 16,   // "Great. Thank you for your help. Now some horrible criminals are in jail for a crime they did commit and it's all your fault!!" ???
+	kDestroyVehicle = 17, // ???
+	kPartakingInHotTarget = 18,
+	kPartakingInKillList = 19,
+	kTimeTrialStarted = 21,
+	kPartakingInCheckpoints = 22,
+	kPartakingInChallenge = 23,
+	kPennedInActive = 24,
+	kRCTimeTrialStarted = 25,
+	kPartakingInHotProperty = 27,
 	kPartakingInKingOfTheCastle = 29,
-	kPartakingInCriminalDamage  = 30,
-	kLowriderIntro              = 31
+	kPartakingInCriminalDamage = 30,
+	kLowriderIntro = 31
 };
 
 enum class eGamerTagFlags
 {
 	kShowPackageCount = 13,
-	kFadeOutGamerTag  = 17,
-	kGangCEO          = 19,
-	kGangBiker        = 20
+	kFadeOutGamerTag = 17,
+	kGangCEO = 19,
+	kGangBiker = 20
 }; // TODO!
 
 enum class eOrbitalBitset
@@ -220,16 +220,16 @@ enum class eOrbitalBitset
 
 enum class eArcadeGameBitset
 {
-	kArcadeMachineActivated          = 0,
-	kLoveMeterActivated              = 1,
+	kArcadeMachineActivated = 0,
+	kLoveMeterActivated = 1,
 	kLoveMeterAnimationGenderDecided = 2
 };
 
 enum class eOutOfSightFlags
 {
-	kOutOfSightEnabled                = 0,
-	kOutOfSightActive                 = 1, // this controls whether you appear on radar or not
-	kHelpDisplayed                    = 2,
+	kOutOfSightEnabled = 0,
+	kOutOfSightActive = 1, // this controls whether you appear on radar or not
+	kHelpDisplayed = 2,
 	kDamagedPlayerOutsideOrganization = 3
 };
 
@@ -579,7 +579,7 @@ struct GlobalPlayerBDEntry
 	SCR_BOOL RadarBlipVisibliltyMechanicEnabled;
 	SCR_BITSET<ePlayerStateFlags> PlayerStateFlags;
 	SCR_BITSET<ePlayerStateFlags2> PlayerStateFlags2; // TODO
-	SCR_INT PlayerStateFlags3; // TODO
+	SCR_INT PlayerStateFlags3;                        // TODO
 	SCR_INT CarMeetModShopSlotPreTakeover;
 	PLAYER_INDEX CurrentCarMeetSlotOwnerIndex; // can be player or player's CEO/MC leader
 	SCR_INT CarMeetModShopSlotPostTakeover;

@@ -17,14 +17,14 @@ namespace YimMenu
 		if (!data)
 			return std::nullopt;
 
-		if (auto address = ScriptPointers::GetPointer(Joaat(m_Pointer.GetName())))
+		if (auto address = ScriptPointers::GetPointer(m_Hash, Joaat(m_Pointer.GetName())))
 		{
 			m_Pc = address;
 		}
 		else
 		{
 			m_Pc = m_Pointer.Scan(data).As<std::uint32_t>();
-			ScriptPointers::CachePointer(Joaat(m_Pointer.GetName()), m_Pc.value());
+			ScriptPointers::CachePointer(m_Hash, Joaat(m_Pointer.GetName()), m_Pc.value());
 		}
 
 		return m_Pc;
@@ -32,7 +32,7 @@ namespace YimMenu
 
 	void ScriptPatches::Patch::Apply()
 	{
-		auto pc   = GetPC();
+		auto pc = GetPC();
 		auto data = GetInstance().GetDataImpl(m_Hash);
 
 		if (!pc || !data)
@@ -52,7 +52,7 @@ namespace YimMenu
 		if (m_OriginalBytes.size() == 0)
 			return; // nothing to restore
 
-		auto pc   = GetPC();
+		auto pc = GetPC();
 		auto data = GetInstance().GetDataImpl(m_Hash);
 
 		if (!pc || !data)
@@ -180,14 +180,14 @@ namespace YimMenu
 		}
 
 		m_CurrentlyReplacedBytecode = program->m_CodeBlocks;
-		program->m_CodeBlocks       = data->GetData();
+		program->m_CodeBlocks = data->GetData();
 	}
 
 	void ScriptPatches::OnScriptVMLeaveImpl(rage::scrProgram* program)
 	{
 		if (m_CurrentlyReplacedBytecode)
 		{
-			program->m_CodeBlocks       = m_CurrentlyReplacedBytecode;
+			program->m_CodeBlocks = m_CurrentlyReplacedBytecode;
 			m_CurrentlyReplacedBytecode = nullptr;
 		}
 	}

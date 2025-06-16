@@ -14,9 +14,6 @@
 #include "game/backend/Players.hpp"
 #include "game/backend/Self.hpp"
 #include "core/memory/Pattern.hpp"
-#include "game/gta/Natives.hpp"
-#include "core/frontend/Notifications.hpp"
-#include "core/backend/ScriptMgr.hpp"
 
 namespace YimMenu::Scripts
 {
@@ -167,7 +164,7 @@ namespace YimMenu::Scripts
 		}
 
 		return std::nullopt;
-  }
+	}
 
 	void ForceScriptHost(rage::scrThread* thread)
 	{

@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-struct netSocketAddress 
+struct netSocketAddress
 {
 	union {
 		uint32_t m_Packed;

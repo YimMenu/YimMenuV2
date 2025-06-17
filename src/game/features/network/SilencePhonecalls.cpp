@@ -27,30 +27,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	class PreventPhonePopup : public LoopedCommand
-	{
-		using LoopedCommand::LoopedCommand;
-
-		virtual void OnTick() override
-		{
-			if (*Pointers.IsSessionStarted)
-			{
-				constexpr auto prevent_phone = ScriptGlobal(21222);
-				*prevent_phone.As<int*>() = 1;
-			}
-		}
-
-		virtual void OnDisable() override
-		{
-			if (*Pointers.IsSessionStarted)
-			{
-				constexpr auto prevent_phone = ScriptGlobal(21222);
-				*prevent_phone.As<int*>() = 0;
-			}
-		}
-	};
-
 	static SilencePhonecalls _SilencePhonecalls{"nocalls", "Silence Phone Calls", "Automatically silences all incoming calls"};
-	static PreventPhonePopup _PreventPhonePopup{"disablephone", "Prevent Phone Popups", "Prevents the phone from showing up on incoming calls"};
-
 }

@@ -7,7 +7,8 @@
 namespace YimMenu::Submenus
 {
 	Vehicle::Vehicle() :
-	    Submenu::Submenu("Vehicle")
+		#define ICON_FA_CAR "\xef\x86\xb9"
+	    Submenu::Submenu("Vehicle", ICON_FA_CAR)
 	{
 		auto main = std::make_shared<Category>("Main");
 
@@ -29,6 +30,7 @@ namespace YimMenu::Submenus
 
 		misc->AddItem(std::make_shared<BoolCommandItem>("speedometer"_J));
 		misc->AddItem(std::make_shared<BoolCommandItem>("seatbelt"_J));
+		misc->AddItem(std::make_shared<BoolCommandItem>("lowervehiclestance"_J, "Lower Stance"));
 		misc->AddItem(std::make_shared<BoolCommandItem>("allowhatsinvehicles"_J));
 		misc->AddItem(std::make_shared<BoolCommandItem>("lsccustomsbypass"_J));
 		misc->AddItem(std::make_shared<BoolCommandItem>("dlcvehicles"_J));

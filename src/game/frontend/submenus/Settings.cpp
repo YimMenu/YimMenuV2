@@ -11,19 +11,80 @@ namespace YimMenu::Submenus
 	// TODO: refactor this
 	static void Hotkeys()
 	{
-		ImGui::BulletText("Hold the command name clicked to change its hotkey");
-		ImGui::BulletText("Press any registered key to remove");
+		ImGui::BulletText("Hold the button with the command name and enter a keystroke to change its hotkey");
+		ImGui::BulletText("If a command has an existing hotkey, clicking the button will remove it");
 
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
+		
+		// this assumes we can't add new commands in runtime, but a lot of other subsystems assume that too
+		static std::map<std::string, CommandLink*> sortedCommands;
+		static bool commandsSorted = []() {
+			for (auto& [hash, command] : Commands::GetCommands())
+			{
+				if (auto it = g_HotkeySystem.m_CommandHotkeys.find(hash); it != g_HotkeySystem.m_CommandHotkeys.end())
+					sortedCommands.emplace(command->GetLabel(), &it->second);
+			}
+			return true;
+		}();
 
-		for (auto& [Hash, Command] : Commands::GetCommands())
+		HotkeySystem::SetBeingModifed(false);
+
+		for (auto& [name, link] : sortedCommands)
 		{
-			ImGui::PushID(Hash);
+			ImGui::PushID(link);
 
-			if (g_HotkeySystem.m_CommandHotkeys.find(Hash) != g_HotkeySystem.m_CommandHotkeys.end())
-				HotkeySetter(Hash).Draw();
+			ImGui::Button(name.data());
+
+			bool active = ImGui::IsItemActive();
+
+			if (active)
+			{
+				HotkeySystem::SetBeingModifed(true);
+				g_HotkeySystem.CreateHotkey(link->m_Chain);
+			}
+
+			ImGui::SameLine(250);
+			ImGui::BeginGroup();
+
+			if (link->m_Chain.empty())
+			{
+				if (active)
+					ImGui::Text("Press any button...");
+				else
+					ImGui::Text("No hotkey assigned");
+			}
+			else
+			{
+				ImGui::PushItemWidth(35);
+				int i = 0;
+				for (auto key : link->m_Chain)
+				{
+					char key_label[32];
+					strcpy(key_label, g_HotkeySystem.GetHotkeyLabel(key).data());
+
+					ImGui::PushID(i);
+					ImGui::InputText("##keylabel", key_label, 32, ImGuiInputTextFlags_ReadOnly);
+					if (ImGui::IsItemClicked())
+						std::erase_if(link->m_Chain, [key](int j) {
+							return j == key;
+						});
+					ImGui::PopID();
+
+					i++;
+					ImGui::SameLine();
+				}
+				ImGui::PopItemWidth();
+
+				ImGui::SameLine();
+				if (ImGui::Button("Clear"))
+				{
+					link->m_Chain.clear();
+				}
+			}
+
+			ImGui::EndGroup();
 
 			ImGui::Spacing();
 
@@ -32,7 +93,8 @@ namespace YimMenu::Submenus
 	};
 
 	Settings::Settings() :
-	    Submenu::Submenu("Settings")
+	#define ICON_FA_GEARS "\xef\x80\x93"
+	    Submenu::Submenu("Settings", ICON_FA_GEARS)
 	{
 		auto hotkeys = std::make_shared<Category>("Hotkeys");
 		auto gui = std::make_shared<Category>("GUI");

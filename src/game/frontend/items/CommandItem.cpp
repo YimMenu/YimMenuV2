@@ -1,6 +1,7 @@
 #include "Items.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/Command.hpp"
+#include "core/commands/HotkeySystem.hpp"
 #include "core/backend/FiberPool.hpp"
 
 namespace YimMenu
@@ -40,16 +41,21 @@ namespace YimMenu
 		ImGui::SetNextWindowSize(ImVec2(500, 120));
 		if (ImGui::BeginPopupModal(windowLabel.data(), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
 		{
-			ImGui::BulletText("Hold the command name clicked to change its hotkey");
-			ImGui::BulletText("Press any registered key to remove");
+			ImGui::BulletText("Enter a keystroke");
+
 			ImGui::Separator();
 
-			HotkeySetter(m_Command->GetHash()).Draw();
+			HotkeySystem::SetBeingModifed(true);
 
+			if (auto it = g_HotkeySystem.m_CommandHotkeys.find(m_Command->GetHash()); it != g_HotkeySystem.m_CommandHotkeys.end())
+				g_HotkeySystem.CreateHotkey(it->second.m_Chain);
 
 			ImGui::Spacing();
 			if (ImGui::Button("Close") || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
+			{
+				HotkeySystem::SetBeingModifed(false);
 				ImGui::CloseCurrentPopup();
+			}
 
 			ImGui::EndPopup();
 		}

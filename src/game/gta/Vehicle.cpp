@@ -141,10 +141,19 @@ namespace YimMenu
 	void Vehicle::SetBoostCharge(int percentage)
 	{
 		ENTITY_ASSERT_VALID();
+		ENTITY_ASSERT_CONTROL();
+
 		if (!SupportsBoost())
 			return;
 
 		VEHICLE::SET_ROCKET_BOOST_FILL(GetHandle(), percentage);
+	}
+
+	void Vehicle::LowerStance(bool lower)
+	{
+		ENTITY_ASSERT_VALID();
+
+		VEHICLE::SET_REDUCED_SUSPENSION_FORCE(GetHandle(), lower);
 	}
 
 	std::string Vehicle::GetFullName()

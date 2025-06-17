@@ -94,11 +94,11 @@ namespace YimMenu
 	{
 		while (g_Running)
 		{
-			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE())
+			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified)
 			{
 				for (auto& [hash, link] : m_CommandHotkeys)
 				{
-					if (link.m_Chain.empty() || link.m_BeingModified)
+					if (link.m_Chain.empty())
 						continue;
 
 					bool all_keys_pressed = true;
@@ -157,5 +157,10 @@ namespace YimMenu
 			if (m_CommandHotkeys.contains(std::atoi(key.data())))
 				m_CommandHotkeys[std::atoi(key.data())].m_Chain = value.get<std::vector<int>>();
 		}
+	}
+
+	void HotkeySystem::SetBeingModifed(bool being_modified)
+	{
+		g_HotkeySystem.m_BeingModified = being_modified;
 	}
 }

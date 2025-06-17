@@ -32,6 +32,9 @@ namespace YimMenu
 		bool IsBoostActive();
 		void SetBoostCharge(int percentage = 100);
 
+		// stance
+		void LowerStance(bool lower);
+
 		std::string GetFullName();
 	};
 }

@@ -37,6 +37,11 @@ namespace YimMenu
 			GetInstance().m_OptionsFont = font;
 		}
 
+		static bool ShowingContentWindow()
+		{
+			return GetInstance().m_ShowContentWindow;
+		}
+
 	private:
 		static inline UIManager& GetInstance()
 		{
@@ -53,5 +58,6 @@ namespace YimMenu
 		std::shared_ptr<Submenu> m_ActiveSubmenu;
 		std::vector<std::shared_ptr<Submenu>> m_Submenus;
 		ImFont* m_OptionsFont = nullptr;
+		bool m_ShowContentWindow = false;
 	};
 }

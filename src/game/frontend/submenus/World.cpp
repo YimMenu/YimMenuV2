@@ -4,7 +4,8 @@
 namespace YimMenu::Submenus
 {
 	World::World() :
-	    Submenu::Submenu("World")
+		#define ICON_FA_GLOBE "\xef\x82\xac"
+	    Submenu::Submenu("World", ICON_FA_GLOBE)
 	{
 		auto main = std::make_shared<Category>("Main");
 		auto spawnersGroup = std::make_shared<Category>("Spawners");

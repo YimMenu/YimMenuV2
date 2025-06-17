@@ -8,7 +8,8 @@
 namespace YimMenu::Submenus
 {
 	Recovery::Recovery() :
-	    Submenu::Submenu("Recovery")
+		#define ICON_FA_SACK_DOLLAR "\xef\x93\x80"
+	    Submenu::Submenu("Recovery", ICON_FA_SACK_DOLLAR)
 	{
 		auto missions = std::make_shared<Category>("Missions");
 		auto businesses = std::make_shared<Category>("Businesses");
@@ -16,7 +17,10 @@ namespace YimMenu::Submenus
 
 		auto generalGroup = std::make_shared<Group>("General");
 		auto businessGroup = std::make_shared<Group>("General");
-		auto casinoGroup = std::make_shared<Group>("Slot Machines");
+		auto casinoSlots = std::make_shared<Group>("Slot Machines");
+		//auto casinoWheel = std::make_shared<Group>("Lucky Wheel");
+		//auto casinoBlackJack = std::make_shared<Group>("Blackjack");
+		//auto casinoRoulette = std::make_shared<Group>("Roulette");
 
 		generalGroup->AddItem(std::make_shared<BoolCommandItem>("playallmissionssolo"_J));
 		generalGroup->AddItem(std::make_shared<CommandItem>("forcelaunchheist"_J));
@@ -32,11 +36,12 @@ namespace YimMenu::Submenus
 		businessGroup->AddItem(std::make_shared<ListCommandItem>("businesssafe"_J));
 		businessGroup->AddItem(std::make_shared<CommandItem>("claimsafeearnings"_J));
 
-		casinoGroup->AddItem(std::make_shared<BoolCommandItem>("casinomanipulaterigslotmachines"_J));
+		casinoSlots->AddItem(std::make_shared<BoolCommandItem>("casinomanipulaterigslotmachines"_J));
+		
 
 		missions->AddItem(generalGroup);
 		businesses->AddItem(businessGroup);
-		casino->AddItem(casinoGroup);
+		casino->AddItem(casinoSlots);
 
 		AddCategory(std::move(missions));
 		AddCategory(std::move(businesses));

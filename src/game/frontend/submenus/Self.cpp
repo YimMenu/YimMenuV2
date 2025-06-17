@@ -8,7 +8,8 @@
 namespace YimMenu::Submenus
 {
 	Self::Self() :
-	    Submenu::Submenu("Self")
+		#define ICON_FA_USER "\xef\x80\x87"
+	    Submenu::Submenu("Self", ICON_FA_USER)
 	{
 		auto main = std::make_shared<Category>("Main");
 		auto globalsGroup = std::make_shared<Group>("Globals");

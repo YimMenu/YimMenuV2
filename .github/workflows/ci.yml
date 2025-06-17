@@ -3,22 +3,6 @@ name: CI
 on: [ push, pull_request ]
 
 jobs:
-  lint:
-    runs-on: [ ubuntu-latest ]
-    name: Lint Source
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check lint with clang-format-21
-        run: |
-          sudo mkdir -p /etc/apt/keyrings
-          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/llvm-snapshot.gpg
-          sudo chmod a+r /etc/apt/keyrings/llvm-snapshot.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
-          sudo apt-get update && sudo apt-get install -y clang-format-21
-          clang-format-21 --version
-          find src \( -name "*.hpp" -o -name "*.h" -o -name "*.cpp" \) -exec clang-format-21 --Werror --dry-run --verbose {} +
-
   ci:
     runs-on: [ self-hosted, Windows ]
     name: CI

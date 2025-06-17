@@ -14,6 +14,7 @@ namespace YimMenu
 	class Command;
 	class ColorCommand;
 	class StringCommand;
+	class CommandLink;
 
 	class Button : public UIItem
 	{
@@ -132,16 +133,6 @@ namespace YimMenu
 
 	private:
 		std::function<void()> m_Callback;
-	};
-
-	class HotkeySetter : public UIItem
-	{
-	public:
-		explicit HotkeySetter(joaat_t);
-		void Draw() override;
-
-	private:
-		joaat_t m_Id;
 	};
 
 	class Group : public UIItem

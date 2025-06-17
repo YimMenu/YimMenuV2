@@ -74,6 +74,9 @@ namespace YimMenu::Features
 		}
 	}
 
+	// Some vehicles cannot be safely acquired using this method, see #443
+	static const std::unordered_set<std::uint32_t> s_BlacklistedVehicles = {"rcbandito"_J, "minitank"_J, "thruster"_J, "terbyte"_J, "avenger"_J, "hauler2"_J, "phantom3"_J, "speedo4"_J, "pounder2"_J, "mule4"_J, "kosatka"_J, "policet3"_J, "brickade2"_J};
+
 	class _SavePersonalVehicle : public Command
 	{
 		using Command::Command;
@@ -93,7 +96,7 @@ namespace YimMenu::Features
 			}
 
 			static ScriptFunction isVehicleValidForPV("freemode"_J, ScriptPointer("IsVehicleValidForPV", "5D ? ? ? 2A 06 56 13 00 38 00").Add(1).Rip());
-			if (!isVehicleValidForPV.Call<bool>(Self::GetVehicle().GetModel()))
+			if (s_BlacklistedVehicles.contains(Self::GetVehicle().GetModel()) || !isVehicleValidForPV.Call<bool>(Self::GetVehicle().GetModel()))
 			{
 				Notifications::Show("Save Personal Vehicle", "This vehicle cannot be saved as a personal vehicle.", NotificationType::Error);
 				return;

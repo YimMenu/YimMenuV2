@@ -23,5 +23,8 @@ namespace YimMenu::Menu
 
 		inline ImFont* g_OverlayFont = nullptr;
 		inline float g_OverlayFontSize = 30.0f;
+
+		inline ImFont* g_AwesomeFont = nullptr;
+		inline float g_AwesomeFontSize = 30.0f;
 	}
 }

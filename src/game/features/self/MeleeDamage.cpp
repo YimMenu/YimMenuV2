@@ -6,58 +6,98 @@
 
 namespace YimMenu::Features
 {
-	static FloatCommand _MeleeDamageScale{"meleedamagescale", "Melee Damage Scale", "Sets the damage scale for melee", 0.0f, 10.0f, 1.0f};
+	static FloatCommand _MeleeDamageScale{
+	    "meleedamagescale",
+	    "Melee Damage Scale",
+	    "Sets the damage scale for melee",
+	    0.0f,
+	    10.0f,
+	    1.0f};
 
 	class MeleeDamage : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
 
+		void applyForceToTarget(Hash target, float scale)
+		{
+			NETWORK::NETWORK_REQUEST_CONTROL_OF_ENTITY(target);
+
+			Vector3 from = ENTITY::GET_ENTITY_COORDS(Self::GetPed().GetHandle(), true);
+			Vector3 to = ENTITY::GET_ENTITY_COORDS(target, true);
+
+			Vector3 direction = {
+			    to.x - from.x,
+			    to.y - from.y,
+			    0.0f};
+
+			float len = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+			if (len > 0.0f)
+			{
+				direction.x /= len;
+				direction.y /= len;
+			}
+
+			float forceScale = scale * 25.0f;
+			direction.x *= forceScale;
+			direction.y *= forceScale;
+
+			ENTITY::APPLY_FORCE_TO_ENTITY(
+			    target,
+			    0,
+			    0.0f,
+			    0.0f,
+			    15.0f,
+			    0,
+			    0,
+			    0,
+			    0,
+			    true,
+			    false,
+			    true,
+			    false,
+			    true);
+
+			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(
+			    target,
+			    0,
+			    direction.x,
+			    direction.y,
+			    -1.0f,
+			    true,
+			    false,
+			    true,
+			    true);
+		}
+
 		void OnTick() override
 		{
 			float scale = _MeleeDamageScale.GetState();
-			if (scale > 0.0f)
+			if (scale <= 0.0f)
+				return;
+
+			Hash weapon;
+			if (!WEAPON::GET_CURRENT_PED_WEAPON(Self::GetPed().GetHandle(), &weapon, 0))
+				return;
+
+			PLAYER::SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(Self::GetPlayer().GetId(), scale, 1);
+
+			Hash target = PED::GET_MELEE_TARGET_FOR_PED(Self::GetPed().GetHandle());
+			if (target != 0 && ENTITY::DOES_ENTITY_EXIST(target))
 			{
-				Hash weapon;
-				if (WEAPON::GET_CURRENT_PED_WEAPON(Self::GetPed().GetHandle(), &weapon, 0))
+				if (WEAPON::HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON(target, weapon, true) && ENTITY::HAS_ENTITY_BEEN_DAMAGED_BY_ENTITY(target, Self::GetPed().GetHandle(), true))
 				{
-					PLAYER::SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(Self::GetPlayer().GetId(), scale, 0);
+					applyForceToTarget(target, scale);
 
-					Hash target = PED::GET_MELEE_TARGET_FOR_PED(Self::GetPed().GetHandle());
-					if (target != 0)
-					{
-						Vector3 forward = ENTITY::GET_ENTITY_FORWARD_VECTOR(Self::GetPed().GetHandle());
-
-						if (ENTITY::IS_ENTITY_A_PED(target))
-						{
-							float forceScale = scale * 1.0f; // Set ped force lower since they weigh less
-						}
-						float forceScale = scale * 5.0f;
-						Vector3 force{
-						    forward.x * forceScale,
-						    forward.y * forceScale,
-						    0.1f // Small vertical lift
-						};
-
-						ENTITY::APPLY_FORCE_TO_ENTITY(
-						    target,
-						    0,
-						    force.x,
-						    force.y,
-						    force.z,
-						    0.0f,
-						    0.0f,
-						    0.0f,
-						    true,
-						    true,
-						    true,
-						    true,
-						    false,
-						    true);
-					}
+					WEAPON::CLEAR_ENTITY_LAST_WEAPON_DAMAGE(target);
+					ENTITY::CLEAR_ENTITY_LAST_DAMAGE_ENTITY(target);
 				}
 			}
 		}
+
 	};
 
-	static MeleeDamage _MeleeDamage{"meleedamage", "Melee Damage", "Allows altering your melee damage output"};
+	static MeleeDamage _MeleeDamage{
+	    "meleedamage",
+	    "Melee Damage",
+	    "Allows altering your melee damage output"};
 }

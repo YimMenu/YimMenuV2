@@ -116,4 +116,5 @@ namespace YimMenu
 	    "WEAPON_BATTLERIFLE"_J,
 	    "WEAPON_STUNROD"_J,
 	    "WEAPON_STRICKLER"_J});
+	    "WEAPON_BRIEFCASE_03"_J});
 }

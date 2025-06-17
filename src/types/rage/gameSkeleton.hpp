@@ -21,6 +21,8 @@ namespace rage
 	{
 		virtual ~gameSkeletonUpdateBase() = default;
 		virtual void Run() = 0;
+		virtual bool ShouldIntegrityCheck() = 0;
+
 		uint64_t m_Pad;                 // 0x08
 		uint32_t m_Hash;                // 0x10
 		gameSkeletonUpdateBase* m_Next; // 0x18

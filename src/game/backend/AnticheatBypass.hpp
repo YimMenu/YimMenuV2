@@ -11,6 +11,7 @@ namespace YimMenu
 			return instance;
 		}
 
+		void RunOnStartupImpl();
 		void RunScriptImpl();
 
 		bool m_IsFSLLoaded = false;
@@ -20,6 +21,11 @@ namespace YimMenu
 		bool m_FSLProvidesBEBypass = false;
 
 	public:
+		static void RunOnStartup()
+		{
+			GetInstance().RunOnStartupImpl();
+		}
+
 		static void RunScript()
 		{
 			GetInstance().RunScriptImpl();

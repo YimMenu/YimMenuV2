@@ -395,9 +395,10 @@ namespace YimMenu
 			GameSkeleton = ptr.Add(0x9).Add(3).Rip().As<rage::gameSkeleton*>();
 		});
 
-		constexpr auto SetExplosiveAmmoOnlinePatchPtrn = Pattern<"48 83 EC 28 80 3D ? ? ? ? 00 0F 85 ? ? ? ? E9 ? ? ? ? 56 57 53 48 81 EC B0 00 00 00">("SetExplosiveAmmoOnlinePatch");
-		scanner.Add(SetExplosiveAmmoOnlinePatchPtrn, [this](PointerCalculator ptr) {
-			BytePatches::Add(ptr.Add(0xB).As<std::uint16_t*>(), 0x04EB)->Apply();
+		constexpr auto anticheatInitializedHashPtrn = Pattern<"89 9E C8 00 00 00 48 8B 0D ? ? ? ? 48 85 C9 74 46">("AnticheatInitializedHash");
+		scanner.Add(anticheatInitializedHashPtrn, [this](PointerCalculator ptr) {
+			AnticheatInitializedHash = ptr.Add(9).Rip().As<rage::Obf32**>();
+			GetAnticheatInitializedHash = ptr.Add(0x13).Rip().As<PVOID>();
 		});
 
 		if (!scanner.Scan())

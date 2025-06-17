@@ -28,7 +28,8 @@ namespace YimMenu
 	    "Rail",
 	    "Open Wheel"});
 
-	static constexpr auto g_VehicleHashes = std::to_array({"adder"_J,
+		static constexpr auto g_VehicleHashes = std::to_array({
+	    "adder"_J,
 	    "airbus"_J,
 	    "airtug"_J,
 	    "akula"_J,
@@ -914,5 +915,26 @@ namespace YimMenu
 	    "zr380"_J,
 	    "zr3802"_J,
 	    "zr3803"_J,
-	    "ztype"_J});
+	    "ztype"_J,
+	    "cheetah3"_J,
+	    "driftchavos6"_J,
+	    "driftdominator10"_J,
+	    "driftgauntlet4"_J,
+	    "drifthardy"_J,
+	    "driftl352"_J,
+	    "everon3"_J,
+	    "flatbed2"_J,
+	    "hardy"_J,
+	    "l352"_J,
+	    "maverick2"_J,
+	    "minimus"_J,
+	    "policeb2"_J,
+	    "rapidgt4"_J,
+	    "sentinel5"_J,
+	    "stockade4"_J,
+	    "suzume"_J,
+	    "tampa4"_J,
+	    "woodlander"_J,
+	});
+
 }

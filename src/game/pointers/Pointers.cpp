@@ -360,7 +360,7 @@ namespace YimMenu
 			SetJoinRequestPoolTypePatch = BytePatches::Add(ptr.Sub(5).As<std::uint8_t*>(), std::to_array<std::uint8_t>({0xB8, 0x00, 0x00, 0x00, 0x00}));
 		});
 
-		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"41 83 FF 05 ? 30 43">("HandleJoinRequestIgnorePoolPatch");
+		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"83 FD 05 ? ? ? 00 00 00 48 8B">("HandleJoinRequestIgnorePoolPatch");
 		scanner.Add(handleJoinRequestIgnorePoolPatchPtrn, [this](PointerCalculator ptr) {
 			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.Add(4).As<std::uint8_t*>(), 0xEB);
 		});

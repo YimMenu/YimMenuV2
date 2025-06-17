@@ -1,3 +1,5 @@
+#include "core/commands/LoopedCommand.hpp"
+#include "core/commands/Commands.hpp"
 #include "core/util/Joaat.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
@@ -306,6 +308,14 @@ namespace YimMenu::Hooks
 			if (event.m_0x30 != 6) // false positives when telemetry endpoint is unreachable
 			{
 				// Triggered anti cheat
+			}
+
+			static auto cheaterPool = Commands::GetCommand<LoopedCommand>("cheaterpool"_J);
+
+			if (cheaterPool->GetState())
+			{
+				LOGF(WARNING, "Blocked REPORT_MYSELF_EVENT from {} with type {} since we're in a cheater-only session", player.GetName(), event.m_0x30);
+				return false;
 			}
 
 			break;

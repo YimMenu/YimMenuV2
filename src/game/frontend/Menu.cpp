@@ -66,29 +66,29 @@ namespace YimMenu
 
 		style.Colors[ImGuiCol_Border] = ImVec4(0.28f, 0.28f, 0.28f, 0.25f);
 		style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.17f, 1.00f);
-		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.40f, 0.30f, 0.50f, 0.75f);
-		style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.45f, 0.35f, 0.60f, 0.85f);
+		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.35f, 0.59f, 0.35f, 0.75f);
+		style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.47f, 0.75f, 0.47f, 0.85f);
 
-		style.Colors[ImGuiCol_Button] = ImVec4(0.40f, 0.30f, 0.50f, 1.00f);
-		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.40f, 0.60f, 1.00f);
-		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.60f, 0.45f, 0.70f, 1.00f);
+		style.Colors[ImGuiCol_Button] = ImVec4(0.35f, 0.59f, 0.35f, 1.00f);
+		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.40f, 0.65f, 0.40f, 1.00f);
+		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.47f, 0.75f, 0.47f, 1.00f);
 
 		style.Colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.06f, 0.07f, 1.00f);
 		style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.09f, 0.09f, 0.11f, 1.00f);
 		style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.04f, 0.04f, 0.05f, 1.00f);
 
-		style.Colors[ImGuiCol_Tab] = ImVec4(0.35f, 0.30f, 0.45f, 0.85f);
-		style.Colors[ImGuiCol_TabHovered] = ImVec4(0.50f, 0.40f, 0.60f, 0.85f);
-		style.Colors[ImGuiCol_TabActive] = ImVec4(0.60f, 0.45f, 0.70f, 1.00f);
+		style.Colors[ImGuiCol_Tab] = ImVec4(0.30f, 0.55f, 0.30f, 0.85f);
+		style.Colors[ImGuiCol_TabHovered] = ImVec4(0.40f, 0.65f, 0.40f, 0.85f);
+		style.Colors[ImGuiCol_TabActive] = ImVec4(0.47f, 0.75f, 0.47f, 1.00f);
 
-		style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.25f, 0.40f, 1.00f);
-		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.45f, 0.35f, 0.60f, 1.00f);
-		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.55f, 0.40f, 0.65f, 1.00f);
+		style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.50f, 0.30f, 1.00f);
+		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.40f, 0.65f, 0.40f, 1.00f);
+		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.47f, 0.75f, 0.47f, 1.00f);
 
 		style.Colors[ImGuiCol_PlotLines] = ImVec4(0.80f, 0.80f, 0.00f, 0.00f);
 		style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.85f, 0.00f, 1.00f);
-		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.30f, 0.50f, 1.00f);
-		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.60f, 0.45f, 0.70f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.35f, 0.59f, 0.35f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.47f, 0.75f, 0.47f, 1.00f);
 
 		style.GrabRounding = style.FrameRounding = style.ChildRounding = style.WindowRounding = 8.0f;
 	}

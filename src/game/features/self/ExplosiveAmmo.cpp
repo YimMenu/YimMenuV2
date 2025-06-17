@@ -5,6 +5,7 @@
 #include <game/gta/Natives.hpp>
 #include "core/commands/ListCommand.hpp"
 #include "core/commands/FloatCommand.hpp"
+#include "game/gta/Scripts.hpp"
 
 namespace YimMenu::Features
 {
@@ -137,16 +138,18 @@ namespace YimMenu::Features
 				float damageScale = _ExplosionDamageScale.GetState();
 				float shake = _CameraShake.GetState();
 
-				FIRE::ADD_OWNED_EXPLOSION(
-				    Self::GetPed().GetHandle(),
-				    impactCoords.x,
-				    impactCoords.y,
-				    impactCoords.z,
-				    static_cast<int>(explosionType),
-				    damageScale,
-				    true,  // isAudible
-				    false, // isInvisible
-				    shake);
+				Scripts::RunWithSpoofedThreadName("am_mp_orbital_cannon"_J, [=] {
+					FIRE::ADD_OWNED_EXPLOSION(
+					    Self::GetPed().GetHandle(),
+					    impactCoords.x,
+					    impactCoords.y,
+					    impactCoords.z,
+					    static_cast<int>(explosionType),
+					    damageScale,
+					    true,  // isAudible
+					    false, // isInvisible
+					    shake);
+				});
 			}
 		}
 	};

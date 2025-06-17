@@ -69,8 +69,8 @@ namespace YimMenu
 			}
 
 			ImU32 defaultIconColor = IM_COL32(255, 255, 255, 255);
-			ImU32 activeIconColor = IM_COL32(120, 90, 160, 255);
-			ImU32 hoveredIconColor = IM_COL32(90, 70, 120, 255);
+			ImU32 activeIconColor = IM_COL32(46, 204, 113, 255); // GTA green
+			ImU32 hoveredIconColor = IM_COL32(36, 174, 93, 255); // Darker hover
 
 			ImU32 iconColor = submenu == m_ActiveSubmenu ? activeIconColor : (ImGui::IsItemHovered() ? hoveredIconColor : defaultIconColor);
 
@@ -81,8 +81,8 @@ namespace YimMenu
 			ImGui::PopFont();
 
 			ImU32 defaultTextColor = IM_COL32(255, 255, 255, 255);
-			ImU32 activeTextColor = IM_COL32(120, 90, 160, 255);
-			ImU32 hoveredTextColor = IM_COL32(90, 70, 120, 255);
+			ImU32 activeTextColor = IM_COL32(46, 204, 113, 255); // GTA green
+			ImU32 hoveredTextColor = IM_COL32(36, 174, 93, 255); // Darker hover
 
 			ImU32 textColor = submenu == m_ActiveSubmenu ? activeTextColor : (ImGui::IsItemHovered() ? hoveredTextColor : defaultTextColor);
 

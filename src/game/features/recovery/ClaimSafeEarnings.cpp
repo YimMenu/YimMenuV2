@@ -64,7 +64,7 @@ namespace YimMenu::Features
 			case eAppVinewoodMenuSafe::BAIL_OFFICE:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.BailShopData.SafeCashValue > 0)
-					*ScriptGlobal(2708252).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708237).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::GARMENT_FACTORY:

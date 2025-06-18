@@ -159,7 +159,7 @@ namespace YimMenu::Features
 			auto offset = *order.At(i).As<int*>();
 			if (!GPBD_Flow::Get()->Entries[Self::GetPlayer().GetId()].TunerCBVDeliveredFlags.IsSet(offset))
 			{
-				auto hash = *ScriptGlobal(1946095 + (offset + 1)).As<joaat_t*>();
+				auto hash = *ScriptGlobal(1946084 + (offset + 1)).As<joaat_t*>();
 				return hash;
 			}
 		}

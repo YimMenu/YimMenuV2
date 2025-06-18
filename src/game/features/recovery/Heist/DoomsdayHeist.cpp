@@ -21,7 +21,7 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				auto base = ScriptGlobal(1962078).At(812).At(50);
+				auto base = ScriptGlobal(1964170).At(812).At(50);
 
 				*base.At(1).As<int*>() = _DoomsdayHeistCut1.GetState();
 				*base.At(2).As<int*>() = _DoomsdayHeistCut2.GetState();
@@ -36,7 +36,7 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				auto base = ScriptGlobal(1882925);
+				auto base = ScriptGlobal(1882449);
 
 				*base.At(0, 149).At(43).At(0).At(4).At(8).As<int*>() = 1;
 				*base.At(1, 149).At(43).At(1).At(4).At(8).As<int*>() = 1;
@@ -45,10 +45,7 @@ namespace YimMenu::Features
 			}
 		};
 
-		static std::vector<std::pair<int, const char*>> doomsdayHeistCategory = {
-		    {0, "The Data Breaches"},
-		    {1, "The Bogdan Problem"},
-		    {2, "The Doomsday Senario"}};
+		static std::vector<std::pair<int, const char*>> doomsdayHeistCategory = {{0, "The Data Breaches"}, {1, "The Bogdan Problem"}, {2, "The Doomsday Senario"}};
 		static ListCommand _DoomsdayHeistCategory{"doomsdayheistcategory", "Select Heist", "Heist categories", doomsdayHeistCategory, 0};
 
 		class Setup : public Command
@@ -89,9 +86,9 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				*ScriptLocal("fm_mission_controller"_J, 1538).As<int*>() = 3;
-				*ScriptLocal("fm_mission_controller"_J, 1569).As<int*>() = 2;
-				*ScriptLocal("fm_mission_controller"_J, 1294).At(135).As<int*>() = 3;
+				*ScriptLocal("fm_mission_controller"_J, 1540).As<int*>() = 3;
+				*ScriptLocal("fm_content_auto_shop_delivery"_J, 1590).As<int*>() = 2;
+				*ScriptLocal("fm_mission_controller"_J, 1296).At(135).As<int*>() = 3;
 			}
 		};
 
@@ -104,10 +101,10 @@ namespace YimMenu::Features
 				Scripts::ForceScriptHost(Scripts::FindScriptThread("fm_mission_controller"_J));
 				ScriptMgr::Yield(500ms);
 
-				*ScriptLocal("fm_mission_controller"_J, 20387).At(1725).At(1).As<int*>() = 80;
-				*ScriptLocal("fm_mission_controller"_J, 20387).As<int*>() = 12;
-				*ScriptLocal("fm_mission_controller"_J, 29006).At(1).As<int*>() = 99999;
-				*ScriptLocal("fm_mission_controller"_J, 32462).At(1).At(68).As<int*>() = 99999;
+				*ScriptLocal("fm_mission_controller"_J, 20391).At(1725).At(1).As<int*>() = 80;
+				*ScriptLocal("fm_mission_controller"_J, 20391).As<int*>() = 12;
+				*ScriptLocal("fm_mission_controller"_J, 29011).At(1).As<int*>() = 99999;
+				*ScriptLocal("fm_mission_controller"_J, 32467).At(1).At(68).As<int*>() = 99999;
 
 				// TODO: find a way of getting current heist info so that InstantFinishAct3 can be implemented here conditionally.
 			}
@@ -122,11 +119,11 @@ namespace YimMenu::Features
 				Scripts::ForceScriptHost(Scripts::FindScriptThread("fm_mission_controller"_J));
 				ScriptMgr::Yield(500ms);
 
-				*ScriptLocal("fm_mission_controller"_J, 20387).As<int*>() = 12;
-				*ScriptLocal("fm_mission_controller"_J, 20387).At(1740).At(1).As<int*>() = 150;
-				*ScriptLocal("fm_mission_controller"_J, 20387).At(1062).As<int*>() = 5;
-				*ScriptLocal("fm_mission_controller"_J, 29006).At(1).As<int*>() = 99999;
-				*ScriptLocal("fm_mission_controller"_J, 32462).At(1).At(68).As<int*>() = 99999;
+				*ScriptLocal("fm_mission_controller"_J, 20391).As<int*>() = 12;
+				*ScriptLocal("fm_mission_controller"_J, 20391).At(1740).At(1).As<int*>() = 150;
+				*ScriptLocal("fm_mission_controller"_J, 20391).At(1062).As<int*>() = 5;
+				*ScriptLocal("fm_mission_controller"_J, 29011).At(1).As<int*>() = 99999;
+				*ScriptLocal("fm_mission_controller"_J, 32467).At(1).At(68).As<int*>() = 99999;
 			}
 		};
 

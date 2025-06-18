@@ -29,11 +29,15 @@ jobs:
       - name: Rename DLL to YimMenuV2-dev-{GITHUB_SHA}.dll
         run: |
           del YimMenuV2-dev-*.dll
+          del YimMenuV2-dev-*.pdb
           ren YimMenuV2.dll YimMenuV2-dev-${{github.sha}}.dll
+          ren YimMenuV2.pdb YimMenuV2-dev-${{github.sha}}.pdb
         working-directory: build/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: RelWithDebInfo-Clang
-          path: build/YimMenuV2-dev-*.dll
+          path: |
+            build/YimMenuV2-dev-*.dll
+            build/YimMenuV2-dev-*.pdb

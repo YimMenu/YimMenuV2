@@ -25,6 +25,16 @@ namespace YimMenu::Features
 				}
 			}
 		}
+
+		void OnDisable() override
+		{
+			Hash weapon;
+			if (WEAPON::GET_CURRENT_PED_WEAPON(Self::GetPed().GetHandle(), &weapon, 0))
+			{
+				WEAPON::SET_WEAPON_DAMAGE_MODIFIER(weapon, 1.0f);
+				WEAPON::_SET_WEAPON_PED_DAMAGE_MODIFIER(Self::GetPed().GetHandle(), 1.0f);
+			}
+		}
 	};
 
 	static WeaponDamage _WeaponDamage{"weapondamage", "Weapon Damage", "Allows altering your weapons damage output"};

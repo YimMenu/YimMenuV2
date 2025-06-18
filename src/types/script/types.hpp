@@ -116,4 +116,4 @@ private:
 };
 static_assert(sizeof(GAMER_HANDLE) == 13 * 8);
 
-#define NUM_CONTACTS 83
+#define NUM_CONTACTS 84

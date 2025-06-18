@@ -518,9 +518,9 @@ struct PROPERTY_DATA
 	SCR_INT Garage3DataBitset;
 	SCR_INT ModshopDataBitset;
 	SCR_ARRAY<FACTORY_INFO, 7> FactoryInfos;
-	SCR_INT TotalBunkerResearch;
+	SCR_INT TotalBunkerResearch; // (@291 b889g9)
 	SCR_INT CurrentBunkerResearchProgress;
-	SCR_INT BunkerDecorVariation;
+	// SCR_INT BunkerDecorVariation; REMOVED b889g9
 	SCR_INT MOCBitset;
 	SCR_INT MOCColor;     // bitset for some reason
 	uint64_t PAD_0290[2]; // unused
@@ -529,7 +529,7 @@ struct PROPERTY_DATA
 	SCR_INT PAD_0299;
 	DEFUNCT_BASE_DATA DefunctBaseData;
 	SCR_INT AvengerInteriorDecorFlags; // "PACKED_MP_INT_ARMORY_AIRCRAFT_INTERIOR_v0"
-	uint64_t PAD_0308[3];
+	uint64_t PAD_0308[2]; // one field removed here b889g9
 	BUSINESS_HUB_DATA BusinessHubData;
 	NIGHTCLUB_DATA NightclubData;
 	SCR_INT PAD_0365;
@@ -574,7 +574,7 @@ struct PROPERTY_DATA
 	HACKER_DEN_DATA HackerDenData;
 	FIELD_HANGAR_DATA FieldHangarData;
 };
-static_assert(sizeof(PROPERTY_DATA) == 545 * 8);
+static_assert(sizeof(PROPERTY_DATA) == 543 * 8);
 
 struct BIKER_CONTRACTS
 {
@@ -634,11 +634,11 @@ struct GPBD_FM_Entry
 	SCR_BITSET<eGangCallServices> GangCallRequestedServices;
 	PLAYER_INDEX GangCallTarget; // can be used to send muggers/hit squad
 	SCR_BITSET<eGangCallServices> GangCallSentServices;
-	SCR_INT TutorialBitset2;
+	SCR_INT TutorialBitset2; // @144 as of b889g9
 	TEXT_LABEL_23 PlayingContentUsedId;
 	TEXT_LABEL_23 MatchId;
-	uint64_t PAD_0156[8];         // unused
-	TEXT_LABEL_63 DisplayJobName; // as shown in the playerlist?
+	// uint64_t PAD_0156[8];         // unused (REMOVED b889g9)
+	TEXT_LABEL_63 DisplayJobName; // as shown in the playerlist? (@157 b889g9)
 	STRIKE_TEAM StrikeTeam;
 	uint64_t PAD_0185[7]; // pad
 	SCR_INT FMMCState;
@@ -655,7 +655,7 @@ struct GPBD_FM_Entry
 	PLAYER_STATS PlayerStats;
 	SCR_INT PAD_265;
 	SCR_INT Mood;
-	PROPERTY_DATA PropertyData; // @267 as of b3095
+	PROPERTY_DATA PropertyData; // @260 as of b889g9
 	uint64_t PAD_0779[4];       // TODO
 	uint64_t PAD_0783[12];      // no clue what it does but it looks rather interesting
 	SCR_INT AssistedKillFlags;
@@ -684,11 +684,11 @@ struct GPBD_FM_Entry
 	NIGHTCLUB_SALE NightclubSale; // @874 as of b812g9
 	SCR_INT SeatingIndex;
 	ARENA_WAR_DATA ArenaWarData; // @883 as of b812g9
-	uint64_t PAD_0861[2];
+	// int64_t PAD_0861[2]; removed b889g9
 	SCR_INT ApartmentEnterFlags;
-	SCR_VEC3 AvengerMissionStartPosition;
+	// SCR_VEC3 AvengerMissionStartPosition; removed b889g9
 };
-static_assert(sizeof(GPBD_FM_Entry) == 892 * 8);
+static_assert(sizeof(GPBD_FM_Entry) == 877 * 8);
 
 struct GPBD_FM
 {
@@ -696,4 +696,4 @@ struct GPBD_FM
 
 	static GPBD_FM* Get();
 };
-static_assert(sizeof(GPBD_FM) == 28545 * 8);
+static_assert(sizeof(GPBD_FM) == 28065 * 8);

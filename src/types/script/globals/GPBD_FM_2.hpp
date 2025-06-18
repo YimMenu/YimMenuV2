@@ -108,8 +108,9 @@ struct GPBD_FM_2_Entry
 	SCR_VEC3 CoronaPosition;                           // 40
 	GANGOPS_DATA GangopsData;                          // 43
 	RANDOM_EVENTS_CLIENT_DATA RandomEventsClientData;  // 82
+	uint64_t PAD_0149[52];                             // 149 added b889g9, salvage yard vehicle sale data
 };
-static_assert(sizeof(GPBD_FM_2_Entry) == 149 * 8);
+static_assert(sizeof(GPBD_FM_2_Entry) == 201 * 8);
 
 struct GPBD_FM_2
 {
@@ -117,4 +118,4 @@ struct GPBD_FM_2
 
 	static GPBD_FM_2* Get();
 };
-static_assert(sizeof(GPBD_FM_2) == 4769 * 8);
+static_assert(sizeof(GPBD_FM_2) == 6433 * 8);

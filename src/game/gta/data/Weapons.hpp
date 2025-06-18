@@ -4,6 +4,7 @@
 namespace YimMenu
 {
 	static inline constexpr auto g_WeaponHashes = std::to_array({
+	    "WEAPON_UNARMED"_J,
 	    "WEAPON_KNIFE"_J,
 	    "WEAPON_NIGHTSTICK"_J,
 	    "WEAPON_HAMMER"_J,

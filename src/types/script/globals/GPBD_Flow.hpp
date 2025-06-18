@@ -15,16 +15,18 @@ struct FixerFlowData
 	SCR_INT FixerCompletedFlags; // 1
 	SCR_INT PayphoneBonusKillMethod; // 2
 	SCR_INT FixerStoryFlags; // 3
-	SCR_INT FixerStoryStrand; // 4
-	SCR_INT FixerStoryCooldown; // 5
-	SCR_INT FixerFlags; // 6
-	SCR_INT FixerShortTrips; // 7
-	SCR_INT FixerCount; // 8
-	SCR_ARRAY<uint64_t, 6> FixerSecContractCompleted; // 9
-	SCR_INT FixerEarnings; // 16
-	SCR_ARRAY<FixerSecContractData, 3> FixerSecContracts; // 17
+	SCR_INT PAD_0004; // added b889g9
+	SCR_INT PAD_0005; // added b889g9
+	SCR_INT FixerStoryStrand; // 6
+	SCR_INT FixerStoryCooldown; // 7
+	SCR_INT FixerFlags; // 8
+	SCR_INT FixerShortTrips; // 9
+	SCR_INT FixerCount; // 10
+	SCR_ARRAY<uint64_t, 6> FixerSecContractCompleted; // 11
+	SCR_INT FixerEarnings; // 18
+	SCR_ARRAY<FixerSecContractData, 3> FixerSecContracts; // 19
 };
-static_assert(sizeof(FixerFlowData) == 27 * 8);
+static_assert(sizeof(FixerFlowData) == 29 * 8);
 
 struct ULPFlowData
 {
@@ -74,12 +76,13 @@ struct SALV23FlowData
 	SCR_INT PackedInt42102; // 3
 	SCR_INT SALV23ScopeFlags; // 4
 	SCR_ARRAY<uint64_t, 7> SALV23CFRCounts; // 5
+	SCR_ARRAY<uint64_t, 7> SALV23CFRCounts2; // 13, added b889g9
 	SALV23VehicleData SALV23Vehicles; // 13
 	SCR_ARRAY<uint64_t, 3> SALV23VehRobStatus; // 23
 	SCR_INT SALV23Flags; // 27
 	SCR_BOOL UNK_28; // 28
 };
-static_assert(sizeof(SALV23FlowData) == 29 * 8);
+static_assert(sizeof(SALV23FlowData) == 37 * 8);
 
 struct Bounty24STDData
 {
@@ -111,6 +114,14 @@ struct Hacker24FlowData
 };
 static_assert(sizeof(Hacker24FlowData) == 17 * 8);
 
+struct Drug25FlowData
+{
+	SCR_INT PAD_0000; // unused
+	SCR_ARRAY<uint64_t, 3> DrugMissions;
+	SCR_INT LastMissionCompleted;
+};
+static_assert(sizeof(Drug25FlowData) == 6 * 8);
+
 struct GPBD_Flow_Entry
 {
 	SCR_INT TunerFlowFlags; // 0
@@ -137,8 +148,9 @@ struct GPBD_Flow_Entry
 	SALV23FlowData SALV23Flow; // 71
 	Bounty24FlowData Bounty24Flow; // 100
 	Hacker24FlowData Hacker24Flow; // 111
+	Drug25FlowData Drug25Flow; // added b889g9
 };
-static_assert(sizeof(GPBD_Flow_Entry) == 128 * 8);
+static_assert(sizeof(GPBD_Flow_Entry) == 144 * 8);
 
 struct GPBD_Flow
 {
@@ -146,4 +158,4 @@ struct GPBD_Flow
 
 	static GPBD_Flow* Get();
 };
-static_assert(sizeof(GPBD_Flow) == 4097 * 8);
+static_assert(sizeof(GPBD_Flow) == 4609 * 8);

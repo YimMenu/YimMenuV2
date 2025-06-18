@@ -131,25 +131,31 @@ namespace YimMenu::Features
 
 		void TriggerExplosion()
 		{
-			Vector3 impactCoords;
-			if (WEAPON::GET_PED_LAST_WEAPON_IMPACT_COORD(Self::GetPed().GetHandle(), &impactCoords))
-			{
-				auto explosionType = static_cast<ExplosionType>(_SelectedExplosion.GetState());
-				float damageScale = _ExplosionDamageScale.GetState();
-				float shake = _CameraShake.GetState();
+			Hash weapon = WEAPON::GET_SELECTED_PED_WEAPON(Self::GetPed().GetHandle());
 
-				Scripts::RunWithSpoofedThreadName("am_mp_orbital_cannon"_J, [=] {
-					FIRE::ADD_OWNED_EXPLOSION(
-					    Self::GetPed().GetHandle(),
-					    impactCoords.x,
-					    impactCoords.y,
-					    impactCoords.z,
-					    static_cast<int>(explosionType),
-					    damageScale,
-					    true,  // isAudible
-					    false, // isInvisible
-					    shake);
-				});
+			// Ensure ped is using a non-melee/non-explosive weapon AND that their not using melee of any kind before applying
+			if (WEAPON::IS_PED_ARMED(Self::GetPed().GetHandle(), 4) && !PED::IS_PED_PERFORMING_MELEE_ACTION(Self::GetPed().GetHandle()))
+			{
+				Vector3 impactCoords;
+				if (WEAPON::GET_PED_LAST_WEAPON_IMPACT_COORD(Self::GetPed().GetHandle(), &impactCoords))
+				{
+					auto explosionType = static_cast<ExplosionType>(_SelectedExplosion.GetState());
+					float damageScale = _ExplosionDamageScale.GetState();
+					float shake = _CameraShake.GetState();
+
+					Scripts::RunWithSpoofedThreadName("am_mp_orbital_cannon"_J, [=] {
+						FIRE::ADD_OWNED_EXPLOSION(
+						    Self::GetPed().GetHandle(),
+						    impactCoords.x,
+						    impactCoords.y,
+						    impactCoords.z,
+						    static_cast<int>(explosionType),
+						    damageScale,
+						    true,  // isAudible
+						    false, // isInvisible
+						    shake);
+					});
+				}
 			}
 		}
 	};

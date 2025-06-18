@@ -42,8 +42,9 @@ struct SMPL_INTERIOR_DATA_SERVER
 	SCR_ARRAY<uint64_t, 32> PlayerInteriorSimpleInteriorTypes;
 	SCR_ARRAY<uint64_t, 32> PlayerInteriorIsOwnerless;
 	SCR_ARRAY<uint64_t, 32> PlayerInteriorOwners;
+	SCR_INT LastBroadcastTime; // added b889g9, unused
 };
-static_assert(sizeof(SMPL_INTERIOR_DATA_SERVER) == 234 * 8);
+static_assert(sizeof(SMPL_INTERIOR_DATA_SERVER) == 235 * 8);
 
 struct LEAVE_CLUBHOUSE_SERVER
 {
@@ -94,4 +95,4 @@ struct GSBD
 
 	static GSBD* Get();
 };
-static_assert(sizeof(GSBD) == 1498 * 8);
+static_assert(sizeof(GSBD) == 1499 * 8);

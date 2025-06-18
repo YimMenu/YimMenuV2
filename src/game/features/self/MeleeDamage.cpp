@@ -37,7 +37,7 @@ namespace YimMenu::Features
 				direction.y /= len;
 			}
 
-			float forceScale = scale * 25.0f;
+			float forceScale = scale;
 			direction.x *= forceScale;
 			direction.y *= forceScale;
 
@@ -75,23 +75,25 @@ namespace YimMenu::Features
 			if (scale <= 0.0f)
 				return;
 
-			Hash weapon;
-			if (!WEAPON::GET_CURRENT_PED_WEAPON(Self::GetPed().GetHandle(), &weapon, 0))
-				return;
+			Hash weapon = WEAPON::GET_SELECTED_PED_WEAPON(Self::GetPed().GetHandle());
 
 			PLAYER::SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(Self::GetPlayer().GetId(), scale, 1);
 
 			Hash target = PED::GET_MELEE_TARGET_FOR_PED(Self::GetPed().GetHandle());
 			if (target != 0 && ENTITY::DOES_ENTITY_EXIST(target))
 			{
-				if (WEAPON::HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON(target, weapon, true) && ENTITY::HAS_ENTITY_BEEN_DAMAGED_BY_ENTITY(target, Self::GetPed().GetHandle(), true))
+				if (PED::IS_PED_PERFORMING_MELEE_ACTION(Self::GetPed().GetHandle()))
 				{
-					applyForceToTarget(target, scale);
-
-					WEAPON::CLEAR_ENTITY_LAST_WEAPON_DAMAGE(target);
-					ENTITY::CLEAR_ENTITY_LAST_DAMAGE_ENTITY(target);
+					if (WEAPON::HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON(target, weapon, 0))
+					{
+						applyForceToTarget(target, scale);
+					}
 				}
 			}
+		}
+		void OnDisable() override
+		{
+			PLAYER::SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(Self::GetPlayer().GetId(), 1.0f, 1);
 		}
 
 	};

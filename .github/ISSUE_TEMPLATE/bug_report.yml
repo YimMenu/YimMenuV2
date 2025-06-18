@@ -78,3 +78,10 @@ body:
       options:
         - label: I've confirmed the issue exists on the latest version of YimMenuV2
           required: true
+  - type: checkboxes
+    attributes:
+      label: Duplicate
+      description: You confirm that you've read existing open issues of YimMenuV2 and this isn't a duplicate of an already existing bug.
+      options:
+        - label: I confirm that issue isn't a duplicate.
+          required: true

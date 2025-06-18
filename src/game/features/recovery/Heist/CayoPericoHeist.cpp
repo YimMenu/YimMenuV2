@@ -257,7 +257,7 @@ namespace YimMenu::Features
 				Scripts::ForceScriptHost(Scripts::FindScriptThread("fm_mission_controller_2020"_J));
 				ScriptMgr::Yield(500ms);
 
-				*ScriptLocal("fm_mission_controller_2020"_J, 52581).As<int*>() = 9;
+				*ScriptLocal("fm_mission_controller_2020"_J, 54763).As<int*>() = 9;
 				*ScriptLocal("fm_mission_controller_2020"_J, 54763).At(1776).At(1).As<int*>() = 50;
 			}
 		};

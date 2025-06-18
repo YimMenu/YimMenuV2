@@ -116,8 +116,8 @@ namespace YimMenu
 
 	void DrawSavedVariable(SavedVariableBase& var)
 	{
-		ImGui::SetNextItemWidth(175.0f);
-		ImGui::InputScalar("Index", ImGuiDataType_U32, &var.base);
+		ImGui::SetNextItemWidth(200.0f);
+		ImGui::InputScalar("Index", ImGuiDataType_U32, &var.base, (void*)1);
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(100.0f);
 		ImGui::Combo("##var_type", (int*)&var.type, "Int\0Int64\0Bitset\0Bool\0Float\0Vector\0String\0");
@@ -128,15 +128,15 @@ namespace YimMenu
 			switch (item.type)
 			{
 			case VariableAppendage::Type::OFFSET:
-				ImGui::SetNextItemWidth(100.f);
-				ImGui::InputScalar(std::format("At##{}{}", i, (int)item.type).c_str(), ImGuiDataType_S32, &item.offset);
+				ImGui::SetNextItemWidth(125.f);
+				ImGui::InputScalar(std::format("At##{}{}", i, (int)item.type).c_str(), ImGuiDataType_S32, &item.offset, (void*)1);
 				ImGui::SameLine();
-				ImGui::SetNextItemWidth(100.f);
-				ImGui::InputScalar(std::format("Size##{}{}", i, (int)item.type).c_str(), ImGuiDataType_S32, &item.size);
+				ImGui::SetNextItemWidth(125.f);
+				ImGui::InputScalar(std::format("Size##{}{}", i, (int)item.type).c_str(), ImGuiDataType_S32, &item.size, (void*)1);
 				break;
 			case VariableAppendage::Type::PLAYER_ID:
-				ImGui::SetNextItemWidth(100.f);
-				ImGui::InputScalar(std::format("Size##{}{}", i, (int)item.type).c_str(), ImGuiDataType_S32, &item.size);
+				ImGui::SetNextItemWidth(125.f);
+				ImGui::InputScalar(std::format("Size##{}{}", i, (int)item.type).c_str(), ImGuiDataType_S32, &item.size, (void*)1);
 				break;
 			}
 		}

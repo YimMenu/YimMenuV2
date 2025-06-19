@@ -38,4 +38,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 message(STATUS "Setting up linked libraries")
-target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json dbghelp d3dcompiler dwmapi)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    # Project dependencies
+    AsyncLogger
+    imgui
+    minhook
+    nlohmann_json::nlohmann_json
+    dbghelp
+
+    # ImGui dependencies
+    d3dcompiler_47
+    dwmapi
+    gdi32
+)

@@ -395,10 +395,20 @@ namespace YimMenu
 			GameSkeleton = ptr.Add(0x9).Add(3).Rip().As<rage::gameSkeleton*>();
 		});
 
-		constexpr auto anticheatInitializedHashPtrn = Pattern<"89 9E C8 00 00 00 48 8B 0D ? ? ? ? 48 85 C9 74 46">("AnticheatInitializedHash");
+		constexpr auto anticheatInitializedHashPtrn = Pattern<"89 9E C8 00 00 00 48 8B 0D ? ? ? ? 48 85 C9 74 46">("AnticheatInitializedHash&GetAnticheatInitializedHash");
 		scanner.Add(anticheatInitializedHashPtrn, [this](PointerCalculator ptr) {
 			AnticheatInitializedHash = ptr.Add(9).Rip().As<rage::Obf32**>();
 			GetAnticheatInitializedHash = ptr.Add(0x13).Rip().As<PVOID>();
+		});
+
+		constexpr auto anticheatContextPtrn = Pattern<"48 8D BB 70 0A 00 00 4C 8D 35 ? ? ? ? 66 90">("AnticheatContext");
+		scanner.Add(anticheatContextPtrn, [this](PointerCalculator ptr) {
+			AnticheatContext = ptr.Sub(0x12).Add(3).Rip().As<CAnticheatContext**>();
+		});
+
+		constexpr auto getAnticheatInitializedHash2Ptrn = Pattern<"89 9E E8 00 00 00 89 C2 E8 ? ? ? ? 69">("GetAnticheatInitializedHash2");
+		scanner.Add(getAnticheatInitializedHash2Ptrn, [this](PointerCalculator ptr) {
+			GetAnticheatInitializedHash2 = ptr.Add(0x9).Rip().As<PVOID>();
 		});
 
 		if (!scanner.Scan())

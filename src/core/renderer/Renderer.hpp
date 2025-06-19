@@ -181,6 +181,7 @@ namespace YimMenu
 		ExampleDescriptorHeapAllocator m_HeapAllocator;
 
 	private:
+		bool m_Initialized;
 		bool m_Resizing;
 
 		// Shared

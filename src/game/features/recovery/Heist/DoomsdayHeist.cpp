@@ -87,7 +87,7 @@ namespace YimMenu::Features
 			virtual void OnCall() override
 			{
 				*ScriptLocal("fm_mission_controller"_J, 1540).As<int*>() = 3;
-				*ScriptLocal("fm_content_auto_shop_delivery"_J, 1590).As<int*>() = 2;
+				*ScriptLocal("fm_mission_controller"_J, 1571).As<int*>() = 2;
 				*ScriptLocal("fm_mission_controller"_J, 1296).At(135).As<int*>() = 3;
 			}
 		};

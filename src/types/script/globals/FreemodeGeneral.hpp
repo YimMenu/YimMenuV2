@@ -58,12 +58,12 @@ struct FreemodeGeneral
 {
 	uint64_t PAD_0000[301];
 	VEHICLE_INDEX PersonalVehicleIndex; // 301
-	uint64_t PAD_0302[6551];
-	STREET_DEALERS StreetDealers; // 6853
-	uint64_t PAD_6877[57];
-	DAILY_RESET_DATA DailyReset;         // 6934
-	FREEMODE_DELIVERY_DATA DeliveryData; // 6938
+	uint64_t PAD_0302[6553];
+	STREET_DEALERS StreetDealers; // 6855
+	uint64_t PAD_6879[71];
+	DAILY_RESET_DATA DailyReset; // 6950
+	FREEMODE_DELIVERY_DATA DeliveryData; // 6954
 
 	static FreemodeGeneral* Get();
 };
-//static_assert(sizeof(FreemodeGeneral) == 7224 * 8);
+//static_assert(sizeof(FreemodeGeneral) == 7240 * 8);

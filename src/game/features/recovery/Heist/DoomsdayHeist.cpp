@@ -38,10 +38,10 @@ namespace YimMenu::Features
 			{
 				auto base = ScriptGlobal(1882449);
 
-				*base.At(0, 149).At(43).At(0).At(4).At(8).As<int*>() = 1;
-				*base.At(1, 149).At(43).At(1).At(4).At(8).As<int*>() = 1;
-				*base.At(2, 149).At(43).At(2).At(4).At(8).As<int*>() = 1;
-				*base.At(3, 149).At(43).At(3).At(4).At(8).As<int*>() = 1;
+				*base.At(0, 201).At(43).At(0).At(4).At(8).As<int*>() = 1;
+				*base.At(1, 201).At(43).At(1).At(4).At(8).As<int*>() = 1;
+				*base.At(2, 201).At(43).At(2).At(4).At(8).As<int*>() = 1;
+				*base.At(3, 201).At(43).At(3).At(4).At(8).As<int*>() = 1;
 			}
 		};
 

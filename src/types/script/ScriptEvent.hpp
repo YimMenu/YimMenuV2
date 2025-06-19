@@ -217,6 +217,7 @@ struct SCRIPT_EVENT_COLLECT_COLLECTABLE : public SCRIPT_EVENT
 		Tagging = 19,
 		SprayCans = 20,
 		Yuanbao = 21,
+		SmokeOnTheWater = 22
 	};
 
 	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_COLLECT_COLLECTABLE, CollectCollectable);

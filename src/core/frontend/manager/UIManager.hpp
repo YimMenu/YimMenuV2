@@ -58,6 +58,6 @@ namespace YimMenu
 		std::shared_ptr<Submenu> m_ActiveSubmenu;
 		std::vector<std::shared_ptr<Submenu>> m_Submenus;
 		ImFont* m_OptionsFont = nullptr;
-		bool m_ShowContentWindow = false;
+		bool m_ShowContentWindow = true;
 	};
 }

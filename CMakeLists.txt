@@ -51,3 +51,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     dwmapi
     gdi32
 )
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+    # Do not warn about non-reproducible code
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-date-time>
+    $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wno-date-time>
+)

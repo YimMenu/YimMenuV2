@@ -46,9 +46,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Cross-compilation
     strategy:
-      # Currently Clang is failing to build due to a bug in MinGW on Ubuntu 24.04 which causes ImGui to not compile.
-      # Remove `fast-fail` when the issue is resolved. See: https://github.com/ocornut/imgui/pull/8702
-      fail-fast: false
       matrix:
         compiler: ["Zig", "Clang"]
     steps:

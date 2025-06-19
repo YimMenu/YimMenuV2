@@ -33,7 +33,7 @@ namespace YimMenu::Features
 					m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
 					if (!skipGunLockerMenuChecksPatch)
 					{
-						skipGunLockerMenuChecksPatch = ScriptPatches::AddPatch("AM_MP_AUTO_SHOP"_J, ScriptPointer("SkipGunLockerMenuChecksPatch", "56 08 01 2C 01 03 A5"), {0x55, 0xB1, 0x00});
+						skipGunLockerMenuChecksPatch = ScriptPatches::AddPatch("AM_MP_AUTO_SHOP"_J, ScriptPointer("SkipGunLockerMenuChecksPatch", "72 5D ? ? ? 56 ? ? 2C ? ? ? 2C ? ? ? 06").Add(5), {0x55, 0xB1, 0x00});
 					}
 					skipGunLockerMenuChecksPatch->Enable();
 				}
@@ -45,7 +45,7 @@ namespace YimMenu::Features
 			}
 
 			static ScriptFunction runGunLockerMenu("AM_MP_AUTO_SHOP"_J, ScriptPointer("RunGunLockerMenu", "2D 06 08 00 00 38 03 5D ? ? ? 57 03 00"));
-			auto gunLockerData = ScriptLocal(m_Thread, 290).At(569);
+			auto gunLockerData = ScriptLocal(m_Thread, 292).At(583);
 
 			int unused;
 			runGunLockerMenu.Call<void>(gunLockerData.As<void*>(), &unused, eSimpleInteriorIndex::SIMPLE_INTERIOR_AUTO_SHOP_MISSION_ROW, Self::GetPlayer().GetId(), false, true);

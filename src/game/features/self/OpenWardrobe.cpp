@@ -52,7 +52,7 @@ namespace YimMenu::Features
 
 			if (!shouldCleanupWardrobePatch)
 			{
-				shouldCleanupWardrobePatch = ScriptPatches::AddPatch("wardrobe_mp"_J, ScriptPointer("ShouldCleanupWardrobePatch", "2C 01 00 40 2C 05 02 69 06 56 1C 07"), {0x72, 0x2E, 0x05, 0x01});
+				shouldCleanupWardrobePatch = ScriptPatches::AddPatch("wardrobe_mp"_J, ScriptPointer("ShouldCleanupWardrobePatch", "2C ? ? ? 2C ? ? ? 06 56 ? ? 2C ? ? ? 56 ? ? 2C"), {0x72, 0x2E, 0x05, 0x01});
 			}
 			shouldCleanupWardrobePatch->Enable();
 
@@ -105,7 +105,7 @@ namespace YimMenu::Features
 		{
 			if (auto thread = Scripts::FindScriptThread("wardrobe_mp"_J))
 			{
-				if (*ScriptLocal(thread, 187).At(46).At(9).As<int*>() == 4)
+				if (*ScriptLocal(thread, 189).At(46).At(9).As<int*>() == 4)
 				{
 					shouldCleanupWardrobePatch->Disable();
 					isWardrobeOpenedPatch->Disable();

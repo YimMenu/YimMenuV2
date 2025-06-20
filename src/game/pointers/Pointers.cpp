@@ -309,7 +309,7 @@ namespace YimMenu
 			NetworkTime = ptr.Add(2).Rip().As<std::uint32_t*>();
 		});
 
-		constexpr auto gameTimerPtrn = Pattern<"3B 2D ? ? ? ? 76">("GameTimer");
+		constexpr auto gameTimerPtrn = Pattern<"3B 2D ? ? ? ? 76 ? 89 D9">("GameTimer");
 		scanner.Add(gameTimerPtrn, [this](PointerCalculator ptr) {
 			GameTimer = ptr.Add(2).Rip().As<std::uint32_t*>();
 		});

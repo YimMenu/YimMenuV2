@@ -73,7 +73,7 @@ namespace YimMenu::Features
 			case eAppVinewoodMenuSafe::GARMENT_FACTORY:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.HackerDenData.SafeCashValue > 0)
-					*ScriptGlobal(2708246).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708252).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::HANDS_ON_CAR_WASH:

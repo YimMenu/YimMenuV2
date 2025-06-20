@@ -37,7 +37,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RelWithDebInfo-Clang
+          name: RelWithDebInfo-Native-Clang
           path: |
             build/YimMenuV2-dev-*.dll
             build/YimMenuV2-dev-*.pdb

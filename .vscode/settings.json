@@ -1,6 +1,9 @@
 {
+    "cmake.configureSettings": {
+        "CMAKE_GENERATOR": "Ninja"
+    },
     "files.associations": {
-        "*.c": "c",
+        ".clangd": "yaml",
         "string_view": "cpp",
         "algorithm": "cpp",
         "atomic": "cpp",

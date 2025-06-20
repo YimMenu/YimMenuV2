@@ -1,0 +1,67 @@
+# Use `zig cc` as the compiler for C files
+If:
+  PathMatch: [
+    .*\.c,
+    .*\.h,
+  ]
+CompileFlags:
+  Compiler: zig cc
+---
+# Use `clang` as the compiler for C files
+If:
+  PathMatch: [
+    .*\.c,
+    .*\.h,
+  ]
+CompileFlags:
+  Compiler: clang
+---
+# Use `zig c++` as the compiler for C++ files
+If:
+  PathMatch: [
+    .*\.cpp,
+    .*\.c\+\+,
+    .*\.cc,
+    .*\.cp,
+    .*\.cppm,
+    .*\.cxx,
+    .*\.h\+\+,
+    .*\.hh,
+    .*\.hpp,
+    .*\.hxx,
+    .*\.inc,
+    .*\.inl,
+    .*\.ino,
+    .*\.ipp,
+    .*\.ixx,
+    .*\.re,
+    .*\.tcc,
+    .*\.tpp,
+  ]
+CompileFlags:
+  Compiler: zig c++
+---
+# Use `clang++` as the compiler for C++ files
+If:
+  PathMatch: [
+    .*\.cpp,
+    .*\.c\+\+,
+    .*\.cc,
+    .*\.cp,
+    .*\.cppm,
+    .*\.cxx,
+    .*\.h\+\+,
+    .*\.hh,
+    .*\.hpp,
+    .*\.hxx,
+    .*\.inc,
+    .*\.inl,
+    .*\.ino,
+    .*\.ipp,
+    .*\.ixx,
+    .*\.re,
+    .*\.tcc,
+    .*\.tpp,
+  ]
+CompileFlags:
+  Compiler: clang++

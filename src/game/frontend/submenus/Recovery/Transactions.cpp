@@ -134,7 +134,7 @@ namespace YimMenu::Submenus
 
 	struct TransactionItemHash
 	{
-		char m_Name[54]{};
+		char m_Name[128]{};
 		std::uint32_t m_Hash;
 		std::uint32_t m_IntendedCategory;
 		int m_IntendedPrice;

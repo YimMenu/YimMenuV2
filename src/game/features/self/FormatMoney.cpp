@@ -27,7 +27,11 @@ namespace YimMenu::Features
 				formatIntCaller2Hook = CallSiteHook::AddHook(Pointers.FormatIntCaller2, reinterpret_cast<void*>(FormatIntHook));
 			}
 			formatIntCaller2Hook->Enable();
-			NativeHooks::AddHook("shop_controller"_J, NativeIndex::SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT, &ScaleformAddIntHook);
+			static auto hooked = []()
+			{
+				NativeHooks::AddHook("shop_controller"_J, NativeIndex::SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT, &ScaleformAddIntHook);
+				return true;
+			}();
 		}
 
 		virtual void OnDisable() override

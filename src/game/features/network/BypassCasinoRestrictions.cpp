@@ -13,8 +13,11 @@ namespace YimMenu::Features
 
 		virtual void OnEnable() override
 		{
-			NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS, NativeIndex::NETWORK_CASINO_CAN_BET, &NetworkCasinoCanBetHook);
-			NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS, NativeIndex::NETWORK_CASINO_CAN_BUY_CHIPS_PVC, &NetworkCasinoCanBuyChipsPVCHook);
+			static auto hooked = []() {
+				NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS, NativeIndex::NETWORK_CASINO_CAN_BET, &NetworkCasinoCanBetHook);
+				NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS, NativeIndex::NETWORK_CASINO_CAN_BUY_CHIPS_PVC, &NetworkCasinoCanBuyChipsPVCHook);
+				return true;
+			}();
 		}
 	};
 

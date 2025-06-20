@@ -3,13 +3,13 @@
 
 namespace YimMenu
 {
-    static constexpr auto creatorScripts = std::to_array({
-        "fm_race_creator"_J,
-        "fm_survival_creator"_J,
-        "fm_lts_creator"_J,
-        "fm_deathmatch_creator"_J,
-        "fm_capture_creator"_J,
-    });
+	static constexpr auto creatorScripts = std::to_array({
+	    "fm_race_creator"_J,
+	    "fm_survival_creator"_J,
+	    "fm_lts_creator"_J,
+	    "fm_deathmatch_creator"_J,
+	    "fm_capture_creator"_J,
+	});
 	
 	class EnableCreatorDevMode : public BoolCommand
 	{

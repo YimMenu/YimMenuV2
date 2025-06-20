@@ -151,6 +151,16 @@ namespace YimMenu
 			GetInstance().ResizeImpl(scale);
 		}
 
+		static void SetFontsUpdated()
+		{
+			GetInstance().m_FontsUpdated = true;
+		}
+
+		static void SetSafeToRender()
+		{
+			GetInstance().m_SafeToRender = true;
+		}
+
 	private:
 		static void DX12NewFrame();
 		static void DX12EndFrame();
@@ -183,6 +193,7 @@ namespace YimMenu
 	private:
 		bool m_Initialized;
 		bool m_Resizing;
+		bool m_SafeToRender;
 
 		// Shared
 		ImFontAtlas m_FontAtlas;
@@ -205,6 +216,8 @@ namespace YimMenu
 		UINT64 m_FenceLastSignaledValue{};
 		HANDLE m_SwapchainWaitableObject{};
 		UINT64 m_FrameIndex{};
+
+		bool m_FontsUpdated;
 
 	private:
 		//Other

@@ -5,6 +5,7 @@
 #include "core/commands/LoopedCommand.hpp"
 #include "game/backend/Self.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "game/frontend/items/DrawHotkey.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -33,62 +34,7 @@ namespace YimMenu::Submenus
 
 		for (auto& [name, link] : sortedCommands)
 		{
-			ImGui::PushID(link);
-
-			ImGui::Button(name.data());
-
-			bool active = ImGui::IsItemActive();
-
-			if (active)
-			{
-				HotkeySystem::SetBeingModifed(true);
-				g_HotkeySystem.CreateHotkey(link->m_Chain);
-			}
-
-			ImGui::SameLine(250);
-			ImGui::BeginGroup();
-
-			if (link->m_Chain.empty())
-			{
-				if (active)
-					ImGui::Text("Press any button...");
-				else
-					ImGui::Text("No hotkey assigned");
-			}
-			else
-			{
-				ImGui::PushItemWidth(35);
-				int i = 0;
-				for (auto key : link->m_Chain)
-				{
-					char key_label[32];
-					strcpy(key_label, g_HotkeySystem.GetHotkeyLabel(key).data());
-
-					ImGui::PushID(i);
-					ImGui::InputText("##keylabel", key_label, 32, ImGuiInputTextFlags_ReadOnly);
-					if (ImGui::IsItemClicked())
-						std::erase_if(link->m_Chain, [key](int j) {
-							return j == key;
-						});
-					ImGui::PopID();
-
-					i++;
-					ImGui::SameLine();
-				}
-				ImGui::PopItemWidth();
-
-				ImGui::SameLine();
-				if (ImGui::Button("Clear"))
-				{
-					link->m_Chain.clear();
-				}
-			}
-
-			ImGui::EndGroup();
-
-			ImGui::Spacing();
-
-			ImGui::PopID();
+			DrawHotkey(link, name);
 		}
 	};
 

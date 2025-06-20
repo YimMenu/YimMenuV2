@@ -73,6 +73,22 @@ struct RANDOM_EVENTS_CLIENT_DATA
 };
 static_assert(sizeof(RANDOM_EVENTS_CLIENT_DATA) == 67 * 8);
 
+struct HOCW_DATA
+{
+	uint64_t PAD_0000[2];
+	SCR_INT SafeCashValue; // 2
+	uint64_t PAD_0003[13];
+};
+static_assert(sizeof(HOCW_DATA) == 16 * 8);
+
+struct SALVAGE_YARD_VEHICLE_SALE_DATA
+{
+	uint64_t PAD_0000[27];
+	HOCW_DATA HOWCData; // 27
+	uint64_t PAD_0043[9];
+};
+static_assert(sizeof(SALVAGE_YARD_VEHICLE_SALE_DATA) == 52 * 8);
+
 struct GPBD_FM_2_Entry
 {
 	SCR_INT NumTeams;                                  // 0
@@ -108,7 +124,7 @@ struct GPBD_FM_2_Entry
 	SCR_VEC3 CoronaPosition;                           // 40
 	GANGOPS_DATA GangopsData;                          // 43
 	RANDOM_EVENTS_CLIENT_DATA RandomEventsClientData;  // 82
-	uint64_t PAD_0149[52];                             // 149 added b889g9, salvage yard vehicle sale data
+	SALVAGE_YARD_VEHICLE_SALE_DATA SYVehSaleData;      // 149 added b889g9
 };
 static_assert(sizeof(GPBD_FM_2_Entry) == 201 * 8);
 

@@ -47,6 +47,8 @@ namespace YimMenu::Features
 
 	static ListCommand animalIndex = {"animalindex", "Animal", "Selected Animal", {{0, "Animal 1"}, {1, "Animal 2"}, {2, "Animal 3"}}};
 
+	static ListCommand productIndex = {"productindex", "Product", "Selected Product", {{0, "Product 1"}, {1, "Product 2"}, {2, "Product 3"}, {3, "Product 4"}, {4, "Product 5"}, {5, "Product 6"}, {6, "Product 7"}, {7, "Product 8"}, {8, "Product 9"}, {9, "Product 10"}}};
+
 	static constexpr auto wildlifePhotographyAnimalHashes = std::to_array({"A_C_Boar"_J, "A_C_Cat_01"_J, "A_C_Cow"_J, "A_C_Coyote"_J, "A_C_Deer"_J, "A_C_Husky"_J, "A_C_MtLion"_J, "A_C_Pig"_J, "A_C_Poodle"_J, "A_C_Pug"_J, "A_C_Rabbit_01"_J, "A_C_Retriever"_J, "A_C_Rottweiler"_J, "A_C_shepherd"_J, "A_C_Westy"_J, "A_C_Chickenhawk"_J, "A_C_Cormorant"_J, "A_C_Crow"_J, "A_C_Hen"_J, "A_C_Seagull"_J});
 
 	static void SetAllDailyActivitiesCompleted(bool completed)
@@ -77,6 +79,16 @@ namespace YimMenu::Features
 		Stats::SetPackedBool(42059, completed); // Shoot Animals Photography 1
 		Stats::SetPackedBool(42060, completed); // Shoot Animals Photography 2
 		Stats::SetPackedBool(42061, completed); // Shoot Animals Photography 3
+		Stats::SetPackedBool(54672, completed); // Smoke on the Water Product 1
+		Stats::SetPackedBool(54673, completed); // Smoke on the Water Product 2
+		Stats::SetPackedBool(54674, completed); // Smoke on the Water Product 3
+		Stats::SetPackedBool(54675, completed); // Smoke on the Water Product 4
+		Stats::SetPackedBool(54676, completed); // Smoke on the Water Product 5
+		Stats::SetPackedBool(54677, completed); // Smoke on the Water Product 6
+		Stats::SetPackedBool(54678, completed); // Smoke on the Water Product 7
+		Stats::SetPackedBool(54679, completed); // Smoke on the Water Product 8
+		Stats::SetPackedBool(54680, completed); // Smoke on the Water Product 9
+		Stats::SetPackedBool(54681, completed); // Smoke on the Water Product 10
 		// Street Dealers
 		for (int i = 0; i < 3; ++i)
 		{
@@ -192,7 +204,7 @@ namespace YimMenu::Features
 				}
 			}
 
-			auto streetDealerData = ScriptLocal(m_Thread, 253).At(12);
+			auto streetDealerData = ScriptLocal(m_Thread, 256).At(12);
 
 			if (!initialized)
 			{
@@ -201,7 +213,7 @@ namespace YimMenu::Features
 				    FreemodeGeneral::Get()->StreetDealers.Dealers[selected].Location;
 				FreemodeGeneral::Get()->StreetDealers.ClosetsDealerIndex = selected;
 
-				static ScriptFunction initStreetDealerData("fm_street_dealer"_J, ScriptPointer("InitStreetDealerData", "2D 00 07 00 00 61 E9 CE 29"));
+				static ScriptFunction initStreetDealerData("fm_street_dealer"_J, ScriptPointer("InitStreetDealerData", "2D 00 07 00 00 61"));
 				initStreetDealerData.Call<void>();
 				streetDealerData.At(5).As<SCR_BITSET<uint64_t>*>()->Set(0);
 				initialized = true;
@@ -643,8 +655,8 @@ namespace YimMenu::Features
 			{
 				thread->m_Context.m_State = rage::scrThread::State::PAUSED;
 
-				*ScriptLocal(thread, 3060).At(130).At(1).As<int*>() = FreemodeGeneral::Get()->DailyReset.Seed % 14; // if we don't init this, the par time duration function will return 0 and the COMPLETED stat will be set to 0, which is bad
-				*ScriptLocal(thread, 142).At(4).As<int*>() = 0;
+				*ScriptLocal(thread, 3088).At(131).At(1).As<int*>() = FreemodeGeneral::Get()->DailyReset.Seed % 14; // if we don't init this, the par time duration function will return 0 and the COMPLETED stat will be set to 0, which is bad
+				*ScriptLocal(thread, 144).At(4).As<int*>() = 0;
 				static ScriptFunction onBTTEnd("fm_content_bicycle_time_trial"_J,
 				    ScriptPointer("OnBTTEnd", "64 ? ? ? 5D ? ? ? 75 77").Add(1).Rip());
 				onBTTEnd.Call<void>();
@@ -783,8 +795,8 @@ namespace YimMenu::Features
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					int combination = *ScriptLocal(thread, 142).At(22).At(i, 2).At(1).As<int*>();
-					*ScriptLocal(thread, 142).At(22).At(i, 2).As<float*>() = combination;
+					int combination = *ScriptLocal(thread, 144).At(22).At(i, 2).At(1).As<int*>();
+					*ScriptLocal(thread, 144).At(22).At(i, 2).As<float*>() = combination;
 				}
 			}
 		}
@@ -902,7 +914,7 @@ namespace YimMenu::Features
 
 			if (auto thread = Scripts::FindScriptThread("fm_content_daily_bounty"_J))
 			{
-				if (auto coords = *ScriptLocal(thread, 239).At(434).At(1).At(0, 4).As<Vector3*>())
+				if (auto coords = *ScriptLocal(thread, 241).At(434).At(1).At(0, 4).As<Vector3*>())
 				{
 					Self::GetPed().TeleportTo(coords);
 				}
@@ -960,6 +972,58 @@ namespace YimMenu::Features
 		}
 	};
 
+	class TeleportToProduct : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+				return;
+
+			if (Stats::GetInt("MPX_SB_WEED_SHOP_OWNED") == 0)
+			{
+				Notifications::Show("Smoke on the Water", "You must own a Smoke on the Water property.", NotificationType::Error);
+				return;
+			}
+
+			if (!Stats::GetPackedBool(54672 + productIndex.GetState()))
+			{
+				TeleportToCollectable(SCRIPT_EVENT_COLLECT_COLLECTABLE::eCollectables::SmokeOnTheWater, productIndex.GetState());
+			}
+			else
+			{
+				Notifications::Show("Smoke on the Water", "This product has already been collected.", NotificationType::Error);
+			}
+		}
+	};
+
+	class CollectProduct : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+				return;
+
+			if (Stats::GetInt("MPX_SB_WEED_SHOP_OWNED") == 0)
+			{
+				Notifications::Show("Smoke on the Water", "You must own a Smoke on the Water property.", NotificationType::Error);
+				return;
+			}
+
+			if (!Stats::GetPackedBool(54672 + productIndex.GetState()))
+			{
+				CollectCollectable(SCRIPT_EVENT_COLLECT_COLLECTABLE::eCollectables::SmokeOnTheWater, productIndex.GetState());
+			}
+			else
+			{
+				Notifications::Show("Smoke on the Water", "This product has already been collected.", NotificationType::Error);
+			}
+		}
+	};
+
 	static SetAllActivitiesCompleted _SetAllActivitiesCompleted{"setallactivitiescompleted", "Set All Activities Completed", "Switch session to apply the changes."};
 	static ResetAllActivities _ResetAllActivities{"resetallactivities", "Reset All Activities", "Switch session to apply the changes."};
 
@@ -1005,4 +1069,7 @@ namespace YimMenu::Features
 
 	static SpawnAnimal _SpawnAnimal{"spawnanimal", "Spawn Animal", "Spawns the selected animal."};
 	static PhotographAnimal _PhotographAnimal{"photographanimal", "Photograph Animal", "Photographs the selected animal."};
+
+	static TeleportToProduct _TeleportToProduct{"tptoproduct", "Teleport to Product", "Teleports to the selected product."};
+	static CollectProduct _CollectProduct{"collectproduct", "Collect Product", "Collects the selected product."};
 }

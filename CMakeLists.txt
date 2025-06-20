@@ -47,7 +47,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     dbghelp
 
     # ImGui dependencies
-    d3dcompiler_47
+    $<IF:$<BOOL:${CROSSCOMPILE}>,d3dcompiler_47,d3dcompiler>
     dwmapi
     gdi32
 )

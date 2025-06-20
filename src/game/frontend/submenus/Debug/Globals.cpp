@@ -67,9 +67,8 @@ namespace YimMenu::Submenus
 			{
 				for (auto& var : SavedVariables::GetSavedGlobals())
 				{
-					const auto& value = var.Read();
-					ImGui::PushID(value);
-					DrawSavedVariablePreview(var, value);
+					ImGui::PushID(var.name.c_str());
+					DrawSavedVariablePreview(var, var.Read());
 					ImGui::PopID();
 				}
 				ImGui::EndListBox();

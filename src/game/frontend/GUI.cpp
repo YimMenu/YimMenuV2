@@ -43,6 +43,8 @@ namespace YimMenu
 			    Overlay::Draw();
 		    },
 		    -6);
+
+		Renderer::SetSafeToRender();
 	}
 
 	GUI::~GUI()

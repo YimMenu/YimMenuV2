@@ -162,6 +162,7 @@ namespace YimMenu
 		PVOID GetAnticheatInitializedHash;
 		PVOID GetAnticheatInitializedHash2;
 		CAnticheatContext** AnticheatContext;
+		BytePatch AbilityBarPatch;
 	};
 
 	struct Pointers : PointerData

@@ -44,6 +44,9 @@ namespace YimMenu::Submenus
 	{
 		auto hotkeys = std::make_shared<Category>("Hotkeys");
 		auto gui = std::make_shared<Category>("GUI");
+		auto game = std::make_shared<Category>("Game");
+
+		auto uiStyle = std::make_shared<Group>("UI");
 		auto playerEsp = std::make_shared<Group>("Player ESP", 10);
 		auto pedEsp = std::make_shared<Group>("Ped ESP", 10);
 		auto objectEsp = std::make_shared<Group>("Object ESP");
@@ -53,6 +56,8 @@ namespace YimMenu::Submenus
 		hotkeys->AddItem(std::make_shared<ImGuiItem>(Hotkeys));
 
 		// Players
+		uiStyle->AddItem(std::make_shared<ListCommandItem>("styleselector"_J));
+
 		playerEsp->AddItem(std::make_shared<BoolCommandItem>("espdrawplayers"_J));
 		playerEsp->AddItem(std::make_shared<ConditionalItem>("espdrawplayers"_J, std::make_shared<BoolCommandItem>("espdrawdeadplayers"_J)));
 
@@ -92,13 +97,16 @@ namespace YimMenu::Submenus
 
 		chat->AddItem(std::make_shared<BoolCommandItem>("clearchat"_J));
 
-		gui->AddItem(playerEsp);
-		gui->AddItem(pedEsp);
-		gui->AddItem(objectEsp);
+		game->AddItem(playerEsp);
+		game->AddItem(pedEsp);
+		game->AddItem(objectEsp);
+
+		gui->AddItem(uiStyle);
 		gui->AddItem(overlay);
 		gui->AddItem(chat);
 
 		AddCategory(std::move(hotkeys));
 		AddCategory(std::move(gui));
+		AddCategory(std::move(game));
 	}
 }

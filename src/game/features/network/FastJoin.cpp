@@ -13,9 +13,13 @@ namespace YimMenu::Features
 
 		virtual void OnEnable() override
 		{
-			NativeHooks::AddHook("freemode"_J, NativeIndex::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA, &BroadcastHook);
-			NativeHooks::AddHook("fmmc_launcher"_J, NativeIndex::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA, &BroadcastHook);
-			NativeHooks::AddHook("am_launcher"_J, NativeIndex::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA, &BroadcastHook);
+			static auto hooked = []()
+			{
+				NativeHooks::AddHook("freemode"_J, NativeIndex::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA, &BroadcastHook);
+				NativeHooks::AddHook("fmmc_launcher"_J, NativeIndex::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA, &BroadcastHook);
+				NativeHooks::AddHook("am_launcher"_J, NativeIndex::NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA, &BroadcastHook);
+				return true;
+			}();
 		}
 	};
 

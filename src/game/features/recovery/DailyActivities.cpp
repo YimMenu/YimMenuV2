@@ -962,8 +962,8 @@ namespace YimMenu::Features
 					return;
 
 				ScriptGlobal(2708777).At(544).As<SCR_BITSET<uint64_t>*>()->Set(6);
-				*ScriptGlobal(2708777).At(547).As<joaat_t*>() = wildlifePhotographyAnimalHashes[index];
-				*ScriptGlobal(2708777).At(548).As<int*>() = *Pointers.GameTimer - 1; // bypass 2 sec delay
+				*ScriptGlobal(2708777).At(548).As<joaat_t*>() = wildlifePhotographyAnimalHashes[index];
+				*ScriptGlobal(2708777).At(549).As<int*>() = *Pointers.GameTimer - 1; // bypass 2 sec delay
 			}
 			else
 			{

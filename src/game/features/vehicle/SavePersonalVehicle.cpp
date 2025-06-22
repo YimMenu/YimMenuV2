@@ -21,7 +21,7 @@ namespace YimMenu::Features
 			if (!m_ShouldRunScript)
 				continue;
 
-			if (!*Pointers.IsSessionStarted || !Self::GetVehicle().IsValid())
+			if (!*Pointers.IsSessionStarted || !Self::GetVehicle().IsValid()) // if transition happens or player gets out of vehicle, cleanup immediately
 			{
 				if (m_StartedByUs && m_Thread)
 				{
@@ -35,18 +35,26 @@ namespace YimMenu::Features
 
 			if (!m_Thread)
 			{
-				int id = Scripts::StartScript("AM_MP_VEHICLE_REWARD"_J, eStackSizes::FRIEND);
-				m_Thread = Scripts::FindScriptThreadByID(id);
-				if (m_Thread)
+				if (Scripts::IsScriptActive("AM_MP_VEHICLE_REWARD"_J)) // This script already runs in freemode, so check if it is active first
 				{
-					m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
-					m_StartedByUs = true;
+					m_Thread = Scripts::FindScriptThread("AM_MP_VEHICLE_REWARD"_J);
 				}
-				else
+				else // if not (e.g., we are in a mission), start and pause it
 				{
-					m_ShouldRunScript = false;
-					continue;
+					int id = Scripts::StartScript("AM_MP_VEHICLE_REWARD"_J, eStackSizes::FRIEND);
+					m_Thread = Scripts::FindScriptThreadByID(id);
+					if (m_Thread)
+					{
+						m_Thread->m_Context.m_State = rage::scrThread::State::PAUSED;
+						m_StartedByUs = true; // mark so we only kill it if started by us
+					}
 				}
+			}
+
+			if (!m_Thread) // if still invalid, exit early
+			{
+				m_ShouldRunScript = false;
+				continue;
 			}
 
 			if (auto VehicleRewardData = VEHICLE_REWARD_DATA::Get(m_Thread))
@@ -55,7 +63,7 @@ namespace YimMenu::Features
 				static ScriptFunction giveVehicleReward("AM_MP_VEHICLE_REWARD"_J, ScriptPointer("GiveVehicleReward", "2D 0C 1E 00 00"));
 				if (giveVehicleReward.Call<bool>(Self::GetVehicle().GetHandle(), VehicleMenuData, &VehicleRewardData->TransactionStatus, &VehicleRewardData->Garage, &VehicleRewardData->GarageOffset, &VehicleRewardData->ControlStatus, false, true, true, false, 0, -1))
 				{
-					if (VehicleRewardData->ControlStatus != 3)
+					if (VehicleRewardData->ControlStatus != 3) // success (player either saved the vehicle or exited the menu)
 					{
 						VehicleRewardData->TransactionStatus = 0;
 						VehicleRewardData->Garage = 0;
@@ -75,7 +83,7 @@ namespace YimMenu::Features
 	}
 
 	// Some vehicles cannot be safely acquired using this method, see #443
-	static const std::unordered_set<std::uint32_t> s_BlacklistedVehicles = {"rcbandito"_J, "minitank"_J, "thruster"_J, "terbyte"_J, "avenger"_J, "hauler2"_J, "phantom3"_J, "speedo4"_J, "pounder2"_J, "mule4"_J, "kosatka"_J, "policet3"_J, "brickade2"_J};
+	static const std::unordered_set<std::uint32_t> s_BlacklistedVehicles = {"rcbandito"_J, "minitank"_J, "thruster"_J, "terbyte"_J, "avenger"_J, "policet3"_J, "brickade2"_J};
 
 	class _SavePersonalVehicle : public Command
 	{

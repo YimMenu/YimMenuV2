@@ -23,10 +23,10 @@ namespace YimMenu::Features
 			{
 				auto base = ScriptGlobal(1964170).At(812).At(50);
 
-				*base.At(1).As<int*>() = _DoomsdayHeistCut1.GetState();
-				*base.At(2).As<int*>() = _DoomsdayHeistCut2.GetState();
-				*base.At(3).As<int*>() = _DoomsdayHeistCut3.GetState();
-				*base.At(4).As<int*>() = _DoomsdayHeistCut4.GetState();
+				*base.At(0, 1).As<int*>() = _DoomsdayHeistCut1.GetState();
+				*base.At(1, 1).As<int*>() = _DoomsdayHeistCut2.GetState();
+				*base.At(2, 1).As<int*>() = _DoomsdayHeistCut3.GetState();
+				*base.At(3, 1).As<int*>() = _DoomsdayHeistCut4.GetState();
 			}
 		};
 
@@ -38,14 +38,18 @@ namespace YimMenu::Features
 			{
 				auto base = ScriptGlobal(1882449);
 
-				*base.At(0, 201).At(43).At(0).At(4).At(8).As<int*>() = 1;
-				*base.At(1, 201).At(43).At(1).At(4).At(8).As<int*>() = 1;
-				*base.At(2, 201).At(43).At(2).At(4).At(8).As<int*>() = 1;
-				*base.At(3, 201).At(43).At(3).At(4).At(8).As<int*>() = 1;
+				for (int i = 0; i <= 3; i++)
+				{
+					*base.At(i, 201).At(43).At(11).At(i, 1).As<int*>() = 1;
+				}
 			}
 		};
 
-		static std::vector<std::pair<int, const char*>> doomsdayHeistCategory = {{0, "The Data Breaches"}, {1, "The Bogdan Problem"}, {2, "The Doomsday Senario"}};
+		static std::vector<std::pair<int, const char*>> doomsdayHeistCategory = {
+			{0, "The Data Breaches"},
+			{1, "The Bogdan Problem"},
+			{2, "The Doomsday Senario"}
+		};
 		static ListCommand _DoomsdayHeistCategory{"doomsdayheistcategory", "Select Heist", "Heist categories", doomsdayHeistCategory, 0};
 
 		class Setup : public Command
@@ -76,7 +80,8 @@ namespace YimMenu::Features
 
 				ScriptMgr::Yield(500ms);
 
-				*ScriptLocal("gb_gang_ops_planning"_J, 207).As<int*>() = 6; // Reload planning screen
+				if (auto thread = Scripts::FindScriptThread("gb_gang_ops_planning"_J))
+					*ScriptLocal(thread, 209).As<int*>() = 6;
 			}
 		};
 
@@ -86,9 +91,12 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				*ScriptLocal("fm_mission_controller"_J, 1540).As<int*>() = 3;
-				*ScriptLocal("fm_mission_controller"_J, 1571).As<int*>() = 2;
-				*ScriptLocal("fm_mission_controller"_J, 1296).At(135).As<int*>() = 3;
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
+				{
+					*ScriptLocal(thread, 1570).As<int*>() = 2;
+					*ScriptLocal(thread, 1539).As<int*>() = 3;
+					*ScriptLocal(thread, 1296).At(135).As<int*>() = 3;
+				}
 			}
 		};
 
@@ -98,14 +106,16 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				Scripts::ForceScriptHost(Scripts::FindScriptThread("fm_mission_controller"_J));
-				ScriptMgr::Yield(500ms);
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
+				{
+					Scripts::ForceScriptHost(thread);
+					ScriptMgr::Yield(500ms);
 
-				*ScriptLocal("fm_mission_controller"_J, 20391).At(1725).At(1).As<int*>() = 80;
-				*ScriptLocal("fm_mission_controller"_J, 20391).As<int*>() = 12;
-				*ScriptLocal("fm_mission_controller"_J, 29011).At(1).As<int*>() = 99999;
-				*ScriptLocal("fm_mission_controller"_J, 32467).At(1).At(68).As<int*>() = 99999;
-
+					*ScriptLocal(thread, 20391).At(1725).At(0, 1).As<int*>() = 80;
+					*ScriptLocal(thread, 20391).As<int*>() = 12;
+					*ScriptLocal(thread, 29011).At(0, 1).As<int*>() = 99999;
+					*ScriptLocal(thread, 32467).At(0, 294).At(68).As<int*>() = 99999;
+				}
 				// TODO: find a way of getting current heist info so that InstantFinishAct3 can be implemented here conditionally.
 			}
 		};
@@ -116,14 +126,17 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				Scripts::ForceScriptHost(Scripts::FindScriptThread("fm_mission_controller"_J));
-				ScriptMgr::Yield(500ms);
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
+				{
+					Scripts::ForceScriptHost(thread);
+					ScriptMgr::Yield(500ms);
 
-				*ScriptLocal("fm_mission_controller"_J, 20391).As<int*>() = 12;
-				*ScriptLocal("fm_mission_controller"_J, 20391).At(1740).At(1).As<int*>() = 150;
-				*ScriptLocal("fm_mission_controller"_J, 20391).At(1062).As<int*>() = 5;
-				*ScriptLocal("fm_mission_controller"_J, 29011).At(1).As<int*>() = 99999;
-				*ScriptLocal("fm_mission_controller"_J, 32467).At(1).At(68).As<int*>() = 99999;
+					*ScriptLocal(thread, 20391).As<int*>() = 12;
+					*ScriptLocal(thread, 20391).At(1740).At(0, 1).As<int*>() = 150;
+					*ScriptLocal(thread, 20391).At(1062).As<int*>() = 5;
+					*ScriptLocal(thread, 29011).At(0, 1).As<int*>() = 99999;
+					*ScriptLocal(thread, 32467).At(0, 294).At(68).As<int*>() = 99999;
+				}
 			}
 		};
 

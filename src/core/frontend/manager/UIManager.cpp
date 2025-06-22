@@ -9,8 +9,8 @@ namespace YimMenu::Features
 	static const std::vector<std::pair<int, const char*>> g_StyleOptions = {
 		{0, "Classic"},
 		{1, "Modern"},
-		{2, "ModernV"},
-	    {3, "Modular"},
+		{2, "Modern (Vertical)"},
+	  {3, "Modular"},
 	};
 
 	static ListCommand _StyleSelector{

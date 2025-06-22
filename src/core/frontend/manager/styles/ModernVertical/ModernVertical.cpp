@@ -128,8 +128,8 @@ namespace YimMenu
 			float centerY = *YimMenu::Pointers.ScreenResY / 5.0f;
 			ImVec2 windowSize(windowWidth, *YimMenu::Pointers.ScreenResY / 2.5f);
 
-			ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
-			ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_Once);
+			ImGui::SetNextWindowSize(windowSize, ImGuiCond_FirstUseEver);
+			ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_FirstUseEver);
 			ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse;
 
 			if (ImGui::Begin("##Categories&Content", nullptr, flags))

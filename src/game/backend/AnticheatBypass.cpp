@@ -74,14 +74,6 @@ namespace YimMenu
 			}
 		}
 
-		for (rage::gameSkeletonData& i : Pointers.GameSkeleton->m_SysData)
-		{
-			if (i.m_Hash != 0xA0F39FB6 && i.m_Hash != "TamperActions"_J)
-				continue;
-			// this is integrity checked and runs before we patch it, so it isn't very useful anymore
-			//i.m_InitFunc = Pointers.Nullsub;
-			i.m_ShutdownFunc = Pointers.Nullsub;
-		}
 
 		if (patched)
 		{
@@ -156,12 +148,12 @@ namespace YimMenu
 		if (m_BattlEyeRunning)
 			LOGF(WARNING, "If you are not running an actual BattlEye bypass, exit the game immediately and ensure that BE is properly disabled");
 
-		if (!m_FSLProvidesBEBypass)
+		if (!m_FSLProvidesBEBypass && !m_BattlEyeRunning)
 			Pointers.BattlEyeStatusUpdatePatch->Apply();
 
 		while (true)
 		{
-			if (!m_FSLProvidesBEBypass)
+			if (!m_FSLProvidesBEBypass && !m_BattlEyeRunning)
 			{
 				*Pointers.BERestartStatus = 0;
 				*Pointers.NeedsBERestart = false;

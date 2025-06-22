@@ -8,7 +8,7 @@ namespace YimMenu::Features
 	static const std::vector<std::pair<int, const char*>> g_StyleOptions = {
 		{0, "Classic"},
 		{1, "Modern"},
-		{2, "ModernV"},
+		{2, "Modern (Vertical)"},
 	};
 
 	// Expose as global reference so other code can use it

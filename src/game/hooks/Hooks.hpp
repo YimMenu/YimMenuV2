@@ -18,7 +18,13 @@ namespace rage
 	class datBitBuffer;
 	class JsonSerializer;
 	class rlMetric;
+	class rlSessionDetailMsg;
+	class rlSessionInfo;
+	struct rlTaskStatus;
 }
+
+class MatchmakingAttributes;
+class MatchmakingId;
 
 namespace YimMenu
 {
@@ -44,6 +50,14 @@ namespace YimMenu::Hooks
 		extern bool BattlEyeServerProcessPlayerJoin(CBattlEyePlayerModifyInterface* server_iface, CBattlEyePlayerModifyContext* context);
 		extern std::uint32_t GetAnticheatInitializedHash();
 		extern std::uint32_t GetAnticheatInitializedHash2(void* ac_var, std::uint32_t seed);
+	}
+
+	namespace Matchmaking
+	{
+		extern bool MatchmakingAdvertise(int profile_index, int num_slots, int available_slots, MatchmakingAttributes* data, std::uint64_t session_id, rage::rlSessionInfo* info, MatchmakingId* out_id, rage::rlTaskStatus* status);
+		extern bool MatchmakingUpdate(int profile_index, MatchmakingId* id, int num_slots, int available_slots, rage::rlSessionInfo* info, MatchmakingAttributes* data, rage::rlTaskStatus* status);
+		extern bool MatchmakingUnadvertise(int profile_index, MatchmakingId* id, rage::rlTaskStatus* status);
+		extern bool MatchmakingSessionDetailSendResponse(rage::netConnectionManager* mgr, void* request_frame, rage::rlSessionDetailMsg* msg);
 	}
 
 	namespace Info

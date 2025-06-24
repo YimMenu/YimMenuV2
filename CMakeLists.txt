@@ -38,4 +38,22 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 message(STATUS "Setting up linked libraries")
-target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json dbghelp d3dcompiler dwmapi)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    # Project dependencies
+    AsyncLogger
+    imgui
+    minhook
+    nlohmann_json::nlohmann_json
+    dbghelp
+
+    # ImGui dependencies
+    $<IF:$<BOOL:${CROSSCOMPILE}>,d3dcompiler_47,d3dcompiler>
+    dwmapi
+    gdi32
+)
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+    # Do not warn about non-reproducible code
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-date-time>
+    $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wno-date-time>
+)

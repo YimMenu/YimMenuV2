@@ -57,6 +57,11 @@ public:
 	{
 		return (m_Flags & 0x80) != 0;
 	}
+
+	inline bool IsControlledByNetshop() const
+	{
+		return (m_Flags & 0x8000000) != 0;
+	}
 };
 static_assert(sizeof(sStatData) == 0x10);
 

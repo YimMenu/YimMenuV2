@@ -69,7 +69,10 @@ namespace YimMenu
 		else
 		{
 			std::vector<Hook> hooks = {Hook(index, hook)};
-			m_RegisteredHooks.emplace(script, hooks);
+			if (!m_RegisteredHooks.emplace(script, hooks).second)
+			{
+				LOGF(WARNING, "NativeHooks::AddHookImpl: {:X} already registered for script {:X}", static_cast<std::uint64_t>(index), script);
+			}
 		}
 
 		for (auto& [scp, program] : m_RegisteredPrograms)

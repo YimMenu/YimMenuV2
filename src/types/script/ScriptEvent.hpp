@@ -5,12 +5,12 @@
 	constexpr static auto EVENT_INDEX = ScriptEventIndex::indexType;           \
 	classType()                                                                \
 	{                                                                          \
-		memset(reinterpret_cast<classType*>(this), 0, sizeof(classType));      \
+		memset(reinterpret_cast<void*>(this), 0, sizeof(classType));           \
 		EventIndex = static_cast<int>(EVENT_INDEX);                            \
 	}                                                                          \
 	classType(const classType& other)                                          \
 	{                                                                          \
-		memcpy(reinterpret_cast<classType*>(this), &other, sizeof(classType)); \
+		memcpy(reinterpret_cast<void*>(this), &other, sizeof(classType));      \
 		EventIndex = static_cast<int>(EVENT_INDEX);                            \
 	}                                                                          \
 	static constexpr size_t GetSize()                                          \
@@ -173,6 +173,21 @@ struct SCRIPT_EVENT_SEND_TO_INTERIOR : public SCRIPT_EVENT
 	SCR_INT SubInstanceId;
 };
 static_assert(sizeof(SCRIPT_EVENT_SEND_TO_INTERIOR) == 16 * 8);
+
+struct SCRIPT_EVENT_SEND_TO_PROPERTY : public SCRIPT_EVENT
+{
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_SEND_TO_PROPERTY, Teleport);
+
+	PLAYER_INDEX Owner;
+	SCR_INT PAD_0004;
+	SCR_INT Variation;
+	SCR_INT PropertyIndex;
+	SCR_INT SubProperyIndex;
+	SCR_BOOL MissionPassNotify1;
+	SCR_BOOL MissionPassNotify2;
+	SCR_INT Flags;
+};
+static_assert(sizeof(SCRIPT_EVENT_SEND_TO_PROPERTY) == 11 * 8);
 
 struct SCRIPT_EVENT_REQUEST_RANDOM_EVENT : public SCRIPT_EVENT
 {

@@ -1,6 +1,7 @@
 #include "SavedVehicles.hpp"
 
 #include "core/backend/FiberPool.hpp"
+#include "core/backend/ScriptMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "core/util/Strings.hpp"
 #include "game/backend/Self.hpp"
@@ -15,31 +16,41 @@ namespace YimMenu::Submenus
 		static std::string folder{}, file{};
 		static std::vector<std::string> folders{}, files{};
 		static char vehicle_file_name_input[64]{};
-		static char save_folder[50]{};
+		static char newFolder[50]{};
 
 		auto persistCar = std::make_shared<Category>("Saved Vehicles");
 
 		persistCar->AddItem(std::make_unique<ImGuiItem>([] {
-			static auto drawSaveVehicleButton = [](const char* folderToSaveIn) {
+			static auto drawSaveVehicleButton = [](bool saveToNewFolder) {
 				if (!Self::GetVehicle() || !Self::GetVehicle().IsValid())
 					return;
 
 				if (ImGui::Button("Save"))
 				{
-					std::string yo = vehicle_file_name_input;
-					ZeroMemory(vehicle_file_name_input, sizeof(vehicle_file_name_input));
+					std::string fileName = vehicle_file_name_input;
+					strcpy(vehicle_file_name_input, "");
 
-					if (!TrimString(yo).size())
+					if (!TrimString(fileName).size())
 					{
 						Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
 						return;
 					}
 
-					ReplaceString(yo, ".", ""); // so that .. does not throw error by custom file system when it sees say bob..json
-					yo += ".json";
+					ReplaceString(fileName, ".", ""); // filename say "bob.." will throw relative path error from Folder::GetFile
+					fileName += ".json";
 
-					SavedVehicles::Save(folderToSaveIn, yo);
-					SavedVehicles::RefreshList(folder, folders, files);
+					SavedVehicles::Save(saveToNewFolder ? newFolder : folder, fileName);
+
+					if (saveToNewFolder)
+					{
+						folder = newFolder; // set current folder to newly created folder
+						strcpy(newFolder, "");
+					}
+
+					FiberPool::Push([] {
+						ScriptMgr::Yield(1000ms); // wait for files to save and then refresh
+						SavedVehicles::RefreshList(folder, folders, files);
+					});
 				}
 				ImGui::SameLine();
 				if (ImGui::Button("Populate Name"))
@@ -113,11 +124,11 @@ namespace YimMenu::Submenus
 				{
 					ImGui::Text("Folder Name");
 					ImGui::SetNextItemWidth(250);
-					ImGui::InputText("##foldername", save_folder, IM_ARRAYSIZE(save_folder));
-					drawSaveVehicleButton(save_folder);
+					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
+					drawSaveVehicleButton(true);
 				}
 				else
-					drawSaveVehicleButton(folder.c_str());
+					drawSaveVehicleButton(false);
 			}
 			ImGui::EndGroup();
 

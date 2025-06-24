@@ -1,5 +1,6 @@
 #include "World.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "World/SpawnPed.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -8,7 +9,6 @@ namespace YimMenu::Submenus
 	    Submenu::Submenu("World", ICON_FA_GLOBE)
 	{
 		auto main = std::make_shared<Category>("Main");
-		auto spawnersGroup = std::make_shared<Category>("Spawners");
 		auto iplsGroup = std::make_shared<Category>("IPLs");
 
 		auto killPeds = std::make_shared<Group>("Kill", 1);
@@ -29,11 +29,13 @@ namespace YimMenu::Submenus
 		weatherOpts->AddItem(std::make_shared<ConditionalItem>("forceweather"_J, std::make_shared<CommandItem>("setweather"_J), true));
 		weatherOpts->AddItem(std::make_shared<BoolCommandItem>("forceweather"_J));
 
-		auto timeGroup = std::make_shared<Group>("Time Control");
+		auto timeGroup = std::make_shared<Group>("Time");
 
-		timeGroup->AddItem(std::make_shared<IntCommandItem>("networktimehour"_J, "Hour"));
-		timeGroup->AddItem(std::make_shared<IntCommandItem>("networktimeminute"_J, "Minute"));
-		timeGroup->AddItem(std::make_shared<IntCommandItem>("networktimesecond"_J, "Second"));
+		auto hms = std::make_shared<Group>("", 1);
+		hms->AddItem(std::make_shared<IntCommandItem>("networktimehour"_J, "Hour"));
+		hms->AddItem(std::make_shared<IntCommandItem>("networktimeminute"_J, "Minute"));
+		hms->AddItem(std::make_shared<IntCommandItem>("networktimesecond"_J, "Second"));
+		timeGroup->AddItem(std::move(hms));
 
 		timeGroup->AddItem(std::make_shared<CommandItem>("setnetworktime"_J, "Set"));
 		timeGroup->AddItem(std::make_shared<BoolCommandItem>("freezenetworktime"_J, "Freeze"));
@@ -42,6 +44,7 @@ namespace YimMenu::Submenus
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("pedsignore"_J));
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("enablecreatordevmode"_J));
 
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));
@@ -50,29 +53,13 @@ namespace YimMenu::Submenus
 		main->AddItem(std::move(otherOpts));
 		main->AddItem(timeGroup);
 
-		auto spawnVehicle = std::make_shared<Group>("Vehicle");
-		spawnVehicle->AddItem(std::make_shared<StringCommandItem>("vehmodelname"_J));
-		spawnVehicle->AddItem(std::make_shared<CommandItem>("spawnvehicle"_J));
-
-		auto spawnPed = std::make_shared<Group>("Ped");
-		spawnPed->AddItem(std::make_shared<StringCommandItem>("pedmodelname"_J));
-		spawnPed->AddItem(std::make_shared<CommandItem>("spawnped"_J));
-
-		auto spawnObject = std::make_shared<Group>("Object");
-		spawnObject->AddItem(std::make_shared<StringCommandItem>("objectmodelname"_J));
-		spawnObject->AddItem(std::make_shared<CommandItem>("spawnobject"_J));
-
-		spawnersGroup->AddItem(spawnVehicle);
-		spawnersGroup->AddItem(spawnPed);
-		spawnersGroup->AddItem(spawnObject);
-
 		iplsGroup->AddItem(std::make_shared<ListCommandItem>("iplselector"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("loadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("unloadipl"_J));
 		iplsGroup->AddItem(std::make_shared<CommandItem>("ipltp"_J));
 
 		AddCategory(std::move(main));
-		AddCategory(std::move(spawnersGroup));
+		AddCategory(std::move(BuildSpawnPedMenu()));
 		AddCategory(std::move(iplsGroup));
 	}
 };

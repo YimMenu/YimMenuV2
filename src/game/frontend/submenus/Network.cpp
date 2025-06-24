@@ -19,6 +19,7 @@ namespace YimMenu::Submenus
 		auto toxicGroup = std::make_shared<Group>("Toxic");
 		auto teleportGroup = std::make_shared<Group>("Teleport");
 		auto trollGroup = std::make_shared<Group>("Troll");
+		auto miscGroup = std::make_shared<Group>("Misc");
 		auto enhancements = std::make_shared<Group>("Enhancements");
 
 		auto joinSession = std::make_shared<Group>("", 1);
@@ -59,10 +60,18 @@ namespace YimMenu::Submenus
 		bountyGroup->AddItem(std::make_shared<BoolCommandItem>("anonymousbounty"_J, "Anonymous"));
 		bountyGroup->AddItem(std::make_shared<CommandItem>("setbountyall"_J, "Set Bounties"));
 
-		teleportGroup->AddItem(std::make_shared<CommandItem>("bringall"_J, "Bring All"));
 		auto customPlayerTp = std::make_shared<Group>("", 1);
 		customPlayerTp->AddItem(std::make_shared<Vector3CommandItem>("playertpcoord"_J, ""));
 		customPlayerTp->AddItem(std::make_shared<CommandItem>("tpplayertocoordall"_J, "Teleport Everyone"));
+		auto tpToProperty = std::make_shared<Group>("", 1);
+		tpToProperty->AddItem(std::make_shared<ListCommandItem>("sendtopropertyindex"_J, "##selproperty"));
+		tpToProperty->AddItem(std::make_shared<CommandItem>("sendtopropertyall"_J, "Send All to Property"));
+		auto tpToInterior = std::make_shared<Group>("", 1);
+		tpToInterior->AddItem(std::make_shared<ListCommandItem>("sendtointeriorindex"_J, "##selinterior"));
+		tpToInterior->AddItem(std::make_shared<CommandItem>("sendtointeriorall"_J, "Send All to Interior"));
+		teleportGroup->AddItem(tpToProperty);
+		teleportGroup->AddItem(tpToInterior);
+		teleportGroup->AddItem(std::make_shared<CommandItem>("bringall"_J, "Bring All"));
 		teleportGroup->AddItem(customPlayerTp);
 
 		trollGroup->AddItem(std::make_shared<CommandItem>("sendsextall"_J, "Send Sexts"));
@@ -75,6 +84,9 @@ namespace YimMenu::Submenus
 		toxicGroup->AddItem(std::make_shared<CommandItem>("explodeall"_J, "Explode All"));
 		toxicGroup->AddItem(std::make_shared<CommandItem>("ceokickall"_J, "CEO Kick All"));
 
+		miscGroup->AddItem(std::make_shared<BoolCommandItem>("forcethunder"_J));
+
+		enhancements->AddItem(std::make_shared<BoolCommandItem>("notifyonplayerjoin"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("fastjoin"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("disabledeathbarriers"_J));
 		enhancements->AddItem(std::make_shared<BoolCommandItem>("despawnbypass"_J));
@@ -88,16 +100,36 @@ namespace YimMenu::Submenus
 		session->AddItem(trollGroup);
 		session->AddItem(teleportGroup);
 		session->AddItem(toxicGroup);
+		session->AddItem(miscGroup);
 		session->AddItem(enhancements);
 
 		auto spoofing = std::make_shared<Category>("Spoofing");
-		auto matchmakingGroup = std::make_shared<Group>("Matchmaking");
+		auto matchmakingGroup = std::make_shared<Group>("Matchmaking (Client)");
 		matchmakingGroup->AddItem(std::make_shared<BoolCommandItem>("cheaterpool"_J));
 		auto spoofMMRegion = std::make_shared<Group>("", 1);
 		spoofMMRegion->AddItem(std::make_shared<BoolCommandItem>("spoofmmregion"_J, "Spoof Region"));
 		spoofMMRegion->AddItem(std::make_shared<ConditionalItem>("spoofmmregion"_J, std::make_shared<ListCommandItem>("mmregion"_J, "##mmregion")));
 		matchmakingGroup->AddItem(std::make_shared<ConditionalItem>("cheaterpool"_J, spoofMMRegion, true));
 		spoofing->AddItem(matchmakingGroup);
+
+		auto matchmakingSrvGroup = std::make_shared<Group>("Matchmaking (Server)");
+		auto srvSpoofRegion = std::make_shared<Group>("", 1);
+		srvSpoofRegion->AddItem(std::make_shared<BoolCommandItem>("mmspoofregiontype"_J));
+		srvSpoofRegion->AddItem(std::make_shared<ConditionalItem>("mmspoofregiontype"_J, std::make_shared<ListCommandItem>("mmregiontype"_J, "##mmregiontype")));
+		auto srvSpoofLanguage = std::make_shared<Group>("", 1);
+		srvSpoofLanguage->AddItem(std::make_shared<BoolCommandItem>("mmspooflanguage"_J));
+		srvSpoofLanguage->AddItem(std::make_shared<ConditionalItem>("mmspooflanguage"_J, std::make_shared<ListCommandItem>("mmlanguage"_J, "##mmlanguage")));
+		auto srvSpoofPlayerCount = std::make_shared<Group>("", 1);
+		srvSpoofPlayerCount->AddItem(std::make_shared<BoolCommandItem>("mmspoofplayercount"_J));
+		srvSpoofPlayerCount->AddItem(std::make_shared<ConditionalItem>("mmspoofplayercount"_J, std::make_shared<IntCommandItem>("mmplayercount"_J, "##mmplayercount")));
+		auto srvMultiplex = std::make_shared<Group>("", 1);
+		srvMultiplex->AddItem(std::make_shared<BoolCommandItem>("mmmultiplexsession"_J));
+		srvMultiplex->AddItem(std::make_shared<ConditionalItem>("mmmultiplexsession"_J, std::make_shared<IntCommandItem>("mmmultiplexsessioncount"_J, "##mmmultiplexsessioncount")));
+		matchmakingSrvGroup->AddItem(std::move(srvSpoofRegion));
+		matchmakingSrvGroup->AddItem(std::move(srvSpoofLanguage));
+		matchmakingSrvGroup->AddItem(std::move(srvSpoofPlayerCount));
+		matchmakingSrvGroup->AddItem(std::move(srvMultiplex));
+		spoofing->AddItem(matchmakingSrvGroup);
 
 		AddCategory(std::move(session));
 		AddCategory(std::move(spoofing));

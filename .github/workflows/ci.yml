@@ -3,9 +3,9 @@ name: CI
 on: [ push, pull_request ]
 
 jobs:
-  ci:
+  native-compilation:
     runs-on: [ self-hosted, Windows ]
-    name: CI
+    name: Native Compilation
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +37,52 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RelWithDebInfo-Clang
+          name: RelWithDebInfo-Native-Clang
           path: |
             build/YimMenuV2-dev-*.dll
             build/YimMenuV2-dev-*.pdb
+
+  cross-compilation:
+    runs-on: ubuntu-latest
+    name: Cross-compilation
+    strategy:
+      matrix:
+        compiler: ["Zig", "Clang"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig
+        if: matrix.compiler == 'Zig'
+        uses: mlugg/setup-zig@v2
+
+      - name: Setup MinGW
+        if: matrix.compiler == 'Clang'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld binutils-mingw-w64-x86-64 mingw-w64-x86-64-dev gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
+
+      - name: Check CMake version
+        run: cmake --version
+
+      - name: Generate CMake project
+        run: cmake -DUSE_CROSSCOMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+
+      - name: Build 64bit RelWithDebInfo DLL
+        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
+
+      - name: Check if DLL got built
+        run: if [ ! -f build/libYimMenuV2.dll ]; then exit 1; fi
+
+      - name: Rename DLL to libYimMenuV2-dev-{GITHUB_SHA}.dll
+        run: |
+          mv libYimMenuV2.dll libYimMenuV2-dev-${{github.sha}}.dll
+          mv libYimMenuV2.pdb libYimMenuV2-dev-${{github.sha}}.pdb || true
+        working-directory: build/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RelWithDebInfo-Cross-${{ matrix.compiler }}
+          path: |
+            build/libYimMenuV2-dev-*.dll
+            build/libYimMenuV2-dev-*.pdb

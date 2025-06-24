@@ -6,6 +6,8 @@
 #include "core/backend/FiberPool.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "game/gta/Natives.hpp"
+#include "types/script/globals/GlobalPlayerBD.hpp"
+#include "types/script/ScriptEvent.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -18,6 +20,30 @@ namespace YimMenu::Submenus
 			{
 				FiberPool::Push([] {
 					NETWORK::NETWORK_BAIL(0, 24, 0);
+				});
+			}
+
+			static int interiorIndex = 0;
+			ImGui::InputInt("interiorIndex", &interiorIndex);
+
+			static bool enterOwnerInterior = false;
+			ImGui::Checkbox("enterOwnerInterior", &enterOwnerInterior);
+
+			if (ImGui::Button("DoTeleport"))
+			{
+				FiberPool::Push([] {
+					SCRIPT_EVENT_SEND_TO_INTERIOR message;
+					message.Interior = interiorIndex;
+					message.EnterOwnerInterior = enterOwnerInterior;
+					message.GoonsOnly = false;
+					message.InstanceId = 0;
+					message.SubInstanceId = -1;
+					message.Owner = Self::GetPlayer().GetId();
+					message.Distance = 99999;
+					message.Position = {0, 0, 0};
+
+					message.SetAllPlayers();
+					message.Send();
 				});
 			}
 

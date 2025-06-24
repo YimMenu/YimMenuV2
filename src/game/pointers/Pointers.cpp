@@ -229,7 +229,16 @@ namespace YimMenu
 
 		constexpr auto battlEyeStatusUpdatePatchPtrn = Pattern<"80 B9 92 0A 00 00 01">("BattlEyeStatusUpdatePatch");
 		scanner.Add(battlEyeStatusUpdatePatchPtrn, [this](PointerCalculator ptr) {
-			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.Sub(0x26).As<std::uint8_t*>(), 0xC3);
+			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.As<void*>(), 
+				// since arxan obfuscated this subroutine, return mid-function instead
+				// TODO: this might break in a later update
+				std::to_array<std::uint8_t>({
+					0x48, 0x83, 0xC4, 0x38, // add rsp, 38h
+					0x5F,                   // pop rdi
+					0x5E,                   // pop rsi
+					0xC3                    // ret
+				})
+			);
 		});
 
 		constexpr auto writeNetArrayDataPtrn = Pattern<"0F 84 06 03 00 00 0F B6 83">("WriteNetArrayData");
@@ -309,7 +318,7 @@ namespace YimMenu
 			NetworkTime = ptr.Add(2).Rip().As<std::uint32_t*>();
 		});
 
-		constexpr auto gameTimerPtrn = Pattern<"3B 2D ? ? ? ? 76">("GameTimer");
+		constexpr auto gameTimerPtrn = Pattern<"3B 2D ? ? ? ? 76 ? 89 D9">("GameTimer");
 		scanner.Add(gameTimerPtrn, [this](PointerCalculator ptr) {
 			GameTimer = ptr.Add(2).Rip().As<std::uint32_t*>();
 		});
@@ -409,6 +418,31 @@ namespace YimMenu
 		constexpr auto getAnticheatInitializedHash2Ptrn = Pattern<"89 9E E8 00 00 00 89 C2 E8 ? ? ? ? 69">("GetAnticheatInitializedHash2");
 		scanner.Add(getAnticheatInitializedHash2Ptrn, [this](PointerCalculator ptr) {
 			GetAnticheatInitializedHash2 = ptr.Add(0x9).Rip().As<PVOID>();
+		});
+
+		constexpr auto abilityBarPatchPtrn = Pattern<"75 39 48 85 F6 74 1A 48 89 F1 E8">("AbilityBarPatch");
+		scanner.Add(abilityBarPatchPtrn, [this](PointerCalculator ptr) {
+			AbilityBarPatch = BytePatches::Add(ptr.As<std::uint16_t*>(), 0x9090);
+		});
+
+		static constexpr auto doMatchmakingAdvertisePtrn = Pattern<"C7 47 30 01 00 00 00 E9 92">("MatchmakingAdvertise");
+		scanner.Add(doMatchmakingAdvertisePtrn, [this](PointerCalculator addr) {
+			MatchmakingAdvertise = addr.Sub(0xC).Rip().As<PVOID>();
+		});
+
+		static constexpr auto doMatchmakingUpdatePtrn = Pattern<"C7 47 30 02 00 00 00 EB 7A">("MatchmakingUpdate");
+		scanner.Add(doMatchmakingUpdatePtrn, [this](PointerCalculator addr) {
+			MatchmakingUpdate = addr.Sub(0x8).Rip().As<PVOID>();
+		});
+
+		static constexpr auto doMatchmakingUnadvertisePtrn = Pattern<"C7 86 C8 01 00 00 04 00 00 00">("MatchmakingUnadvertise");
+		scanner.Add(doMatchmakingUnadvertisePtrn, [this](PointerCalculator addr) {
+			MatchmakingUnadvertise = addr.Sub(0xC).Rip().As<PVOID>();
+		});
+
+		static constexpr auto matchmakingSessionDetailSendResponsePtrn = Pattern<"48 B8 01 00 00 00 0D 00 00 00">("SessionDetailSendResponse");
+		scanner.Add(matchmakingSessionDetailSendResponsePtrn, [this](PointerCalculator addr) {
+			MatchmakingSessionDetailSendResponse = addr.Add(0x2F).Rip().As<PVOID>();
 		});
 
 		if (!scanner.Scan())

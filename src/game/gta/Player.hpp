@@ -83,6 +83,10 @@ namespace YimMenu
 
 		int GetMaxArmour();
 
+		int GetGroup();
+
+		void SetPed(Ped ped, bool delete_old = true);
+
 		bool operator==(Player other);
 
 		inline operator bool()

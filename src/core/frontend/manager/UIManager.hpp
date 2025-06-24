@@ -1,9 +1,18 @@
 #pragma once
 #include "Category.hpp"
 #include "Submenu.hpp"
+#include "core/frontend/manager/styles/Themes.hpp"
 
 namespace YimMenu
 {
+	// Enum to represent different UI themes, append when adding new themes
+	enum class UITheme
+	{
+		Classic = 0,
+		Modern,
+		ModernV,
+	};
+
 	class UIManager
 	{
 	public:
@@ -42,6 +51,21 @@ namespace YimMenu
 			return GetInstance().m_ShowContentWindow;
 		}
 
+		static void SetShowContentWindow(bool show)
+		{
+			GetInstance().m_ShowContentWindow = show;
+		}
+
+		static const std::vector<std::shared_ptr<Submenu>>& GetSubmenus()
+		{
+			return GetInstance().m_Submenus;
+		}
+
+		static ImFont* GetOptionsFont()
+		{
+			return GetInstance().m_OptionsFont;
+		}
+
 	private:
 		static inline UIManager& GetInstance()
 		{
@@ -57,6 +81,7 @@ namespace YimMenu
 
 		std::shared_ptr<Submenu> m_ActiveSubmenu;
 		std::vector<std::shared_ptr<Submenu>> m_Submenus;
+
 		ImFont* m_OptionsFont = nullptr;
 		bool m_ShowContentWindow = true;
 	};

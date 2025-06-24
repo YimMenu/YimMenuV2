@@ -9,6 +9,7 @@
 
 #include "game/pointers/Pointers.hpp" // game import in core!
 #include "game/gta/Natives.hpp"       // game import in core!
+#include "game/frontend/GUI.hpp"
 
 namespace YimMenu
 {
@@ -94,7 +95,7 @@ namespace YimMenu
 	{
 		while (g_Running)
 		{
-			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified)
+			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified && !GUI::IsUsingKeyboard())
 			{
 				for (auto& [hash, link] : m_CommandHotkeys)
 				{

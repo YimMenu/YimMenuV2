@@ -153,7 +153,7 @@ namespace YimMenu::Submenus
 			});
 		}
 
-		if (*Pointers.IsSessionStarted && selectedWeaponHash != NULL)
+		if (*Pointers.IsSessionStarted && selectedWeaponHash != 0)
 		{
 			ImGui::Text("Kills With: %d", kills);
 			ImGui::Text("Deaths By: %d", deaths);

@@ -36,5 +36,10 @@ namespace YimMenu
 		void LowerStance(bool lower);
 
 		std::string GetFullName();
+
+		// 
+		bool HasHydraulics();
+		void RaiseHydraulicWheel(int wheelIndex, float raiseFactor);
+		void LowerHydraulicWheel(int wheelIndex, float raiseFactor);
 	};
 }

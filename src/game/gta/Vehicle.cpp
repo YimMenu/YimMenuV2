@@ -242,4 +242,30 @@ namespace YimMenu
 
 		return ownedMods;
 	}
+
+	constexpr int hydraulicWheelIndexes[4]{0, 1, 4, 5};
+	bool Vehicle::HasHydraulics()
+	{
+		return VEHICLE::GET_NUM_VEHICLE_MODS(GetHandle(), (int)VehicleModType::MOD_HYDRAULICS) > 0;
+	}
+	void Vehicle::RaiseHydraulicWheel(int wheelIndex, float raiseFactor)
+	{
+		if (!HasHydraulics())
+			return;
+		auto vehicle = GetHandle();
+		auto wheelId = hydraulicWheelIndexes[wheelIndex];
+
+		VEHICLE::SET_HYDRAULIC_WHEEL_STATE(vehicle, wheelId, 4, raiseFactor, 1);
+		ScriptMgr::Yield(250ms);
+		VEHICLE::SET_HYDRAULIC_WHEEL_STATE(vehicle, wheelId, 1, raiseFactor, 1);
+	}
+	void Vehicle::LowerHydraulicWheel(int wheelIndex, float raiseFactor)
+	{
+		if (!HasHydraulics())
+			return;
+		auto vehicle = GetHandle();
+		auto wheelId = hydraulicWheelIndexes[wheelIndex];
+
+		VEHICLE::SET_HYDRAULIC_WHEEL_STATE(vehicle, wheelId, 0, raiseFactor, 1);
+	}
 }

@@ -245,6 +245,7 @@ namespace YimMenu::Submenus
 				if (ImGui::TreeNode("Bytecode"))
 				{
 					RenderBytecode(curProgram);
+					ImGui::TreePop();
 				}
 			}
 		}));

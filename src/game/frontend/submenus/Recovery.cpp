@@ -11,7 +11,7 @@ namespace YimMenu::Submenus
 		#define ICON_FA_SACK_DOLLAR "\xef\x93\x80"
 	    Submenu::Submenu("Recovery", ICON_FA_SACK_DOLLAR)
 	{
-		auto missions = std::make_shared<Category>("Missions");
+		auto main = std::make_shared<Category>("Main");
 		auto businesses = std::make_shared<Category>("Businesses");
 		auto casino = std::make_shared<Category>("Casino");
 
@@ -36,11 +36,11 @@ namespace YimMenu::Submenus
 		casinoSlots->AddItem(std::make_shared<BoolCommandItem>("casinomanipulaterigslotmachines"_J));
 		
 
-		missions->AddItem(generalGroup);
+		main->AddItem(generalGroup);
 		businesses->AddItem(businessGroup);
 		casino->AddItem(casinoSlots);
 
-		AddCategory(std::move(missions));
+		AddCategory(std::move(main));
 		AddCategory(std::move(businesses));
 		AddCategory(std::move(casino));
 		AddCategory(BuildStatEditorMenu());

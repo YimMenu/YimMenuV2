@@ -14,7 +14,7 @@ namespace YimMenu::Submenus
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
 			const float height = 15 * ImGui::GetTextLineHeightWithSpacing();
-			if (ImGui::BeginListBox("##vehicles", {300.f, height}))
+			if (ImGui::BeginListBox("##luascripts", {300.f, height}))
 			{
 				static std::optional<std::string> loadingScript;
 

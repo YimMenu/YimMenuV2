@@ -58,11 +58,22 @@ namespace YimMenu
 		ENTITY_ASSERT_CONTROL();
 		ENTITY_ASSERT_SCRIPT_CONTEXT();
 
-		if (VEHICLE::GET_DOES_VEHICLE_HAVE_DAMAGE_DECALS(GetHandle()))
+		if (!VEHICLE::GET_DOES_VEHICLE_HAVE_DAMAGE_DECALS(GetHandle()))
+			return;
+
+		// this is what carmod_shop does to repair your vehicle
+		VEHICLE::SET_VEHICLE_FIXED(GetHandle());
+		ENTITY::SET_ENTITY_HEALTH(GetHandle(), 1000, 0, 0);
+		VEHICLE::SET_VEHICLE_ENGINE_HEALTH(GetHandle(), 1000.f);
+		VEHICLE::SET_VEHICLE_PETROL_TANK_HEALTH(GetHandle(), 1000.f);
+		VEHICLE::SET_VEHICLE_DIRT_LEVEL(GetHandle(), 0.f);
+		GRAPHICS::REMOVE_DECALS_FROM_VEHICLE(GetHandle());
+		ENTITY::FORCE_ENTITY_AI_AND_ANIMATION_UPDATE(GetHandle());
+		/*if (ENTITY::GET_ENTITY_MODEL(GetHandle()) == "brawler"_J)
 		{
-			VEHICLE::SET_VEHICLE_FIXED(GetHandle());
-			VEHICLE::SET_VEHICLE_DIRT_LEVEL(GetHandle(), 0);
-		}
+			VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(GetHandle(), 1084227584);
+			PHYSICS::ACTIVATE_PHYSICS(GetHandle());
+		}*/
 	}
 
 	int Vehicle::GetGear()

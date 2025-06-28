@@ -9,11 +9,17 @@
 #include "types/script/CGameScriptHandlerNetComponent.hpp"
 #include "types/script/CGameScriptId.hpp"
 #include "types/script/globals/GlobalPlayerBD.hpp"
+#include "types/script/globals/GPBD_FM_3.hpp"
+#include "types/script/globals/LauncherServerData.hpp"
+#include "types/script/locals/LauncherClientData.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/gta/Packet.hpp"
 #include "game/backend/Players.hpp"
 #include "game/backend/Self.hpp"
 #include "core/memory/Pattern.hpp"
+#include "game/gta/data/LauncherScripts.hpp"
+#include "types/script/ScriptEvent.hpp"
+#include "game/gta/ScriptGlobal.hpp"
 
 namespace YimMenu::Scripts
 {
@@ -186,5 +192,157 @@ namespace YimMenu::Scripts
 				if (!player.second.IsLocal())
 					pkt.Send(player.second.GetMessageId());
 		}
+	}
+
+	std::optional<int> GetLauncherIndexFromScript(joaat_t hash)
+	{
+		for (int i = 0; i < g_LauncherScripts.size(); i++)
+			if (g_LauncherScripts[i] == hash)
+				return i;
+
+		return std::nullopt;
+	}
+
+	void StartLauncherScript(joaat_t hash)
+	{
+		auto index = GetLauncherIndexFromScript(hash);
+
+		if (!index)
+			return;
+
+		static auto atLeastOnePlayerInState = [](GtaThread* launcher, eLauncherState state) -> bool {
+			bool set = false;
+
+			if (!launcher->m_NetComponent)
+				return false;
+
+			for (auto& [_, plyr] : Players::GetPlayers())
+			{
+				if (launcher->m_NetComponent->IsParticipant(plyr.GetId()))
+				{
+					if (LauncherClientData::Get(launcher)->Entries[plyr.GetId()].LauncherState == state)
+					{
+						set = true;
+						break;
+					}
+				}
+			}
+
+			return set;
+		};
+
+		// 1) Get launcher
+		if (auto launcher = reinterpret_cast<GtaThread*>(FindScriptThread("am_launcher"_J)); launcher && launcher->m_NetComponent)
+		{
+			// 2) Force host of launcher
+			if (!launcher->m_NetComponent->IsLocalPlayerHost())
+			{
+				ForceScriptHost(launcher);
+				ScriptMgr::Yield(400ms);
+			}
+			
+			launcher->m_Context.m_State = rage::scrThread::State::PAUSED;
+
+			auto serverData = LauncherServerData::Get();
+
+			// 3) Remove players from that annoying waiting stage
+			if (atLeastOnePlayerInState(launcher, eLauncherState::WAIT_FOR_ACK))
+			{
+				for (int i = 0; atLeastOnePlayerInState(launcher, eLauncherState::WAIT_FOR_ACK); i++)
+				{
+					if (i > 200)
+						break; // 3F) Timeout
+
+					serverData->CurrentScript.LauncherIndex = 0;
+					serverData->LauncherState = eLauncherState::START_SCRIPT;
+					ScriptMgr::Yield(10ms);
+				}
+			} // State should now be 6 or 0
+
+			// 4) Check if a script is already being executed, and unstuck from that state if so
+			if (atLeastOnePlayerInState(launcher, eLauncherState::START_SCRIPT))
+			{
+				for (int i = 0; atLeastOnePlayerInState(launcher, eLauncherState::START_SCRIPT); i++)
+				{
+					if (i > 200)
+						break; // 4F) Timeout
+
+					serverData->CurrentScript.LauncherIndex = 0;
+					serverData->LauncherState = eLauncherState::WAIT_FOR_TERMINATION;
+					ScriptMgr::Yield(10ms);
+				}
+			} // State should now be 7 or 0
+
+			// 5) Get everyone out of state 7
+			if (atLeastOnePlayerInState(launcher, eLauncherState::WAIT_FOR_TERMINATION))
+			{
+				for (int i = 0; atLeastOnePlayerInState(launcher, eLauncherState::WAIT_FOR_TERMINATION); i++)
+				{
+					if (i > 200)
+						break; // 5F) Timeout
+
+					serverData->LauncherState = eLauncherState::EMPTY;
+					ScriptMgr::Yield(10ms);
+				}
+			} // State should now be 0
+
+			// 6) Actually get the script to start
+			serverData->Flags.Set(eLauncherFlags::RUN_IMMEDIATELY);
+			serverData->CurrentScript.EventIndex = 0;
+			serverData->CurrentScript.LauncherIndex = *index;
+			serverData->CurrentScript.Terminated = false;
+			serverData->LauncherState = eLauncherState::START_SCRIPT;
+			LauncherClientData::Get(launcher)->Entries[Self::GetPlayer().GetId()].LauncherState = eLauncherState::START_SCRIPT;
+
+			launcher->m_Context.m_State = rage::scrThread::State::RUNNING;
+		}
+	}
+
+	void ForceScriptOnPlayer(joaat_t hash, int bits)
+	{
+		auto index = GetLauncherIndexFromScript(hash);
+
+		if (!index)
+			return;
+
+		int random_int = time(0) ^ -*index;
+
+		MP_SCRIPT_DATA data{};
+		data.MissionIndex = *index;
+		strcpy(data.CloudFileName.Data, "0");
+		data.InstanceId = -1;
+		data.UniqueId = random_int;
+		data.GenericInt = 0;
+
+		SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION event;
+		event.ScriptData = data;
+		event.Flags = 0;
+		event.ReplayProtectionValue = GPBD_FM_3::Get()->Entries[Self::GetPlayer().GetId()].ScriptEventReplayProtectionCounter;
+		event.PAD_0026 = random_int ^ 917391583 ^ rand();
+
+		// we need to REALLY make sure we're getting an unique random number since the script checks it against the last five events sent
+		auto& rand_int_2 = event.GetEventIndex();
+		rand_int_2 ^= (random_int ^ -2024791401); // TODO: this is a pretty ghetto way to create random numbers
+		rand_int_2 ^= (random_int ^ 917391583);
+
+		auto bypass_global = ScriptGlobal(1986361); // this global will bypass the new checks added this update
+		auto old_val = *bypass_global.As<int*>();
+		*bypass_global.As<int*>() = rand_int_2 ^ rand() ^ time(0);
+		
+		event.SetPlayerBits(bits);
+		event.Send();
+
+		for (int i = 0; i < 2; i++)
+		{
+			SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION_SERVER_ACK ack; // not strictly necessary but still useful
+			ack.ScriptData = data;
+			ack.SetPlayerBits(bits);
+			ack.Send();
+
+			ScriptMgr::Yield(20ms);
+		}
+
+		// restore global just in case
+		*bypass_global.As<int*>() = old_val;
 	}
 }

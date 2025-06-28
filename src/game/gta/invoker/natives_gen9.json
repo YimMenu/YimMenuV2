@@ -3313,7 +3313,7 @@
 		"0x3CDC1E622CCE0356": {
 			"name": "OVERRIDE_VEH_HORN",
 			"jhash": "0x2ACAB783",
-			"comment": "Overrides the vehicle's horn hash.\nWhen changing this hash on a vehicle, it will not return the 'overwritten' hash. It will still always return the default horn hash (same as GET_VEHICLE_DEFAULT_HORN)\n\nvehicle - the vehicle whose horn should be overwritten\nmute - p1 seems to be an option for muting the horn\np2 - maybe a horn id, since the function AUDIO::GET_VEHICLE_DEFAULT_HORN(veh) exists?",
+			"comment": "Overrides the vehicle's horn hash.\nWhen changing this hash on a vehicle, it will not return the 'overwritten' hash. It will still always return the default horn hash (same as GET_VEHICLE_DEFAULT_HORN)\n\nvehicle - the vehicle whose horn should be overwritten",
 			"params": [
 				{
 					"type": "Vehicle",
@@ -3373,7 +3373,7 @@
 		"0x58BB377BEC7CD5F4": {
 			"name": "SET_VEHICLE_CONVERSATIONS_PERSIST",
 			"jhash": "0x8CE63FA1",
-			"comment": "SET_VEHICLE_CONVERSATIONS_PERSIST?",
+			"comment": "",
 			"params": [
 				{
 					"type": "BOOL",
@@ -4193,7 +4193,7 @@
 		"0xBAC7FC81A75EC1A1": {
 			"name": "STOP_AUDIO_SCENES",
 			"jhash": "0xF6C7342A",
-			"comment": "??",
+			"comment": "",
 			"params": [],
 			"return_type": "void",
 			"build": "811"
@@ -4882,6 +4882,31 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0xC9D623C5A3D8FD5D": {
+			"name": "SET_INDIVIDUAL_PORTAL_SETTINGS_OVERRIDE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "interiorNameHash"
+				},
+				{
+					"type": "int",
+					"name": "roomIndex"
+				},
+				{
+					"type": "int",
+					"name": "doorIndex"
+				},
+				{
+					"type": "const char*",
+					"name": "newPortalSettingsName"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
+		},
 		"0xB4BBFD9CD8B3922B": {
 			"name": "REMOVE_PORTAL_SETTINGS_OVERRIDE",
 			"jhash": "0xD24B4D0C",
@@ -4895,10 +4920,31 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x8EF105736194F80C": {
+			"name": "REMOVE_INDIVIDUAL_PORTAL_SETTINGS_OVERRIDE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "interiorNameHash"
+				},
+				{
+					"type": "int",
+					"name": "roomIndex"
+				},
+				{
+					"type": "int",
+					"name": "doorIndex"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
+		},
 		"0xE4E6DD5566D28C82": {
 			"name": "STOP_SMOKE_GRENADE_EXPLOSION_SOUNDS",
 			"jhash": "0x7262B5BA",
-			"comment": "STOP_S[MOKE_GRENADE_EXPLOSION_SOUNDS]?",
+			"comment": "",
 			"params": [],
 			"return_type": "void",
 			"build": "811"
@@ -9821,6 +9867,23 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x1FA904B60E492336": {
+			"name": "GET_CUT_FILE_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "const char*",
+					"name": "cutsceneName"
+				},
+				{
+					"type": "int",
+					"name": "index"
+				}
+			],
+			"return_type": "Vector3",
+			"build": "889"
+		},
 		"0x0ABC54DE641DC0FC": {
 			"name": "GET_CUT_FILE_CONCAT_COUNT",
 			"jhash": "0xFD8B1AC2",
@@ -10319,11 +10382,11 @@
 		"0x2F137B508DE238F2": {
 			"name": "NETWORK_SET_MOCAP_CUTSCENE_CAN_BE_SKIPPED",
 			"jhash": "0x8338DA1D",
-			"comment": "Stops current cutscene with a fade transition\np0: always true in R* Scripts\nYou will need to manually fade the screen back in\nSET_CUTSCENE_INPUTS_PARTIALLY_FADE?",
+			"comment": "",
 			"params": [
 				{
 					"type": "BOOL",
-					"name": "p0"
+					"name": "toggle"
 				}
 			],
 			"return_type": "void",
@@ -13335,7 +13398,7 @@
 		"0x1218E6886D3D8327": {
 			"name": "IS_ENTITY_STATIC",
 			"jhash": "0x928E12E9",
-			"comment": "a static ped will not react to natives like \"APPLY_FORCE_TO_ENTITY\" or \"SET_ENTITY_VELOCITY\" and oftentimes will not react to task-natives like \"TASK::TASK_COMBAT_PED\". The only way I know of to make one of these peds react is to ragdoll them (or sometimes to use CLEAR_PED_TASKS_IMMEDIATELY(). Static peds include almost all far-away peds, beach-combers, peds in certain scenarios, peds crossing a crosswalk, peds walking to get back into their cars, and others. If anyone knows how to make a ped non-static without ragdolling them, please edit this with the solution.\n\nhow can I make an entity static???",
+			"comment": "a static ped will not react to natives like \"APPLY_FORCE_TO_ENTITY\" or \"SET_ENTITY_VELOCITY\" and oftentimes will not react to task-natives like \"TASK::TASK_COMBAT_PED\". The only way I know of to make one of these peds react is to ragdoll them (or sometimes to use CLEAR_PED_TASKS_IMMEDIATELY(). Static peds include almost all far-away peds, beach-combers, peds in certain scenarios, peds crossing a crosswalk, peds walking to get back into their cars, and others. If anyone knows how to make a ped non-static without ragdolling them, please edit this with the solution.",
 			"params": [
 				{
 					"type": "Entity",
@@ -14243,7 +14306,7 @@
 		"0x43D3807C077261E3": {
 			"name": "STOP_SYNCHRONIZED_ENTITY_ANIM",
 			"jhash": "0xE27D2FC1",
-			"comment": "p1 sync task id?",
+			"comment": "",
 			"params": [
 				{
 					"type": "Entity",
@@ -17619,6 +17682,23 @@
 				"_GET_PED_INSIDE_EXPLOSION_AREA",
 				"_GET_ENTITY_INSIDE_EXPLOSION_AREA"
 			]
+		},
+		"0x5241DB47A8B8AD54": {
+			"name": "_NETWORK_EXPECT_EXPLOSION_EVENTS_FOR_PLAYER",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "expect"
+				},
+				{
+					"type": "Player",
+					"name": "player"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
 		}
 	},
 	"GRAPHICS": {
@@ -20345,7 +20425,7 @@
 		"0x845BAD77CC770633": {
 			"name": "ATTACH_TV_AUDIO_TO_ENTITY",
 			"jhash": "0x784944DB",
-			"comment": "Might be more appropriate in AUDIO?",
+			"comment": "",
 			"params": [
 				{
 					"type": "Entity",
@@ -21040,7 +21120,7 @@
 		"0x6D955F6A9E0295B1": {
 			"name": "GRASSBATCH_ENABLE_FLATTENING_IN_SPHERE",
 			"jhash": "",
-			"comment": "Wraps 0xAAE9BE70EC7C69AB with FLT_MAX as p7, Jenkins: 0x73E96210?",
+			"comment": "Wraps 0xAAE9BE70EC7C69AB with FLT_MAX as p7",
 			"params": [
 				{
 					"type": "float",
@@ -25578,7 +25658,7 @@
 		"0xAE4E8157D9ECF087": {
 			"name": "END_TEXT_COMMAND_UNPARSED_SCALEFORM_STRING",
 			"jhash": "0x2E80DB52",
-			"comment": "Same as END_TEXT_COMMAND_SCALEFORM_STRING but does not perform HTML conversion for text tokens.\n\nEND_TEXT_COMMAND_VIA_SPECIAL_MODIFIABLE_STRING?",
+			"comment": "Same as END_TEXT_COMMAND_SCALEFORM_STRING but does not perform HTML conversion for text tokens.",
 			"params": [],
 			"return_type": "void",
 			"build": "811",
@@ -31056,7 +31136,7 @@
 		"0xA17784FCA9548D15": {
 			"name": "SET_FAKE_GPS_PLAYER_POSITION_THIS_FRAME",
 			"jhash": "",
-			"comment": "p2 maybe z float?",
+			"comment": "",
 			"params": [
 				{
 					"type": "float",
@@ -31067,8 +31147,8 @@
 					"name": "y"
 				},
 				{
-					"type": "Any",
-					"name": "p2"
+					"type": "float",
+					"name": "z"
 				}
 			],
 			"return_type": "void",
@@ -39373,6 +39453,14 @@
 			"params": [],
 			"return_type": "BOOL",
 			"build": "811"
+		},
+		"0xE2BCD0EFAE90D1F4": {
+			"name": "_IS_XBOXPC_VERSION",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "BOOL",
+			"build": "813"
 		},
 		"0x9F1935CA1F724008": {
 			"name": "IS_AUSSIE_VERSION",
@@ -51020,6 +51108,19 @@
 				"_NETWORK_SHOP_CHECKOUT_START"
 			]
 		},
+		"0x4B64CD6D18474126": {
+			"name": "NET_GAMESERVER_CHECKOUT_PENDING",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "transactionId"
+				}
+			],
+			"return_type": "BOOL",
+			"build": "889"
+		},
 		"0x3C5FD37B5499582E": {
 			"name": "NET_GAMESERVER_BEGIN_SERVICE",
 			"jhash": "",
@@ -51359,6 +51460,14 @@
 			"params": [],
 			"return_type": "BOOL",
 			"build": "811"
+		},
+		"0xA6BC0D9BCF9662FA": {
+			"name": "_NETWORK_MULTIPLAYER_CROSSPLAY_NOT_ALLOWED",
+			"jhash": "",
+			"comment": "For the XboxPC version this returns true if XPRIVILEGE_MULTIPLAYER_SESSIONS is granted but XPRIVILEGE_CROSS_PLAY is NOT granted.\nFor more information, see https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/live/features/identity/privileges/concepts/live-user-privileges-client#privilege-ids-to-check\n\nAlways returns false for non-XboxPC versions.",
+			"params": [],
+			"return_type": "BOOL",
+			"build": "889"
 		},
 		"0x1353F87E89946207": {
 			"name": "NETWORK_HAS_AGE_RESTRICTIONS",
@@ -51737,6 +51846,40 @@
 			"return_type": "BOOL",
 			"build": "811"
 		},
+		"0x6FA9825D0B5A721B": {
+			"name": "NETWORK_CHECK_CAN_ACCESS_AND_ALERT",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "BOOL",
+			"build": "889"
+		},
+		"0x967E6FB554E1B6DE": {
+			"name": "_NETWORK_GET_ACCESS_CODE_LABEL_HEADING",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "accessCode"
+				}
+			],
+			"return_type": "const char*",
+			"build": "889"
+		},
+		"0x214CA1730793EBA8": {
+			"name": "_NETWORK_GET_ACCESS_CODE_LABEL_BODY",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "accessCode"
+				}
+			],
+			"return_type": "const char*",
+			"build": "889"
+		},
 		"0x9747292807126EDA": {
 			"name": "NETWORK_IS_MULTIPLAYER_DISABLED",
 			"jhash": "0x05518C0F",
@@ -51957,23 +52100,6 @@
 				{
 					"type": "int",
 					"name": "leaveReason"
-				}
-			],
-			"return_type": "BOOL",
-			"build": "811"
-		},
-		"0xA02E59562D711006": {
-			"name": "NETWORK_SESSION_END",
-			"jhash": "0xBCACBEA2",
-			"comment": "p0 is always false and p1 varies.\nNETWORK_SESSION_END(0, 1)\nNETWORK_SESSION_END(0, 0)\nResults in: \"Connection to session lost due to an unknown network error. Please return to Grand Theft Auto V and try again later.\"",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "p0"
-				},
-				{
-					"type": "BOOL",
-					"name": "p1"
 				}
 			],
 			"return_type": "BOOL",
@@ -56501,9 +56627,9 @@
 			"build": "811"
 		},
 		"0xDBDF80673BBA3D65": {
-			"name": "_NETWORK_DOES_COMMUNICATION_GROUP_EXIST",
+			"name": "_NETWORK_DOES_COMMUNICATION_GROUP_HAVE_PERMISSION",
 			"jhash": "",
-			"comment": "communicationType: 0 = VOICE; 1 = TEXT_CHAT; 2 = TEXT_MESSAGE; 3 = EMAIL; 4 = USER_CONTENT;  5 = USER_TEXT",
+			"comment": "communicationType: 0 = VOICE; 1 = TEXT_CHAT; 2 = TEXT_MESSAGE; 3 = EMAIL; 4 = USER_CONTENT; 5 = USER_TEXT",
 			"params": [
 				{
 					"type": "int",
@@ -56511,7 +56637,23 @@
 				}
 			],
 			"return_type": "BOOL",
-			"build": "811"
+			"build": "811",
+			"old_names": [
+				"_NETWORK_DOES_COMMUNICATION_GROUP_EXIST"
+			]
+		},
+		"0x20C12650830A64EC": {
+			"name": "_NETWORK_DOES_COMMUNICATION_GROUP_HAVE_SETTINGS_ENABLED",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "communicationType"
+				}
+			],
+			"return_type": "BOOL",
+			"build": "889"
 		},
 		"0x40DF02F371F40883": {
 			"name": "_NETWORK_GET_COMMUNICATION_GROUP_FLAGS",
@@ -56525,6 +56667,32 @@
 			],
 			"return_type": "int",
 			"build": "811"
+		},
+		"0x97F35B898D2D067F": {
+			"name": "_NETWORK_GET_COMMUNICATION_GROUP_DEFAULT_FLAGS",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "communicationType"
+				}
+			],
+			"return_type": "int",
+			"build": "889"
+		},
+		"0xBF66ACD9AE81A99F": {
+			"name": "_NETWORK_GET_COMMUNICATION_GROUP_VALUE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "communicationType"
+				}
+			],
+			"return_type": "int",
+			"build": "889"
 		},
 		"0xE549F846DE7D32D5": {
 			"name": "_NETWORK_SET_COMMUNICATION_GROUP_FLAGS",
@@ -58928,11 +59096,11 @@
 		"0xC6FCEE21C6FCEE21": {
 			"name": "NETWORK_SET_TASK_CUTSCENE_INSCOPE_MULTIPLER",
 			"jhash": "",
-			"comment": "A value between 1.0 and 5.0\n\n_NETWORK_SET_TASK_CUTSCENE_PROXIMITY_SCALE?",
+			"comment": "A value between 1.0 and 5.0",
 			"params": [
 				{
-					"type": "Any",
-					"name": "p0"
+					"type": "float",
+					"name": "multiplier"
 				}
 			],
 			"return_type": "void",
@@ -60280,6 +60448,14 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0xCBD02360C5E16871": {
+			"name": "NETWORK_SYNC_CLOCK_TIME_OVERRIDE",
+			"jhash": "",
+			"comment": "Does nothing in final builds.",
+			"params": [],
+			"return_type": "void",
+			"build": "889"
+		},
 		"0xD7C95D322FF57522": {
 			"name": "NETWORK_IS_CLOCK_TIME_OVERRIDDEN",
 			"jhash": "0x2465296D",
@@ -61192,27 +61368,6 @@
 					"name": "netID"
 				}
 			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x1775961C2FBBCB5C": {
-			"name": "NETWORK_SET_PROPERTY_ID",
-			"jhash": "0x5A74E873",
-			"comment": "value must be < 255",
-			"params": [
-				{
-					"type": "int",
-					"name": "id"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xC2B82527CA77053E": {
-			"name": "NETWORK_CLEAR_PROPERTY_ID",
-			"jhash": "0x38BC35C8",
-			"comment": "",
-			"params": [],
 			"return_type": "void",
 			"build": "811"
 		},
@@ -67153,7 +67308,7 @@
 		"0xADBE4809F19F927A": {
 			"name": "ONLY_CLEAN_UP_OBJECT_WHEN_OUT_OF_RANGE",
 			"jhash": "0x2048A7DD",
-			"comment": "is this like setting is as no longer needed?",
+			"comment": "",
 			"params": [
 				{
 					"type": "Object",
@@ -78654,35 +78809,6 @@
 			"return_type": "void",
 			"build": "811"
 		},
-		"0x082D79E15302F0C2": {
-			"name": "IS_PED_IN_SPHERE_AREA_OF_ANY_ENEMY_PEDS",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "Ped",
-					"name": "ped"
-				},
-				{
-					"type": "float",
-					"name": "x"
-				},
-				{
-					"type": "float",
-					"name": "y"
-				},
-				{
-					"type": "float",
-					"name": "z"
-				},
-				{
-					"type": "float",
-					"name": "range"
-				}
-			],
-			"return_type": "BOOL",
-			"build": "811"
-		},
 		"0xC158D28142A34608": {
 			"name": "STOP_PED_WEAPON_FIRING_WHEN_DROPPED",
 			"jhash": "0x4AC3421E",
@@ -81975,7 +82101,7 @@
 		"0x15F944730C832252": {
 			"name": "SET_USE_KINEMATIC_PHYSICS",
 			"jhash": "",
-			"comment": "PED_RAGDOLL_BUMP Proof?",
+			"comment": "",
 			"params": [
 				{
 					"type": "Entity",
@@ -82867,7 +82993,7 @@
 		"0x0032A6DBA562C518": {
 			"name": "RESET_LAW_RESPONSE_DELAY_OVERRIDE",
 			"jhash": "0x47CAB814",
-			"comment": "2 matches in 1 script - am_hold_up\n\nUsed in multiplayer scripts?",
+			"comment": "",
 			"params": [],
 			"return_type": "void",
 			"build": "811"
@@ -83753,6 +83879,14 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0x875BDD898B99C8CE": {
+			"name": "GET_PLAYER_TARGETING_MODE",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "int",
+			"build": "889"
 		},
 		"0x5702B917B99DB1CD": {
 			"name": "SET_PLAYER_TARGET_LEVEL",
@@ -85094,7 +85228,7 @@
 		"0x11D5F725F0E780E0": {
 			"name": "SET_PLAYER_PHONE_PALETTE_IDX",
 			"jhash": "",
-			"comment": "example:\n\nflags: 0-6\n\nPLAYER::SET_PLAYER_RESET_FLAG_PREFER_REAR_SEATS(PLAYER::PLAYER_ID(), 6);\n\nwouldnt the flag be the seatIndex?",
+			"comment": "",
 			"params": [
 				{
 					"type": "Player",
@@ -85102,7 +85236,7 @@
 				},
 				{
 					"type": "int",
-					"name": "flags"
+					"name": "idx"
 				}
 			],
 			"return_type": "void",
@@ -94179,6 +94313,39 @@
 				"_PLAYSTATS_NJVS_VOTE"
 			]
 		},
+		"0x01D8B04D02F1217F": {
+			"name": "_PLAYSTATS_DEATH_INFO",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Ped",
+					"name": "victimPed"
+				},
+				{
+					"type": "Ped",
+					"name": "killerPed"
+				},
+				{
+					"type": "int",
+					"name": "mentalState"
+				},
+				{
+					"type": "BOOL",
+					"name": "revengeKill"
+				},
+				{
+					"type": "int",
+					"name": "victimKvK"
+				},
+				{
+					"type": "int",
+					"name": "killerKvK"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
+		},
 		"0x46A70777BE6CEAB9": {
 			"name": "PLAYSTATS_FM_MISSION_END",
 			"jhash": "",
@@ -94918,6 +95085,19 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0x574A7808450E141C": {
+			"name": "_PLAYSTATS_SCRIPT_EVENT_FPOM",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Any*",
+					"name": "data"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
 		}
 	},
 	"STREAMING": {
@@ -96795,10 +96975,6 @@
 				{
 					"type": "const char*",
 					"name": "overrideEntryClipsetName"
-				},
-				{
-					"type": "Any",
-					"name": "p7"
 				}
 			],
 			"return_type": "void",
@@ -98733,6 +98909,19 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0xF5D1F489147CB683": {
+			"name": "SET_SEQUENCE_PREVENT_MIGRATION",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "taskSequenceId"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
 		},
 		"0x00A9010CFE1E3533": {
 			"name": "GET_SEQUENCE_PROGRESS",
@@ -103047,6 +103236,23 @@
 			"return_type": "int",
 			"build": "811"
 		},
+		"0x686ECCD99D4E61BB": {
+			"name": "SET_PED_WAYPOINT_PROGRESS",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Ped",
+					"name": "ped"
+				},
+				{
+					"type": "int",
+					"name": "progress"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
+		},
 		"0xE6A877C64CAF1BC5": {
 			"name": "GET_PED_WAYPOINT_DISTANCE",
 			"jhash": "0x084B35B0",
@@ -103510,6 +103716,19 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0xE435D3539EFDCD1B": {
+			"name": "VEHICLE_WAYPOINT_PLAYBACK_GET_IS_PAUSED",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Vehicle",
+					"name": "vehicle"
+				}
+			],
+			"return_type": "BOOL",
+			"build": "889"
 		},
 		"0xDC04FCAA7839D492": {
 			"name": "VEHICLE_WAYPOINT_PLAYBACK_RESUME",
@@ -104073,6 +104292,23 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x0EFE4834A2F40563": {
+			"name": "_SET_AMBIENT_PED_ENABLE_COLLISION_ON_NETWORK_CLONE_WHEN_FIXED",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Ped",
+					"name": "ped"
+				},
+				{
+					"type": "BOOL",
+					"name": "enable"
+				}
+			],
+			"return_type": "void",
+			"build": "889"
+		},
 		"0x349CE7B56DAFD95C": {
 			"name": "IS_MOVE_BLEND_RATIO_STILL",
 			"jhash": "0xE9DAF877",
@@ -104180,7 +104416,7 @@
 		"0xE45B7F222DE47E09": {
 			"name": "IS_PED_STRAFING",
 			"jhash": "0xEFEED13C",
-			"comment": "What's strafing?",
+			"comment": "",
 			"params": [
 				{
 					"type": "Ped",
@@ -108625,7 +108861,7 @@
 		"0xA178472EBB8AE60D": {
 			"name": "SET_HELI_BLADES_FULL_SPEED",
 			"jhash": "0x033A9408",
-			"comment": "Equivalent of SET_HELI_BLADES_SPEED(vehicleHandle, 1.0f);\n\nthis native works on planes to?",
+			"comment": "Equivalent of SET_HELI_BLADES_SPEED(vehicleHandle, 1.0f);",
 			"params": [
 				{
 					"type": "Vehicle",
@@ -108844,7 +109080,7 @@
 		"0x2497C4717C8B881E": {
 			"name": "SET_VEHICLE_ENGINE_ON",
 			"jhash": "0x7FBC86F1",
-			"comment": "Starts or stops the engine on the specified vehicle.\n\nvehicle: The vehicle to start or stop the engine on.\nvalue: true to turn the vehicle on; false to turn it off.\ninstantly: if true, the vehicle will be set to the state immediately; otherwise, the current driver will physically turn on or off the engine.\ndisableAutoStart: If true, the system will prevent the engine from starting when the player got into it.\n\nfrom what I've tested when I do this to a helicopter the propellers turn off after the engine has started. so is there any way to keep the heli propellers on?",
+			"comment": "Starts or stops the engine on the specified vehicle.\n\nvehicle: The vehicle to start or stop the engine on.\nvalue: true to turn the vehicle on; false to turn it off.\ninstantly: if true, the vehicle will be set to the state immediately; otherwise, the current driver will physically turn on or off the engine.\ndisableAutoStart: If true, the system will prevent the engine from starting when the player got into it.",
 			"params": [
 				{
 					"type": "Vehicle",

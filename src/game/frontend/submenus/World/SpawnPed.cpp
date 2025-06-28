@@ -33,7 +33,7 @@ namespace YimMenu::Submenus
 
 			const int visible = std::min(20, static_cast<int>(g_PedModels.size()));
 			const float height = visible * ImGui::GetTextLineHeightWithSpacing();
-			if (ImGui::BeginListBox("##vehicles", {300.f, height}))
+			if (ImGui::BeginListBox("##peds", {300.f, height}))
 			{
 				std::string lower = search;
 				std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);

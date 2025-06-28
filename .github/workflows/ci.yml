@@ -45,27 +45,19 @@ jobs:
   cross-compilation:
     runs-on: ubuntu-latest
     name: Cross-compilation
-    strategy:
-      matrix:
-        compiler: ["Zig", "Clang"]
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup CMake and build tools
+        run: |
+          sudo apt update
+          sudo apt install -y cmake ninja-build
+
       - name: Setup Zig
-        if: matrix.compiler == 'Zig'
         uses: mlugg/setup-zig@v2
 
-      - name: Setup MinGW
-        if: matrix.compiler == 'Clang'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang lld binutils-mingw-w64-x86-64 mingw-w64-x86-64-dev gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
-
-      - name: Check CMake version
-        run: cmake --version
-
       - name: Generate CMake project
-        run: cmake -DUSE_CROSSCOMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+        run: cmake -DUSE_CROSSCOMPILER=Zig -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
 
       - name: Build 64bit RelWithDebInfo DLL
         run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
@@ -76,13 +68,13 @@ jobs:
       - name: Rename DLL to libYimMenuV2-dev-{GITHUB_SHA}.dll
         run: |
           mv libYimMenuV2.dll libYimMenuV2-dev-${{github.sha}}.dll
-          mv libYimMenuV2.pdb libYimMenuV2-dev-${{github.sha}}.pdb || true
+          mv libYimMenuV2.pdb libYimMenuV2-dev-${{github.sha}}.pdb
         working-directory: build/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RelWithDebInfo-Cross-${{ matrix.compiler }}
+          name: RelWithDebInfo-Cross
           path: |
             build/libYimMenuV2-dev-*.dll
             build/libYimMenuV2-dev-*.pdb

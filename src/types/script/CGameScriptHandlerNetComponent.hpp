@@ -101,5 +101,10 @@ public:
 
 		return m_Host->m_Player;
 	}
+
+	inline bool IsParticipant(int player_index) const
+	{
+		return (m_ParticipantBitset & (1 << player_index)) != 0;
+	}
 };
 static_assert(sizeof(CGameScriptHandlerNetComponent) == 0x1B0);

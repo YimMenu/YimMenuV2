@@ -57,6 +57,11 @@ namespace rage
 			m_NumVectorRefs = 0;
 		}
 
+		rage::fvector3& GetSourceVector(int index)
+		{
+			return m_VectorRefSources[index];
+		}
+
 	protected:
 		void* m_ReturnValue;                    // 0x00
 		std::uint32_t m_ArgCount;               // 0x08

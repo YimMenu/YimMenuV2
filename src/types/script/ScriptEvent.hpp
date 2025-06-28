@@ -1,5 +1,6 @@
 #pragma once
 #include "types.hpp"
+#include "MPScriptData.hpp"
 
 #define REGISTER_SCRIPT_EVENT(classType, indexType)                            \
 	constexpr static auto EVENT_INDEX = ScriptEventIndex::indexType;           \
@@ -77,7 +78,7 @@ enum class ScriptEventIndex
 	TriggerCEORaid = -1906536929,
 
 	StartScriptBegin = -366707054,
-	StartScriptProceed = 1757622014,
+	StartScriptProceed = 1757622014, 
 
 	RequestRandomEvent = -126218586,
 	CollectCollectable = 968269233,
@@ -97,7 +98,7 @@ public:
 		return SenderIndex;
 	}
 
-	Hash GetEventIndex() const
+	Hash& GetEventIndex()
 	{
 		return EventIndex;
 	}
@@ -120,6 +121,11 @@ public:
 	void SetPlayer(int player)
 	{
 		PlayerBits |= (1 << player);
+	}
+	
+	void SetPlayerBits(int bits)
+	{
+		PlayerBits = bits;
 	}
 
 protected:
@@ -254,5 +260,23 @@ struct SET_SKYDIVE_COMPLETED : public SCRIPT_EVENT
 	SCR_BOOL ParTimeBeaten;
 	SCR_BOOL AccurateLanding;
 };
+
+// FPOM
+struct SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION : public SCRIPT_EVENT
+{
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION, StartScriptBegin);
+	MP_SCRIPT_DATA ScriptData;
+	SCR_INT Flags;
+	SCR_INT ReplayProtectionValue;
+	SCR_INT PAD_0026;
+};
+static_assert(sizeof(SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION) == 27 * 8);
+
+struct SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION_SERVER_ACK : public SCRIPT_EVENT
+{
+	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION_SERVER_ACK, StartScriptProceed);
+	MP_SCRIPT_DATA ScriptData;
+};
+static_assert(sizeof(SCRIPT_EVENT_FORCE_PLAYER_ON_MISSION_SERVER_ACK) == 24 * 8);
 
 #undef REGISTER_SCRIPT_EVENT

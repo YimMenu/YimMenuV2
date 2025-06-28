@@ -11,6 +11,8 @@ namespace YimMenu::Submenus
 		auto vehicle = std::make_shared<Group>("Vehicle");
 
 		general->AddItem(std::make_shared<PlayerCommandItem>("sendsext"_J));
+		general->AddItem(std::make_shared<PlayerCommandItem>("sendphantomcar"_J));
+		general->AddItem(std::make_shared<PlayerCommandItem>("sendgooch"_J));
 
 		bounty->AddItem(std::make_shared<IntCommandItem>("bountyamount"_J, "Amount"));
 		bounty->AddItem(std::make_shared<BoolCommandItem>("anonymousbounty"_J, "Anonymous"));

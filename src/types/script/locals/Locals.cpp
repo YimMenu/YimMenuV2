@@ -4,6 +4,7 @@
 #include "RCBanditoTimeTrialData.hpp"
 #include "HSWTimeTrialData.hpp"
 #include "BikeTimeTrialData.hpp"
+#include "LauncherClientData.hpp"
 #include "game/gta/ScriptLocal.hpp"
 
 #define DEFINE_LOCAL_ACCESSOR(str, local)               \
@@ -21,3 +22,6 @@ DEFINE_LOCAL_ACCESSOR(StandardTimeTrialData, 14640);
 DEFINE_LOCAL_ACCESSOR(RCBanditoTimeTrialData, 14690);
 DEFINE_LOCAL_ACCESSOR(HSWTimeTrialData, 14734);
 DEFINE_LOCAL_ACCESSOR(BikeTimeTrialData, 15529);
+
+// am_launcher
+DEFINE_LOCAL_ACCESSOR(LauncherClientData, 245);

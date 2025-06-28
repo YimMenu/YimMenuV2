@@ -73,6 +73,8 @@ namespace YimMenu
 				return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("CMM_MOD_S19c");
 			else if (model == "VIRGO2"_J)
 				return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("CMM_MOD_S19d");
+			else if ("TOP_IMANI_TECH"_J == MISC::GET_HASH_KEY(VEHICLE::GET_MOD_SLOT_NAME(vehicle, mod_slot)))
+				return "Imani Tech";
 			else
 				return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("CMM_MOD_S19");
 		case VehicleModType::MOD_TANK:

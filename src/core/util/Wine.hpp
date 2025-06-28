@@ -9,6 +9,6 @@ namespace YimMenu {
         auto module = ModuleMgr.Get("ntdll.dll"_J);
         if (!module)
             return std::nullopt;
-        return module->GetExport("wine_get_version");
+        return module->IsExported("wine_get_version");
     }
 }

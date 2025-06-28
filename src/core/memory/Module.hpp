@@ -2,10 +2,15 @@
 #include "PointerCalculator.hpp"
 #include "common.hpp"
 
+#include <type_traits>
+
 #include <winternl.h>
 
 namespace YimMenu
 {
+	template<typename T>
+	concept Symbol = std::is_convertible_v<T, int> || std::is_convertible_v<T, std::string_view>;
+
 	class Module
 	{
 	public:
@@ -18,15 +23,39 @@ namespace YimMenu
 		inline const std::uintptr_t End() const;
 
 		/**
-		 * @brief Parses the EAT of the module for the requested symbolname
+		 * @brief Parses the EAT of the module for the requested symbol name
 		 * 
-		 * @param symbolName 
+		 * @param symbolName The function name
 		 * @return void* Function address of the exported function
 		 */
-		template<typename T = void*>
-		T GetExport(const std::string_view symbolName) const;
-		template<typename T = void*>
-		T GetExport(int ordinal) const;
+		template<typename R = void*>
+		R GetExport(const std::string_view symbolName) const;
+		/**
+		 * @brief Parses the EAT of the module for the requested symbol ordinal
+		 * 
+		 * @param ordinal The function ordinal
+		 * @return void* Function address of the exported function
+		 */
+		template<typename R = void*>
+		R GetExport(const int ordinal) const;
+		/**
+		 * @brief Checks if the module exports a function with the given name
+		 * 
+		 * @param symbolName The function name
+		 * @return true If the function is exported
+		 * @return false If the function is not exported
+		 */
+		[[nodiscard]]
+		bool IsExported(const std::string_view symbolName) const;
+		/**
+		 * @brief Checks if the module exports a function with the given ordinal
+		 * 
+		 * @param ordinal The function ordinal
+		 * @return true If the function is exported
+		 * @return false If the function is not exported
+		 */
+		[[nodiscard]]
+		bool IsExported(const int ordinal) const;
 		/**
 		 * @brief Gets the address of the import function
 		 * 
@@ -39,6 +68,10 @@ namespace YimMenu
 		bool Valid() const;
 
 		IMAGE_NT_HEADERS* GetNtHeader() const;
+
+	private:
+		template<typename R = void*, Symbol T>
+		R GetExportImpl(const T symbol) const;
 
 	private:
 		const std::filesystem::path m_Path;
@@ -62,8 +95,40 @@ namespace YimMenu
 		return Base() + m_Size;
 	}
 
-	template<typename T>
-	inline T Module::GetExport(const std::string_view symbolName) const
+	template<typename R>
+	inline R Module::GetExport(const std::string_view name) const
+	{
+		auto result = GetExportImpl<R, typeof(name)>(name);
+		if (result)
+			return result;
+
+		LOG(FATAL) << "Cannot find export: " << name;
+		return nullptr;
+	}
+
+	template<typename R>
+	inline R Module::GetExport(const int ordinal) const
+	{
+		auto result = GetExportImpl<R, typeof(ordinal)>(ordinal);
+		if (result)
+			return result;
+
+		LOG(FATAL) << "Cannot find export: " << ordinal;
+		return nullptr;
+	}
+
+	inline bool Module::IsExported(const std::string_view symbolName) const
+	{
+		return GetExportImpl<void*, typeof(symbolName)>(symbolName) != nullptr;
+	}
+
+	inline bool Module::IsExported(const int ordinal) const
+	{
+		return GetExportImpl<void*, typeof(ordinal)>(ordinal) != nullptr;
+	}
+
+	template<typename R, Symbol T>
+	inline R Module::GetExportImpl(const T symbol) const
 	{
 		const auto ntHeader = GetNtHeader();
 		if (!ntHeader)
@@ -72,42 +137,32 @@ namespace YimMenu
 		const auto imageDataDirectory = ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
 		const auto exportDirectory = m_Base.Add(imageDataDirectory.VirtualAddress).As<IMAGE_EXPORT_DIRECTORY*>();
 		const auto namesOffsets = m_Base.Add(exportDirectory->AddressOfNames).As<DWORD*>();
-		const auto funcOffsets = m_Base.Add(exportDirectory->AddressOfFunctions).As<DWORD*>();
-
-		for (std::size_t i = 0; i < exportDirectory->NumberOfFunctions; i++)
-		{
-			const auto functionName = m_Base.Add(namesOffsets[i]).As<const char*>();
-			if (strcmp(functionName, symbolName.data()))
-				continue;
-
-			return m_Base.Add(funcOffsets[i]).As<T>();
-		}
-
-		LOG(FATAL) << "Cannot find export: " << symbolName;
-		return nullptr;
-	}
-
-	template<typename T>
-	inline T Module::GetExport(int ordinal) const
-	{
-		const auto ntHeader = GetNtHeader();
-		if (!ntHeader)
-			return nullptr;
-
-		const auto imageDataDirectory = ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-		const auto exportDirectory = m_Base.Add(imageDataDirectory.VirtualAddress).As<IMAGE_EXPORT_DIRECTORY*>();
 		const auto ordinalOffsets = m_Base.Add(exportDirectory->AddressOfNameOrdinals).As<uint16_t*>();
 		const auto funcOffsets = m_Base.Add(exportDirectory->AddressOfFunctions).As<DWORD*>();
 
 		for (std::size_t i = 0; i < exportDirectory->NumberOfFunctions; i++)
 		{
-			if (ordinalOffsets[i] != ordinal)
-				continue;
+			if constexpr (std::is_convertible_v<T, int>)
+			{
+				if (ordinalOffsets[i] != symbol)
+					continue;
 
-			return m_Base.Add(funcOffsets[i]).As<T>();
+				return m_Base.Add(funcOffsets[i]).As<R>();
+			}
+			else if constexpr (std::is_convertible_v<T, std::string_view>)
+			{
+				const auto functionName = m_Base.Add(namesOffsets[i]).As<const char*>();
+				if (strcmp(functionName, symbol.data()))
+					continue;
+
+				return m_Base.Add(funcOffsets[i]).As<R>();
+			}
+			else
+			{
+				static_assert(false, "Unsupported symbol type");
+			}
 		}
 
-		LOG(FATAL) << "Cannot find export: " << ordinal;
 		return nullptr;
 	}
 }

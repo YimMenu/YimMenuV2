@@ -1,11 +1,9 @@
 #include "Vehicle.hpp"
 #include "Natives.hpp"
 #include "core/backend/ScriptMgr.hpp"
-#include "game/backend/Self.hpp"
 #include "game/pointers/Pointers.hpp"
 #include "game/gta/data/VehicleValues.hpp"
 #include "game/gta/data/Vehicles.hpp"
-#include "game/gta/ScriptFunction.hpp"
 
 namespace YimMenu
 {
@@ -254,97 +252,5 @@ namespace YimMenu
 				ownedMods[extra] = VEHICLE::IS_VEHICLE_EXTRA_TURNED_ON(vehicle, id);
 
 		return ownedMods;
-	}
-
-	void Vehicle::ApplyOwnedMods(std::map<int, int32_t> ownedMods)
-	{
-		ENTITY_ASSERT_VALID();
-
-		for (int i = (int)CustomVehicleModType::MOD_NEON_COL_B; i <= (int)CustomVehicleModType::MOD_MODEL_HASH; i++)
-		{
-			if (ownedMods.count(i) == 0)
-			{
-				ownedMods[i] = 0;
-			}
-		}
-
-		VEHICLE::SET_VEHICLE_MOD_KIT(GetHandle(), 0);
-
-		VEHICLE::SET_VEHICLE_NUMBER_PLATE_TEXT_INDEX(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_PLATE_STYLE]);
-		VEHICLE::SET_VEHICLE_WINDOW_TINT(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_WINDOW_TINT]);
-		VEHICLE::SET_VEHICLE_WHEEL_TYPE(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_WHEEL_TYPE]);
-
-		VEHICLE::SET_VEHICLE_COLOURS(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_PRIMARY_COL], ownedMods[(int)CustomVehicleModType::MOD_SECONDARY_COL]);
-		VEHICLE::SET_VEHICLE_EXTRA_COLOURS(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_PEARLESCENT_COL], ownedMods[(int)CustomVehicleModType::MOD_WHEEL_COL]);
-		VEHICLE::SET_VEHICLE_EXTRA_COLOUR_5(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_INTERIOR_COL]);
-		VEHICLE::SET_VEHICLE_EXTRA_COLOUR_6(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_DASHBOARD_COL]);
-
-		if (ownedMods[(int)CustomVehicleModType::MOD_PRIMARY_CUSTOM])
-		{
-			VEHICLE::SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_PRIMARY_COL_R], ownedMods[(int)CustomVehicleModType::MOD_PRIMARY_COL_G], ownedMods[(int)CustomVehicleModType::MOD_PRIMARY_COL_B]);
-		}
-
-		if (ownedMods[(int)CustomVehicleModType::MOD_SECONDARY_CUSTOM])
-		{
-			VEHICLE::SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_SECONDARY_COL_R], ownedMods[(int)CustomVehicleModType::MOD_SECONDARY_COL_G], ownedMods[(int)CustomVehicleModType::MOD_SECONDARY_COL_B]);
-		}
-
-		if (ownedMods[(int)VehicleModType::MOD_TYRE_SMOKE])
-		{
-			VEHICLE::SET_VEHICLE_TYRE_SMOKE_COLOR(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_TIRESMOKE_COL_R], ownedMods[(int)CustomVehicleModType::MOD_TIRESMOKE_COL_G], ownedMods[(int)CustomVehicleModType::MOD_TIRESMOKE_COL_B]);
-			VEHICLE::TOGGLE_VEHICLE_MOD(GetHandle(), (int)VehicleModType::MOD_TYRE_SMOKE, ownedMods[(int)VehicleModType::MOD_TYRE_SMOKE]);
-		}
-
-		if (ownedMods[(int)VehicleModType::MOD_XENON_LIGHTS])
-		{
-			VEHICLE::SET_VEHICLE_XENON_LIGHT_COLOR_INDEX(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_XENON_COL]);
-			VEHICLE::TOGGLE_VEHICLE_MOD(GetHandle(), (int)VehicleModType::MOD_XENON_LIGHTS, ownedMods[(int)VehicleModType::MOD_XENON_LIGHTS]);
-		}
-
-		VEHICLE::SET_VEHICLE_NEON_COLOUR(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_NEON_COL_R], ownedMods[(int)CustomVehicleModType::MOD_NEON_COL_G], ownedMods[(int)CustomVehicleModType::MOD_NEON_COL_B]);
-		VEHICLE::SET_VEHICLE_NEON_ENABLED(GetHandle(), (int)NeonLightLocations::NEON_LEFT, ownedMods[(int)CustomVehicleModType::MOD_NEON_LEFT_ON]);
-		VEHICLE::SET_VEHICLE_NEON_ENABLED(GetHandle(), (int)NeonLightLocations::NEON_RIGHT, ownedMods[(int)CustomVehicleModType::MOD_NEON_RIGHT_ON]);
-		VEHICLE::SET_VEHICLE_NEON_ENABLED(GetHandle(), (int)NeonLightLocations::NEON_FRONT, ownedMods[(int)CustomVehicleModType::MOD_NEON_FRONT_ON]);
-		VEHICLE::SET_VEHICLE_NEON_ENABLED(GetHandle(), (int)NeonLightLocations::NEON_BACK, ownedMods[(int)CustomVehicleModType::MOD_NEON_BACK_ON]);
-
-
-		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_TIRE_CAN_BURST]);
-		VEHICLE::SET_DRIFT_TYRES(GetHandle(), ownedMods[(int)CustomVehicleModType::MOD_DRIFT_TIRE]);
-		VEHICLE::TOGGLE_VEHICLE_MOD(GetHandle(), (int)VehicleModType::MOD_TURBO, ownedMods[(int)VehicleModType::MOD_TURBO]);
-
-		for (int slot = (int)VehicleModType::MOD_SPOILERS; slot <= (int)VehicleModType::MOD_LIGHTBAR; slot++)
-		{
-			if (ownedMods.count(slot) && ownedMods[slot] != -1)
-			{
-				bool custom_tire = false;
-
-				if (slot == (int)VehicleModType::MOD_FRONTWHEEL)
-				{
-					custom_tire = ownedMods[(int)CustomVehicleModType::MOD_FRONTWHEEL_VAR];
-				}
-				else if (slot == (int)VehicleModType::MOD_REARWHEEL)
-				{
-					custom_tire = ownedMods[(int)CustomVehicleModType::MOD_REARWHEEL_VAR];
-				}
-
-				VEHICLE::SET_VEHICLE_MOD(GetHandle(), slot, ownedMods[slot], custom_tire);
-			}
-		}
-
-		for (int extra = (int)CustomVehicleModType::MOD_EXTRA_14; extra <= (int)CustomVehicleModType::MOD_EXTRA_1; extra++)
-		{
-			int gta_extra_id = (extra - (int)CustomVehicleModType::MOD_EXTRA_1) * -1;
-			if (ownedMods.count(extra) && VEHICLE::DOES_EXTRA_EXIST(GetHandle(), gta_extra_id))
-			{
-				VEHICLE::SET_VEHICLE_EXTRA(GetHandle(), gta_extra_id, ownedMods[extra] == 0);
-			}
-		}
-
-		if (ownedMods[(int)CustomVehicleModType::MOD_HAS_CLAN_LOGO] != 0)
-		{
-			auto handle = GetHandle();
-			static ScriptFunction addClonLogoToVehicle("main_persistent"_J, ScriptPointer("AddClonLogoToVehicle", "2D 02 04 00 00 5D ? ? ? 61"));
-			addClonLogoToVehicle.Call<bool>(&handle, Self::GetPlayer().GetId());
-		}
 	}
 }

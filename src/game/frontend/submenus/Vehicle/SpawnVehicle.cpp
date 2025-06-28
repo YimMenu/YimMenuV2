@@ -212,7 +212,7 @@ namespace YimMenu::Submenus
 									if (spawnClonePersonalVehicle.GetState())
 									{
 										auto handle = Vehicle::Create(personalVeh->GetModel(), GetVehicleSpawnLoc(personalVeh->GetModel(), spawnInsidePersonalVehicle.GetState()), Self::GetPed().GetHeading());
-										handle.ApplyOwnedMods(personalVeh->GetOwnedMods());
+										personalVeh->ApplyOwnedMods(handle.GetHandle());
 										
 										if (spawnInsidePersonalVehicle.GetState())
 											Self::GetPed().SetInVehicle(handle);

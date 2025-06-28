@@ -7,6 +7,7 @@
 #include "game/gta/ScriptFunction.hpp"
 #include "game/gta/ScriptLocal.hpp"
 #include "game/gta/ScriptGlobal.hpp"
+#include "game/gta/ScriptFunction.hpp"
 #include "game/gta/Stats.hpp"
 #include "types/script/globals/GPBD_FM.hpp"
 #include "types/script/globals/MPSV.hpp"
@@ -145,9 +146,9 @@ namespace YimMenu
 		case 27: stat = "MPX_MULTI_PROPERTY_8"; break;
 		case 28: stat = "MPX_MULTI_PROPERTY_9"; break;
 		case 29: stat = "MPX_MULTSTOREY_GAR_OWNED"; break;
-		case 30: return 1; // *Pointers.HasGTAPlus; is this a good idea?
 		case 31: stat = "MPX_PROP_BAIL_OFFICE"; break;
 		case 32: stat = "MPX_PROP_HACKER_DEN"; break;
+		case 30:
 		case MAX_GARAGE_NUM + 0:
 		case MAX_GARAGE_NUM + 1:
 		case MAX_GARAGE_NUM + 2:
@@ -247,7 +248,6 @@ namespace YimMenu
 		m_Name  = std::format("{} ({})", HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(m_Model)), m_Plate);
 
 		SetGarage();
-		SetOwnedMods();
 	}
 
 	int PersonalVehicles::PersonalVehicle::GetId()
@@ -280,11 +280,6 @@ namespace YimMenu
 		return m_Garage;
 	}
 
-	std::map<int, int32_t> PersonalVehicles::PersonalVehicle::GetOwnedMods()
-	{
-		return m_OwnedMods;
-	}
-
 	void PersonalVehicles::PersonalVehicle::SetGarage()
 	{
 		for (int propertyIterator = 0; propertyIterator < MAX_GARAGE_NUM + 4; propertyIterator++)
@@ -313,103 +308,6 @@ namespace YimMenu
 				}
 			}
 		}
-	}
-
-	void PersonalVehicles::PersonalVehicle::SetOwnedMods()
-	{
-		for (int i = static_cast<int>(CustomVehicleModType::MOD_SECONDARY_CUSTOM); i <= static_cast<int>(CustomVehicleModType::MOD_MODEL_HASH); i++)
-		{
-			m_OwnedMods[i] = 0;
-		}
-
-		auto xenonLights = m_Data->ModTypes[static_cast<int>(VehicleModType::MOD_XENON_LIGHTS)];
-		auto flags1 = m_Data->Flags1;
-		auto tyreType = m_Data->TyreType;
-		auto pvFlags = m_Data->PersonalVehicleFlags;
-
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_MODEL_HASH)] = m_Data->VehicleModel;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PLATE_STYLE)] = m_Data->NumberPlateTextIndex;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_WINDOW_TINT)] = m_Data->WindowTint;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_WHEEL_TYPE)] = m_Data->WheelType;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PRIMARY_COL)] = m_Data->Colours1;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_SECONDARY_COL)] = m_Data->Colours2;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PEARLESCENT_COL)] = m_Data->ExtraColours1;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_WHEEL_COL)] = m_Data->ExtraColours2;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_INTERIOR_COL)] = m_Data->ExtraColour5;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_DASHBOARD_COL)] = m_Data->ExtraColour6;
-
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PRIMARY_CUSTOM)] = flags1.IsSet(13);
-		if (m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PRIMARY_CUSTOM)])
-		{
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PRIMARY_COL_R)] = m_Data->CustomPrimaryColourR;
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PRIMARY_COL_G)] = m_Data->CustomPrimaryColourG;
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_PRIMARY_COL_B)] = m_Data->CustomPrimaryColourB;
-		}
-
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_SECONDARY_CUSTOM)] = flags1.IsSet(12);
-		if (m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_SECONDARY_CUSTOM)])
-		{
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_SECONDARY_COL_R)] = m_Data->CustomPrimaryColourR;
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_SECONDARY_COL_G)] = m_Data->CustomPrimaryColourG;
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_SECONDARY_COL_B)] = m_Data->CustomPrimaryColourB;
-		}
-
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRESMOKE_COL_R)] = m_Data->TyreSmokeR;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRESMOKE_COL_G)] = m_Data->TyreSmokeG;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRESMOKE_COL_B)] = m_Data->TyreSmokeB;
-		m_OwnedMods[static_cast<int>(VehicleModType::MOD_TYRE_SMOKE)] = !(m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRESMOKE_COL_R)] == 255 && m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRESMOKE_COL_G)] == 255 && m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRESMOKE_COL_B)] == 255);
-
-		if (xenonLights > 0)
-		{
-			m_OwnedMods[static_cast<int>(VehicleModType::MOD_XENON_LIGHTS)] = 1;
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_XENON_COL)] = xenonLights - 2;
-		}
-		else
-		{
-			m_OwnedMods[static_cast<int>(VehicleModType::MOD_XENON_LIGHTS)] = 0;
-		}
-
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_LEFT_ON)] = flags1.IsSet(30);
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_RIGHT_ON)] = flags1.IsSet(31);
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_FRONT_ON)] = flags1.IsSet(28);
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_BACK_ON)] = flags1.IsSet(29);
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_COL_R)] = m_Data->NeonColourR;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_COL_G)] = m_Data->NeonColourG;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_NEON_COL_B)] = m_Data->NeonColourB;
-
-		if (tyreType != 0)
-		{
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRE_CAN_BURST)] = tyreType > 1;
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_DRIFT_TIRE)] = tyreType == 3;
-		}
-		else
-		{
-			m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_TIRE_CAN_BURST)] = flags1.IsSet(9);
-		}
-
-		m_OwnedMods[static_cast<int>(VehicleModType::MOD_TURBO)] = m_Data->ModTypes[static_cast<int>(VehicleModType::MOD_TURBO)];
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_FRONTWHEEL_VAR)] = m_Data->ModVariation[0] != 0;
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_REARWHEEL_VAR)] = m_Data->ModVariation[1] != 0;
-
-		for (int slot = static_cast<int>(VehicleModType::MOD_SPOILERS); slot <= static_cast<int>(VehicleModType::MOD_LIGHTBAR); slot++)
-		{
-			if (slot == static_cast<int>(VehicleModType::MOD_TURBO) || slot == static_cast<int>(VehicleModType::MOD_TYRE_SMOKE) || slot == static_cast<int>(VehicleModType::MOD_XENON_LIGHTS))
-				continue;
-
-			auto val = m_Data->ModTypes[slot] - 1;
-			if (val != -1)
-			{
-				m_OwnedMods[slot] = val;
-			}
-		}
-
-		for (int extra = static_cast<int>(CustomVehicleModType::MOD_EXTRA_14); extra <= static_cast<int>(CustomVehicleModType::MOD_EXTRA_1); extra++)
-		{
-			auto extraId = (extra - static_cast<int>(CustomVehicleModType::MOD_EXTRA_1)) * -1;
-			m_OwnedMods[extra] = flags1.IsSet(extraId - 1);
-		}
-
-		m_OwnedMods[static_cast<int>(CustomVehicleModType::MOD_HAS_CLAN_LOGO)] = pvFlags.IsSet(static_cast<ePersonalVehicleFlags>(8));
 	}
 
 	int PersonalVehicles::PersonalVehicle::GetCurrentId()
@@ -511,6 +409,16 @@ namespace YimMenu
 		}
 
 		return false;
+	}
+
+	void PersonalVehicles::PersonalVehicle::ApplyOwnedMods(int handle)
+	{
+		auto oldVal = m_Data->IsPersonalVehicle;
+
+		m_Data->IsPersonalVehicle = 0;
+		static ScriptFunction applyMPSVMods("freemode"_J, ScriptPointer("ApplyMPSVMods", "5D ? ? ? 38 2A 71").Add(1).Rip());
+		applyMPSVMods.Call<void>(handle, m_Data, true, true, false);
+		m_Data->IsPersonalVehicle = oldVal;
 	}
 
 	void PersonalVehicles::RefreshPersonalVehiclesImpl()

@@ -23,6 +23,7 @@ namespace YimMenu
 		void Upgrade();
 		void SetPlateText(std::string_view text);
 		std::map<int, int32_t> GetOwnedMods();
+		void ApplyOwnedMods(std::map<int, int32_t> ownedMods);
 
 		// seats
 		bool IsSeatFree(int seat);

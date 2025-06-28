@@ -18,6 +18,7 @@ namespace YimMenu
 			std::string m_Plate;
 			std::string m_Name;
 			std::string m_Garage;
+			std::map<int, int32_t> m_OwnedMods;
 
 		public:
 			PersonalVehicle(int id, MPSV_Entry* data);
@@ -28,11 +29,16 @@ namespace YimMenu
 			std::string GetPlate();
 			std::string GetName();
 			std::string GetGarage();
-
-			static void DespawnCurrent();
+			std::map<int, int32_t> GetOwnedMods();
 			void SetGarage();
+			void SetOwnedMods();
+
+			static int GetCurrentId();
+			static int GetCurrentHandle();
+			static bool DespawnCurrent();
+
 			bool Repair();
-			bool Summon();
+			bool Summon(bool bring = false);
 		};
 
 		static std::map<std::string, std::unique_ptr<PersonalVehicle>>& GetPersonalVehicles()

@@ -12,6 +12,8 @@ namespace YimMenu::Submenus
 {
 	static BoolCommand spawnInsideVehicle{"spawninsideveh", "Spawn Inside", "Spawn inside the vehicle."};
 	static BoolCommand spawnVehicleMaxed{"spawnvehmaxed", "Spawn Maxed", "Spawn the vehicle maxed."};
+	static BoolCommand spawnInsidePersonalVehicle{"spawninsidepv", "Spawn Inside", "Spawn inside the personal vehicle."};
+	static BoolCommand spawnClonePersonalVehicle{"spawnclonepv", "Spawn Clone", "Spawn a clone of the persone vehicle."};
 
 	static Vector3 GetVehicleSpawnLoc(joaat_t hash, bool spawnInside)
 	{
@@ -97,7 +99,7 @@ namespace YimMenu::Submenus
 				ImGui::EndCombo();
 			}
 
-			const int visible = std::min(10, static_cast<int>(vehicleNames.size()));
+			const int visible = std::min(20, static_cast<int>(vehicleNames.size()));
 			const float height = visible * ImGui::GetTextLineHeightWithSpacing();
 			if (ImGui::BeginListBox("##vehicles", {300.f, height}))
 			{
@@ -179,7 +181,7 @@ namespace YimMenu::Submenus
 				ImGui::EndCombo();
 			}
 
-			const int visible = std::min(10, static_cast<int>(PersonalVehicles::GetPersonalVehicles().size()));
+			const int visible = std::min(20, static_cast<int>(PersonalVehicles::GetPersonalVehicles().size()));
 			const float height = visible * ImGui::GetTextLineHeightWithSpacing();
 			if (ImGui::BeginListBox("##personalvehicles", {300.f, height}))
 			{
@@ -207,7 +209,18 @@ namespace YimMenu::Submenus
 							if (ImGui::Selectable(label.c_str()))
 							{
 								FiberPool::Push([&personalVeh] {
-									personalVeh->Summon();
+									if (spawnClonePersonalVehicle.GetState())
+									{
+										auto handle = Vehicle::Create(personalVeh->GetModel(), GetVehicleSpawnLoc(personalVeh->GetModel(), spawnInsidePersonalVehicle.GetState()), Self::GetPed().GetHeading());
+										handle.ApplyOwnedMods(personalVeh->GetOwnedMods());
+										
+										if (spawnInsidePersonalVehicle.GetState())
+											Self::GetPed().SetInVehicle(handle);
+									}
+									else
+									{
+										personalVeh->Summon(spawnInsidePersonalVehicle.GetState());
+									}
 								});
 							}
 							ImGui::PopID();
@@ -218,6 +231,9 @@ namespace YimMenu::Submenus
 				ImGui::EndListBox();
 			}
 		}));
+
+		tab->AddItem(std::make_shared<BoolCommandItem>("spawninsidepv"_J));
+		tab->AddItem(std::make_shared<BoolCommandItem>("spawnclonepv"_J));
 
 		return tab;
 	}

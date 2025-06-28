@@ -5,7 +5,6 @@
 #include "game/backend/Self.hpp"
 #include "game/backend/PersonalVehicles.hpp"
 #include "game/gta/data/Vehicles.hpp"
-#include "game/gta/Vehicle.hpp"
 #include "game/gta/Natives.hpp"
 
 namespace YimMenu::Submenus
@@ -205,14 +204,15 @@ namespace YimMenu::Submenus
 						bool matchesGarage = selectedGarageStr.empty() || personalVeh->GetGarage() == selectedGarageStr;
 						if (matchesSearch && matchesGarage)
 						{
-							ImGui::PushID('v' << 24 & personalVeh->GetId());
+							ImGui::PushID(personalVeh->GetId());
 							if (ImGui::Selectable(label.c_str()))
 							{
 								FiberPool::Push([&personalVeh] {
 									if (spawnClonePersonalVehicle.GetState())
 									{
-										auto handle = Vehicle::Create(personalVeh->GetModel(), GetVehicleSpawnLoc(personalVeh->GetModel(), spawnInsidePersonalVehicle.GetState()), Self::GetPed().GetHeading());
-										personalVeh->ApplyOwnedMods(handle.GetHandle());
+										auto coords  = GetVehicleSpawnLoc(personalVeh->GetModel(), spawnInsidePersonalVehicle.GetState());
+										auto heading = Self::GetPed().GetHeading();
+										auto handle  = personalVeh->Clone(coords, heading);
 										
 										if (spawnInsidePersonalVehicle.GetState())
 											Self::GetPed().SetInVehicle(handle);

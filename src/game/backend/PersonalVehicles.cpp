@@ -7,7 +7,6 @@
 #include "game/gta/ScriptFunction.hpp"
 #include "game/gta/ScriptLocal.hpp"
 #include "game/gta/ScriptGlobal.hpp"
-#include "game/gta/ScriptFunction.hpp"
 #include "game/gta/Stats.hpp"
 #include "types/script/globals/GPBD_FM.hpp"
 #include "types/script/globals/MPSV.hpp"
@@ -320,14 +319,14 @@ namespace YimMenu
 		return -1;
 	}
 
-	int PersonalVehicles::PersonalVehicle::GetCurrentHandle()
+	Vehicle PersonalVehicles::PersonalVehicle::GetCurrent()
 	{
 		if (auto freemodeGeneral = FreemodeGeneral::Get())
 		{
-			return freemodeGeneral->PersonalVehicleIndex;
+			return Vehicle(freemodeGeneral->PersonalVehicleIndex);
 		}
 
-		return -1;
+		return nullptr;
 	}
 
 	bool PersonalVehicles::PersonalVehicle::DespawnCurrent()
@@ -335,7 +334,7 @@ namespace YimMenu
 		if (auto MPSV = MPSV::Get())
 		{
 			MPSV->Entries[GetCurrentId()].PersonalVehicleFlags.Clear(ePersonalVehicleFlags::TRIGGER_SPAWN_TOGGLE);
-			for (int i = 0; GetCurrentHandle() != -1; i++)
+			for (int i = 0; GetCurrent().GetHandle() != -1; i++)
 			{
 				ScriptMgr::Yield(100ms);
 				if (i > 30)
@@ -392,17 +391,18 @@ namespace YimMenu
 
 			if (bring)
 			{
-				for (int i = 0; GetCurrentHandle() == -1; i++)
+				for (int i = 0; GetCurrent().GetHandle() == -1; i++)
 				{
 					ScriptMgr::Yield(100ms);
 					if (i > 30)
-						break;
+						return false;
 				}
 
-				auto handle = Vehicle(GetCurrentHandle());
 				auto coords = Self::GetPed().GetPosition();
-				handle.SetPosition(coords);
-				Self::GetPed().SetInVehicle(handle.GetHandle());
+				auto heading = Self::GetPed().GetHeading();
+				GetCurrent().SetPosition(coords);
+				GetCurrent().SetHeading(heading);
+				Self::GetPed().SetInVehicle(GetCurrent());
 			}
 
 			return true;
@@ -411,14 +411,23 @@ namespace YimMenu
 		return false;
 	}
 
-	void PersonalVehicles::PersonalVehicle::ApplyOwnedMods(int handle)
+	Vehicle PersonalVehicles::PersonalVehicle::Clone(rage::fvector3 coords, float heading)
 	{
-		auto oldVal = m_Data->IsPersonalVehicle;
+		if (auto veh = Vehicle::Create(m_Model, coords, heading))
+		{
+			auto oldVal = m_Data->IsPersonalVehicle;
 
-		m_Data->IsPersonalVehicle = 0;
-		static ScriptFunction applyMPSVMods("freemode"_J, ScriptPointer("ApplyMPSVMods", "5D ? ? ? 38 2A 71").Add(1).Rip());
-		applyMPSVMods.Call<void>(handle, m_Data, true, true, false);
-		m_Data->IsPersonalVehicle = oldVal;
+			m_Data->IsPersonalVehicle = 0;
+
+			// This sometimes fails to apply the crew logo since ADD_VEHICLE_EMBLEM needs to be called in a loop
+			static ScriptFunction applyMPSVData("freemode"_J, ScriptPointer("ApplyMPSVData", "5D ? ? ? 38 2A 71").Add(1).Rip());
+			applyMPSVData.Call<void>(veh.GetHandle(), m_Data, true, true, false);
+
+			m_Data->IsPersonalVehicle = oldVal;
+			return veh;
+		}
+
+		return nullptr;
 	}
 
 	void PersonalVehicles::RefreshPersonalVehiclesImpl()

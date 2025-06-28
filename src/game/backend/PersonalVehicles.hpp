@@ -1,5 +1,6 @@
 #pragma once
 #include "core/util/Joaat.hpp"
+#include "game/gta/Vehicle.hpp"
 
 #include <set>
 
@@ -30,13 +31,13 @@ namespace YimMenu
 			std::string GetGarage();
 			void SetGarage();
 
+			static Vehicle GetCurrent();
 			static int GetCurrentId();
-			static int GetCurrentHandle();
 			static bool DespawnCurrent();
 
 			bool Repair();
 			bool Summon(bool bring = false);
-			void ApplyOwnedMods(int handle);
+			Vehicle Clone(rage::fvector3 coords, float heading);
 		};
 
 		static std::map<std::string, std::unique_ptr<PersonalVehicle>>& GetPersonalVehicles()

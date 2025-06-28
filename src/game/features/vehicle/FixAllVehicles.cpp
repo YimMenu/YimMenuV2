@@ -1,6 +1,5 @@
 #include "core/commands/Command.hpp"
 #include "core/frontend/Notifications.hpp"
-#include "types/script/globals/MPSV.hpp"
 #include "game/backend/PersonalVehicles.hpp"
 #include "game/pointers/Pointers.hpp"
 

@@ -1,6 +1,7 @@
 #include "SpawnPed.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/data/PedModels.hpp"
 #include "game/gta/Ped.hpp"
@@ -52,6 +53,23 @@ namespace YimMenu::Submenus
 						{
 							auto set_player = ImGui::GetIO().KeyCtrl;
 							FiberPool::Push([name, set_player] {
+								if (spawnInMyVehicle)
+								{
+									auto vehicle = Self::GetVehicle();
+									if (vehicle)
+									{
+										if (!vehicle.IsSeatFree(-2) && 
+										    !vehicle.IsSeatFree(-1))
+										{
+											Notifications::Show(
+											    "Spawn Ped",
+											    "Cannot spawn ped in vehicle, all seats are occupied, please free a seat first or disable 'Spawn In My Vehicle' option.",
+											    NotificationType::Warning);
+											return;
+										}
+									}
+								}
+
 								auto hash = Joaat(name);
 								auto handle = Ped::Create(hash, Self::GetPed().GetPosition(), Self::GetPed().GetHeading());
 
@@ -99,8 +117,12 @@ namespace YimMenu::Submenus
 								if (spawnInMyVehicle)
 								{
 									auto vehicle = Self::GetVehicle();
-									if (vehicle)
-										handle.SetInVehicle(vehicle, -2);
+									if (vehicle) {
+										if (vehicle.IsSeatFree(-1))
+											handle.SetInVehicle(vehicle, -1);
+										else
+											handle.SetInVehicle(vehicle, -2);
+									}
 								}
 
 								if (giveAllWeapons)

@@ -133,7 +133,7 @@ namespace YimMenu::Lua
 		virtual void Register(lua_State* state) override
 		{
 			lua_pushcfunction(state, InvokeNative);
-			lua_setglobal(state, "_I"); // we're trying to keep the invoker code as short as possible
+			lua_setglobal(state, "_I"); // we're trying to keep the auto-generated natives code as short as possible to fit under 65535 characters per namespace
 		}
 	};
 

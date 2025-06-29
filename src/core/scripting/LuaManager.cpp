@@ -64,7 +64,7 @@ namespace YimMenu
 
 					if (script->IsMalfunctioning())
 					{
-						Notifications::Show("Lua Scripting", std::format("Script {} has been unloaded due to a malfunction", script->GetName()), NotificationType::Warning);
+						Notifications::Show("Lua Scripting", std::format("Script {} has been unloaded due to a malfunction. Check the console for more details", script->GetName()), NotificationType::Warning);
 						unload = true;
 					}
 					else if (script->GetLoadState() == LuaScript::LoadState::WANT_UNLOAD)

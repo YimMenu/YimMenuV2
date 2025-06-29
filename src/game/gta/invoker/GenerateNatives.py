@@ -200,12 +200,21 @@ def create_lua_func(native: NativeFunc):
         return f"{native.name}=function()error('{blacklist_reason}')end,"
     return f"{native.name}=function({"..." if using_varargs else generate_lua_func_signature(native)}){"" if native.return_type == "void" else "return "}_I({native.native_index},'{generate_lua_param_string(native)}'{",..." if using_varargs else sign})end,"
 
+# does MSVC still live in the 2000s?
+def chunkstring(string, length):
+    return (string[0+i:length+i] for i in range(0, len(string), length))
+
 def create_lua_namespace(name: str, natives: list[NativeFunc]):
-    string = f"\t\"{name}={{"
+    string = f"{name}={{"
     for native in natives:
         string += create_lua_func(native)
-    string = string[:-1] + "}\",\n"
-    return string
+    string = string[:-1] + "}"
+    chunks = chunkstring(string, 15000)
+    real_string = "\t"
+    for chunk in chunks:
+        real_string += '"' + chunk + '"'
+    real_string += ",\n"
+    return real_string
 
 def create_lua_defs():
     with open("../../scripting/libraries/NativeDefs.cpp", "w+") as file:

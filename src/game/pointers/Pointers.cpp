@@ -371,7 +371,7 @@ namespace YimMenu
 
 		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"83 FD 05 ? ? ? 00 00 00 48 8B">("HandleJoinRequestIgnorePoolPatch");
 		scanner.Add(handleJoinRequestIgnorePoolPatchPtrn, [this](PointerCalculator ptr) {
-			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.Add(4).As<std::uint8_t*>(), 0xEB);
+			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0x39, 0xC9, 0x90}));
 		});
 
 		constexpr auto statsMpCharacterMappingDataPtrn = Pattern<"48 8D 0D ? ? ? ? 89 F2 0F 28 74 24 ? 48 83 C4 38">("CStatsMpCharacterMappingData");

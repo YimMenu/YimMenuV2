@@ -20,6 +20,7 @@ namespace YimMenu::Submenus
 		static bool spawnDead;
 		static bool spawnAsBodyguard;
 		static bool spawnAsCop;
+		static bool spawnInMyVehicle;
 		static bool giveAllWeapons;
 		static bool spawnAsProstitute;
 		static bool randomizeOutfit;
@@ -93,6 +94,13 @@ namespace YimMenu::Submenus
 								if (spawnAsCop)
 								{
 									handle.SetAsCop();
+								}
+
+								if (spawnInMyVehicle)
+								{
+									auto vehicle = Self::GetVehicle();
+									if (vehicle)
+										handle.SetInVehicle(vehicle, -2);
 								}
 
 								if (giveAllWeapons)
@@ -172,6 +180,7 @@ namespace YimMenu::Submenus
 			ImGui::Checkbox("Spawn Dead", &spawnDead);
 			ImGui::Checkbox("Spawn As Bodyguard", &spawnAsBodyguard);
 			ImGui::Checkbox("Spawn As Cop", &spawnAsCop);
+			ImGui::Checkbox("Spawn In My Vehicle", &spawnInMyVehicle);
 			ImGui::Checkbox("Give All Weapons", &giveAllWeapons);
 			ImGui::Checkbox("Spawn As Prostitute", &spawnAsProstitute);
 			ImGui::Checkbox("Randomize Outfit", &randomizeOutfit);

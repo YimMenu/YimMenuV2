@@ -35,6 +35,9 @@ namespace YimMenu
 		// stance
 		void LowerStance(bool lower);
 
+		void BringToHalt(float distance = 1.0f, int duration = 1);
+		bool SetOnGroundProperly();
+
 		std::string GetFullName();
 	};
 }

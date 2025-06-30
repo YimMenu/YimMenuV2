@@ -167,6 +167,20 @@ namespace YimMenu
 		VEHICLE::SET_REDUCED_SUSPENSION_FORCE(GetHandle(), lower);
 	}
 
+	void Vehicle::BringToHalt(float distance, int duration)
+	{
+		ENTITY_ASSERT_VALID();
+
+		VEHICLE::BRING_VEHICLE_TO_HALT(GetHandle(), distance, duration, FALSE);
+	}
+
+	bool Vehicle::SetOnGroundProperly()
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(GetHandle(), 5.f);
+	}
+
 	std::string Vehicle::GetFullName()
 	{
 		auto model = ENTITY::GET_ENTITY_MODEL(GetHandle());

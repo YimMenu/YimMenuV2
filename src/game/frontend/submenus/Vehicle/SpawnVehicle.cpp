@@ -2,6 +2,7 @@
 #include "core/commands/BoolCommand.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/backend/PersonalVehicles.hpp"
 #include "game/gta/data/Vehicles.hpp"
@@ -37,11 +38,14 @@ namespace YimMenu::Submenus
 	{
 		auto tab = std::make_shared<TabItem>("New Vehicle");
 
+		auto spawn = std::make_shared<Group>("Spawn");
+		auto settings = std::make_shared<Group>("Settings");
+
 		static std::vector<std::string> vehicleNames{};
 		static std::vector<int> vehicleClasses{};
 		static int selectedClass{-1};
 
-		tab->AddItem(std::make_unique<ImGuiItem>([] {
+		spawn->AddItem(std::make_unique<ImGuiItem>([] {
 			static bool init = [] {
 				FiberPool::Push([] {
 					std::unordered_map<std::string, int> nameCount;
@@ -143,9 +147,11 @@ namespace YimMenu::Submenus
 			}
 		}));
 
-		tab->AddItem(std::make_shared<BoolCommandItem>("spawninsideveh"_J));
-		tab->AddItem(std::make_shared<BoolCommandItem>("spawnvehmaxed"_J));
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawninsideveh"_J));
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawnvehmaxed"_J));
 
+		tab->AddItem(spawn);
+		tab->AddItem(settings);
 		return tab;
 	}
 
@@ -153,10 +159,16 @@ namespace YimMenu::Submenus
 	{
 		auto tab = std::make_shared<TabItem>("Personal Vehicle");
 
+		auto spawn = std::make_shared<Group>("Spawn");
+		auto settings = std::make_shared<Group>("Settings");
+
 		static std::string selectedGarageStr{""};
 
-		tab->AddItem(std::make_unique<ImGuiItem>([] {
-			PersonalVehicles::RefreshPersonalVehicles();
+		spawn->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!*Pointers.IsSessionStarted)
+				return ImGui::TextDisabled("Join GTA Online.");
+
+			PersonalVehicles::Update();
 
 			static char search[64];
 			ImGui::SetNextItemWidth(300.f);
@@ -219,7 +231,8 @@ namespace YimMenu::Submenus
 									}
 									else
 									{
-										personalVeh->Summon(spawnInsidePersonalVehicle.GetState());
+										if (!personalVeh->Request(spawnInsidePersonalVehicle.GetState()))
+											Notifications::Show("Spawn Personal Vehicle", "Failed to spawn Personal Vehicle.", NotificationType::Error);
 									}
 								});
 							}
@@ -232,9 +245,12 @@ namespace YimMenu::Submenus
 			}
 		}));
 
-		tab->AddItem(std::make_shared<BoolCommandItem>("spawninsidepv"_J));
-		tab->AddItem(std::make_shared<BoolCommandItem>("spawnclonepv"_J));
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawninsidepv"_J));
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawnclonepv"_J));
 
+
+		tab->AddItem(spawn);
+		tab->AddItem(settings);
 		return tab;
 	}
 

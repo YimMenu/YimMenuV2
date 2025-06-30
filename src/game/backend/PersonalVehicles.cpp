@@ -203,7 +203,7 @@ namespace YimMenu
 		case 22: return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("ARCADE_GARNAME"); // Arcade
 		case 25: return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("AUT_SHP_GAR"); // Auto Shop
 		case 26: return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("FIXER_GARNAME"); // Agency
-		case 29:
+		case 29: // Eclipse Blvd Garage
 		{
 			int level = (garageSlotIterator - 1) / 10;
 			switch (level)
@@ -215,7 +215,7 @@ namespace YimMenu
 			case 4: return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("MSG_B5"); // Eclipse Blvd Garage B5
 			}
 		}
-		case 30:
+		case 30: // The Vinewood Club Garage
 		{
 			int level = (garageSlotIterator - 1) / 10;
 			switch (level)
@@ -235,7 +235,7 @@ namespace YimMenu
 		case MAX_GARAGE_NUM + 3: return HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("MP_BHUB_SUB"); // Kosatka
 		}
 
-		return std::string();
+		return "";
 	}
 
 	PersonalVehicles::PersonalVehicle::PersonalVehicle(int id, MPSV_Entry* data) :
@@ -309,71 +309,49 @@ namespace YimMenu
 		}
 	}
 
-	int PersonalVehicles::PersonalVehicle::GetCurrentId()
+	bool PersonalVehicles::PersonalVehicle::Despawn()
 	{
-		if (auto savedMPGlobals = g_SavedMPGlobals::Get())
+		if (auto veh = GetCurrentHandle(); veh.IsValid())
 		{
-			return savedMPGlobals->Entries[0].GeneralSaved.LastSavedCar;
-		}
+			veh.BringToHalt();
 
-		return -1;
-	}
-
-	Vehicle PersonalVehicles::PersonalVehicle::GetCurrent()
-	{
-		if (auto freemodeGeneral = FreemodeGeneral::Get())
-		{
-			return Vehicle(freemodeGeneral->PersonalVehicleIndex);
-		}
-
-		return nullptr;
-	}
-
-	bool PersonalVehicles::PersonalVehicle::DespawnCurrent()
-	{
-		if (auto MPSV = MPSV::Get())
-		{
-			MPSV->Entries[GetCurrentId()].PersonalVehicleFlags.Clear(ePersonalVehicleFlags::TRIGGER_SPAWN_TOGGLE);
-			for (int i = 0; GetCurrent().GetHandle() != -1; i++)
+			m_Data->PersonalVehicleFlags.Clear(ePersonalVehicleFlags::TRIGGER_SPAWN_TOGGLE);
+			for (int i = 0; veh.IsValid(); i++)
 			{
 				ScriptMgr::Yield(100ms);
 				if (i > 30)
+				{
+					LOG(WARNING) << "Despawn() Timed out despawning Personal Vehicle.";
 					return false;
+				}
 			}
+		}
+
+		return true;
+	}
+
+	bool PersonalVehicles::PersonalVehicle::Repair()
+	{
+		if (m_Data->PersonalVehicleFlags.IsSet(ePersonalVehicleFlags::DESTROYED) && m_Data->PersonalVehicleFlags.IsSet(ePersonalVehicleFlags::HAS_INSURANCE))
+		{
+			m_Data->PersonalVehicleFlags.Clear(ePersonalVehicleFlags::DESTROYED);
+			m_Data->PersonalVehicleFlags.Clear(ePersonalVehicleFlags::IMPOUNDED);
+			m_Data->PersonalVehicleFlags.Clear(ePersonalVehicleFlags::UNK2);
 			return true;
 		}
 
 		return false;
 	}
 
-	bool PersonalVehicles::PersonalVehicle::Repair()
-	{
-		if (auto MPSV = MPSV::Get())
-		{
-			if (MPSV->Entries[m_Id].PersonalVehicleFlags.IsSet(ePersonalVehicleFlags::DESTROYED) && MPSV->Entries[m_Id].PersonalVehicleFlags.IsSet(ePersonalVehicleFlags::HAS_INSURANCE))
-			{
-				MPSV->Entries[m_Id].PersonalVehicleFlags.Clear(ePersonalVehicleFlags::DESTROYED);
-				MPSV->Entries[m_Id].PersonalVehicleFlags.Clear(ePersonalVehicleFlags::IMPOUNDED);
-				MPSV->Entries[m_Id].PersonalVehicleFlags.Clear(ePersonalVehicleFlags::UNK2);
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool PersonalVehicles::PersonalVehicle::Summon(bool bring)
+	bool PersonalVehicles::PersonalVehicle::Request(bool bring)
 	{
 		if (auto freemodeGeneral = FreemodeGeneral::Get())
 		{
 			if (freemodeGeneral->RequestedPersonalVehicleId != -1)
 				return false;
 
-			if (!DespawnCurrent())
-			{
-				LOG(WARNING) << "Timed out despawning personal vehicle.";
+			if (!GetCurrent()->Despawn())
 				return false;
-			}
 
 			Repair();
 			
@@ -391,18 +369,22 @@ namespace YimMenu
 
 			if (bring)
 			{
-				for (int i = 0; GetCurrent().GetHandle() == -1; i++)
+				for (int i = 0; !GetCurrentHandle().IsValid(); i++)
 				{
 					ScriptMgr::Yield(100ms);
 					if (i > 30)
-						return false;
+						break;
 				}
 
-				auto coords = Self::GetPed().GetPosition();
-				auto heading = Self::GetPed().GetHeading();
-				GetCurrent().SetPosition(coords);
-				GetCurrent().SetHeading(heading);
-				Self::GetPed().SetInVehicle(GetCurrent());
+				if (auto veh = GetCurrentHandle(); veh.IsValid())
+				{
+					auto coords = Self::GetPed().GetPosition();
+					auto heading = Self::GetPed().GetHeading();
+					veh.SetPosition(coords);
+					veh.SetHeading(heading);
+					veh.SetOnGroundProperly();
+					Self::GetPed().SetInVehicle(veh);
+				}
 			}
 
 			return true;
@@ -430,7 +412,32 @@ namespace YimMenu
 		return nullptr;
 	}
 
-	void PersonalVehicles::RefreshPersonalVehiclesImpl()
+	std::unique_ptr<PersonalVehicles::PersonalVehicle> PersonalVehicles::GetCurrentImpl()
+	{
+		auto savedMPGlobals = g_SavedMPGlobals::Get();
+		auto MPSV           = MPSV::Get();
+		if (savedMPGlobals && MPSV)
+		{
+			auto id = savedMPGlobals->Entries[0].GeneralSaved.LastSavedCar;
+			auto data = &MPSV->Entries[id];
+			return std::make_unique<PersonalVehicle>(id, data);
+		}
+
+		return nullptr;
+	}
+
+	Vehicle PersonalVehicles::GetCurrentHandleImpl()
+	{
+		if (auto freemodeGeneral = FreemodeGeneral::Get())
+		{
+			if (auto veh = freemodeGeneral->PersonalVehicleIndex; veh != -1)
+				return Vehicle(veh);
+		}
+
+		return nullptr;
+	}
+
+	void PersonalVehicles::UpdateImpl()
 	{
 		const auto now = std::chrono::high_resolution_clock::now();
 		if (std::chrono::duration_cast<std::chrono::seconds>(now - m_LastUpdate) < 10s)
@@ -440,20 +447,8 @@ namespace YimMenu
 
 		FiberPool::Push([] {
 			RegisterVehicles();
-			RefreshGarages();
+			RegisterGarages();
 		});
-	}
-
-	void PersonalVehicles::RefreshGaragesImpl()
-	{
-		m_Garages.clear();
-		for (const auto& [name, ptr] : GetPersonalVehicles())
-		{
-			if (auto garageName = ptr->GetGarage(); !garageName.empty())
-			{
-				m_Garages.emplace(garageName);
-			}
-		}
 	}
 
 	void PersonalVehicles::RegisterVehiclesImpl()
@@ -504,6 +499,18 @@ namespace YimMenu
 					m_PersonalVehicles.erase(it->second);
 					m_PVLookup.erase(i);
 				}
+			}
+		}
+	}
+
+	void PersonalVehicles::RegisterGaragesImpl()
+	{
+		m_Garages.clear();
+		for (const auto& [name, ptr] : GetPersonalVehicles())
+		{
+			if (auto garageName = ptr->GetGarage(); !garageName.empty())
+			{
+				m_Garages.emplace(garageName);
 			}
 		}
 	}

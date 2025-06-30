@@ -31,14 +31,21 @@ namespace YimMenu
 			std::string GetGarage();
 			void SetGarage();
 
-			static Vehicle GetCurrent();
-			static int GetCurrentId();
-			static bool DespawnCurrent();
-
+			bool Despawn();
 			bool Repair();
-			bool Summon(bool bring = false);
+			bool Request(bool bring = false);
 			Vehicle Clone(rage::fvector3 coords, float heading);
 		};
+
+		static std::unique_ptr<PersonalVehicle> GetCurrent()
+		{
+			return GetInstance().GetCurrentImpl();
+		}
+
+		static Vehicle GetCurrentHandle()
+		{
+			return GetInstance().GetCurrentHandleImpl();
+		}
 
 		static std::map<std::string, std::unique_ptr<PersonalVehicle>>& GetPersonalVehicles()
 		{
@@ -50,14 +57,14 @@ namespace YimMenu
 			return GetInstance().m_Garages;
 		}
 
-		static void RefreshPersonalVehicles()
+		static void Update()
 		{
-			GetInstance().RefreshPersonalVehiclesImpl();
+			GetInstance().UpdateImpl();
 		}
 
-		static void RefreshGarages()
+		static void RegisterGarages()
 		{
-			GetInstance().RefreshGaragesImpl();
+			GetInstance().RegisterGaragesImpl();
 		}
 
 		static void RegisterVehicles()
@@ -72,9 +79,11 @@ namespace YimMenu
 			return instance;
 		}
 
-		void RefreshPersonalVehiclesImpl();
-		void RefreshGaragesImpl();
+		std::unique_ptr<PersonalVehicle> GetCurrentImpl();
+		Vehicle GetCurrentHandleImpl();
+		void UpdateImpl();
 		void RegisterVehiclesImpl();
+		void RegisterGaragesImpl();
 
 		std::map<std::string, std::unique_ptr<PersonalVehicle>> m_PersonalVehicles;
 		std::map<int, std::string> m_PVLookup;

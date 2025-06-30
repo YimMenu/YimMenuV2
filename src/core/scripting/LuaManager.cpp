@@ -15,6 +15,22 @@ namespace YimMenu
 		m_Libraries.push_back(library);
 	}
 
+	int LuaManager::RegisterResourceTypeImpl(LuaResourceType* res_type)
+	{
+		m_ResourceTypes.push_back(res_type);
+		return m_ResourceTypes.size() - 1;
+	}
+
+	int LuaManager::GetNumResourceTypesImpl()
+	{
+		return m_ResourceTypes.size();
+	}
+
+	LuaResourceType* LuaManager::GetResourceTypeImpl(int index)
+	{
+		return m_ResourceTypes[index];
+	}
+
 	void LuaManager::LoadLibrariesImpl(lua_State* state)
 	{
 		for (auto library : m_Libraries)
@@ -64,7 +80,7 @@ namespace YimMenu
 
 					if (script->IsMalfunctioning())
 					{
-						Notifications::Show("Lua Scripting", std::format("Script {} has been unloaded due to a malfunction", script->GetName()), NotificationType::Warning);
+						Notifications::Show("Lua Scripting", std::format("Script {} has been unloaded due to a malfunction. Check the console for more details", script->GetName()), NotificationType::Warning);
 						unload = true;
 					}
 					else if (script->GetLoadState() == LuaScript::LoadState::WANT_UNLOAD)
@@ -115,7 +131,7 @@ namespace YimMenu
 
 			// 4) run tick coroutines
 			for (auto& script : m_LoadedScripts)
-				if (script->IsValid())
+				if (script->IsRunning())
 					script->Tick();
 
 			ScriptMgr::Yield();
@@ -160,7 +176,7 @@ namespace YimMenu
 
 		for (auto& script : m_LoadedScripts)
 		{
-			if (script->IsValid())
+			if (script->IsRunning())
 			{
 				result = (bool)(((int)result) & ((int)script->DispatchEvent(event, add_arguments_cb, handle_result)));
 				if (!result && handle_result)
@@ -169,5 +185,33 @@ namespace YimMenu
 		}
 
 		return result;
+	}
+
+	void LuaManager::ForAllResourcesOfTypeImpl(ForAllResourcesOfTypeCallback callback, int type)
+	{
+		auto _type = GetResourceType(type);
+		bool locked = false;
+		for (auto& script : m_LoadedScripts)
+		{
+			if (script->IsRunning())
+			{
+				auto& resources = script->GetAllResourcesOfType(type);
+				if (resources.size() > 0)
+				{
+					if (!locked)
+					{
+						_type->Lock();
+						locked = true;
+					}
+
+					for (auto& resource : resources)
+					{
+						callback(resource.get());
+					}
+				}
+			}
+		}
+		if (locked)
+			_type->Unlock();
 	}
 }

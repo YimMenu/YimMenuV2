@@ -251,7 +251,7 @@ namespace YimMenu::Submenus
 				}
 			});
 
-			if (txn->m_Running)
+			if (txn && txn->m_Running)
 			{
 				while (txn->m_Status == 0 || txn->m_Status == 1)
 					ScriptMgr::Yield();

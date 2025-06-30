@@ -109,10 +109,45 @@ namespace YimMenu
 			DeleteFiber(callback.m_Fiber);
 	}
 
+	void LuaScript::DisableResources()
+	{
+		for (int i = 0; i < m_Resources.size(); i++)
+		{
+			if (!m_Resources[i].size())
+				return;
+
+			auto type = LuaManager::GetResourceType(i);
+			type->Lock();
+
+			for (auto& resource : m_Resources[i])
+				resource->OnDisable();
+
+			type->Unlock();
+		}
+	}
+
+	void LuaScript::EnableResources()
+	{
+		for (int i = 0; i < m_Resources.size(); i++)
+		{
+			if (!m_Resources[i].size())
+				return;
+
+			auto type = LuaManager::GetResourceType(i);
+			type->Lock();
+
+			for (auto& resource : m_Resources[i])
+				resource->OnEnable();
+
+			type->Unlock();
+		}
+	}
+
 	LuaScript::LuaScript(std::string_view file_name) :
 	    m_FileName(file_name),
 	    m_ModuleName(std::filesystem::path(file_name).filename().string())
 	{
+		m_Resources.resize(LuaManager::GetNumResourceTypes());
 		m_State = luaL_newstate();
 		
 		lua_pushlightuserdata(m_State, (void*)this);  
@@ -141,6 +176,30 @@ namespace YimMenu
 			lua_close(m_State);
 			m_State = nullptr;
 		}
+	}
+
+	void LuaScript::Pause()
+	{
+		if (m_LoadState == LoadState::RUNNING)
+		{
+			DisableResources();
+			m_LoadState = LoadState::PAUSED;
+		}
+	}
+
+	void LuaScript::Resume()
+	{
+		if (m_LoadState == LoadState::PAUSED)
+		{
+			EnableResources();
+			m_LoadState = LoadState::RUNNING;
+		}
+	}
+
+	void LuaScript::MarkUnloaded()
+	{
+		DisableResources();
+		m_LoadState = LoadState::UNLOADED;
 	}
 
 	bool LuaScript::SafeToUnload()
@@ -303,6 +362,25 @@ namespace YimMenu
 		}
 
 		return result;
+	}
+
+	void LuaScript::AddResource(std::shared_ptr<LuaResource>&& resource, int idx)
+	{
+		resource->SetType(idx); // TODO: this is a bad idea
+		auto type = LuaManager::GetResourceType(idx);
+		type->Lock();
+		m_Resources[resource->GetType()].push_back(std::move(resource));
+		type->Unlock();
+	}
+
+	int LuaScript::GetNumResourcesOfType(int type)
+	{
+		return m_Resources[type].size();
+	}
+
+	std::vector<std::shared_ptr<LuaResource>>& LuaScript::GetAllResourcesOfType(int idx)
+	{
+		return m_Resources[idx];
 	}
 	
 	void LuaScript::ScriptCallback::SetTimeToResume(int millis)

@@ -1,5 +1,6 @@
 #include "core/scripting/LuaLibrary.hpp"
 #include "core/scripting/LuaScript.hpp"
+#include "core/scripting/LuaUtils.hpp"
 
 namespace YimMenu::Lua
 {
@@ -47,22 +48,11 @@ namespace YimMenu::Lua
 		virtual void Register(lua_State* state) override
 		{
 			lua_newtable(state);
-		
-			lua_pushcfunction(state, Verbose);
-			lua_setfield(state, -2, "verbose");
-
-			lua_pushcfunction(state, Info);
-			lua_setfield(state, -2, "info");
-
-			lua_pushcfunction(state, Warn);
-			lua_setfield(state, -2, "warn");
-
-			lua_pushcfunction(state, Error);
-			lua_setfield(state, -2, "error");
-
-			lua_pushcfunction(state, Trace);
-			lua_setfield(state, -2, "trace");
-
+			SetFunction(state, Verbose, "verbose");
+			SetFunction(state, Info, "info");
+			SetFunction(state, Warn, "warn");
+			SetFunction(state, Error, "error");
+			SetFunction(state, Trace, "trace");
 		    lua_setglobal(state, "log");
 		}
 	};

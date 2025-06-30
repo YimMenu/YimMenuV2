@@ -115,6 +115,13 @@ namespace YimMenu
 		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
 	}
 
+	std::string Vehicle::GetPlateText()
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(GetHandle());
+	}
+
 	void Vehicle::SetPlateText(std::string_view text)
 	{
 		ENTITY_ASSERT_VALID();

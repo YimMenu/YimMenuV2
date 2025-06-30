@@ -100,6 +100,18 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
+		static int BringToHalt(lua_State* state)
+		{
+			GetObject<YimMenu::Vehicle>(state, 1).BringToHalt(luaL_checknumber(state, 2), luaL_checkinteger(state, 3));
+			return 0;
+		}
+
+		static int SetOnGroundProperly(lua_State* state)
+		{
+			lua_pushboolean(state, GetObject<YimMenu::Vehicle>(state, 1).SetOnGroundProperly());
+			return 1;
+		}
+
 		static int GetFullName(lua_State* state)
 		{
 			auto name = GetObject<YimMenu::Vehicle>(state, 1).GetFullName();
@@ -126,6 +138,8 @@ namespace YimMenu::Lua
 					SetFunction(state, IsBoostActive, "is_boost_active");
 					SetFunction(state, SetBoostCharge, "set_boost_charge");
 					SetFunction(state, LowerStance, "lower_stance");
+					SetFunction(state, BringToHalt, "bring_to_halt");
+					SetFunction(state, SetOnGroundProperly, "set_on_ground_properly");
 					SetFunction(state, GetFullName, "get_full_name");
 				}
 				lua_setfield(state, -2, "__index"); // prototype

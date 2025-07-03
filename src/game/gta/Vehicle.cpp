@@ -274,4 +274,11 @@ namespace YimMenu
 
 		return ownedMods;
 	}
+
+	Vector3 Vehicle::GetSpawnLocRelToPed(int ped, joaat_t hash)
+	{
+		Vector3 min, max;
+		MISC::GET_MODEL_DIMENSIONS(hash, &min, &max);
+		return ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(ped, 0.f, (max - min).y, 0.f);
+	}
 }

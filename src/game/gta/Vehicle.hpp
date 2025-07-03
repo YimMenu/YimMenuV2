@@ -1,5 +1,7 @@
 #pragma once
 #include "Entity.hpp"
+#include "types/script/types.hpp"
+#include "core/util/Joaat.hpp"
 
 namespace YimMenu
 {
@@ -10,14 +12,16 @@ namespace YimMenu
 
 		static Vehicle Create(std::uint32_t model, rage::fvector3 coords, float heading = 0.0f);
 
+		// health
 		void Fix();
 
 		// gears
 		int GetGear();
 		float GetRevRatio();
 
-		// speed
+		// motion
 		float GetMaxSpeed();
+		void BringToHalt(float distance = 1.0f, int duration = 1);
 
 		// mods
 		void Upgrade();
@@ -36,9 +40,11 @@ namespace YimMenu
 		// stance
 		void LowerStance(bool lower);
 
-		void BringToHalt(float distance = 1.0f, int duration = 1);
+		// position
 		bool SetOnGroundProperly();
+		static Vector3 GetSpawnLocRelToPed(int ped, joaat_t hash);
 
+		// description
 		std::string GetFullName();
 	};
 }

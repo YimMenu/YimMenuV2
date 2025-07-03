@@ -15,25 +15,6 @@ namespace YimMenu::Submenus
 	static BoolCommand spawnInsidePersonalVehicle{"spawninsidepv", "Spawn Inside", "Spawn inside the personal vehicle."};
 	static BoolCommand spawnClonePersonalVehicle{"spawnclonepv", "Spawn Clone", "Spawn a clone of the persone vehicle."};
 
-	static Vector3 GetVehicleSpawnLoc(joaat_t hash, bool spawnInside)
-	{
-		float y_offset = 0;
-
-		if (Self::GetVehicle().IsValid())
-		{
-			Vector3 min, max, result;
-			MISC::GET_MODEL_DIMENSIONS(hash, &min, &max);
-			result = max - min;
-			y_offset = result.y;
-		}
-		else if (!spawnInside)
-		{
-			y_offset = 5.f;
-		}
-
-		return ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(Self::GetPed().GetHandle(), 0.f, y_offset, 0.f);
-	}
-
 	std::shared_ptr<TabItem> RenderSpawnNewVehicle()
 	{
 		auto tab = std::make_shared<TabItem>("New Vehicle");
@@ -129,7 +110,7 @@ namespace YimMenu::Submenus
 							if (ImGui::Selectable(name.c_str()))
 							{
 								FiberPool::Push([hash] {
-									auto handle = Vehicle::Create(hash, GetVehicleSpawnLoc(hash, spawnInsideVehicle.GetState()), Self::GetPed().GetHeading());
+									auto handle = Vehicle::Create(hash, Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), hash), Self::GetPed().GetHeading());
 
 									if (spawnInsideVehicle.GetState())
 										Self::GetPed().SetInVehicle(handle);
@@ -222,7 +203,7 @@ namespace YimMenu::Submenus
 								FiberPool::Push([&personalVeh] {
 									if (spawnClonePersonalVehicle.GetState())
 									{
-										auto coords  = GetVehicleSpawnLoc(personalVeh->GetModel(), spawnInsidePersonalVehicle.GetState());
+										auto coords  = Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), personalVeh->GetModel());
 										auto heading = Self::GetPed().GetHeading();
 										auto handle  = personalVeh->Clone(coords, heading);
 										

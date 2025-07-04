@@ -1,42 +1,285 @@
 #include "OutfitEditor.hpp"
-#include "core/backend/FiberPool.hpp"
-#include "OutfitEditorCategory.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "core/backend/FiberPool.hpp"
+#include "game/backend/Outfit.hpp"
+#include "core/frontend/Notifications.hpp"
+#include "game/backend/Self.hpp"
+#include "game/gta/Natives.hpp"
+#include "core/util/Strings.hpp"
+#include "misc/cpp/imgui_stdlib.h"
 
 namespace YimMenu
 {
+	class OutfitEditorMenu
+	{
+		Outfit::OutfitComponents components{};
+		Outfit::OutfitProps props{};
+		std::vector<std::string> folders{}, files{};
+		std::string folder{}, file{};
+		char outfitName[64]{}, newFolder[50]{};
+
+	public:
+		void RefreshStats()
+		{
+			auto ped = Self::GetPed().GetHandle();
+			for (auto& t : components.items)
+			{
+				auto& item = t.second;
+				item.drawable_id = PED::GET_PED_DRAWABLE_VARIATION(ped, item.id);
+				item.drawable_id_max = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(ped, item.id) - 1;
+				item.texture_id = PED::GET_PED_TEXTURE_VARIATION(ped, item.id);
+				item.texture_id_max = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(ped, item.id, item.drawable_id) - 1;
+			}
+
+			for (auto& t : props.items)
+			{
+				auto& item = t.second;
+				item.drawable_id = PED::GET_PED_PROP_INDEX(ped, item.id, 0);
+				item.drawable_id_max = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(ped, item.id) - 1;
+				item.texture_id = PED::GET_PED_PROP_TEXTURE_INDEX(ped, item.id);
+				item.texture_id_max = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(ped, item.id, item.drawable_id) - 1;
+			}
+		}
+
+		void RenderComponents()
+		{
+			ImGui::BeginGroup();
+			for (auto& t : components.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} [0,{}]##1", item.label, item.drawable_id_max).c_str(), &item.drawable_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsDrawable(item, 0); // The game does this on it's own but seems to crash if we call OOB values to fast.
+					FiberPool::Push([item, this] {
+						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), item.id, item.drawable_id, 0, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), item.id));
+						RefreshStats();
+					});
+				}
+			}
+			ImGui::EndGroup();
+		}
+
+		void RenderComponentsTextures()
+		{
+			ImGui::BeginGroup();
+			for (auto& t : components.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} TEX [0,{}]##2", item.label, item.texture_id_max).c_str(), &item.texture_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsTexture(item, 0); // The game does this on it's own but seems to crash if we call OOB values to fast.
+					FiberPool::Push([item, this] {
+						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), item.id, item.drawable_id, item.texture_id, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), item.id));
+						RefreshStats();
+					});
+				}
+			}
+			ImGui::EndGroup();
+		}
+
+		void RenderProps()
+		{
+			for (auto& t : props.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} [0,{}]##3", item.label, item.drawable_id_max).c_str(), &item.drawable_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsDrawable(item, -1); // The game does this on it's own but seems to crash if we call OOB values to fast.
+					FiberPool::Push([item, this] {
+						if (item.drawable_id == -1)
+							PED::CLEAR_PED_PROP(Self::GetPed().GetHandle(), item.id, 1);
+						else
+							PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), item.id, item.drawable_id, 0, TRUE, 0);
+						RefreshStats();
+					});
+				}
+			}
+		}
+
+		void RenderPropsTextures()
+		{
+			for (auto& t : props.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} TEX [0,{}]##4", item.label, item.texture_id_max).c_str(), &item.texture_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsTexture(item, -1); // The game does this on it's own but seems to crash if we call OOB values to fast.
+					FiberPool::Push([item, this] {
+						PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), item.id, item.drawable_id, item.texture_id, TRUE, 0);
+						RefreshStats();
+					});
+				}
+			}
+		}
+
+		void RenderOutfitList()
+		{
+			ImGui::BeginGroup();
+			{
+				// folders
+				ImGui::SetNextItemWidth(300.f);
+				if (ImGui::BeginCombo("", folder.empty() ? "Root" : folder.c_str()))
+				{
+					if (ImGui::Selectable("Root", folder == ""))
+					{
+						folder.clear();
+						FiberPool::Push([this] {
+							Outfit::OutfitEditor::RefreshList(folder, folders, files);
+						});
+					}
+
+					for (std::string folder_name : folders)
+						if (ImGui::Selectable(folder_name.c_str(), folder == folder_name))
+						{
+							folder = folder_name;
+							FiberPool::Push([this] {
+								Outfit::OutfitEditor::RefreshList(folder, folders, files);
+							});
+						}
+
+					ImGui::EndCombo();
+				}
+
+				// files
+				static std::string search;
+				ImGui::SetNextItemWidth(300);
+				if (ImGui::InputTextWithHint("###outfitname", "Search", &search))
+					std::transform(search.begin(), search.end(), search.begin(), tolower);
+				if (ImGui::BeginListBox("##saved_outfits", ImVec2(300, 300)))
+				{
+					for (const auto& pair : files)
+					{
+						std::string pair_lower = pair;
+						std::transform(pair_lower.begin(), pair_lower.end(), pair_lower.begin(), tolower);
+						if (pair_lower.contains(search))
+						{
+							auto file_name = pair.c_str();
+							if (ImGui::Selectable(file_name, file == pair, ImGuiSelectableFlags_AllowItemOverlap))
+								file = pair;
+						}
+					}
+					ImGui::EndListBox();
+				}
+			}
+			ImGui::EndGroup();
+		}
+
+		void RenderSaveButton(bool saveToNewFolder)
+		{
+			if (ImGui::Button("Save Outfit"))
+				FiberPool::Push([saveToNewFolder, this] {
+					std::string fileName = outfitName;
+					strcpy(outfitName, "");
+
+					if (!TrimString(fileName).size())
+					{
+						Notifications::Show("Outfit", "Filename empty!", NotificationType::Warning);
+						return;
+					}
+
+					ReplaceString(fileName, ".", ""); // filename say "bob.." will throw relative path error from Folder::GetFile
+					fileName += ".json";
+
+					Outfit::OutfitEditor::SaveOutfit(fileName, folder);
+
+					if (saveToNewFolder)
+					{
+						folder = newFolder; // set current folder to newly created folder
+						strcpy(newFolder, "");
+					}
+
+					Outfit::OutfitEditor::RefreshList(folder, folders, files);
+				});
+		};
+
+		void RenderOutfitListControls()
+		{
+			ImGui::BeginGroup();
+			{
+				if (ImGui::Button("Refresh list"))
+					FiberPool::Push([this] {
+						Outfit::OutfitEditor::RefreshList(folder, folders, files);
+					});
+				ImGui::Spacing();
+				static bool applyHair = false;
+				ImGui::Checkbox("Apply hair", &applyHair);
+				ImGui::Spacing();
+				if (ImGui::Button("Apply Selected Outfit"))
+					FiberPool::Push([this] {
+						// get current hairstyle
+						auto ped = Self::GetPed().GetHandle();
+						int drawable_id = PED::GET_PED_DRAWABLE_VARIATION(ped, 2);
+						int texture_id = PED::GET_PED_TEXTURE_VARIATION(ped, 2);
+						int palette_var = PED::GET_PED_PALETTE_VARIATION(ped, 2);
+
+						Outfit::OutfitEditor::ApplyOutfitFromJson(folder, file);
+
+						if (!applyHair)
+							PED::SET_PED_COMPONENT_VARIATION(ped, 2, drawable_id, texture_id, palette_var);
+
+						RefreshStats();
+					});
+
+				ImGui::Spacing();
+
+				// save outfit
+				ImGui::Text("Outfit Name");
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(250);
+				ImGui::InputText("##filename", outfitName, IM_ARRAYSIZE(outfitName));
+
+				if (folder.empty())
+				{
+					ImGui::Text("Folder Name");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(250);
+					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
+					RenderSaveButton(true);
+				}
+				else
+					RenderSaveButton(false);
+			}
+			ImGui::EndGroup();
+		}
+	};
+
 	std::shared_ptr<Category> CreateOutfitsMenu()
 	{
-		auto category = std::make_shared<OutfitEditorCategory>("Outfit Editor");
+		static OutfitEditorMenu editor{};
+		auto category = std::make_shared<Category>("Outfit Editor");
 
-		category->AddItem(std::make_shared<ImGuiItem>([category] {
+		category->AddItem(std::make_shared<ImGuiItem>([] {
 			if (ImGui::Button("Refresh Stats"))
-				FiberPool::Push([category] {
-					category->RefreshStats();
+				FiberPool::Push([] {
+					editor.RefreshStats();
 				});
 			ImGui::SameLine();
 			if (ImGui::Button("Randomize Outfit"))
-				FiberPool::Push([category] {
+				FiberPool::Push([] {
 					Self::GetPed().RandomizeOutfit2();
 				});
 
-			category->RenderComponents();
+			editor.RenderComponents();
 			ImGui::SameLine();
-			category->RenderComponentsTextures();
+			editor.RenderComponentsTextures();
 			ImGui::SameLine();
 			ImGui::BeginGroup();
 			{
-				category->RenderProps();
+				editor.RenderProps();
 				ImGui::Spacing();
-				category->RenderPropsTextures();
+				editor.RenderPropsTextures();
 			}
 			ImGui::EndGroup();
 
 			ImGui::Spacing();
 
-			category->RenderOutfitList();
+			editor.RenderOutfitList();
 			ImGui::SameLine();
-			category->RenderOutfitListControls();
+			editor.RenderOutfitListControls();
 		}));
 
 		return category;

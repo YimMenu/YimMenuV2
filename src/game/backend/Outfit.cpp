@@ -76,7 +76,7 @@ namespace YimMenu
 			OutfitComponents components;
 			OutfitProps props;
 
-			if (j["model"] != ENTITY::GET_ENTITY_MODEL(Self::GetPed().GetHandle()))
+			if (j["model"] != Self::GetPed().GetModel())
 			{
 				Notifications::Show("Oufit", "Ped models different.", NotificationType::Error);
 				return;

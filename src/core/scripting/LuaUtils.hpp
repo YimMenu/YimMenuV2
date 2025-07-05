@@ -8,6 +8,7 @@ namespace YimMenu::Lua
 	class Metatable
 	{
 		inline static int m_Index;
+		inline static std::vector<int> m_Subclasses;
 
 	public:
 		static inline void Register(lua_State* state)
@@ -18,6 +19,17 @@ namespace YimMenu::Lua
 		static inline int Get()
 		{
 			return m_Index;
+		}
+
+		static inline const std::vector<int>& GetSubclasses()
+		{
+			return m_Subclasses;
+		}
+
+		template<typename T2>
+		static inline void AddSubclass()
+		{
+			m_Subclasses.push_back(Metatable<T2>::Get());
 		}
 	};
 
@@ -34,12 +46,34 @@ namespace YimMenu::Lua
 
 		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
 		auto equals = lua_rawequal(state, -1, -2);
-		lua_pop(state, 2);
+		lua_pop(state, 1);
 
-		if (!equals)
-			luaL_argerror(state, idx, "the metatable for this userdata at this index is incorrect");			
+		if (equals)
+		{
+			lua_pop(state, 1);
+			return *reinterpret_cast<T*>(data);
+		}
 
-		return *reinterpret_cast<T*>(data);
+		const auto& subclasses = Metatable<T>::GetSubclasses();
+		if (!equals && subclasses.size())
+		{
+			for (const auto subclass : subclasses)
+			{
+				lua_rawgeti(state, LUA_REGISTRYINDEX, subclass);
+				auto equals = lua_rawequal(state, -1, -2);
+				lua_pop(state, 1);
+
+				if (equals)
+				{
+					lua_pop(state, 1);
+					return *reinterpret_cast<T*>(data);
+				}
+			}
+		}
+
+		lua_pop(state, 1);
+		luaL_argerror(state, idx, "the metatable for this userdata at this index is incorrect");
+		std::unreachable();
 	}
 
 	inline void SetFunction(lua_State* state, lua_CFunction func, const char* name)
@@ -112,10 +146,10 @@ namespace YimMenu::Lua
 	}
 
 	// luaL_checkstring automatically converts ints into strings, which we don't want
-	inline const char* CheckStringSafe(lua_State* state, int index)
+	inline const char* CheckStringSafe(lua_State* state, int index, size_t* size = nullptr)
 	{
 		luaL_checktype(state, index, LUA_TSTRING);
-		return lua_tostring(state, index);
+		return lua_tolstring(state, index, size);
 	}
 
 	// lua doesn't even offer a check function for bools

@@ -21,13 +21,72 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
+		// returns three values
+		static int GetCoords(lua_State* state)
+		{
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).x);
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).y);
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).z);
+			return 3;
+		}
+
+		static int GetX(lua_State* state)
+		{
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).x);
+			return 1;
+		}
+
+		static int GetY(lua_State* state)
+		{
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).y);
+			return 1;
+		}
+
+		static int GetZ(lua_State* state)
+		{
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).z);
+			return 1;
+		}
+
+		static int SetX(lua_State* state)
+		{
+			GetObject<rage::fvector3>(state, 1).x = luaL_checknumber(state, 2);
+			return 1;
+		}
+
+		static int SetY(lua_State* state)
+		{
+			GetObject<rage::fvector3>(state, 1).y = luaL_checknumber(state, 2);
+			return 1;
+		}
+
+		static int SetZ(lua_State* state)
+		{
+			GetObject<rage::fvector3>(state, 1).z = luaL_checknumber(state, 2);
+			return 1;
+		}
+
+		static int GetDistance(lua_State* state)
+		{
+			lua_pushnumber(state, GetObject<rage::fvector3>(state, 1).GetDistance(GetObject<rage::fvector3>(state, 2)));
+			return 1;
+		}
+
 		virtual void Register(lua_State* state) override
 		{
 			luaL_newmetatable(state, "Vector3");
 			{
 				lua_newtable(state);
 				{
-					// TODO?
+					SetFunction(state, GetCoords, "get_coords");
+					SetFunction(state, GetX, "get_x");
+					SetFunction(state, GetY, "get_y");
+					SetFunction(state, GetZ, "get_z");
+					SetFunction(state, SetX, "set_x");
+					SetFunction(state, SetY, "set_y");
+					SetFunction(state, SetZ, "set_z");
+					SetFunction(state, SetZ, "set_z");
+					SetFunction(state, GetDistance, "get_distance");
 				}
 				lua_setfield(state, -2, "__index"); // prototype
 			}

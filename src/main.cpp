@@ -10,6 +10,7 @@
 #include "core/hooking/CallHook.hpp"
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
+#include "core/util/Wine.hpp"
 #include "core/scripting/LuaManager.hpp"
 #include "game/backend/AnticheatBypass.hpp"
 #include "game/backend/Players.hpp"
@@ -83,6 +84,9 @@ namespace YimMenu
 			LOG(WARNING) << "Socialclub patterns failed to load";
 
 		Notifications::Show("YimMenuV2", "Loaded succesfully", NotificationType::Success);
+
+		if (InWine().value_or(false))
+		    LOG(INFO) << "Running in Wine!";
 
 		while (g_Running)
 		{

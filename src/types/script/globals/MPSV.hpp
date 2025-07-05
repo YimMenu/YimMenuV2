@@ -1,6 +1,18 @@
 #pragma once
 #include "types/script/types.hpp"
 
+enum class ePersonalVehicleFlags
+{
+	TRIGGER_SPAWN_TOGGLE = 0,
+	DESTROYED = 1,
+	HAS_INSURANCE = 2,
+	UNK0 = 3,
+	IMPOUNDED = 6,
+	UNK1 = 10,
+	SPAWN_AT_MORS_MUTUAL = 11,
+	UNK2 = 16
+};
+
 struct MPSV_Entry
 {
 	SCR_INT NumberPlateTextIndex;              // 0 (SET/GET_VEHICLE_NUMBER_PLATE_TEXT)
@@ -41,7 +53,7 @@ struct MPSV_Entry
 	SCR_INT ImportExportVehicle;               // 101
 	SCR_INT TyreType;                          // 102
 	SCR_BITSET<uint64_t> Flags3;               // 103 (flag 0 is set if the MLJ decor exists)
-	SCR_BITSET<uint64_t> PersonalVehicleFlags; // 104
+	SCR_BITSET<ePersonalVehicleFlags> PersonalVehicleFlags; // 104
 	SCR_INT ImpoundTime;                       // 105 (MP_STAT_MPSV_IMPOUND_TIME)
 	SCR_INT PremiumPaid;                       // 106 (MP_STAT_MPSV_PREMIUM_PAID)
 	TEXT_LABEL_63 DestroyerName;               // 107

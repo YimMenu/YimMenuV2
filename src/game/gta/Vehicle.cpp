@@ -115,6 +115,13 @@ namespace YimMenu
 		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
 	}
 
+	std::string Vehicle::GetPlateText()
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(GetHandle());
+	}
+
 	void Vehicle::SetPlateText(std::string_view text)
 	{
 		ENTITY_ASSERT_VALID();
@@ -165,6 +172,20 @@ namespace YimMenu
 		ENTITY_ASSERT_VALID();
 
 		VEHICLE::SET_REDUCED_SUSPENSION_FORCE(GetHandle(), lower);
+	}
+
+	void Vehicle::BringToHalt(float distance, int duration)
+	{
+		ENTITY_ASSERT_VALID();
+
+		VEHICLE::BRING_VEHICLE_TO_HALT(GetHandle(), distance, duration, FALSE);
+	}
+
+	bool Vehicle::SetOnGroundProperly()
+	{
+		ENTITY_ASSERT_VALID();
+
+		return VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(GetHandle(), 5.f);
 	}
 
 	std::string Vehicle::GetFullName()
@@ -252,5 +273,12 @@ namespace YimMenu
 				ownedMods[extra] = VEHICLE::IS_VEHICLE_EXTRA_TURNED_ON(vehicle, id);
 
 		return ownedMods;
+	}
+
+	Vector3 Vehicle::GetSpawnLocRelToPed(int ped, joaat_t hash)
+	{
+		Vector3 min, max;
+		MISC::GET_MODEL_DIMENSIONS(hash, &min, &max);
+		return ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(ped, 0.f, (max - min).y, 0.f);
 	}
 }

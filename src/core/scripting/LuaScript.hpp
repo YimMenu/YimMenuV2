@@ -1,5 +1,8 @@
 #pragma once
 #include "lua.hpp"
+#include "LuaResource.hpp"
+#include "LuaConfig.hpp"
+#include "LuaUserInterface.hpp"
 
 namespace YimMenu
 {
@@ -43,12 +46,16 @@ namespace YimMenu
 		bool m_RunningScriptCallbacks = false;
 		ScriptCallback* m_CurrentlyExecutingCallback = nullptr;
 		std::unordered_map<std::uint32_t, std::vector<int>> m_EventHandlers;
-		bool m_NativesLoaded = false; // TODO: move this to a LuaResource
+		std::vector<std::vector<std::shared_ptr<LuaResource>>> m_Resources; // yes, it's a shared pointer stored in a vector of resources stored in a vector of resource types TODO: can we just use raw pointers or even store the resource directly in that array?
+		LuaConfig m_Config;
+		LuaUserInterface m_Interface;
 
 		// Calls the function at the top of stack. If this returns false the stack would have nothing on it
 		bool CallFunction(int n_args, int n_results, lua_State* override_state = nullptr);
 		int ResumeCoroutine(int n_args, int n_results, lua_State* coro_state);
 		void RemoveScriptCallback(ScriptCallback& callback);
+		void DisableResources();
+		void EnableResources();
 
 	public:
 		LuaScript(std::string_view file_name);
@@ -59,7 +66,7 @@ namespace YimMenu
 			return m_IsMalfunctioning;
 		}
 
-		bool IsValid() const
+		bool IsRunning() const
 		{
 			return m_LoadState == LoadState::RUNNING;
 		}
@@ -86,23 +93,11 @@ namespace YimMenu
 				m_LoadState = LoadState::WANT_RELOAD;
 		}
 		
-		void Pause()
-		{
-			if (m_LoadState == LoadState::RUNNING)
-				m_LoadState = LoadState::PAUSED;
-		}
-
-		void Resume()
-		{
-			if (m_LoadState == LoadState::PAUSED)
-				m_LoadState = LoadState::RUNNING;
-		}
+		void Pause();
+		void Resume();
 
 		// Should only be called by LuaManager::RunScriptImpl
-		void MarkUnloaded()
-		{
-			m_LoadState = LoadState::UNLOADED;
-		}
+		void MarkUnloaded();
 
 		bool SafeToUnload();
 
@@ -119,8 +114,7 @@ namespace YimMenu
 		// we're guaranteed to have a LuaScript for each lua_State, so we can return it as a reference
 		static LuaScript& GetScript(lua_State* state);
 
-
-		void AddScriptCallback(int coro_handle);
+		void AddScriptCallback(int func_handle);
 
 		// must be called from a coroutine
 		void Yield(lua_State* state, int millis = 0, bool from_code = true);
@@ -135,18 +129,14 @@ namespace YimMenu
 		void AddEventHandler(std::uint32_t event, int handler);
 		bool DispatchEvent(std::uint32_t event, const DispatchEventCallback& add_arguments_cb, bool handle_result = false);
 
-		// ------- TODO: move these into a resource
+		// TODO: add RemoveResource
+		void AddResource(std::shared_ptr<LuaResource>&& resource, int idx);
+		int GetNumResourcesOfType(int type);
+		std::vector<std::shared_ptr<LuaResource>>& GetAllResourcesOfType(int idx);
 
-		bool AreNativesLoaded() const
+		LuaUserInterface& GetUserInterface()
 		{
-			return m_NativesLoaded;
+			return m_Interface;
 		}
-
-		void SetNativesLoaded()
-		{
-			m_NativesLoaded = true;
-		}
-
-		// --------------
 	};
 }

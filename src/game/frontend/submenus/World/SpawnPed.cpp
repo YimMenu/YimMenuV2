@@ -1,6 +1,7 @@
 #include "SpawnPed.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/data/PedModels.hpp"
 #include "game/gta/Ped.hpp"
@@ -20,6 +21,7 @@ namespace YimMenu::Submenus
 		static bool spawnDead;
 		static bool spawnAsBodyguard;
 		static bool spawnAsCop;
+		static bool spawnInMyVehicle;
 		static bool giveAllWeapons;
 		static bool spawnAsProstitute;
 		static bool randomizeOutfit;
@@ -51,6 +53,23 @@ namespace YimMenu::Submenus
 						{
 							auto set_player = ImGui::GetIO().KeyCtrl;
 							FiberPool::Push([name, set_player] {
+								if (spawnInMyVehicle)
+								{
+									auto vehicle = Self::GetVehicle();
+									if (vehicle)
+									{
+										if (!vehicle.IsSeatFree(-2) && 
+										    !vehicle.IsSeatFree(-1))
+										{
+											Notifications::Show(
+											    "Spawn Ped",
+											    "Cannot spawn ped in vehicle, all seats are occupied, please free a seat first or disable 'Spawn In My Vehicle' option.",
+											    NotificationType::Warning);
+											return;
+										}
+									}
+								}
+
 								auto hash = Joaat(name);
 								auto handle = Ped::Create(hash, Self::GetPed().GetPosition(), Self::GetPed().GetHeading());
 
@@ -93,6 +112,17 @@ namespace YimMenu::Submenus
 								if (spawnAsCop)
 								{
 									handle.SetAsCop();
+								}
+
+								if (spawnInMyVehicle)
+								{
+									auto vehicle = Self::GetVehicle();
+									if (vehicle) {
+										if (vehicle.IsSeatFree(-1))
+											handle.SetInVehicle(vehicle, -1);
+										else
+											handle.SetInVehicle(vehicle, -2);
+									}
 								}
 
 								if (giveAllWeapons)
@@ -172,6 +202,7 @@ namespace YimMenu::Submenus
 			ImGui::Checkbox("Spawn Dead", &spawnDead);
 			ImGui::Checkbox("Spawn As Bodyguard", &spawnAsBodyguard);
 			ImGui::Checkbox("Spawn As Cop", &spawnAsCop);
+			ImGui::Checkbox("Spawn In My Vehicle", &spawnInMyVehicle);
 			ImGui::Checkbox("Give All Weapons", &giveAllWeapons);
 			ImGui::Checkbox("Spawn As Prostitute", &spawnAsProstitute);
 			ImGui::Checkbox("Randomize Outfit", &randomizeOutfit);

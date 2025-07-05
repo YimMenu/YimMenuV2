@@ -218,7 +218,7 @@ def create_lua_namespace(name: str, natives: list[NativeFunc]):
 
 def create_lua_defs():
     with open("../../scripting/libraries/NativeDefs.cpp", "w+") as file:
-        string = "#pragma once\n#include \"NativeDefs.hpp\"\n\nconst char* g_LuaNativeDefs[] = \n{\n"
+        string = "#include \"NativeDefs.hpp\"\n\nconst char* g_LuaNativeDefs[] = \n{\n"
         for ns, natives_list in natives.items():
             string += create_lua_namespace(ns, natives_list)
         string += f"}};\n\nint g_NumLuaNativeDefs = {len(natives.items())};"

@@ -145,10 +145,10 @@ namespace YimMenu
 		});
 	}
 
-	void SavedVehicles::Load(std::string folderName, std::string fileName)
+	void SavedVehicles::Load(std::string folderName, std::string fileName, bool spawnInside)
 	{
 		if (!fileName.empty())
-			FiberPool::Push([folderName, fileName] {
+			FiberPool::Push([folderName, fileName, spawnInside] {
 				const auto file = CheckFolder(folderName).GetFile(fileName).Path();
 
 				if (!std::filesystem::exists(file))
@@ -163,8 +163,14 @@ namespace YimMenu
 				try
 				{
 					file_stream >> vehicle_json;
-					if (SpawnFromJson(vehicle_json))
+					auto veh = SpawnFromJson(vehicle_json);
+
+					if (veh)
+					{
+						if (spawnInside)
+							Self::GetPed().SetInVehicle(veh.GetHandle());
 						Notifications::Show("Persist Car", std::format("Spawned {}", fileName), NotificationType::Success);
+					}
 					else
 						Notifications::Show("Persist Car", std::format("Unable to spawn {}", fileName), NotificationType::Error);
 				}
@@ -179,10 +185,10 @@ namespace YimMenu
 			Notifications::Show("Persist Car", "Select a file first", NotificationType::Warning);
 	}
 
-	bool SavedVehicles::SpawnFromJson(nlohmann::json vehicle_json)
+	Vehicle SavedVehicles::SpawnFromJson(nlohmann::json vehicle_json)
 	{
 		const Hash vehicle_hash = vehicle_json[vehicle_model_hash_key];
-		auto veh = Vehicle::Create(vehicle_hash, Self::GetPed().GetPosition(), Self::GetPed().GetHeading());
+		auto veh = Vehicle::Create(vehicle_hash, Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), vehicle_hash), Self::GetPed().GetHeading());
 
 		if (veh != nullptr)
 		{
@@ -273,10 +279,8 @@ namespace YimMenu
 				for (const auto& [extra, extra_enabled] : vehicle_extras)
 					VEHICLE::SET_VEHICLE_EXTRA(vehicle, extra, extra_enabled ? 0 : 1);
 			}
-
-			return true;
 		}
 
-		return false;
+		return veh;
 	}
 }

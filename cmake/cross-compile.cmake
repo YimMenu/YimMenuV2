@@ -11,6 +11,7 @@ if(CROSSCOMPILE)
 
     # Set the CMake system name to Windows for cross-compilation
     set(CMAKE_SYSTEM_NAME Windows)
+    set(CMAKE_SYSTEM_VERSION 10.0.26100)
 
     # adjust the default behavior of the FIND_XXX() commands:
     # search programs in the host environment

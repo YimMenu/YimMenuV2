@@ -109,10 +109,46 @@ namespace YimMenu
 			DeleteFiber(callback.m_Fiber);
 	}
 
+	void LuaScript::DisableResources()
+	{
+		for (int i = 0; i < m_Resources.size(); i++)
+		{
+			if (!m_Resources[i].size())
+				return;
+
+			auto type = LuaManager::GetResourceType(i);
+			type->Lock();
+
+			for (auto& resource : m_Resources[i])
+				resource->OnDisable();
+
+			type->Unlock();
+		}
+	}
+
+	void LuaScript::EnableResources()
+	{
+		for (int i = 0; i < m_Resources.size(); i++)
+		{
+			if (!m_Resources[i].size())
+				return;
+
+			auto type = LuaManager::GetResourceType(i);
+			type->Lock();
+
+			for (auto& resource : m_Resources[i])
+				resource->OnEnable();
+
+			type->Unlock();
+		}
+	}
+
 	LuaScript::LuaScript(std::string_view file_name) :
 	    m_FileName(file_name),
-	    m_ModuleName(std::filesystem::path(file_name).filename().string())
+	    m_ModuleName(std::filesystem::path(file_name).filename().string()),
+	    m_Config(std::filesystem::path(file_name).stem().string())
 	{
+		m_Resources.resize(LuaManager::GetNumResourceTypes());
 		m_State = luaL_newstate();
 		
 		lua_pushlightuserdata(m_State, (void*)this);  
@@ -143,6 +179,30 @@ namespace YimMenu
 		}
 	}
 
+	void LuaScript::Pause()
+	{
+		if (m_LoadState == LoadState::RUNNING)
+		{
+			DisableResources();
+			m_LoadState = LoadState::PAUSED;
+		}
+	}
+
+	void LuaScript::Resume()
+	{
+		if (m_LoadState == LoadState::PAUSED)
+		{
+			EnableResources();
+			m_LoadState = LoadState::RUNNING;
+		}
+	}
+
+	void LuaScript::MarkUnloaded()
+	{
+		DisableResources();
+		m_LoadState = LoadState::UNLOADED;
+	}
+
 	bool LuaScript::SafeToUnload()
 	{
 		for (auto& callback : m_ScriptCallbacks)
@@ -160,8 +220,16 @@ namespace YimMenu
 		return *script;
 	}
 
-	void LuaScript::AddScriptCallback(int coro_handle)
+	void LuaScript::AddScriptCallback(int func_handle)
 	{
+		lua_rawgeti(m_State, LUA_REGISTRYINDEX, func_handle);
+
+		lua_State* coro_state = lua_newthread(m_State);
+		lua_pushvalue(m_State, 1); // xmove can only move from top of stack, so we have to push the function again even if it's already in the stack
+		lua_xmove(m_State, coro_state, 1);
+
+		auto coro_handle = luaL_ref(m_State, LUA_REGISTRYINDEX);
+
 		ScriptCallback callback;
 		callback.m_Coroutine = coro_handle;
 		callback.m_LastYieldFromCode = false;
@@ -303,6 +371,25 @@ namespace YimMenu
 		}
 
 		return result;
+	}
+
+	void LuaScript::AddResource(std::shared_ptr<LuaResource>&& resource, int idx)
+	{
+		resource->SetType(idx); // TODO: this is a bad idea
+		auto type = LuaManager::GetResourceType(idx);
+		type->Lock();
+		m_Resources[resource->GetType()].push_back(std::move(resource));
+		type->Unlock();
+	}
+
+	int LuaScript::GetNumResourcesOfType(int type)
+	{
+		return m_Resources[type].size();
+	}
+
+	std::vector<std::shared_ptr<LuaResource>>& LuaScript::GetAllResourcesOfType(int idx)
+	{
+		return m_Resources[idx];
 	}
 	
 	void LuaScript::ScriptCallback::SetTimeToResume(int millis)

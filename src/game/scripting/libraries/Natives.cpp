@@ -1,4 +1,5 @@
 #include "core/scripting/LuaLibrary.hpp"
+#include "core/scripting/LuaResource.hpp"
 #include "core/scripting/LuaScript.hpp"
 #include "core/scripting/LuaUtils.hpp"
 #include "NativeDefs.hpp"
@@ -6,6 +7,12 @@
 
 namespace YimMenu::Lua
 {
+	class AreNativesLoadedResource : public LuaResource
+	{
+	};
+
+	const static LuaResourceType _AreNativesLoadedResource;
+
 	class Natives : LuaLibrary
 	{
 		using LuaLibrary::LuaLibrary;
@@ -14,7 +21,7 @@ namespace YimMenu::Lua
 		{
 			auto& script = LuaScript::GetScript(state);
 
-			if (script.AreNativesLoaded())
+			if (script.GetNumResourcesOfType(_AreNativesLoadedResource.GetIndex()) > 0)
 				luaL_error(state, "Natives have already been loaded");
 
 			for (int i = 0; i < g_NumLuaNativeDefs; i++)
@@ -28,14 +35,14 @@ namespace YimMenu::Lua
 				}
 			}
 
-			script.SetNativesLoaded();
+			script.AddResource(std::make_shared<AreNativesLoadedResource>(), _AreNativesLoadedResource.GetIndex());
 			return 0;
 		}
 
 		static int AreNativesLoaded(lua_State* state)
 		{
 			auto& script = LuaScript::GetScript(state);
-			lua_pushboolean(state, script.AreNativesLoaded());
+			lua_pushboolean(state, script.GetNumResourcesOfType(_AreNativesLoadedResource.GetIndex()) > 0);
 			return 1;
 		}
 

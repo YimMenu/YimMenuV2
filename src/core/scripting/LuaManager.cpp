@@ -2,6 +2,8 @@
 #include "core/filemgr/FileMgr.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/frontend/Notifications.hpp"
+#include "types/script/scrThread.hpp"
+#include "core/util/Joaat.hpp"
 
 namespace YimMenu
 {
@@ -13,6 +15,22 @@ namespace YimMenu
 	void LuaManager::RegisterLibraryImpl(LuaLibrary* library)
 	{
 		m_Libraries.push_back(library);
+	}
+
+	int LuaManager::RegisterResourceTypeImpl(LuaResourceType* res_type)
+	{
+		m_ResourceTypes.push_back(res_type);
+		return m_ResourceTypes.size() - 1;
+	}
+
+	int LuaManager::GetNumResourceTypesImpl()
+	{
+		return m_ResourceTypes.size();
+	}
+
+	LuaResourceType* LuaManager::GetResourceTypeImpl(int index)
+	{
+		return m_ResourceTypes[index];
 	}
 
 	void LuaManager::LoadLibrariesImpl(lua_State* state)
@@ -113,10 +131,14 @@ namespace YimMenu
 				}
 			}
 
-			// 4) run tick coroutines
-			for (auto& script : m_LoadedScripts)
-				if (script->IsValid())
-					script->Tick();
+			// don't run stuff while we're starting up
+			if (rage::scrThread::GetRunningThread()->m_ScriptHash != "startup"_J)
+			{
+				// 4) run tick coroutines
+				for (auto& script : m_LoadedScripts)
+					if (script->IsRunning())
+						script->Tick();
+			}
 
 			ScriptMgr::Yield();
 		}
@@ -160,7 +182,7 @@ namespace YimMenu
 
 		for (auto& script : m_LoadedScripts)
 		{
-			if (script->IsValid())
+			if (script->IsRunning())
 			{
 				result = (bool)(((int)result) & ((int)script->DispatchEvent(event, add_arguments_cb, handle_result)));
 				if (!result && handle_result)
@@ -169,5 +191,33 @@ namespace YimMenu
 		}
 
 		return result;
+	}
+
+	void LuaManager::ForAllResourcesOfTypeImpl(ForAllResourcesOfTypeCallback callback, int type)
+	{
+		auto _type = GetResourceType(type);
+		bool locked = false;
+		for (auto& script : m_LoadedScripts)
+		{
+			if (script->IsRunning())
+			{
+				auto& resources = script->GetAllResourcesOfType(type);
+				if (resources.size() > 0)
+				{
+					if (!locked)
+					{
+						_type->Lock();
+						locked = true;
+					}
+
+					for (auto& resource : resources)
+					{
+						callback(resource.get());
+					}
+				}
+			}
+		}
+		if (locked)
+			_type->Unlock();
 	}
 }

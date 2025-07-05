@@ -1,6 +1,7 @@
 #pragma once
 #include "LuaScript.hpp"
 #include "LuaLibrary.hpp"
+#include "LuaResource.hpp"
 
 namespace YimMenu
 {
@@ -16,12 +17,14 @@ namespace YimMenu
 
 		using ForAllLoadedScriptsCallback = void(*)(std::shared_ptr<LuaScript>& script);
 		using ForAllUnloadedScriptsCallback = void(*)(UnloadedScript& script);
+		using ForAllResourcesOfTypeCallback = void(*)(LuaResource* resource);
 
 	private:
 		std::vector<std::shared_ptr<LuaScript>> m_LoadedScripts;
 		std::vector<UnloadedScript> m_UnloadedScripts;
 		std::chrono::system_clock::time_point m_LastRefreshedUnloadedScripts;
 		std::vector<LuaLibrary*> m_Libraries;
+		std::vector<LuaResourceType*> m_ResourceTypes;
 		std::queue<std::string> m_ScriptsToLoad;
 		std::mutex m_LoadMutex;
 		std::uint32_t m_MainThreadId;
@@ -31,6 +34,9 @@ namespace YimMenu
 		void AddUnloadedScript(std::string_view name, std::string_view path);
 
 		void RegisterLibraryImpl(LuaLibrary* library);
+		int RegisterResourceTypeImpl(LuaResourceType* res_type); // returns resource index
+		int GetNumResourceTypesImpl();
+		LuaResourceType* GetResourceTypeImpl(int index);
 		void LoadLibrariesImpl(lua_State* state);
 		void LoadScriptImpl(std::string path);
 		void RunScriptImpl();
@@ -39,6 +45,7 @@ namespace YimMenu
 		void ForAllLoadedScriptsImpl(ForAllLoadedScriptsCallback callback);
 		void ForAllUnloadedScriptsImpl(ForAllUnloadedScriptsCallback callback);
 		bool DispatchEventImpl(std::uint32_t event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result = false);
+		void ForAllResourcesOfTypeImpl(ForAllResourcesOfTypeCallback callback, int type);
 
 		static LuaManager& GetInstance()
 		{
@@ -50,6 +57,21 @@ namespace YimMenu
 		static void RegisterLibrary(LuaLibrary* library)
 		{
 			GetInstance().RegisterLibraryImpl(library);
+		}
+
+		static int RegisterResourceType(LuaResourceType* res_type)
+		{
+			return GetInstance().RegisterResourceTypeImpl(res_type);
+		}
+
+		static int GetNumResourceTypes()
+		{
+			return GetInstance().GetNumResourceTypesImpl();
+		}
+
+		static LuaResourceType* GetResourceType(int index)
+		{
+			return GetInstance().GetResourceTypeImpl(index);
 		}
 
 		static void LoadLibraries(lua_State* state)

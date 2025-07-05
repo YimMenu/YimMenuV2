@@ -22,12 +22,9 @@ namespace YimMenu::Lua
 
 			luaL_checktype(state, 1, LUA_TFUNCTION); // will throw error if a1 isn't a function. not sure what happens if you don't pass any parameters
 
-			lua_State* coro_state = lua_newthread(state);
-			lua_pushvalue(state, 1); // xmove can only move from top of stack, so we have to push the function again even if it's already in the stack
-			lua_xmove(state, coro_state, 1); 
-
-			auto coro_handle = luaL_ref(state, LUA_REGISTRYINDEX);
-			script.AddScriptCallback(coro_handle);
+			auto func_handle = luaL_ref(state, LUA_REGISTRYINDEX);
+			script.AddScriptCallback(func_handle);
+			luaL_unref(state, LUA_REGISTRYINDEX, func_handle);
 
 			return 0;
 		}

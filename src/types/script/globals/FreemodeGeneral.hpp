@@ -58,7 +58,15 @@ struct FreemodeGeneral
 {
 	uint64_t PAD_0000[301];
 	VEHICLE_INDEX PersonalVehicleIndex; // 301
-	uint64_t PAD_0302[6553];
+	uint64_t PAD_0302[653];
+	SCR_BOOL PersonalVehicleRequested; // 955
+	uint64_t PAD_0956[13];
+	SCR_BOOL NodeDistanceCheck; // 969
+	uint64_t PAD_0970[48];
+	SCR_INT RequestedPersonalVehicleId; // 1018
+	uint64_t PAD_1019[2];
+	SCR_BOOL Exec1Impound; // 1021
+	uint64_t PAD_1022[5833];
 	STREET_DEALERS StreetDealers; // 6855
 	uint64_t PAD_6879[71];
 	DAILY_RESET_DATA DailyReset; // 6950

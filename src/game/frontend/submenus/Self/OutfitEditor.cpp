@@ -25,19 +25,19 @@ namespace YimMenu
 			for (auto& t : components.items)
 			{
 				auto& item = t.second;
-				item.drawable_id = PED::GET_PED_DRAWABLE_VARIATION(ped, item.id);
-				item.drawable_id_max = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(ped, item.id) - 1;
-				item.texture_id = PED::GET_PED_TEXTURE_VARIATION(ped, item.id);
-				item.texture_id_max = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(ped, item.id, item.drawable_id) - 1;
+				item.drawable_id = PED::GET_PED_DRAWABLE_VARIATION(ped, t.first);
+				item.drawable_id_max = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(ped, t.first) - 1;
+				item.texture_id = PED::GET_PED_TEXTURE_VARIATION(ped, t.first);
+				item.texture_id_max = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(ped, t.first, item.drawable_id) - 1;
 			}
 
 			for (auto& t : props.items)
 			{
 				auto& item = t.second;
-				item.drawable_id = PED::GET_PED_PROP_INDEX(ped, item.id, 0);
-				item.drawable_id_max = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(ped, item.id) - 1;
-				item.texture_id = PED::GET_PED_PROP_TEXTURE_INDEX(ped, item.id);
-				item.texture_id_max = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(ped, item.id, item.drawable_id) - 1;
+				item.drawable_id = PED::GET_PED_PROP_INDEX(ped, t.first, 0);
+				item.drawable_id_max = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(ped, t.first) - 1;
+				item.texture_id = PED::GET_PED_PROP_TEXTURE_INDEX(ped, t.first);
+				item.texture_id_max = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(ped, t.first, item.drawable_id) - 1;
 			}
 		}
 
@@ -51,8 +51,8 @@ namespace YimMenu
 				if (ImGui::InputInt(std::format("{} [0,{}]##1", item.label, item.drawable_id_max).c_str(), &item.drawable_id))
 				{
 					Outfit::OutfitEditor::CheckBoundsDrawable(item, 0); // The game does this on it's own but seems to crash if we call OOB values to fast.
-					FiberPool::Push([item, this] {
-						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), item.id, item.drawable_id, 0, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), item.id));
+					FiberPool::Push([id = t.first, item, this] {
+						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), id, item.drawable_id, 0, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), id));
 						RefreshStats();
 					});
 				}
@@ -70,8 +70,8 @@ namespace YimMenu
 				if (ImGui::InputInt(std::format("{} TEX [0,{}]##2", item.label, item.texture_id_max).c_str(), &item.texture_id))
 				{
 					Outfit::OutfitEditor::CheckBoundsTexture(item, 0); // The game does this on it's own but seems to crash if we call OOB values to fast.
-					FiberPool::Push([item, this] {
-						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), item.id, item.drawable_id, item.texture_id, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), item.id));
+					FiberPool::Push([id = t.first, item, this] {
+						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), id, item.drawable_id, item.texture_id, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), id));
 						RefreshStats();
 					});
 				}
@@ -88,11 +88,11 @@ namespace YimMenu
 				if (ImGui::InputInt(std::format("{} [0,{}]##3", item.label, item.drawable_id_max).c_str(), &item.drawable_id))
 				{
 					Outfit::OutfitEditor::CheckBoundsDrawable(item, -1); // The game does this on it's own but seems to crash if we call OOB values to fast.
-					FiberPool::Push([item, this] {
+					FiberPool::Push([id = t.first, item, this] {
 						if (item.drawable_id == -1)
-							PED::CLEAR_PED_PROP(Self::GetPed().GetHandle(), item.id, 1);
+							PED::CLEAR_PED_PROP(Self::GetPed().GetHandle(), id, 1);
 						else
-							PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), item.id, item.drawable_id, 0, TRUE, 0);
+							PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), id, item.drawable_id, 0, TRUE, 0);
 						RefreshStats();
 					});
 				}
@@ -108,8 +108,8 @@ namespace YimMenu
 				if (ImGui::InputInt(std::format("{} TEX [0,{}]##4", item.label, item.texture_id_max).c_str(), &item.texture_id))
 				{
 					Outfit::OutfitEditor::CheckBoundsTexture(item, -1); // The game does this on it's own but seems to crash if we call OOB values to fast.
-					FiberPool::Push([item, this] {
-						PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), item.id, item.drawable_id, item.texture_id, TRUE, 0);
+					FiberPool::Push([id = t.first, item, this] {
+						PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), id, item.drawable_id, item.texture_id, TRUE, 0);
 						RefreshStats();
 					});
 				}

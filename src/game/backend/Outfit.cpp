@@ -7,7 +7,7 @@ namespace YimMenu
 {
 	namespace Outfit
 	{
-		void OutfitEditor::CheckBoundsDrawable(Component& item, const int lower)
+		void OutfitEditor::CheckBoundsDrawable(ComponentData& item, const int lower)
 		{
 			if (item.drawable_id > item.drawable_id_max)
 				item.drawable_id = item.drawable_id_max;
@@ -15,7 +15,7 @@ namespace YimMenu
 				item.drawable_id = lower;
 		}
 
-		void OutfitEditor::CheckBoundsTexture(Component& item, const int lower)
+		void OutfitEditor::CheckBoundsTexture(ComponentData& item, const int lower)
 		{
 			if (item.texture_id > item.texture_id_max)
 				item.texture_id = item.texture_id_max;
@@ -31,9 +31,9 @@ namespace YimMenu
 
 				auto palette_var = item.palette_var;
 				if (item.palette_var == -1)
-					palette_var = PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), item.id);
+					palette_var = PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), t.first);
 
-				PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), item.id, item.drawable_id, item.texture_id, palette_var);
+				PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), t.first, item.drawable_id, item.texture_id, palette_var);
 			}
 
 			PED::CLEAR_ALL_PED_PROPS(Self::GetPed().GetHandle(), 0);
@@ -41,7 +41,7 @@ namespace YimMenu
 			for (auto& t : props.items)
 			{
 				auto item = t.second;
-				PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), item.id, item.drawable_id, item.texture_id, TRUE, 0);
+				PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), t.first, item.drawable_id, item.texture_id, TRUE, 0);
 			}
 		}
 

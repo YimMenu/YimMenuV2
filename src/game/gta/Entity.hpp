@@ -1,5 +1,6 @@
 #pragma once
 #include "types/rage/vector.hpp"
+#include "types/script/types.hpp"
 
 #define ENTITY_DEBUG
 
@@ -92,7 +93,7 @@ namespace YimMenu
 		bool IsMissionEntity();
 
 		// info
-		int GetModel();
+		Hash GetModel();
 
 		// position
 		rage::fvector3 GetPosition();

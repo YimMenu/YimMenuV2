@@ -21,6 +21,15 @@ namespace YimMenu::Submenus
 		globals->AddItem(std::make_shared<BoolCommandItem>("hornboost"_J));
 		globals->AddItem(std::make_shared<BoolCommandItem>("modifyboostbehavior"_J));
 		globals->AddItem(std::make_shared<ConditionalItem>("modifyboostbehavior"_J, std::make_shared<ListCommandItem>("boostbehavior"_J)));
+		// Rainbow Paint feature with options
+		globals->AddItem(std::make_shared<BoolCommandItem>("rainbowpaint"_J, "Rainbow Paint"));
+		globals->AddItem(std::make_shared<ConditionalItem>("rainbowpaint"_J, std::make_shared<ListCommandItem>("rainbowtype"_J, "Paint Type")));
+		globals->AddItem(std::make_shared<ConditionalItem>("rainbowpaint"_J, std::make_shared<BoolCommandItem>("rainbowpri"_J, "Primary")));
+		globals->AddItem(std::make_shared<ConditionalItem>("rainbowpaint"_J, std::make_shared<BoolCommandItem>("rainbowsec"_J, "Secondary")));
+//		globals->AddItem(std::make_shared<ConditionalItem>("rainbowpaint"_J, std::make_shared<IntCommandItem>("rainbowspeed"_J, "Speed")));   Don't know how to change the speed once it's been changed in the UI, so no speed, for now.
+
+		// Vehicle Jump feature
+		globals->AddItem(std::make_shared<BoolCommandItem>("vehjump"_J, "Vehicle Jump"));
 
 		tools->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
 		tools->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));

@@ -2,7 +2,7 @@
 #include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
 #include "types/pad/ControllerInputs.hpp"
-
+// This can literally be recycled almost word
 namespace YimMenu::Features
 {
 	class VehicleJump : public LoopedCommand
@@ -11,8 +11,8 @@ namespace YimMenu::Features
 
 		virtual void OnTick() override
 		{
-			auto veh = Self::GetVehicle();
-			if (!veh)
+			auto veh = Self::GetVehicle();   // Check if player is in the vehicle
+			if (!veh)			 // If not, then don't do anything.
 				return;
 
 			// Disable default handbrake action to capture input manually
@@ -25,19 +25,19 @@ namespace YimMenu::Features
 				    1, // force type
 				    0.0f,
 				    0.0f,
-				    20.0f, // force vector (x,y,z) - strong upwards force
+				    20.0f, // X Y Z - modifies the Z force (responsible for up or down) - strong upwards force
 				    0.0f,
 				    0.0f,
-				    0.0f, // offset vector
+				    0.0f,
 				    0,
 				    0,
 				    1,
 				    1,
 				    0,
-				    1); // other params: apply force to center, etc.
+				    1);
 			}
 		}
 	};
 
-	static VehicleJump _VehicleJump{"vehjump", "Vehicle Jump", "Allows the vehicle to jump when the handbrake is pressed"};
+	static VehicleJump _VehicleJump{"vehjump", "Vehicle Jump", "Allows the vehicle to jump when the handbrake is pressed"};   // this is literally almost a word-for-word recycle of the version found in the legacy version of YimMenu
 }

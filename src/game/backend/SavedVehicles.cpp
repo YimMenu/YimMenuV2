@@ -1,6 +1,5 @@
 #include "SavedVehicles.hpp"
 
-#include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "game/gta/VehicleModel.hpp"
@@ -18,21 +17,19 @@ namespace YimMenu
 
 	void SavedVehicles::RefreshList(std::string folderName, std::vector<std::string>& folders, std::vector<std::string>& files)
 	{
-		FiberPool::Push([folderName, &folders, &files] {
-			folders.clear();
+		folders.clear();
 
-			const auto file_path = CheckFolder();
-			for (const auto& directory_entry : std::filesystem::directory_iterator(file_path.Path()))
-				if (directory_entry.is_directory())
-					folders.push_back(directory_entry.path().filename().generic_string());
+		const auto file_path = CheckFolder();
+		for (const auto& directory_entry : std::filesystem::directory_iterator(file_path.Path()))
+			if (directory_entry.is_directory())
+				folders.push_back(directory_entry.path().filename().generic_string());
 
-			files.clear();
+		files.clear();
 
-			const auto file_path2 = CheckFolder(folderName);
-			for (const auto& directory_entry : std::filesystem::directory_iterator(file_path2.Path()))
-				if (directory_entry.path().extension() == ".json")
-					files.push_back(directory_entry.path().filename().generic_string());
-		});
+		const auto file_path2 = CheckFolder(folderName);
+		for (const auto& directory_entry : std::filesystem::directory_iterator(file_path2.Path()))
+			if (directory_entry.path().extension() == ".json")
+				files.push_back(directory_entry.path().filename().generic_string());
 	}
 
 	nlohmann::json SavedVehicles::GetJson(Vehicle veh)
@@ -132,55 +129,53 @@ namespace YimMenu
 
 	void SavedVehicles::Save(std::string folderName, std::string fileName)
 	{
-		FiberPool::Push([folderName, fileName] {
-			if (auto veh = Self::GetVehicle(); veh && veh.IsValid())
-			{
-				const auto file = SavedVehicles::CheckFolder(folderName).GetFile(fileName);
-				std::ofstream file_stream(file.Path(), std::ios::out | std::ios::trunc);
-				file_stream << SavedVehicles::GetJson(veh).dump(4);
-				file_stream.close();
-			}
-			else
-				Notifications::Show("Persist Car", "Tried to save a vehicle which does not exist", NotificationType::Warning);
-		});
+		if (auto veh = Self::GetVehicle(); veh && veh.IsValid())
+		{
+			const auto file = SavedVehicles::CheckFolder(folderName).GetFile(fileName);
+			std::ofstream file_stream(file.Path(), std::ios::out | std::ios::trunc);
+			file_stream << SavedVehicles::GetJson(veh).dump(4);
+			file_stream.close();
+		}
+		else
+			Notifications::Show("Persist Car", "Tried to save a vehicle which does not exist", NotificationType::Warning);
 	}
 
 	void SavedVehicles::Load(std::string folderName, std::string fileName, bool spawnInside)
 	{
 		if (!fileName.empty())
-			FiberPool::Push([folderName, fileName, spawnInside] {
-				const auto file = CheckFolder(folderName).GetFile(fileName).Path();
+		{
+			const auto file = CheckFolder(folderName).GetFile(fileName).Path();
 
-				if (!std::filesystem::exists(file))
+			if (!std::filesystem::exists(file))
+			{
+				Notifications::Show("Persist Car", "File does not exist.", NotificationType::Error);
+				return;
+			}
+
+			std::ifstream file_stream(file);
+			nlohmann::json vehicle_json;
+
+			try
+			{
+				file_stream >> vehicle_json;
+				auto veh = SpawnFromJson(vehicle_json);
+
+				if (veh)
 				{
-					Notifications::Show("Persist Car", "File does not exist.", NotificationType::Error);
-					return;
+					if (spawnInside)
+						Self::GetPed().SetInVehicle(veh.GetHandle());
+					Notifications::Show("Persist Car", std::format("Spawned {}", fileName), NotificationType::Success);
 				}
+				else
+					Notifications::Show("Persist Car", std::format("Unable to spawn {}", fileName), NotificationType::Error);
+			}
+			catch (std::exception& e)
+			{
+				LOG(WARNING) << e.what();
+			}
 
-				std::ifstream file_stream(file);
-				nlohmann::json vehicle_json;
-
-				try
-				{
-					file_stream >> vehicle_json;
-					auto veh = SpawnFromJson(vehicle_json);
-
-					if (veh)
-					{
-						if (spawnInside)
-							Self::GetPed().SetInVehicle(veh.GetHandle());
-						Notifications::Show("Persist Car", std::format("Spawned {}", fileName), NotificationType::Success);
-					}
-					else
-						Notifications::Show("Persist Car", std::format("Unable to spawn {}", fileName), NotificationType::Error);
-				}
-				catch (std::exception& e)
-				{
-					LOG(WARNING) << e.what();
-				}
-
-				file_stream.close();
-			});
+			file_stream.close();
+		}
 		else
 			Notifications::Show("Persist Car", "Select a file first", NotificationType::Warning);
 	}

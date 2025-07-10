@@ -94,16 +94,19 @@ namespace YimMenu
 			std::this_thread::yield();
 		}
 
+		EARLY_UNLOAD:
+		g_Running = false;
+
 		LOG(INFO) << "Unloading";
+
 		AnticheatBypass::ShutdownImpl();
 		NativeHooks::Destroy();
-		FiberPool::Destroy();
 		ScriptMgr::Destroy();
+		FiberPool::Destroy();
+
 		Hooking::Destroy();
 		CallSiteHook::Destroy();
 
-	EARLY_UNLOAD:
-		g_Running = false;
 		Renderer::Destroy();
 		LogHelper::Destroy();
 

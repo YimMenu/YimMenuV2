@@ -15,6 +15,7 @@ using FnBattlEyeBypass = bool (*)();
 
 namespace YimMenu
 {
+	static bool g_AllocatedAnticheatInitializedHash = false;
 	static std::vector<void*> s_PatchedVTables;
 
 	static bool CheckForFSL()
@@ -38,8 +39,6 @@ namespace YimMenu
 
 	static void NopGameSkeletonElement(rage::gameSkeletonUpdateElement* element)
 	{
-		// Hey rockstar if you keep up with this I'll make you integrity check everything until you can't anymore, please grow a brain and realize that this is futile
-		// and kills performance if you're the host
 		auto vtable = *reinterpret_cast<void***>(element);
 		if (vtable[1] == Pointers.Nullsub)
 			return; // already nopped
@@ -47,6 +46,7 @@ namespace YimMenu
 		auto new_vtable = new void*[3];
 		memcpy(new_vtable, vtable, sizeof(void*) * 3);
 		new_vtable[1] = Pointers.Nullsub;
+
 		*reinterpret_cast<void***>(element) = new_vtable;
 
 		s_PatchedVTables.push_back(new_vtable);
@@ -94,13 +94,15 @@ namespace YimMenu
 
 		if (!*Pointers.AnticheatInitializedHash)
 		{
-			*Pointers.AnticheatInitializedHash = new rage::Obf32; // this doesn't get freed so we don't have to use the game allocator
+			*Pointers.AnticheatInitializedHash = new rage::Obf32;
 			(*Pointers.AnticheatInitializedHash)->setData(0x124EA49D);
+			g_AllocatedAnticheatInitializedHash = true;
 		}
 		else
 		{
 			(*Pointers.AnticheatInitializedHash)->setData(0x124EA49D);
 			loaded_late = true;
+			g_AllocatedAnticheatInitializedHash = false;
 		}
 	}
 
@@ -172,10 +174,16 @@ namespace YimMenu
 
 	void AnticheatBypass::ShutdownImpl()
 	{
-		for (auto vtable : s_PatchedVTables)
+		for (auto* vtable : s_PatchedVTables)
 		{
 			delete[] vtable;
 		}
 		s_PatchedVTables.clear();
+
+		if (g_AllocatedAnticheatInitializedHash && Pointers.AnticheatInitializedHash && *Pointers.AnticheatInitializedHash)
+		{
+			delete *Pointers.AnticheatInitializedHash;
+			*Pointers.AnticheatInitializedHash = nullptr;
+		}
 	}
 }

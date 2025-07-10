@@ -21,6 +21,9 @@ namespace YimMenu
 		bool m_FSLProvidesBEBypass = false;
 
 	public:
+
+		static void ShutdownImpl();
+
 		static void RunOnStartup()
 		{
 			GetInstance().RunOnStartupImpl();

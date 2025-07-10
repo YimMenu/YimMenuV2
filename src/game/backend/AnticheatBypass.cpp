@@ -15,6 +15,8 @@ using FnBattlEyeBypass = bool (*)();
 
 namespace YimMenu
 {
+	static std::vector<void*> s_PatchedVTables;
+
 	static bool CheckForFSL()
 	{
 		int num_versions = 0;
@@ -47,6 +49,22 @@ namespace YimMenu
 		memcpy(new_vtable, vtable, sizeof(void*) * 3);
 		new_vtable[1] = Pointers.Nullsub;
 		*reinterpret_cast<void***>(element) = new_vtable;
+
+		s_PatchedVTables.push_back(new_vtable);
+	}
+
+	static void CleanupPatchedVTables()
+	{
+		for (auto vtable : s_PatchedVTables)
+		{
+			delete[] vtable;
+		}
+		s_PatchedVTables.clear();
+	}
+
+	void AnticheatBypass::ShutdownImpl()
+	{
+		CleanupPatchedVTables();
 	}
 
 	static void DefuseSigscanner()

@@ -7,7 +7,7 @@
 
 namespace YimMenu
 {
-	Vehicle Vehicle::Create(std::uint32_t model, rage::fvector3 coords, float heading)
+	Vehicle Vehicle::Create(std::uint32_t model, rage::fvector3 coords, float heading, bool setOnGroundProperly)
 	{
 		ENTITY_ASSERT_SCRIPT_CONTEXT();
 		if (!STREAMING::IS_MODEL_IN_CDIMAGE(model))
@@ -46,7 +46,8 @@ namespace YimMenu
 
 		DECORATOR::DECOR_SET_INT(veh.GetHandle(), "MPBitset", 0);
 		NETWORK::SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK::VEH_TO_NET(veh.GetHandle()), true);
-		VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh.GetHandle(), 0);
+		if (setOnGroundProperly)
+			VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh.GetHandle(), 0);
 		STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
 
 		return veh;

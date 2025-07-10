@@ -7,6 +7,8 @@
 #include "game/gta/Scripts.hpp"
 #include "game/gta/ScriptFunction.hpp"
 #include "types/script/scrThread.hpp"
+#include "core/commands/Commands.hpp"
+#include "game/features/self/CustomWeapon.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -163,11 +165,52 @@ namespace YimMenu::Submenus
 		}
 	}
 
+	static std::shared_ptr<Group> RenderCustomWeaponsMenu()
+	{
+		auto customWeaponsGroup = std::make_shared<Group>("Custom Weapons");
+
+		auto cutomWeaponTypes = std::make_shared<Group>("", 1);
+		auto customWeapons = std::make_shared<Group>("");
+		auto paintGunGroup = std::make_shared<Group>("");
+
+		auto cmd = Commands::GetCommand<ListCommand>("customweapontype"_J);
+		
+		auto isGravityGunEnabled = [cmd] {
+			return static_cast<Features::CustomWeapons>(cmd->GetState()) == Features::CustomWeapons::GRAVITY_GUN;
+		};
+
+		auto isVehicleGunEnabled = [cmd] {
+			return static_cast<Features::CustomWeapons>(cmd->GetState()) == Features::CustomWeapons::VEHICLE_GUN;
+		};
+
+		auto isPaintGunEnabled = [cmd] {
+			return static_cast<Features::CustomWeapons>(cmd->GetState()) == Features::CustomWeapons::PAINT_GUN;
+		};
+
+		cutomWeaponTypes->AddItem(std::make_shared<ListCommandItem>("customweapontype"_J));
+		cutomWeaponTypes->AddItem(std::make_shared<ConditionalItem>(isGravityGunEnabled, std::make_shared<BoolCommandItem>("gravitygunlaunchonrelease"_J)));
+		cutomWeaponTypes->AddItem(std::make_shared<ConditionalItem>(isVehicleGunEnabled, std::make_shared<StringCommandItem>("vehiclegunmodel"_J)));
+		cutomWeaponTypes->AddItem(std::make_shared<ConditionalItem>(isPaintGunEnabled, std::make_shared<ConditionalItem>("paintgunrainbowcolorenabled"_J, std::make_shared<ColorCommandItem>("paintguncolor"_J), true)));
+
+		paintGunGroup->AddItem(std::make_shared<BoolCommandItem>("paintgunrainbowcolorenabled"_J));
+		paintGunGroup->AddItem(std::make_shared<ConditionalItem>("paintgunrainbowcolorenabled"_J, std::make_shared<ListCommandItem>("paintgunrainbowcolorstyle"_J)));
+		paintGunGroup->AddItem(std::make_shared<ConditionalItem>("paintgunrainbowcolorenabled"_J, std::make_shared<IntCommandItem>("paintgunrainbowcolorspeed"_J)));
+
+		customWeapons->AddItem(std::make_shared<BoolCommandItem>("customweaponenabledonweaponout"_J));
+		customWeapons->AddItem(std::move(cutomWeaponTypes));
+		customWeapons->AddItem(std::make_shared<ConditionalItem>(isPaintGunEnabled, std::move(paintGunGroup)));
+
+		customWeaponsGroup->AddItem(std::make_shared<BoolCommandItem>("customweapon"_J));
+		customWeaponsGroup->AddItem(std::make_shared<ConditionalItem>("customweapon"_J, std::move(customWeapons)));
+
+		return customWeaponsGroup;
+	}
+
 	std::shared_ptr<Category> BuildWeaponsMenu()
 	{
 		auto weapons = std::make_shared<Category>("Weapons");
 
-		auto weaponsGlobalsGroup = std::make_shared<Group>("Globals");
+		auto weaponsGlobalsGroup = std::make_shared<Group>("Globals", 12);
 		auto weaponsToolsGroup = std::make_shared<Group>("Tools", 1);
 		auto weaponsAmmuNationGroup = std::make_shared<Group>("Ammu-Nation");
 		auto weaponsAimbotGroup = std::make_shared<Group>("Aimbot", 1);
@@ -202,6 +245,7 @@ namespace YimMenu::Submenus
 		weapons->AddItem(weaponsToolsGroup);
 		weapons->AddItem(weaponsAmmuNationGroup);
 		weapons->AddItem(weaponsAimbotGroup);
+		weapons->AddItem(RenderCustomWeaponsMenu());
 		return weapons;
 	}
 }

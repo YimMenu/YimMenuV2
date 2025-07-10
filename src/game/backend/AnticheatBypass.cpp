@@ -38,7 +38,6 @@ namespace YimMenu
 
 	static void NopGameSkeletonElement(rage::gameSkeletonUpdateElement* element)
 	{
-		// TODO: small memory leak
 		// Hey rockstar if you keep up with this I'll make you integrity check everything until you can't anymore, please grow a brain and realize that this is futile
 		// and kills performance if you're the host
 		auto vtable = *reinterpret_cast<void***>(element);
@@ -51,20 +50,6 @@ namespace YimMenu
 		*reinterpret_cast<void***>(element) = new_vtable;
 
 		s_PatchedVTables.push_back(new_vtable);
-	}
-
-	static void CleanupPatchedVTables()
-	{
-		for (auto vtable : s_PatchedVTables)
-		{
-			delete[] vtable;
-		}
-		s_PatchedVTables.clear();
-	}
-
-	void AnticheatBypass::ShutdownImpl()
-	{
-		CleanupPatchedVTables();
 	}
 
 	static void DefuseSigscanner()
@@ -183,5 +168,14 @@ namespace YimMenu
 			}
 			ScriptMgr::Yield();
 		}
+	}
+
+	void AnticheatBypass::ShutdownImpl()
+	{
+		for (auto vtable : s_PatchedVTables)
+		{
+			delete[] vtable;
+		}
+		s_PatchedVTables.clear();
 	}
 }

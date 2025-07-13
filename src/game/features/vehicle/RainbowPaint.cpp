@@ -8,7 +8,7 @@
 
 namespace YimMenu::Features
 {
-	static float red = 255.f, green = 0.f, blue = 0.f;   // start from full red
+	static float red = 255.f, green = 0.f, blue = 0.f;
 
 	enum class RainbowPaintType
 	{
@@ -23,8 +23,8 @@ namespace YimMenu::Features
 
 	struct RainbowPaintSettings
 	{
-		bool primary = true;                           // affect primary color
-		bool secondary = false;			       // do not affect secondary paint
+		bool primary = true;
+		bool secondary = false;
 		int speed = 1;
 		RainbowPaintType type = RainbowPaintType::Fade; // Default option is fade
 	};
@@ -43,20 +43,14 @@ namespace YimMenu::Features
 	    "Enable RGB rainbow paint on vehicle secondary color",
 	    g_RainbowPaintSettings.secondary};
 
-	static IntCommand _RainbowPaintSpeed{
-	    "rainbowspeed",
-	    "Vehicle RGB Paint Speed",
-	    "Speed of the rainbow paint cycling (1-10)",
-	    g_RainbowPaintSettings.speed,
-	    1,
-	    10};
+	static IntCommand _RainbowPaintSpeed{"rainbowspeed", "Vehicle RGB Paint Speed", "Speed of the rainbow paint cycling (1-10)", 1, 10, 1}; // change the setting needed to fix into a one-liner to be more readable
 
 	static ListCommand _RainbowPaintType{
 	    "rainbowtype",
 	    "Vehicle Rainbow Paint Type",
 	    "Type of rainbow paint effect",
 	    g_RainbowPaintTypeList,
-	    1}; // Uses fade by default
+	    1}; // Default index changed to 1 ("Fade")
 
 	class VehicleRainbowPaint : public LoopedCommand
 	{
@@ -64,14 +58,14 @@ namespace YimMenu::Features
 
 		void OnTick() override
 		{
-			UpdateRainbowPaint();  // activates function found below
+			UpdateRainbowPaint();
 		}
 
 		void UpdateRainbowPaint()
 		{
 			auto veh = Self::GetVehicle().GetHandle();
-			if (!ENTITY::DOES_ENTITY_EXIST(veh))  //if player isn't sitting in a vehicle
-				return; // do nothing
+			if (!ENTITY::DOES_ENTITY_EXIST(veh))
+				return;
 
 			RainbowPaintType type = static_cast<RainbowPaintType>(_RainbowPaintType.GetState());
 
@@ -87,11 +81,11 @@ namespace YimMenu::Features
 				green = static_cast<float>(rand() % 256);
 				blue = static_cast<float>(rand() % 256);
 
-				delay = std::chrono::milliseconds(110 - (_RainbowPaintSpeed.GetState() * 10));     // the paint spazzes out
+				delay = std::chrono::milliseconds(110 - (_RainbowPaintSpeed.GetState() * 10));
 				last_rgb_run_time = now;
 				ran = true;
 			}
-			else if (type == RainbowPaintType::Fade)                   // a great fade
+			else if (type == RainbowPaintType::Fade)
 			{
 				if (ran)
 				{
@@ -125,7 +119,7 @@ namespace YimMenu::Features
 			}
 
 			if (_RainbowPaintPrimary.GetState())
-				VEHICLE::SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, static_cast<int>(red), static_cast<int>(green), static_cast<int>(blue));         // checks state of settings toggled
+				VEHICLE::SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, static_cast<int>(red), static_cast<int>(green), static_cast<int>(blue));
 			if (_RainbowPaintSecondary.GetState())
 				VEHICLE::SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, static_cast<int>(red), static_cast<int>(green), static_cast<int>(blue));
 		}

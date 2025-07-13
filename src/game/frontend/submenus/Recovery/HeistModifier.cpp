@@ -8,18 +8,15 @@ namespace YimMenu::Submenus
 {
 	std::shared_ptr<Category> BuildHeistModifierMenu()
 	{
-		auto menu = std::make_shared<Category>("Heists");
+		auto menu        = std::make_shared<Category>("Heists");
+		auto heistTabBar = std::make_shared<TabBarItem>("Heist Modifier");
 
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::BeginTabBar("Heist Modifier");
-		}));
-		menu->AddItem(RenderApartmentHeistMenu());
-		menu->AddItem(RenderDiamondCasinoHeistMenu());
-		menu->AddItem(RenderCayoPericoHeistMenu());
-		menu->AddItem(RenderDoomsdayHeistMenu());
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::EndTabBar();
-		}));
+		heistTabBar->AddItem(RenderApartmentHeistMenu());
+		heistTabBar->AddItem(RenderDiamondCasinoHeistMenu());
+		heistTabBar->AddItem(RenderCayoPericoHeistMenu());
+		heistTabBar->AddItem(RenderDoomsdayHeistMenu());
+
+		menu->AddItem(std::move(heistTabBar));
 
 		return menu;
 	}

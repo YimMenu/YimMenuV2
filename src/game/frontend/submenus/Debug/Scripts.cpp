@@ -129,6 +129,7 @@ namespace YimMenu::Submenus
 	{
 		auto menu = std::make_unique<Category>("Scripts");
 
+		auto tabBar = std::make_unique<TabBarItem>("Scripts");
 		auto threads = std::make_unique<TabItem>("Threads");
 		auto script = std::make_unique<TabItem>("Start Script");
 
@@ -403,14 +404,11 @@ namespace YimMenu::Submenus
 			}
 		}));
 
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::BeginTabBar("Scripts");
-		}));
-		menu->AddItem(std::move(threads));
-		menu->AddItem(std::move(script));
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::EndTabBar();
-		}));
+		tabBar->AddItem(std::move(threads));
+		tabBar->AddItem(std::move(script));
+
+		menu->AddItem(std::move(tabBar));
+
 		return menu;
 	}
 }

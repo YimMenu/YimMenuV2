@@ -10,9 +10,13 @@ namespace YimMenu::Features
 		using LoopedCommand::LoopedCommand;
 		virtual void OnTick() override
 		{
-			PLAYER::EXTEND_WORLD_BOUNDARY_FOR_PLAYER(-42069420.0, -42069420.0, -42069420.0);
-			PLAYER::EXTEND_WORLD_BOUNDARY_FOR_PLAYER(42069420.0, 42069420.0, 42069420.0);
+			PLAYER::EXTEND_WORLD_BOUNDARY_FOR_PLAYER(-1e5, -1e5, -1e5);
+			PLAYER::EXTEND_WORLD_BOUNDARY_FOR_PLAYER(1e5, 1e5, 1e5);
 		}
+		virtual void OnDisable() override
+			{
+			PLAYER::RESET_WORLD_BOUNDARY_FOR_PLAYER();
+		    }
 	};
 
 	static InfiniteBoundary Infinitebundary{"infiniteboundary", "Infinite Boundary", "You won't die because of border restrictions."};

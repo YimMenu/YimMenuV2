@@ -5,7 +5,7 @@
 
 namespace YimMenu::Features
 {
-	class CriticalHits : public LoopedCommand
+	class DisableCriticalHits : public LoopedCommand
 	{
 		using LoopedCommand::LoopedCommand;
 		virtual void OnTick() override
@@ -19,6 +19,6 @@ namespace YimMenu::Features
 		}
 	};
 
-	static CriticalHits _CriticalHits{"criticalhits", "Critical Hits", "Prevent you from getting Critical Hits"};
+	static DisableCriticalHits _DisableCriticalHits{"disablecriticalhits", "Disable Critical Hits", "Prevent you from getting Critical Hits"};
 
 }

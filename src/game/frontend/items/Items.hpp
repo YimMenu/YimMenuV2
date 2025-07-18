@@ -116,11 +116,13 @@ namespace YimMenu
 	{
 	public:
 		explicit ConditionalItem(joaat_t bool_cmd_id, std::shared_ptr<UIItem> to_draw, bool negate = false);
+		explicit ConditionalItem(std::function<bool()> condition_fn, std::shared_ptr<UIItem> to_draw, bool negate = false);
 		void Draw() override;
 		bool CanDraw() override;
 
 	private:
 		BoolCommand* m_Condition;
+		std::function<bool()> m_ConditionFn;
 		std::shared_ptr<UIItem> m_Item;
 		bool m_Negate;
 	};
@@ -204,6 +206,22 @@ namespace YimMenu
 	private:
 		std::string m_Name;
 		std::vector<std::shared_ptr<UIItem>> m_Items;
+	};
+
+	class TabBarItem : public UIItem
+	{
+	public:
+		explicit TabBarItem(const std::string& id);
+		void Draw() override;
+
+		void AddItem(std::shared_ptr<TabItem>&& tab)
+		{
+			m_Tabs.push_back(std::move(tab));
+		}
+
+	private:
+		std::string m_Id;
+		std::vector<std::shared_ptr<TabItem>> m_Tabs;
 	};
 
 	class CollapsingHeaderItem : public UIItem

@@ -121,12 +121,16 @@ namespace YimMenu
 
 		if (m_IsFSLLoaded)
 		{
-			HMODULE hFSL = GetModuleHandleA("WINMM.dll");
-			if (hFSL)
+			Module* FSL = nullptr;
+			for (auto& module : ModuleMgr.GetModules())
+				if (module.first == "WINMM.dll"_J && module.second->IsExported("LawnchairGetVersion"))
+					FSL = module.second.get();
+
+			if (FSL)
 			{
-				auto LawnchairGetVersion = reinterpret_cast<FnGetVersion>(GetProcAddress(hFSL, "LawnchairGetVersion"));
-				auto LawnchairIsProvidingLocalSaves = reinterpret_cast<FnLocalSaves>(GetProcAddress(hFSL, "LawnchairIsProvidingLocalSaves"));
-				auto LawnchairIsProvidingBattlEyeBypass = reinterpret_cast<FnBattlEyeBypass>(GetProcAddress(hFSL, "LawnchairIsProvidingBattlEyeBypass"));
+				auto LawnchairGetVersion = FSL->GetExport<FnGetVersion>("LawnchairGetVersion");
+				auto LawnchairIsProvidingLocalSaves = FSL->GetExport<FnLocalSaves>("LawnchairIsProvidingLocalSaves");
+				auto LawnchairIsProvidingBattlEyeBypass = FSL->GetExport<FnBattlEyeBypass>("LawnchairIsProvidingBattlEyeBypass");
 
 				if (LawnchairGetVersion && LawnchairIsProvidingLocalSaves && LawnchairIsProvidingBattlEyeBypass)
 				{

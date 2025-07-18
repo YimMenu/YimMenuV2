@@ -239,14 +239,12 @@ namespace YimMenu::Submenus
 	{
 		auto menu = std::make_shared<Category>("Spawn");
 
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::BeginTabBar("Spawn");
-		}));
-		menu->AddItem(RenderSpawnNewVehicle());
-		menu->AddItem(RenderSpawnPersonalVehicle());
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::EndTabBar();
-		}));
+		auto tabBar = std::make_shared<TabBarItem>("Spawn");
+
+		tabBar->AddItem(RenderSpawnNewVehicle());
+		tabBar->AddItem(RenderSpawnPersonalVehicle());
+
+		menu->AddItem(std::move(tabBar));
 
 		return menu;
 	}

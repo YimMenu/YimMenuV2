@@ -83,6 +83,7 @@ namespace YimMenu::Submenus
 		toxicGroup->AddItem(std::make_shared<CommandItem>("killexploitall"_J, "Permadeath All"));
 		toxicGroup->AddItem(std::make_shared<CommandItem>("explodeall"_J, "Explode All"));
 		toxicGroup->AddItem(std::make_shared<CommandItem>("ceokickall"_J, "CEO Kick All"));
+		toxicGroup->AddItem(std::make_shared<CommandItem>("hkickall"_J, "hostkick for all player"));
 
 		miscGroup->AddItem(std::make_shared<BoolCommandItem>("forcethunder"_J));
 

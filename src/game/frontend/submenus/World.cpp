@@ -45,6 +45,7 @@ namespace YimMenu::Submenus
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("PedRiotMode"_J));
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("CopsDispatch"_J));
 		otherOpts->AddItem(std::make_shared<BoolCommandItem>("enablecreatordevmode"_J));
+		otherOpts->AddItem(std::make_shared<BoolCommandItem>("infiniteboundary"_J));
 
 		main->AddItem(std::move(killPeds));
 		main->AddItem(std::move(deleteOpts));

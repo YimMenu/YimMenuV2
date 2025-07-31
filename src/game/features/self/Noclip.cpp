@@ -30,9 +30,11 @@ namespace YimMenu::Features
 			// cleanup when changing entities
 			if (m_Entity != ent)
 			{
-				m_Entity.SetFrozen(false);
-				m_Entity.SetCollision(true);
-
+				if (m_Entity)
+				{
+					m_Entity.SetFrozen(false);
+					m_Entity.SetCollision(true);
+				}
 				m_Entity = ent;
 			}
 

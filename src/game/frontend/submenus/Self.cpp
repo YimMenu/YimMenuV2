@@ -28,6 +28,7 @@ namespace YimMenu::Submenus
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("formatmoney"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("mobileradio"_J));
 		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("keepplayerclean"_J));
+		globalsGroup->AddItem(std::make_shared<BoolCommandItem>("disablecriticalhits"_J));
 
 		toolsGroup->AddItem(std::make_shared<CommandItem>("skipcutscene"_J));
 		toolsGroup->AddItem(std::make_shared<CommandItem>("skipconversation"_J));

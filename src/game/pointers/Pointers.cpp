@@ -384,9 +384,9 @@ namespace YimMenu
 			HasGTAPlus = addr.Add(3).Rip().As<int*>();
 		});
 
-		constexpr auto battlEyeServerProcessPlayerJoinPtrn = Pattern<"41 57 41 56 41 55 41 54 56 57 55 53 48 83 EC 48 48 89 D3 48 89 CE E9">("BattlEyeServerProcessPlayerJoin");
+		constexpr auto battlEyeServerProcessPlayerJoinPtrn = Pattern<"48 89 10 48 89 48 10 89 F9">("BattlEyeServerProcessPlayerJoin");
 		scanner.Add(battlEyeServerProcessPlayerJoinPtrn, [this](PointerCalculator ptr) {
-			BattlEyeServerProcessPlayerJoin = ptr.As<PVOID>();
+			BattlEyeServerProcessPlayerJoin = ptr.Sub(4).Rip().As<PVOID*>()[1];
 		});
 
 		constexpr auto assistedAimShouldReleaseEntityPtrn = Pattern<"80 7F 28 04 75 6A">("AssistedAimShouldReleaseEntity");

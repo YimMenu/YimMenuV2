@@ -451,20 +451,15 @@ namespace YimMenu
 		scanner.Add(matchmakingSessionDetailSendResponsePtrn, [this](PointerCalculator addr) {
 			MatchmakingSessionDetailSendResponse = addr.Add(0x2F).Rip().As<PVOID>();
 		});
-
 		static constexpr auto gameSkeletonUpdatePtrn = Pattern<"56 48 83 EC 20 48 8B 81 40 01 00 00 48 85 C0">("GameSkeletonUpdate");
 		scanner.Add(gameSkeletonUpdatePtrn, [this](PointerCalculator addr) {
 			GameSkeletonUpdate = addr.As<PVOID>();
 		});
 
-		static constexpr auto getLabelTextPtrn = Pattern<"56 48 83 EC 20 48 85 D2 74 25">("GetLabelText");
+		static constexpr auto getLabelTextPtrn = Pattern<"56 48 83 EC 20 48 85 D2 74 25 0F B6 02 A8 DF 74 23 48 89 CE 48 89 D1 31 D2 E8 ? ? ? ? 48 89 F1 89 C2 E8 ? ? ? ?">("GetLabelText&GetLabelTextInternal");
 		scanner.Add(getLabelTextPtrn, [this](PointerCalculator addr) {
 			GetLabelText = addr.As<PVOID>();
-		});
-
-		static constexpr auto getLabelTextInternalPtrn = Pattern<"41 57 41 56 56 57 53 48 83 EC 20 89 D7 49 89 CE 48 8D 0D ? ? ? ? E8 ? ? ? ?">("GetLabelTextInternal");
-		scanner.Add(getLabelTextInternalPtrn, [this](PointerCalculator addr) {
-			GetLabelTextInternal = addr.As<PVOID>();
+			GetLabelTextInternal = addr.Add(36).Rip().As<PVOID>();
 		});
 
 		if (!scanner.Scan())

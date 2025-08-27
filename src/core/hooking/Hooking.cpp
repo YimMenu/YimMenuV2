@@ -49,6 +49,8 @@ namespace YimMenu
 		BaseHook::Add<Hooks::Matchmaking::MatchmakingUpdate>(new DetourHook("MatchmakingUpdate", Pointers.MatchmakingUpdate, Hooks::Matchmaking::MatchmakingUpdate));
 
 		BaseHook::Add<Hooks::Misc::AssistedAimShouldReleaseEntity>(new DetourHook("AssistedAimShouldReleaseEntity", Pointers.AssistedAimShouldReleaseEntity, Hooks::Misc::AssistedAimShouldReleaseEntity));
+		BaseHook::Add<Hooks::Misc::GetLabelText>(new DetourHook("GetLabelText", Pointers.GetLabelText, Hooks::Misc::GetLabelText));
+		BaseHook::Add<Hooks::Misc::GetLabelTextInternal>(new DetourHook("GetLabelTextInternal", Pointers.GetLabelTextInternal, Hooks::Misc::GetLabelTextInternal));
 	}
 
 	Hooking::~Hooking()

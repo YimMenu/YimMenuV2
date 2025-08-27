@@ -101,5 +101,7 @@ namespace YimMenu::Hooks
 	namespace Misc
 	{
 		extern bool AssistedAimShouldReleaseEntity(__int64 a1);
+		extern const char* GetLabelText(void* unk, const char* label);
+		extern const char* GetLabelTextInternal(void* this_, uint32_t label_hash);
 	}
 }

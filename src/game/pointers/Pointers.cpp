@@ -457,6 +457,16 @@ namespace YimMenu
 			GameSkeletonUpdate = addr.As<PVOID>();
 		});
 
+		static constexpr auto getLabelTextPtrn = Pattern<"56 48 83 EC 20 48 85 D2 74 25">("GetLabelText");
+		scanner.Add(getLabelTextPtrn, [this](PointerCalculator addr) {
+			GetLabelText = addr.As<PVOID>();
+		});
+
+		static constexpr auto getLabelTextInternalPtrn = Pattern<"41 57 41 56 56 57 53 48 83 EC 20 89 D7 49 89 CE 48 8D 0D ? ? ? ? E8 ? ? ? ?">("GetLabelTextInternal");
+		scanner.Add(getLabelTextInternalPtrn, [this](PointerCalculator addr) {
+			GetLabelTextInternal = addr.As<PVOID>();
+		});
+
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

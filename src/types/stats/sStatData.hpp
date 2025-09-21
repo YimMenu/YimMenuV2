@@ -15,6 +15,10 @@ public:
 		UINT64,
 		DATE = 20,
 		POS,
+		LABEL,
+		PACKED,
+		USERID,
+		PROFILESETTING,
 		INT64 = 26,
 	};
 

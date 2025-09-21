@@ -11,6 +11,10 @@
 #include <utility>
 #include <vector>
 
+
+using stats_vec = std::vector<std::pair<std::string, std::string>>;
+using packed_vec = std::vector<std::pair<uint32_t, uint8_t>>;
+
 namespace YimMenu::Submenus
 {
 	struct StatInfo
@@ -451,7 +455,7 @@ namespace YimMenu::Submenus
 		}
 	}
 
-	void Cmp_Packed_To_Flie(int start, int end, std::vector<std::pair<uint32_t, uint8_t>>& packed_vecs, bool compare)
+	void Cmp_Packed_To_Flie(int start, int end,packed_vec& packed_vecs, bool compare)
 	{
 		if (!compare)
 		{
@@ -479,7 +483,7 @@ namespace YimMenu::Submenus
 			auto file_path = (std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "cmp_packed_date.txt").string();
 			if (fopen_s(&stream, file_path.data(), "w+"))
 			{
-				return ;
+				return;
 			}
 			for (const auto& [index, value] : packed_vecs)
 			{
@@ -503,13 +507,13 @@ namespace YimMenu::Submenus
 		}
 	}
 
-	void Cmp_Stat_To_Flie(std::vector<std::pair<std::string, std::string>>& stats_vecs, bool compare)
+	void Cmp_Stat_To_Flie(stats_vec& stats_vecs, bool compare)
 	{
 		StatInfo current_info;
 		StatValue read_value;
 		if (!compare)
 		{
-			//If possible, extract the cache files from the client.
+			//Can the name be read directly from the client?
 			std::string filePath = (std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "stats.txt").string();
 			std::ifstream file(filePath);
 			if (!file.is_open())
@@ -559,8 +563,8 @@ namespace YimMenu::Submenus
 				current_info = GetStatInfo(name);
 				newvalue = ReadStat(current_info.m_NameHash, read_value, current_info.m_Data);
 				//if (oldvalue != "")
-					if (oldvalue != newvalue)
-						std::println(stream, "data type：[ {:^10} ]||Name:[ {:^10} ] || Value before the change:[ {:^10} ] || Current value[ {:^10} ]", current_info.m_Data->GetTypeString(), name, oldvalue, newvalue);
+				if (oldvalue != newvalue)
+					std::println(stream, "data type：[ {:^10} ]||Name:[ {:^10} ] || Value before the change:[ {:^10} ] || Current value[ {:^10} ]", current_info.m_Data->GetTypeString(), name, oldvalue, newvalue);
 			}
 			if (stream)
 				std::fclose(stream);
@@ -716,13 +720,12 @@ namespace YimMenu::Submenus
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
 
-			using pacedk_date = std::vector<std::pair<uint32_t, uint8_t>>;
-			static pacedk_date packde_vec;
+			static packed_vec packed_vec;
 			static bool create_pac_b = false;
 			if (ImGui::Button("Create packed to save"))
 			{
 				FiberPool::Push([] {
-					Cmp_Packed_To_Flie(1, 54820, packde_vec, false);
+					Cmp_Packed_To_Flie(1, 54820, packed_vec, false);
 					create_pac_b = true;
 				});
 			}
@@ -734,7 +737,7 @@ namespace YimMenu::Submenus
 			if (ImGui::Button("Compared to the last time##packed"))
 			{
 				FiberPool::Push([] {
-					Cmp_Packed_To_Flie(1, 54820, packde_vec, true);
+					Cmp_Packed_To_Flie(1, 54820, packed_vec, true);
 				});
 			}
 		}));
@@ -742,9 +745,8 @@ namespace YimMenu::Submenus
 		stats_compare->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
-
-			using stats_date = std::vector<std::pair<std::string, std::string>>;
-			static stats_date stat_vec;
+			
+			static stats_vec stat_vec;
 			static bool create_stat_b = false;
 
 			if (ImGui::Button("Create stats to save"))

@@ -495,8 +495,72 @@ namespace YimMenu::Submenus
 				else
 				{
 					if (value != Stats::GetPackedInt(index))
-						std::println(stream, "date type：Packed_int  ||索引: {:^10} ||Value before the change:: {:^10} ||Current value {:^10}", index, value, Stats::GetPackedInt(index));
+						std::println(stream, "date type：Packed_int  ||index: {:^10} ||Value before the change: {:^10} ||Current value {:^10}", index, value, Stats::GetPackedInt(index));
 				}
+			}
+			if (stream)
+				std::fclose(stream);
+		}
+	}
+
+	void Cmp_Stat_To_Flie(std::vector<std::pair<std::string, std::string>>& stats_vecs, bool compare)
+	{
+		StatInfo current_info;
+		StatValue read_value;
+		if (!compare)
+		{
+			//If possible, extract the cache files from the client.
+			std::string filePath = (std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "stats.txt").string();
+			std::ifstream file(filePath);
+			if (!file.is_open())
+			{
+				LOG(INFO) << "stats.txt file not found";
+				return;
+			}
+			stats_vecs.clear();
+			stats_vecs.reserve(21460); //all stats 21405
+			std::string line{};
+			std::string oldvalue{};
+			while (std::getline(file, line))
+			{
+				if (line.empty() || line.starts_with("//"))
+					continue;
+
+				size_t pos = line.find(',');
+				if (pos != std::string::npos)
+				{
+					std::string key = line.substr(0, pos);
+
+					current_info = GetStatInfo(key);
+					if (current_info.IsValid())
+					{
+						oldvalue = ReadStat(current_info.m_NameHash, read_value, current_info.m_Data);
+						/*if (oldvalue != "")*/
+						stats_vecs.emplace_back(key, oldvalue);
+					}
+				}
+			}
+			stats_vecs.shrink_to_fit();
+			file.close();
+		}
+		else
+		{
+			if (stats_vecs.size() == 0)
+				return;
+			FILE* stream = nullptr;
+			auto file_path = (std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "cmp_stats_date.txt").string();
+			if (fopen_s(&stream, file_path.data(), "w+"))
+			{
+				return;
+			}
+			std::string newvalue{};
+			for (const auto& [name, oldvalue] : stats_vecs)
+			{
+				current_info = GetStatInfo(name);
+				newvalue = ReadStat(current_info.m_NameHash, read_value, current_info.m_Data);
+				//if (oldvalue != "")
+					if (oldvalue != newvalue)
+						std::println(stream, "data type：[ {:^10} ]||Name:[ {:^10} ] || Value before the change:[ {:^10} ] || Current value[ {:^10} ]", current_info.m_Data->GetTypeString(), name, oldvalue, newvalue);
 			}
 			if (stream)
 				std::fclose(stream);
@@ -520,6 +584,8 @@ namespace YimMenu::Submenus
 		auto packed_range = std::make_shared<Group>("Packed Range");
 		auto from_clipboard = std::make_shared<Group>("From Clipboard");
 		auto packed_compare = std::make_shared<Group>("packed compare");
+		auto stats_compare = std::make_shared<Group>("stats_compare");
+
 		normal->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
@@ -649,10 +715,11 @@ namespace YimMenu::Submenus
 		packed_compare->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
+
 			using pacedk_date = std::vector<std::pair<uint32_t, uint8_t>>;
 			static pacedk_date packde_vec;
 			static bool create_pac_b = false;
-			if (ImGui::Button("创建数据"))
+			if (ImGui::Button("Create packed to save"))
 			{
 				FiberPool::Push([] {
 					Cmp_Packed_To_Flie(1, 54820, packde_vec, false);
@@ -664,10 +731,37 @@ namespace YimMenu::Submenus
 
 			if (!create_pac_b)
 				return;
-			if (ImGui::Button("Compared to the last time"))
+			if (ImGui::Button("Compared to the last time##packed"))
 			{
 				FiberPool::Push([] {
 					Cmp_Packed_To_Flie(1, 54820, packde_vec, true);
+				});
+			}
+		}));
+
+		stats_compare->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!NativeInvoker::AreHandlersCached())
+				return ImGui::TextDisabled("Natives not cached yet");
+
+			using stats_date = std::vector<std::pair<std::string, std::string>>;
+			static stats_date stat_vec;
+			static bool create_stat_b = false;
+
+			if (ImGui::Button("Create stats to save"))
+			{
+				FiberPool::Push([] {
+					Cmp_Stat_To_Flie(stat_vec, false);
+					create_stat_b = true;
+				});
+			}
+			ImGui::SameLine();
+
+			if (!create_stat_b)
+				return;
+			if (ImGui::Button("Compared to the last time##stats"))
+			{
+				FiberPool::Push([] {
+					Cmp_Stat_To_Flie(stat_vec, true);
 				});
 			}
 		}));
@@ -677,6 +771,7 @@ namespace YimMenu::Submenus
 		menu->AddItem(std::move(packed_range));
 		menu->AddItem(std::move(from_clipboard));
 		menu->AddItem(std::move(packed_compare));
+		menu->AddItem(std::move(stats_compare));
 		return menu;
 	}
 }

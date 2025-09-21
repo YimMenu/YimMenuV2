@@ -451,6 +451,58 @@ namespace YimMenu::Submenus
 		}
 	}
 
+	void Cmp_Packed_To_Flie(int start, int end, std::vector<std::pair<uint32_t, uint8_t>>& packed_vecs, bool compare)
+	{
+		if (!compare)
+		{
+			packed_vecs.clear();
+			packed_vecs.reserve(54850);
+			for (int i = start; i <= end; i++)
+			{
+				auto info = GetPackedStatInfo(i);
+				if (!info.m_IsValid)
+					continue;
+
+				if (info.m_IsBoolStat)
+					packed_vecs.emplace_back(info.m_Index, static_cast<int>(Stats::GetPackedBool(info.m_Index)));
+				else
+					packed_vecs.emplace_back(info.m_Index, Stats::GetPackedInt(info.m_Index));
+			}
+			packed_vecs.shrink_to_fit();
+		}
+		else
+		{
+			if (packed_vecs.size() == 0)
+				return;
+
+			FILE* stream = nullptr;
+			auto file_path = (std::filesystem::path(std::getenv("appdata")) / "YimMenuV2" / "cmp_packed_date.txt").string();
+			if (fopen_s(&stream, file_path.data(), "w+"))
+			{
+				return ;
+			}
+			for (const auto& [index, value] : packed_vecs)
+			{
+				auto info = GetPackedStatInfo(index);
+				if (!info.m_IsValid)
+					continue;
+
+				if (info.m_IsBoolStat)
+				{
+					if (static_cast<bool>(value) != Stats::GetPackedBool(index))
+						std::println(stream, "date type：Packed_bool ||index: {:^10} ||Value before the change: {:^10} ||Current value {:^10}", index, static_cast<bool>(value), Stats::GetPackedBool(index));
+				}
+				else
+				{
+					if (value != Stats::GetPackedInt(index))
+						std::println(stream, "date type：Packed_int  ||索引: {:^10} ||Value before the change:: {:^10} ||Current value {:^10}", index, value, Stats::GetPackedInt(index));
+				}
+			}
+			if (stream)
+				std::fclose(stream);
+		}
+	}
+
 	static bool RenderPackedStatEditor(StatValue& value, const PackedStatInfo& info)
 	{
 		ImGui::SetNextItemWidth(150.f);
@@ -467,7 +519,7 @@ namespace YimMenu::Submenus
 		auto packed = std::make_shared<Group>("Packed");
 		auto packed_range = std::make_shared<Group>("Packed Range");
 		auto from_clipboard = std::make_shared<Group>("From Clipboard");
-
+		auto packed_compare = std::make_shared<Group>("packed compare");
 		normal->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
@@ -593,10 +645,38 @@ namespace YimMenu::Submenus
 			}
 		}));
 
+
+		packed_compare->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!NativeInvoker::AreHandlersCached())
+				return ImGui::TextDisabled("Natives not cached yet");
+			using pacedk_date = std::vector<std::pair<uint32_t, uint8_t>>;
+			static pacedk_date packde_vec;
+			static bool create_pac_b = false;
+			if (ImGui::Button("创建数据"))
+			{
+				FiberPool::Push([] {
+					Cmp_Packed_To_Flie(1, 54820, packde_vec, false);
+					create_pac_b = true;
+				});
+			}
+
+			ImGui::SameLine();
+
+			if (!create_pac_b)
+				return;
+			if (ImGui::Button("Compared to the last time"))
+			{
+				FiberPool::Push([] {
+					Cmp_Packed_To_Flie(1, 54820, packde_vec, true);
+				});
+			}
+		}));
+
 		menu->AddItem(std::move(normal));
 		menu->AddItem(std::move(packed));
 		menu->AddItem(std::move(packed_range));
 		menu->AddItem(std::move(from_clipboard));
+		menu->AddItem(std::move(packed_compare));
 		return menu;
 	}
 }

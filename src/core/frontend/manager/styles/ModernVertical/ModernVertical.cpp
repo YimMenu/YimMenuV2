@@ -144,7 +144,7 @@ namespace YimMenu
 				{
 					ImFont* optionsFont = YimMenu::UIManager::GetOptionsFont();
 					if (optionsFont)
-						ImGui::PushFont(optionsFont);
+						ImGui::PushFont(optionsFont,YimMenu::Menu::Font::g_OptionsFontSize);
 
 					activeSubmenu->Draw();
 

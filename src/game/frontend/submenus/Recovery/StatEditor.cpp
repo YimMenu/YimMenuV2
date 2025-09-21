@@ -60,7 +60,8 @@ namespace YimMenu::Submenus
 		        string | std::views::reverse,
 		        [](auto c) {
 			        return std::isspace(c);
-		        }).base()};
+		        })
+		        .base()};
 	}
 
 	static StatInfo GetStatInfo(std::string_view name_str)
@@ -128,7 +129,6 @@ namespace YimMenu::Submenus
 		case sStatData::Type::STRING:
 			strncpy(value.m_AsString, data->GetString(), sizeof(value.m_AsString));
 			return std::format("{}", value.m_AsString);
-			;
 		case sStatData::Type::USERID:
 			data->GetUserID(value.m_AsString, sizeof(value.m_AsString));
 			return std::format("{}", value.m_AsString);
@@ -152,12 +152,12 @@ namespace YimMenu::Submenus
 		switch (data->GetType())
 		{
 		case sStatData::Type::_BOOL:
-			//STATS::STAT_SET_BOOL(hash, value.m_AsBool, true);
-			data->SetBool(value.m_AsBool);
+			STATS::STAT_SET_BOOL(hash, value.m_AsBool, true);
+			//data->SetBool(value.m_AsBool);
 			return;
 		case sStatData::Type::FLOAT:
-			//STATS::STAT_SET_FLOAT(hash, value.m_AsFloat[0], true);
-			data->SetFloat(value.m_AsFloat[0]);
+			STATS::STAT_SET_FLOAT(hash, value.m_AsFloat[0], true);
+			//data->SetFloat(value.m_AsFloat[0]);
 			return;
 		case sStatData::Type::INT:
 			data->SetInt(value.m_AsInt);
@@ -169,8 +169,8 @@ namespace YimMenu::Submenus
 			data->SetUInt16(value.m_AsInt);
 			return;
 		case sStatData::Type::UINT32:
-			//STATS::STAT_SET_INT(hash, value.m_AsInt, true);
-			data->SetUInt64(value.m_AsInt);
+			STATS::STAT_SET_INT(hash, value.m_AsInt, true);
+			//data->SetUInt64(value.m_AsInt);
 			return;
 		case sStatData::Type::INT64:
 			data->SetInt64(value.m_AsU64); // TODO this isn't a good idea! natives can't set this
@@ -181,12 +181,12 @@ namespace YimMenu::Submenus
 			data->SetUInt64(value.m_AsU64);
 			return;
 		case sStatData::Type::STRING:
-			//STATS::STAT_SET_STRING(hash, value.m_AsString, true);
-			data->SetString(value.m_AsString);
+			STATS::STAT_SET_STRING(hash, value.m_AsString, true);
+			//data->SetString(value.m_AsString);
 			return;
 		case sStatData::Type::USERID:
-			//STATS::STAT_SET_USER_ID(hash, value.m_AsString, true);
-			data->SetUserID(value.m_AsString);
+			STATS::STAT_SET_USER_ID(hash, value.m_AsString, true);
+			//data->SetUserID(value.m_AsString);
 			return;
 		case sStatData::Type::DATE:
 			STATS::STAT_SET_DATE(hash, &value.m_date, sizeof(Date) / 8, true);
@@ -233,15 +233,15 @@ namespace YimMenu::Submenus
 				_bool = true;
 			}
 
-			//STATS::STAT_SET_BOOL(hash, _bool, true);
-			data->SetBool(_bool);
+			STATS::STAT_SET_BOOL(hash, _bool, true);
+			//data->SetBool(_bool);
 			return;
 		}
 		case sStatData::Type::FLOAT:
 		{
 			auto _float = std::strtof(value.data(), nullptr);
-			//STATS::STAT_SET_FLOAT(hash, _float, true);
-			data->SetFloat(_float);
+			STATS::STAT_SET_FLOAT(hash, _float, true);
+			//data->SetFloat(_float);
 			return;
 		}
 		case sStatData::Type::INT:
@@ -250,8 +250,8 @@ namespace YimMenu::Submenus
 		case sStatData::Type::UINT32:
 		{
 			auto _int = std::strtol(value.data(), nullptr, 10);
-			//STATS::STAT_SET_INT(hash, _int, true);
-			data->SetInt(_int);
+			STATS::STAT_SET_INT(hash, _int, true);
+			//data->SetInt(_int);
 			return;
 		}
 		case sStatData::Type::INT64:
@@ -269,12 +269,12 @@ namespace YimMenu::Submenus
 			return;
 		}
 		case sStatData::Type::STRING:
-			//STATS::STAT_SET_STRING(hash, value.data(), true);
-			data->SetString(value.data());
+			STATS::STAT_SET_STRING(hash, value.data(), true);
+			//data->SetString(value.data());
 			return;
 		case sStatData::Type::USERID:
-			data->SetUserID(value.data());
-			//STATS::STAT_SET_USER_ID(hash, value.data(), true);
+			//data->SetUserID(value.data());
+			STATS::STAT_SET_USER_ID(hash, value.data(), true);
 			return;
 		case sStatData::Type::DATE:
 		{
@@ -329,7 +329,7 @@ namespace YimMenu::Submenus
 		default:
 			return; // data type not supported
 		}
-	}	
+	}
 
 
 	static bool RenderStatEditor(StatValue& value, sStatData* data)
@@ -379,7 +379,7 @@ namespace YimMenu::Submenus
 				return true;
 			else
 			{
-				ImGui::TextColored(ImVec4(0.957f, 0.643f, 0.376f, 1.00f), "输入日期或时间是非法的，请重新检查输入数据。");
+				ImGui::TextColored(ImVec4(0.957f, 0.643f, 0.376f, 1.00f), "The entered date or time is invalid, please recheck the input data.");
 				return false;
 			}
 		}
@@ -392,12 +392,12 @@ namespace YimMenu::Submenus
 			ImGui::InputFloat("Z", &value.m_AsFloat[2]);
 			ImGui::PopItemWidth();
 			return true;
-			case sStatData::Type::PACKED:
+		case sStatData::Type::PACKED:
 			ImGui::BeginDisabled();
 			ImGui::TextColored(ImVec4(0.26f, 0.59f, 0.98f, 1.00f), "Please use the packed below to modify the data.");
 			ImGui::EndDisabled();
 			return false;
-			case sStatData::Type::LABEL:
+		case sStatData::Type::LABEL:
 		case sStatData::Type::PROFILESETTING:
 		default:
 			ImGui::BeginDisabled();
@@ -473,11 +473,11 @@ namespace YimMenu::Submenus
 				return ImGui::TextDisabled("Natives not cached yet");
 
 			static StatInfo current_info;
-			static char stat_buf[48]{};
+			static std::string stat_buf{};
 			static StatValue value{};
 
 			ImGui::SetNextItemWidth(300.f);
-			if (ImGui::InputText("Name", stat_buf, sizeof(stat_buf)))
+			if (ImGui::InputText("Name", &stat_buf, ImGuiInputTextFlags_CharsUppercase))
 			{
 				current_info = GetStatInfo(stat_buf);
 				if (current_info.IsValid())
@@ -492,8 +492,9 @@ namespace YimMenu::Submenus
 			}
 
 			bool can_edit = RenderStatEditor(value, current_info.m_Data);
-			can_edit = !current_info.m_Data->IsControlledByNetshop();
-			
+			if (can_edit)
+				can_edit = !current_info.m_Data->IsControlledByNetshop();
+
 			if (ImGui::Button("Refresh##stat"))
 				ReadStat(current_info.m_NameHash, value, current_info.m_Data);
 			ImGui::SameLine();

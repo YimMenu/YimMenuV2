@@ -455,7 +455,7 @@ namespace YimMenu::Submenus
 		}
 	}
 
-	void Cmp_Packed_To_Flie(int start, int end,packed_vec& packed_vecs, bool compare)
+	void Cmp_Packed_To_Flie(int start, int end, packed_vec& packed_vecs, bool compare)
 	{
 		if (!compare)
 		{
@@ -533,15 +533,14 @@ namespace YimMenu::Submenus
 				size_t pos = line.find(',');
 				if (pos != std::string::npos)
 				{
-					std::string key = line.substr(0, pos);
-
-					current_info = GetStatInfo(key);
-					if (current_info.IsValid())
-					{
-						oldvalue = ReadStat(current_info.m_NameHash, read_value, current_info.m_Data);
-						/*if (oldvalue != "")*/
-						stats_vecs.emplace_back(key, oldvalue);
-					}
+					line = line.substr(0, pos);
+				}
+				current_info = GetStatInfo(line);
+				if (current_info.IsValid())
+				{
+					oldvalue = ReadStat(current_info.m_NameHash, read_value, current_info.m_Data);
+					/*if (oldvalue != "")*/
+					stats_vecs.emplace_back(line, oldvalue);
 				}
 			}
 			stats_vecs.shrink_to_fit();
@@ -745,7 +744,7 @@ namespace YimMenu::Submenus
 		stats_compare->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
-			
+
 			static stats_vec stat_vec;
 			static bool create_stat_b = false;
 

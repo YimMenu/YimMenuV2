@@ -719,12 +719,12 @@ namespace YimMenu::Submenus
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
 
-			static packed_vec packed_vec;
+			static packed_vec packed_vec_;
 			static bool create_pac_b = false;
 			if (ImGui::Button("Create packed to save"))
 			{
 				FiberPool::Push([] {
-					Cmp_Packed_To_Flie(1, 54820, packed_vec, false);
+					Cmp_Packed_To_Flie(1, 54820, packed_vec_, false);
 					create_pac_b = true;
 				});
 			}
@@ -736,7 +736,7 @@ namespace YimMenu::Submenus
 			if (ImGui::Button("Compared to the last time##packed"))
 			{
 				FiberPool::Push([] {
-					Cmp_Packed_To_Flie(1, 54820, packed_vec, true);
+					Cmp_Packed_To_Flie(1, 54820, packed_vec_, true);
 				});
 			}
 		}));
@@ -745,13 +745,13 @@ namespace YimMenu::Submenus
 			if (!NativeInvoker::AreHandlersCached())
 				return ImGui::TextDisabled("Natives not cached yet");
 
-			static stats_vec stat_vec;
+			static stats_vec stats_vec_;
 			static bool create_stat_b = false;
 
 			if (ImGui::Button("Create stats to save"))
 			{
 				FiberPool::Push([] {
-					Cmp_Stat_To_Flie(stat_vec, false);
+					Cmp_Stat_To_Flie(stats_vec_, false);
 					create_stat_b = true;
 				});
 			}
@@ -762,7 +762,7 @@ namespace YimMenu::Submenus
 			if (ImGui::Button("Compared to the last time##stats"))
 			{
 				FiberPool::Push([] {
-					Cmp_Stat_To_Flie(stat_vec, true);
+					Cmp_Stat_To_Flie(stats_vec_, true);
 				});
 			}
 		}));

@@ -83,11 +83,6 @@ namespace YimMenu::Submenus
 			return std::toupper(c);
 		});
 
-		for (size_t i = 0; i < 3 && i < name_upper.size(); ++i)
-		{
-			name_upper[i] = static_cast<char>(std::toupper(static_cast<unsigned char>(name_upper[i])));
-		}
-
 		if (name_upper.starts_with('$'))
 		{
 			name_upper.erase(0, 1);	

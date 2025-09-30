@@ -345,7 +345,7 @@ namespace YimMenu::Submenus
 				}
 				catch (...)
 				{
-					pos.emplace_back(0.0f); // 转换失败或超出范围时返回 0.0f
+					pos.emplace_back(0.0f);
 				}
 			}
 			if (pos.size() == 3)

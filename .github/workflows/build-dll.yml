@@ -1,0 +1,290 @@
+name: Build DLL
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/*'
+      - 'hotfix/*'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Debug
+          - Release
+          - RelWithDebInfo
+      upload_artifacts:
+        description: 'Upload build artifacts'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  BUILD_DIR: ${{ github.workspace }}/build
+  INSTALL_DIR: ${{ github.workspace }}/install
+  CMAKE_VERSION: "3.27.9"
+  NINJA_VERSION: "v1.11.1"
+
+jobs:
+  build-dll:
+    name: Build YimMenuV2 DLL
+    runs-on: windows-2022
+    
+    steps:
+      # Checkout repository with submodules
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      
+      # Setup Visual Studio 2022 (includes MSVC 14.3)
+      - name: Setup Visual Studio 2022
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-version: '17.8'
+      
+      # Setup MSVC v143 toolset
+      - name: Setup MSVC v143 toolset
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+      
+      # Install CMake
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.27.9
+        with:
+          cmakeVersion: ${{ env.CMAKE_VERSION }}
+          ninjaVersion: ${{ env.NINJA_VERSION }}
+      
+      # Add MSVC to PATH manually
+      - name: Setup MSVC Environment
+        shell: powershell
+        run: |
+          Write-Host "=== Setting up MSVC Environment ===" -ForegroundColor Green
+          
+          # Find MSVC installation path
+          $msvcPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build"
+          if (!(Test-Path $msvcPath)) {
+            $msvcPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build"
+          }
+          if (!(Test-Path $msvcPath)) {
+            $msvcPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build"
+          }
+          
+          if (Test-Path $msvcPath) {
+            Write-Host "Found MSVC at: $msvcPath"
+            
+            # Source vcvars64.bat to set up environment
+            & "$msvcPath\vcvars64.bat" -help | Out-Null
+            
+            # Verify tools are available
+            Write-Host "CL.exe location: $((where cl.exe) -join ', ')"
+            Write-Host "Link.exe location: $((where link.exe) -join ', ')"
+            Write-Host "Lib.exe location: $((where lib.exe) -join ', ')"
+            Write-Host "CMake location: $((where cmake) -join ', ')"
+            Write-Host "Ninja location: $((where ninja) -join ', ')"
+          } else {
+            Write-Host "ERROR: Could not find MSVC installation" -ForegroundColor Red
+            exit 1
+          }
+      
+      # Cache CMake build directory
+      - name: Cache CMake build
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt', '**/CMakeSettings.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-
+      
+      # Configure CMake
+      - name: Configure CMake
+        shell: powershell
+        run: |
+          Write-Host "=== CMake Configuration ===" -ForegroundColor Green
+          
+          # Determine build type
+          $buildType = "${{ github.event.inputs.build_type || 'Release' }}"
+          Write-Host "Build type: $buildType"
+          
+          # Clean previous build
+          if (Test-Path "${{ env.BUILD_DIR }}") {
+            Write-Host "Cleaning previous build directory..."
+            Remove-Item -Recurse -Force "${{ env.BUILD_DIR }}" -ErrorAction SilentlyContinue
+          }
+          
+          # Configure with CMake using generator that works with MSVC
+          Write-Host "Running CMake configuration..."
+          cmake -G "Visual Studio 17 2022" `
+                -A x64 `
+                -DCMAKE_BUILD_TYPE=$buildType `
+                -DCMAKE_CXX_STANDARD=23 `
+                -DCMAKE_CXX_FLAGS="/MP" `
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
+                -S . `
+                -B "${{ env.BUILD_DIR }}"
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "CMake configuration failed!" -ForegroundColor Red
+            Write-Host "Checking build directory contents:"
+            if (Test-Path "${{ env.BUILD_DIR }}") {
+              Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 20
+            }
+            exit 1
+          }
+          
+          Write-Host "CMake configuration completed successfully" -ForegroundColor Green
+      
+      # Build the DLL
+      - name: Build DLL
+        shell: powershell
+        run: |
+          Write-Host "=== Building YimMenuV2 DLL ===" -ForegroundColor Green
+          
+          $buildType = "${{ github.event.inputs.build_type || 'Release' }}"
+          
+          # Build with CMake (preferred method)
+          Write-Host "Building with CMake..."
+          cmake --build "${{ env.BUILD_DIR }}" `
+                --config $buildType `
+                --parallel `
+                --verbose
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "CMake build failed, trying with MSBuild..." -ForegroundColor Yellow
+            
+            # Fallback to direct MSBuild
+            $msbuildConfig = if ($buildType -eq "Debug") { "Debug" } else { "Release" }
+            & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" `
+              "${{ env.BUILD_DIR }}\YimMenuV2.sln" `
+              /m `
+              /p:Configuration=$msbuildConfig `
+              /p:Platform=x64 `
+              /p:OutDir="${{ env.BUILD_DIR }}\$msbuildConfig\" `
+              /v:minimal
+          }
+          
+          # Verify build output
+          Write-Host "Checking build output..."
+          Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.lib", "*.pdb" | ForEach-Object {
+            Write-Host "Built: $($_.Name) ($([math]::Round($_.Length/1KB, 2)) KB)"
+          }
+      
+      # Verify DLL creation
+      - name: Verify DLL creation
+        shell: powershell
+        run: |
+          Write-Host "=== Verifying Build Output ===" -ForegroundColor Green
+          
+          $buildType = "${{ github.event.inputs.build_type || 'Release' }}"
+          
+          # Find DLL files
+          $dllFiles = Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll" -Filter "*YimMenuV2*"
+          
+          if ($dllFiles.Count -gt 0) {
+            Write-Host "✓ DLL files found:" -ForegroundColor Green
+            $dllFiles | ForEach-Object {
+              $dllInfo = Get-Item $_
+              Write-Host "  - $($_.FullName) ($([math]::Round($dllInfo.Length/1KB, 2)) KB)"
+            }
+          } else {
+            Write-Host "✗ No YimMenuV2 DLL files found!" -ForegroundColor Red
+            Write-Host "Searching for any DLL files in build directory:" -ForegroundColor Yellow
+            Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll" | ForEach-Object {
+              Write-Host "  - $($_.FullName)"
+            }
+            exit 1
+          }
+      
+      # Install artifacts
+      - name: Install build artifacts
+        shell: powershell
+        continue-on-error: true
+        run: |
+          Write-Host "=== Installing Build Artifacts ===" -ForegroundColor Green
+          
+          # Create install directory
+          New-Item -ItemType Directory -Force -Path "${{ env.INSTALL_DIR }}" | Out-Null
+          
+          $buildType = "${{ github.event.inputs.build_type || 'Release' }}"
+          
+          # Copy DLL files to install directory
+          $dllFiles = Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.lib", "*.pdb" -Filter "*YimMenuV2*"
+          $dllFiles | ForEach-Object {
+            $destPath = Join-Path "${{ env.INSTALL_DIR }}" $_.Name
+            Copy-Item $_.FullName $destPath -Force
+            Write-Host "Copied: $($_.Name)" -ForegroundColor Green
+          }
+      
+      # Upload artifacts (conditional)
+      - name: Upload build artifacts
+        if: ${{ github.event.inputs.upload_artifacts != false }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: YimMenuV2-DLL-${{ github.event.inputs.build_type || 'Release' }}-${{ github.sha }}
+          path: |
+            ${{ env.BUILD_DIR }}/**/*YimMenuV2*.dll
+            ${{ env.BUILD_DIR }}/**/*YimMenuV2*.lib
+            ${{ env.BUILD_DIR }}/**/*YimMenuV2*.pdb
+            ${{ env.INSTALL_DIR }}/**
+          retention-days: 30
+          compression-level: 6
+      
+      # Upload compile commands for analysis
+      - name: Upload compile commands
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compile-commands-${{ github.event.inputs.build_type || 'Release' }}
+          path: |
+            ${{ env.BUILD_DIR }}/compile_commands.json
+          retention-days: 7
+      
+      # Build summary
+      - name: Build Summary
+        if: always()
+        shell: powershell
+        run: |
+          Write-Host "## 🏗️ YimMenuV2 DLL Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "### Build Configuration" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Type:** ${{ github.event.inputs.build_type || 'Release' }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Platform:** x64" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Compiler:** MSVC v143 (Visual Studio 2022)" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **C++ Standard:** C++23" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Runner:** windows-2022" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          
+          Write-Host "### Build Results" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Status:** ${{ job.status }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Commit:** \`${{ github.sha }}\`" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Branch:** \`${{ github.ref_name }}\`" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Actor:** ${{ github.actor }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          
+          $buildType = "${{ github.event.inputs.build_type || 'Release' }}"
+          $dllFiles = Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll" -Filter "*YimMenuV2*"
+          
+          if ($dllFiles.Count -gt 0) {
+            Write-Host "### Generated Files" >> $env:GITHUB_STEP_SUMMARY
+            $dllFiles | ForEach-Object {
+              $dllInfo = Get-Item $_
+              Write-Host "- **$($_.Name)** ($([math]::Round($dllInfo.Length/1KB, 2)) KB)" >> $env:GITHUB_STEP_SUMMARY
+            }
+          } else {
+            Write-Host "### ⚠️ Build Issues" >> $env:GITHUB_STEP_SUMMARY
+            Write-Host "YimMenuV2 DLL files not found in build directory." >> $env:GITHUB_STEP_SUMMARY
+          }
+          
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "*Build completed at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')*" >> $env:GITHUB_STEP_SUMMARY

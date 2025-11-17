@@ -25,6 +25,7 @@
 #include "game/features/vehicle/SavePersonalVehicle.hpp"
 #include "game/features/self/OpenGunLocker.hpp"
 #include "game/features/recovery/DailyActivities.hpp"
+#include "game/features/vehicle/VehiclePreview.hpp"
 
 namespace YimMenu
 {
@@ -79,6 +80,13 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenGunLocker::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenStreetDealerMenu::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
+		ScriptMgr::AddScript(std::make_unique<Script>([](void*) {
+			while (g_Running)
+			{
+				VehiclePreview::Get().Update();
+				ScriptMgr::Yield();
+			}
+		}));
 
 		if (!Pointers.LateInit())
 			LOG(WARNING) << "Socialclub patterns failed to load";

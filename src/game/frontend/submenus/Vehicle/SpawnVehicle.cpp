@@ -7,6 +7,7 @@
 #include "game/backend/PersonalVehicles.hpp"
 #include "game/gta/data/Vehicles.hpp"
 #include "game/gta/Natives.hpp"
+#include "game/features/vehicle/VehiclePreview.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -15,12 +16,17 @@ namespace YimMenu::Submenus
 	static BoolCommand spawnInsidePersonalVehicle{"spawninsidepv", "Spawn Inside", "Spawn inside the personal vehicle."};
 	static BoolCommand spawnClonePersonalVehicle{"spawnclonepv", "Spawn Clone", "Spawn a clone of the persone vehicle."};
 
+	// Track hover state for preview
+	static int s_HoveredVehicleIndex = -1;
+	static int s_HoveredPersonalVehicleIndex = -1;
+
 	std::shared_ptr<TabItem> RenderSpawnNewVehicle()
 	{
 		auto tab = std::make_shared<TabItem>("New Vehicle");
 
 		auto spawn = std::make_shared<Group>("Spawn");
 		auto settings = std::make_shared<Group>("Settings");
+		auto previewSettings = std::make_shared<Group>("Preview");
 
 		static std::vector<std::string> vehicleNames{};
 		static std::vector<int> vehicleClasses{};
@@ -107,8 +113,27 @@ namespace YimMenu::Submenus
 						if (matchesSearch && matchesClass)
 						{
 							ImGui::PushID(hash);
+							
+							// Handle hover for preview
+							bool isHovered = ImGui::IsItemHovered();
+							if (isHovered && s_HoveredVehicleIndex != veh && VehiclePreview::Get().IsPreviewEnabled())
+							{
+								s_HoveredVehicleIndex = veh;
+								VehiclePreview::Get().ShowPreview(hash, name);
+							}
+							else if (!isHovered && s_HoveredVehicleIndex == veh)
+							{
+								s_HoveredVehicleIndex = -1;
+								VehiclePreview::Get().HidePreview();
+							}
+							
+							// Handle click for spawning
 							if (ImGui::Selectable(name.c_str()))
 							{
+								// Hide preview when actually spawning
+								VehiclePreview::Get().HidePreview();
+								s_HoveredVehicleIndex = -1;
+								
 								FiberPool::Push([hash] {
 									auto handle = Vehicle::Create(hash, Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), hash), Self::GetPed().GetHeading());
 
@@ -128,11 +153,18 @@ namespace YimMenu::Submenus
 			}
 		}));
 
+		// Add preview settings to settings category
 		settings->AddItem(std::make_shared<BoolCommandItem>("spawninsideveh"_J));
 		settings->AddItem(std::make_shared<BoolCommandItem>("spawnvehmaxed"_J));
+		
+		// Add preview controls to preview category
+		previewSettings->AddItem(std::make_shared<BoolCommandItem>("enablevehiclepreview"_J));
+		previewSettings->AddItem(std::make_shared<FloatCommandItem>("previewrotationspeed"_J));
+		previewSettings->AddItem(std::make_shared<IntCommandItem>("previewalpha"_J));
 
 		tab->AddItem(spawn);
 		tab->AddItem(settings);
+		tab->AddItem(previewSettings);
 		return tab;
 	}
 
@@ -142,6 +174,7 @@ namespace YimMenu::Submenus
 
 		auto spawn = std::make_shared<Group>("Spawn");
 		auto settings = std::make_shared<Group>("Settings");
+		auto previewSettings = std::make_shared<Group>("Preview");
 
 		static std::string selectedGarageStr{""};
 
@@ -185,6 +218,7 @@ namespace YimMenu::Submenus
 				{
 					std::string lowerSearch = search;
 					std::transform(lowerSearch.begin(), lowerSearch.end(), lowerSearch.begin(), tolower);
+					int currentIndex = 0;
 					for (const auto& it : PersonalVehicles::GetPersonalVehicles())
 					{
 						const auto& label = it.first;
@@ -198,8 +232,27 @@ namespace YimMenu::Submenus
 						if (matchesSearch && matchesGarage)
 						{
 							ImGui::PushID(personalVeh->GetId());
+							
+							// Handle hover for preview
+							bool isHovered = ImGui::IsItemHovered();
+							if (isHovered && s_HoveredPersonalVehicleIndex != currentIndex && VehiclePreview::Get().IsPreviewEnabled())
+							{
+								s_HoveredPersonalVehicleIndex = currentIndex;
+								VehiclePreview::Get().ShowPreview(personalVeh->GetModel(), label);
+							}
+							else if (!isHovered && s_HoveredPersonalVehicleIndex == currentIndex)
+							{
+								s_HoveredPersonalVehicleIndex = -1;
+								VehiclePreview::Get().HidePreview();
+							}
+							
+							// Handle click for spawning
 							if (ImGui::Selectable(label.c_str()))
 							{
+								// Hide preview when actually spawning
+								VehiclePreview::Get().HidePreview();
+								s_HoveredPersonalVehicleIndex = -1;
+								
 								FiberPool::Push([&personalVeh] {
 									if (spawnClonePersonalVehicle.GetState())
 									{
@@ -219,6 +272,7 @@ namespace YimMenu::Submenus
 							}
 							ImGui::PopID();
 						}
+						currentIndex++;
 					}
 				}
 
@@ -228,10 +282,15 @@ namespace YimMenu::Submenus
 
 		settings->AddItem(std::make_shared<BoolCommandItem>("spawninsidepv"_J));
 		settings->AddItem(std::make_shared<BoolCommandItem>("spawnclonepv"_J));
-
+		
+		// Add preview controls to preview category (shared with new vehicle tab)
+		previewSettings->AddItem(std::make_shared<BoolCommandItem>("enablevehiclepreview"_J));
+		previewSettings->AddItem(std::make_shared<FloatCommandItem>("previewrotationspeed"_J));
+		previewSettings->AddItem(std::make_shared<IntCommandItem>("previewalpha"_J));
 
 		tab->AddItem(spawn);
 		tab->AddItem(settings);
+		tab->AddItem(previewSettings);
 		return tab;
 	}
 

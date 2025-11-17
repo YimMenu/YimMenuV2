@@ -43,64 +43,37 @@ jobs:
       - name: Display system info
         shell: powershell
         run: |
+          Write-Host "=== System Information ===" -ForegroundColor Green
           Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
           Write-Host "OS: $(Get-CimInstance Win32_OperatingSystem | Select-Object Caption)"
+          Write-Host "CMake version: $(cmake --version | Select-Object -First 1)"
+          Write-Host "Git version: $(git --version)"
           [System.Environment]::OSVersion | Write-Host
-      
-      # Setup MSVC v143 toolset using vcvarsall.bat
-      - name: Setup MSVC v143 Environment
+
+      # Verify Visual Studio installation
+      - name: Verify Visual Studio installation
         shell: powershell
         run: |
-          Write-Host "=== Setting up MSVC v143 Environment ===" -ForegroundColor Green
-          
-          # Try different Visual Studio editions
-          $vsEditions = @("Enterprise", "Professional", "Community")
-          $vcvarsPath = $null
-          
-          foreach ($edition in $vsEditions) {
-            $testPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\$edition\VC\Auxiliary\Build\vcvarsall.bat"
-            if (Test-Path $testPath) {
-              $vcvarsPath = $testPath
-              Write-Host "Found vcvarsall.bat at: $vcvarsPath"
-              break
-            }
-          }
-          
-          if (!$vcvarsPath) {
-            Write-Host "ERROR: Could not find vcvarsall.bat in any VS2022 edition" -ForegroundColor Red
+          Write-Host "=== Visual Studio Verification ===" -ForegroundColor Green
+
+          $vsWherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vsWherePath) {
+            Write-Host "Visual Studio installations:"
+            & $vsWherePath -all -property displayName,installationPath,installationVersion
+          } else {
+            Write-Host "ERROR: vswhere.exe not found!" -ForegroundColor Red
             exit 1
           }
-          
-          # Call vcvarsall.bat to set up x64 environment
-          Write-Host "Initializing MSVC environment for x64..."
-          & $vcvarsPath x64 > $env:TEMP\vcvars_output.txt 2>&1
-          
-          # Check if the call was successful
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: vcvarsall.bat failed with exit code $LASTEXITCODE" -ForegroundColor Red
-            Write-Host "Output:"
-            Get-Content $env:TEMP\vcvars_output.txt
+
+          # Verify MSVC is available
+          $msbuildPath = & $vsWherePath -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+          if ($msbuildPath) {
+            Write-Host "`nMSBuild found at: $msbuildPath" -ForegroundColor Green
+          } else {
+            Write-Host "`nERROR: MSBuild not found!" -ForegroundColor Red
             exit 1
           }
-          
-          Write-Host "MSVC environment initialized successfully" -ForegroundColor Green
-          
-          # Verify tools are available
-          $clPath = (Get-Command cl.exe -ErrorAction SilentlyContinue).Source
-          $linkPath = (Get-Command link.exe -ErrorAction SilentlyContinue).Source
-          $libPath = (Get-Command lib.exe -ErrorAction SilentlyContinue).Source
-          
-          Write-Host "CL.exe: $clPath"
-          Write-Host "Link.exe: $linkPath"
-          Write-Host "Lib.exe: $libPath"
-          
-          if (!$clPath -or !$linkPath -or !$libPath) {
-            Write-Host "ERROR: Not all required tools are available" -ForegroundColor Red
-            exit 1
-          }
-          
-          Write-Host "All MSVC tools verified successfully" -ForegroundColor Green
-      
+
       # Check repository structure
       - name: Check repository structure
         shell: powershell
@@ -142,55 +115,67 @@ jobs:
         shell: powershell
         run: |
           Write-Host "=== CMake Configuration ===" -ForegroundColor Green
-          
+
           # Determine build type
           $buildType = "${{ matrix.config.type }}"
           Write-Host "Build type: $buildType"
-          
+
           # Clean previous build
           if (Test-Path "${{ env.BUILD_DIR }}") {
             Write-Host "Cleaning previous build directory..."
             Remove-Item -Recurse -Force "${{ env.BUILD_DIR }}" -ErrorAction SilentlyContinue
           }
-          
+
           # Ensure build directory exists
           New-Item -ItemType Directory -Force -Path "${{ env.BUILD_DIR }}" | Out-Null
-          
-          # Configure with CMake using generator that works with MSVC
+
+          # Configure with CMake using Visual Studio generator
           Write-Host "Running CMake configuration for $buildType..."
           Write-Host "CMake version: $(cmake --version | Select-Object -First 1)"
-          
-          & cmake -G "Visual Studio 17 2022" `
+          Write-Host "Current directory: $(Get-Location)"
+
+          # Run CMake configuration
+          cmake -G "Visual Studio 17 2022" `
                 -A x64 `
                 -DCMAKE_BUILD_TYPE=$buildType `
                 -DCMAKE_CXX_STANDARD=23 `
-                -DCMAKE_CXX_FLAGS="/MP" `
+                -DCMAKE_CXX_FLAGS="/MP /W3 /EHsc" `
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
                 -S . `
                 -B "${{ env.BUILD_DIR }}"
-          
+
           if ($LASTEXITCODE -ne 0) {
-            Write-Host "CMake configuration failed!" -ForegroundColor Red
-            
-            # Check for CMake error log
-            $errorLog = "${{ env.BUILD_DIR }}/CMakeError.log"
-            if (Test-Path $errorLog) {
-              Write-Host "CMake Error Log contents:"
-              Get-Content $errorLog | Select-Object -Last 30
+            Write-Host "CMake configuration failed with exit code $LASTEXITCODE!" -ForegroundColor Red
+
+            # Display CMake logs
+            Write-Host "`n=== CMakeOutput.log ===" -ForegroundColor Yellow
+            $outputLog = "${{ env.BUILD_DIR }}/CMakeFiles/CMakeOutput.log"
+            if (Test-Path $outputLog) {
+              Get-Content $outputLog | Select-Object -Last 50
+            } else {
+              Write-Host "CMakeOutput.log not found"
             }
-            
+
+            Write-Host "`n=== CMakeError.log ===" -ForegroundColor Yellow
+            $errorLog = "${{ env.BUILD_DIR }}/CMakeFiles/CMakeError.log"
+            if (Test-Path $errorLog) {
+              Get-Content $errorLog
+            } else {
+              Write-Host "CMakeError.log not found"
+            }
+
             exit 1
           }
-          
+
           Write-Host "CMake configuration completed successfully" -ForegroundColor Green
-          
+
           # Verify build directory was created
           if (!(Test-Path "${{ env.BUILD_DIR }}")) {
             Write-Host "ERROR: Build directory was not created!" -ForegroundColor Red
             exit 1
           }
-          
-          Write-Host "Build directory contents:"
+
+          Write-Host "`nBuild directory contents:"
           Get-ChildItem -Path "${{ env.BUILD_DIR }}" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
       
       # Build project
@@ -198,48 +183,29 @@ jobs:
         shell: powershell
         run: |
           Write-Host "=== Building ${{ matrix.config.type }} ===" -ForegroundColor Green
-          
-          # Build with CMake (preferred method)
+
+          # Build with CMake
           Write-Host "Building with CMake..."
           cmake --build "${{ env.BUILD_DIR }}" `
                 --config ${{ matrix.config.type }} `
                 --parallel `
                 --verbose
-          
+
           if ($LASTEXITCODE -ne 0) {
-            Write-Host "CMake build failed, trying with MSBuild..." -ForegroundColor Yellow
-            
-            # Find MSBuild executable in any available VS2022 edition
-            $vsEditions = @("Enterprise", "Professional", "Community")
-            $msbuildPath = $null
-            
-            foreach ($edition in $vsEditions) {
-              $testPath = "C:\Program Files\Microsoft Visual Studio\2022\$edition\MSBuild\Current\Bin\MSBuild.exe"
-              if (Test-Path $testPath) {
-                $msbuildPath = $testPath
-                Write-Host "Found MSBuild at: $msbuildPath"
-                break
-              }
-            }
-            
-            if ($msbuildPath) {
-              & $msbuildPath `
-                "${{ env.BUILD_DIR }}\YimMenuV2.sln" `
-                /m `
-                /p:Configuration=${{ matrix.config.type }} `
-                /p:Platform=x64 `
-                /p:OutDir="${{ env.BUILD_DIR }}\${{ matrix.config.type }}\" `
-                /v:minimal
-            } else {
-              Write-Host "ERROR: Could not find MSBuild executable in any VS2022 edition" -ForegroundColor Red
-              exit 1
-            }
+            Write-Host "ERROR: Build failed with exit code $LASTEXITCODE" -ForegroundColor Red
+            exit 1
           }
-          
+
           # Verify build output
           Write-Host "Checking build output..."
-          Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.lib", "*.pdb" | ForEach-Object {
-            Write-Host "Built: $($_.Name) ($([math]::Round($_.Length/1KB, 2)) KB)"
+          $builtFiles = Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.lib", "*.pdb"
+
+          if ($builtFiles) {
+            $builtFiles | ForEach-Object {
+              Write-Host "Built: $($_.FullName) ($([math]::Round($_.Length/1KB, 2)) KB)" -ForegroundColor Green
+            }
+          } else {
+            Write-Host "WARNING: No DLL/LIB/PDB files found in build directory" -ForegroundColor Yellow
           }
       
       # Create install directory
@@ -293,7 +259,7 @@ jobs:
       # Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: success()
         with:
           name: ${{ steps.artifact.outputs.artifact_name }}
           path: |
@@ -303,7 +269,8 @@ jobs:
             ${{ env.INSTALL_DIR }}/**
           retention-days: 30
           compression-level: 6
-      
+          if-no-files-found: warn
+
       # Upload build logs on failure
       - name: Upload build logs on failure
         if: failure()
@@ -311,10 +278,12 @@ jobs:
         with:
           name: build-logs-${{ matrix.config.type }}
           path: |
-            ${{ env.BUILD_DIR }}/**/CMakeFiles/
-            ${{ env.BUILD_DIR }}/**/CMakeOutput.log
-            ${{ env.BUILD_DIR }}/**/CMakeError.log
+            ${{ env.BUILD_DIR }}/CMakeFiles/
+            ${{ env.BUILD_DIR }}/CMakeOutput.log
+            ${{ env.BUILD_DIR }}/CMakeError.log
+            ${{ env.BUILD_DIR }}/**/*.log
           retention-days: 10
+          if-no-files-found: ignore
       
       # Generate build summary
       - name: Generate build summary

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20.x)
+cmake_minimum_required(VERSION 3.20)
 
 include(cmake/cross-compile.cmake)
 

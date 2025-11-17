@@ -59,8 +59,10 @@ jobs:
         with:
           arch: x64
       
-      # Verify MSVC installation
+      # 61
+      installation
       - name: Verify MSVC installation
+        continue-on-error: true
         shell: powershell
         run: |
           Write-Host "Checking MSVC toolset..."

@@ -60,7 +60,6 @@ jobs:
           arch: x64
       
       # 61
-      installation
       - name: Verify MSVC installation
       continue-on-error: true
         shell: powershell

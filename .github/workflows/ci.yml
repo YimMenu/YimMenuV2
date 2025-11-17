@@ -16,7 +16,7 @@ on:
 jobs:
   windows-build:
     name: Windows Build (${{ matrix.config }})
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
@@ -27,10 +27,9 @@ jobs:
             type: RelWithDebInfo
           - name: Debug
             type: Debug
-        os: [windows-latest]
     env:
       BUILD_DIR: ${{ github.workspace }}/build
-      INSTALL_DIR: ${{ github.workspace }}/install    
+      INSTALL_DIR: ${{ github.workspace }}/install
     steps:
       # Checkout repository
       - name: Checkout code
@@ -39,28 +38,60 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       
-      # Display environment info
-      - name: Display system info
+      # Setup Visual Studio 2022
+      - name: Setup Visual Studio 2022
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-version: '17.8'
+      
+      # Setup MSVC v143 toolset
+      - name: Setup MSVC v143 toolset
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+      
+      # Install CMake
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.27.9
+        with:
+          cmakeVersion: "3.27.9"
+          ninjaVersion: "v1.11.1"
+      
+      # Add MSVC to PATH manually
+      - name: Setup MSVC Environment
         shell: powershell
         run: |
-          Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
-          Write-Host "OS: $(Get-CimInstance Win32_OperatingSystem | Select-Object Caption)"
-          [System.Environment]::OSVersion | Write-Host
+          Write-Host "=== Setting up MSVC Environment ===" -ForegroundColor Green
+          
+          # Find MSVC installation path
+          $msvcPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build"
+          if (!(Test-Path $msvcPath)) {
+            $msvcPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build"
+          }
+          if (!(Test-Path $msvcPath)) {
+            $msvcPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build"
+          }
+          
+          if (Test-Path $msvcPath) {
+            Write-Host "Found MSVC at: $msvcPath"
+            
+            # Source vcvars64.bat to set up environment
+            & "$msvcPath\vcvars64.bat" -help | Out-Null
+            
+            # Verify tools are available
+            Write-Host "CL.exe location: $((where cl.exe) -join ', ')"
+            Write-Host "Link.exe location: $((where link.exe) -join ', ')"
+            Write-Host "Lib.exe location: $((where lib.exe) -join ', ')"
+            Write-Host "CMake location: $((where cmake) -join ', ')"
+            Write-Host "Ninja location: $((where ninja) -join ', ')"
+          } else {
+            Write-Host "ERROR: Could not find MSVC installation" -ForegroundColor Red
+            exit 1
+          }
       
-      # Check CMake version
-      - name: Check CMake version
-        shell: powershell
-        run: cmake --version
-      
-      # Set up MSVC compiler environment
-      - name: Setup MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-      
-      # 61
+      # Verify MSVC installation
       - name: Verify MSVC installation
-      continue-on-error: true
+        continue-on-error: true
         shell: powershell
         run: |
           Write-Host "Checking MSVC toolset..."
@@ -92,21 +123,63 @@ jobs:
       - name: Generate CMake project (${{ matrix.config.type }})
         shell: powershell
         run: |
+          Write-Host "=== CMake Configuration ===" -ForegroundColor Green
+          
+          # Clean previous build
+          if (Test-Path "${{ env.BUILD_DIR }}") {
+            Write-Host "Cleaning previous build directory..."
+            Remove-Item -Recurse -Force "${{ env.BUILD_DIR }}" -ErrorAction SilentlyContinue
+          }
+          
+          # Configure with CMake using generator that works with MSVC
+          Write-Host "Running CMake configuration for ${{ matrix.config.type }}..."
           cmake -G "Visual Studio 17 2022" `
-            -A x64 `
-            -DCMAKE_BUILD_TYPE=${{ matrix.config.type }} `
-            -DCMAKE_CONFIGURATION_TYPES=${{ matrix.config.type }} `
-            -S . `
-            -B "${{ env.BUILD_DIR }}"
+                -A x64 `
+                -DCMAKE_BUILD_TYPE=${{ matrix.config.type }} `
+                -DCMAKE_CXX_STANDARD=23 `
+                -DCMAKE_CXX_FLAGS="/MP" `
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
+                -S . `
+                -B "${{ env.BUILD_DIR }}"
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "CMake configuration failed!" -ForegroundColor Red
+            exit 1
+          }
+          
+          Write-Host "CMake configuration completed successfully" -ForegroundColor Green
       
       # Build project
       - name: Build (${{ matrix.config.type }})
         shell: powershell
         run: |
+          Write-Host "=== Building ${{ matrix.config.type }} ===" -ForegroundColor Green
+          
+          # Build with CMake (preferred method)
+          Write-Host "Building with CMake..."
           cmake --build "${{ env.BUILD_DIR }}" `
-            --config ${{ matrix.config.type }} `
-            --verbose `
-            -j $env:NUMBER_OF_PROCESSORS
+                --config ${{ matrix.config.type }} `
+                --parallel `
+                --verbose
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "CMake build failed, trying with MSBuild..." -ForegroundColor Yellow
+            
+            # Fallback to direct MSBuild
+            & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" `
+              "${{ env.BUILD_DIR }}\YimMenuV2.sln" `
+              /m `
+              /p:Configuration=${{ matrix.config.type }} `
+              /p:Platform=x64 `
+              /p:OutDir="${{ env.BUILD_DIR }}\${{ matrix.config.type }}\" `
+              /v:minimal
+          }
+          
+          # Verify build output
+          Write-Host "Checking build output..."
+          Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.lib", "*.pdb" | ForEach-Object {
+            Write-Host "Built: $($_.Name) ($([math]::Round($_.Length/1KB, 2)) KB)"
+          }
       
       # Create install directory
       - name: Create install directory
@@ -137,10 +210,24 @@ jobs:
       - name: Verify build output
         shell: powershell
         run: |
-          Write-Host "Build artifacts location: ${{ env.BUILD_DIR }}"
-          Write-Host "Contents:"
-          Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.exe", "*.lib" | ForEach-Object {
-            Write-Host $_.FullName
+          Write-Host "=== Verifying Build Output ===" -ForegroundColor Green
+          
+          # Find DLL files
+          $dllFiles = Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll" -Filter "*YimMenuV2*"
+          
+          if ($dllFiles.Count -gt 0) {
+            Write-Host "✓ DLL files found:" -ForegroundColor Green
+            $dllFiles | ForEach-Object {
+              $dllInfo = Get-Item $_
+              Write-Host "  - $($_.FullName) ($([math]::Round($dllInfo.Length/1KB, 2)) KB)"
+            }
+          } else {
+            Write-Host "✗ No YimMenuV2 DLL files found!" -ForegroundColor Red
+            Write-Host "Searching for any DLL files in build directory:" -ForegroundColor Yellow
+            Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll" | ForEach-Object {
+              Write-Host "  - $($_.FullName)"
+            }
+            exit 1
           }
       
       # Generate artifact names
@@ -160,10 +247,9 @@ jobs:
         with:
           name: ${{ steps.artifact.outputs.artifact_name }}
           path: |
-            ${{ env.BUILD_DIR }}/**/*.dll
-            ${{ env.BUILD_DIR }}/**/*.exe
-            ${{ env.BUILD_DIR }}/**/*.lib
-            ${{ env.BUILD_DIR }}/**/*.pdb
+            ${{ env.BUILD_DIR }}/**/*YimMenuV2*.dll
+            ${{ env.BUILD_DIR }}/**/*YimMenuV2*.lib
+            ${{ env.BUILD_DIR }}/**/*YimMenuV2*.pdb
             ${{ env.INSTALL_DIR }}/**
           retention-days: 30
           compression-level: 6

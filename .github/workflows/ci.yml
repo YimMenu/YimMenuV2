@@ -28,10 +28,6 @@ jobs:
           - name: Debug
             type: Debug
         os: [windows-latest]
-        include:
-          - os: windows-2022
-            msvc_version: '143'
-    
     env:
       BUILD_DIR: ${{ github.workspace }}/build
       INSTALL_DIR: ${{ github.workspace }}/install
@@ -62,7 +58,6 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-          toolset: ${{ matrix.msvc_version }}
       
       # Verify MSVC installation
       - name: Verify MSVC installation

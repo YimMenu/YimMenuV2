@@ -30,8 +30,7 @@ jobs:
         os: [windows-latest]
     env:
       BUILD_DIR: ${{ github.workspace }}/build
-      INSTALL_DIR: ${{ github.workspace }}/install
-    
+      INSTALL_DIR: ${{ github.workspace }}/install    
     steps:
       # Checkout repository
       - name: Checkout code

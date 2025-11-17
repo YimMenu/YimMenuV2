@@ -125,7 +125,59 @@ jobs:
           Write-Host "Setting up CMake environment..."
           cmake --version
       
-      # Remove problematic caching that's causing 400 errors
+      # Check repository structure and resolve dependencies
+      - name: Check repository structure
+        shell: powershell
+        run: |
+          Write-Host "=== Repository Structure Analysis ===" -ForegroundColor Green
+          
+          Write-Host "Workspace path: ${{ github.workspace }}"
+          Write-Host "Current working directory: $(Get-Location)"
+          Write-Host ""
+          
+          # Check for nested directory issue
+          $potentialNestedPath = Join-Path "${{ github.workspace }}" "yimv2"
+          if (Test-Path $potentialNestedPath) {
+            Write-Host "WARNING: Nested yimv2 directory detected!" -ForegroundColor Yellow
+            Write-Host "Contents of nested directory:"
+            Get-ChildItem -Path $potentialNestedPath -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
+          }
+          
+          # List top-level workspace contents
+          Write-Host "Top-level workspace contents:"
+          Get-ChildItem -Path "${{ github.workspace }}" -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.psisContainer) {
+              Write-Host "  [DIR]  $($_.Name)"
+            } else {
+              Write-Host "  [FILE] $($_.Name)"
+            }
+          }
+          
+          # Check for CMakeLists.txt in both locations
+          $rootCMake = Join-Path "${{ github.workspace }}" "CMakeLists.txt"
+          $nestedCMake = Join-Path $potentialNestedPath "CMakeLists.txt"
+          
+          Write-Host ""
+          Write-Host "CMakeLists.txt locations:"
+          if (Test-Path $rootCMake) {
+            Write-Host "✓ Found at root: $rootCMake" -ForegroundColor Green
+          } else {
+            Write-Host "✗ Not found at root" -ForegroundColor Red
+          }
+          
+          if (Test-Path $nestedCMake) {
+            Write-Host "✓ Found in nested dir: $nestedCMake" -ForegroundColor Green
+          } else {
+            Write-Host "✗ Not found in nested dir" -ForegroundColor Red
+          }
+          
+          # Check for GitHub workspace environment variable
+          Write-Host ""
+          Write-Host "Environment variables:"
+          Write-Host "GITHUB_WORKSPACE: ${{ env.GITHUB_WORKSPACE }}"
+          Write-Host "GITHUB_WORKSPACE is: $(if (${{ env.GITHUB_WORKSPACE }}) { 'Set' } else { 'Not Set' })"
+      
+      # Skip problematic caching that's causing 400 errors
       - name: Skip cache
         continue-on-error: true
         shell: powershell
@@ -139,37 +191,120 @@ jobs:
         run: |
           Write-Host "=== CMake Configuration ===" -ForegroundColor Green
           
+          # Check current directory and handle nested directory issue
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Repository root: ${{ github.workspace }}"
+          
+          # Determine the correct source directory
+          $sourceDir = "${{ github.workspace }}"
+          
+          # Check if there's a nested directory structure (yimv2/yimv2)
+          $potentialNestedSource = Join-Path "${{ github.workspace }}" "yimv2"
+          if (Test-Path $potentialNestedSource) {
+            Write-Host "WARNING: Detected nested directory structure" -ForegroundColor Yellow
+            Write-Host "Checking if nested directory is the actual source..."
+            
+            # If the nested directory has CMakeLists.txt and current doesn't, use nested
+            $nestedCMake = Join-Path $potentialNestedSource "CMakeLists.txt"
+            $rootCMake = Join-Path "${{ github.workspace }}" "CMakeLists.txt"
+            
+            if (Test-Path $nestedCMake -and !(Test-Path $rootCMake)) {
+              Write-Host "Using nested directory as source: $potentialNestedSource" -ForegroundColor Green
+              $sourceDir = $potentialNestedSource
+            } elseif (Test-Path $nestedCMake -and Test-Path $rootCMake) {
+              Write-Host "Both locations have CMakeLists.txt - using root as source" -ForegroundColor Yellow
+            }
+          }
+          
+          # Change to source directory
+          Set-Location $sourceDir
+          Write-Host "Changed to source directory: $sourceDir"
+          
           # Determine build type
           $buildType = "${{ github.event.inputs.build_type || 'Release' }}"
           Write-Host "Build type: $buildType"
           
-          # Clean previous build
-          if (Test-Path "${{ env.BUILD_DIR }}") {
-            Write-Host "Cleaning previous build directory..."
-            Remove-Item -Recurse -Force "${{ env.BUILD_DIR }}" -ErrorAction SilentlyContinue
+          # Verify CMakeLists.txt exists in source directory
+          if (!(Test-Path "CMakeLists.txt")) {
+            Write-Host "ERROR: CMakeLists.txt not found in source directory: $sourceDir!" -ForegroundColor Red
+            Write-Host "Source directory contents:"
+            Get-ChildItem -Path $sourceDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
+            
+            # Try to find CMakeLists.txt anywhere in workspace
+            Write-Host "Searching for CMakeLists.txt in entire workspace..."
+            $cmakeFiles = Get-ChildItem -Path "${{ github.workspace }}" -Recurse -Filter "CMakeLists.txt" -ErrorAction SilentlyContinue
+            if ($cmakeFiles) {
+              Write-Host "Found CMakeLists.txt at:"
+              $cmakeFiles | ForEach-Object { Write-Host "  - $($_.FullName)" }
+              $sourceDir = $cmakeFiles[0].Directory.FullName
+              Write-Host "Using source directory: $sourceDir"
+              Set-Location $sourceDir
+            } else {
+              Write-Host "No CMakeLists.txt found anywhere in workspace!" -ForegroundColor Red
+              exit 1
+            }
+          }
+          
+          Write-Host "Found CMakeLists.txt at: $(Join-Path $sourceDir 'CMakeLists.txt')"
+          
+          # Clean previous build directories
+          Write-Host "Cleaning previous build directories..."
+          $possibleBuildDirs = @("${{ env.BUILD_DIR }}", "${{ github.workspace }}/build", "$sourceDir/build")
+          foreach ($buildDir in $possibleBuildDirs) {
+            if (Test-Path $buildDir) {
+              Write-Host "Cleaning: $buildDir"
+              Remove-Item -Recurse -Force $buildDir -ErrorAction SilentlyContinue
+            }
           }
           
           # Configure with CMake using generator that works with MSVC
           Write-Host "Running CMake configuration..."
-          cmake -G "Visual Studio 17 2022" `
+          Write-Host "CMake version: $(cmake --version | Select-Object -First 1)"
+          Write-Host "Source directory: $sourceDir"
+          Write-Host "Build directory: ${{ env.BUILD_DIR }}"
+          
+          & cmake -G "Visual Studio 17 2022" `
                 -A x64 `
                 -DCMAKE_BUILD_TYPE=$buildType `
                 -DCMAKE_CXX_STANDARD=23 `
                 -DCMAKE_CXX_FLAGS="/MP" `
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
-                -S . `
+                -S $sourceDir `
                 -B "${{ env.BUILD_DIR }}"
           
           if ($LASTEXITCODE -ne 0) {
             Write-Host "CMake configuration failed!" -ForegroundColor Red
-            Write-Host "Checking build directory contents:"
-            if (Test-Path "${{ env.BUILD_DIR }}") {
-              Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 20
+            
+            # Check for CMake error log
+            $errorLog = "${{ env.BUILD_DIR }}/CMakeError.log"
+            if (Test-Path $errorLog) {
+              Write-Host "CMake Error Log contents:"
+              Get-Content $errorLog | Select-Object -Last 20
             }
+            
+            # List source directory contents for debugging
+            Write-Host "Source directory contents:"
+            Get-ChildItem -Path $sourceDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
+            
+            # List CMake build directory if it exists
+            if (Test-Path "${{ env.BUILD_DIR }}") {
+              Write-Host "Build directory contents:"
+              Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10
+            }
+            
             exit 1
           }
           
           Write-Host "CMake configuration completed successfully" -ForegroundColor Green
+          
+          # Verify build directory was created
+          if (!(Test-Path "${{ env.BUILD_DIR }}")) {
+            Write-Host "ERROR: Build directory was not created!" -ForegroundColor Red
+            exit 1
+          }
+          
+          Write-Host "Build directory contents:"
+          Get-ChildItem -Path "${{ env.BUILD_DIR }}" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
       
       # Build the DLL
       - name: Build DLL

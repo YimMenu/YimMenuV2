@@ -18,7 +18,7 @@ namespace YimMenu
         const std::string& GetCurrentVehicleName() const { return m_CurrentVehicleName; }
         joaat_t GetCurrentModelHash() const { return m_CurrentModelHash; }
         void UpdateRotationSpeed(float newSpeed);
-        bool IsPreviewEnabled() const { return enableVehiclePreview.GetState(); }
+        bool IsPreviewEnabled() const;
         
     private:
         VehiclePreview() = default;

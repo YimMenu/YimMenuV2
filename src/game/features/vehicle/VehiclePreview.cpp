@@ -139,4 +139,9 @@ namespace YimMenu
     {
         m_RotationSpeed = newSpeed;
     }
+
+    bool VehiclePreview::IsPreviewEnabled() const
+    {
+        return enableVehiclePreview.GetState();
+    }
 }

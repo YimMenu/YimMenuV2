@@ -113,8 +113,26 @@ namespace YimMenu::Submenus
 						if (matchesSearch && matchesClass)
 						{
 							ImGui::PushID(hash);
-							
-							// Handle hover for preview
+
+							// Handle click for spawning
+							if (ImGui::Selectable(name.c_str()))
+							{
+								// Hide preview when actually spawning
+								VehiclePreview::Get().HidePreview();
+								s_HoveredVehicleIndex = -1;
+
+								FiberPool::Push([hash] {
+									auto handle = Vehicle::Create(hash, Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), hash), Self::GetPed().GetHeading());
+
+									if (spawnInsideVehicle.GetState())
+										Self::GetPed().SetInVehicle(handle);
+
+									if (spawnVehicleMaxed.GetState())
+										handle.Upgrade();
+								});
+							}
+
+							// Handle hover for preview (after item is rendered)
 							bool isHovered = ImGui::IsItemHovered();
 							if (isHovered && s_HoveredVehicleIndex != veh && VehiclePreview::Get().IsPreviewEnabled())
 							{
@@ -126,24 +144,7 @@ namespace YimMenu::Submenus
 								s_HoveredVehicleIndex = -1;
 								VehiclePreview::Get().HidePreview();
 							}
-							
-							// Handle click for spawning
-							if (ImGui::Selectable(name.c_str()))
-							{
-								// Hide preview when actually spawning
-								VehiclePreview::Get().HidePreview();
-								s_HoveredVehicleIndex = -1;
-								
-								FiberPool::Push([hash] {
-									auto handle = Vehicle::Create(hash, Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), hash), Self::GetPed().GetHeading());
 
-									if (spawnInsideVehicle.GetState())
-										Self::GetPed().SetInVehicle(handle);
-
-									if (spawnVehicleMaxed.GetState())
-										handle.Upgrade();
-								});
-							}
 							ImGui::PopID();
 						}
 					}
@@ -232,20 +233,7 @@ namespace YimMenu::Submenus
 						if (matchesSearch && matchesGarage)
 						{
 							ImGui::PushID(personalVeh->GetId());
-							
-							// Handle hover for preview
-							bool isHovered = ImGui::IsItemHovered();
-							if (isHovered && s_HoveredPersonalVehicleIndex != currentIndex && VehiclePreview::Get().IsPreviewEnabled())
-							{
-								s_HoveredPersonalVehicleIndex = currentIndex;
-								VehiclePreview::Get().ShowPreview(personalVeh->GetModel(), label);
-							}
-							else if (!isHovered && s_HoveredPersonalVehicleIndex == currentIndex)
-							{
-								s_HoveredPersonalVehicleIndex = -1;
-								VehiclePreview::Get().HidePreview();
-							}
-							
+
 							// Handle click for spawning
 							if (ImGui::Selectable(label.c_str()))
 							{
@@ -270,6 +258,20 @@ namespace YimMenu::Submenus
 									}
 								});
 							}
+
+							// Handle hover for preview (after item is rendered)
+							bool isHovered = ImGui::IsItemHovered();
+							if (isHovered && s_HoveredPersonalVehicleIndex != currentIndex && VehiclePreview::Get().IsPreviewEnabled())
+							{
+								s_HoveredPersonalVehicleIndex = currentIndex;
+								VehiclePreview::Get().ShowPreview(personalVeh->GetModel(), label);
+							}
+							else if (!isHovered && s_HoveredPersonalVehicleIndex == currentIndex)
+							{
+								s_HoveredPersonalVehicleIndex = -1;
+								VehiclePreview::Get().HidePreview();
+							}
+
 							ImGui::PopID();
 						}
 						currentIndex++;

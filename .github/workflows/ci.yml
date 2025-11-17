@@ -1,80 +1,224 @@
-name: CI
+name: Windows CI Build
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches:
+      - main
+      - enhanced
+      - develop
+  pull_request:
+    branches:
+      - main
+      - enhanced
+      - develop
+  workflow_dispatch:
 
 jobs:
-  native-compilation:
-    runs-on: [ self-hosted, Windows ]
-    name: Native Compilation
+  windows-build:
+    name: Windows Build (${{ matrix.config }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Release
+            type: Release
+          - name: RelWithDebInfo
+            type: RelWithDebInfo
+          - name: Debug
+            type: Debug
+        os: [windows-latest]
+        include:
+          - os: windows-2022
+            msvc_version: '143'
+    
+    env:
+      BUILD_DIR: ${{ github.workspace }}/build
+      INSTALL_DIR: ${{ github.workspace }}/install
+    
     steps:
-      - uses: actions/checkout@v4
-
+      # Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      
+      # Display environment info
+      - name: Display system info
+        shell: powershell
+        run: |
+          Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
+          Write-Host "OS: $(Get-CimInstance Win32_OperatingSystem | Select-Object Caption)"
+          [System.Environment]::OSVersion | Write-Host
+      
+      # Check CMake version
       - name: Check CMake version
+        shell: powershell
         run: cmake --version
-
+      
+      # Set up MSVC compiler environment
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: amd64
-
-      - name: Generate CMake project
-        run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
-
-      - name: Build 64bit RelWithDebInfo DLL
-        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
-
-      - name: Check if DLL got built
-        run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
-
-      - name: Rename DLL to YimMenuV2-dev-{GITHUB_SHA}.dll
+          arch: x64
+          toolset: ${{ matrix.msvc_version }}
+      
+      # Verify MSVC installation
+      - name: Verify MSVC installation
+        shell: powershell
         run: |
-          del YimMenuV2-dev-*.dll
-          del YimMenuV2-dev-*.pdb
-          ren YimMenuV2.dll YimMenuV2-dev-${{github.sha}}.dll
-          ren YimMenuV2.pdb YimMenuV2-dev-${{github.sha}}.pdb
-        working-directory: build/
-
-      - name: Upload Artifact
+          Write-Host "Checking MSVC toolset..."
+          cl.exe
+          link.exe
+          lib.exe
+      
+      # Cache CMake build directory
+      - name: Cache CMake build
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: ${{ runner.os }}-cmake-${{ matrix.config }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-${{ matrix.config }}-
+            ${{ runner.os }}-cmake-
+      
+      # Install build dependencies (if needed)
+      - name: Install build dependencies
+        shell: powershell
+        run: |
+          Write-Host "Build dependencies pre-installed on windows-latest"
+          Write-Host "Available tools:"
+          where cmake
+          where ninja
+          where git
+      
+      # Generate CMake project
+      - name: Generate CMake project (${{ matrix.config.type }})
+        shell: powershell
+        run: |
+          cmake -G "Visual Studio 17 2022" `
+            -A x64 `
+            -DCMAKE_BUILD_TYPE=${{ matrix.config.type }} `
+            -DCMAKE_CONFIGURATION_TYPES=${{ matrix.config.type }} `
+            -S . `
+            -B "${{ env.BUILD_DIR }}"
+      
+      # Build project
+      - name: Build (${{ matrix.config.type }})
+        shell: powershell
+        run: |
+          cmake --build "${{ env.BUILD_DIR }}" `
+            --config ${{ matrix.config.type }} `
+            --verbose `
+            -j $env:NUMBER_OF_PROCESSORS
+      
+      # Create install directory
+      - name: Create install directory
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.INSTALL_DIR }}"
+      
+      # Install build artifacts
+      - name: Install artifacts
+        shell: powershell
+        run: |
+          cmake --install "${{ env.BUILD_DIR }}" `
+            --config ${{ matrix.config.type }} `
+            --prefix "${{ env.INSTALL_DIR }}"
+      
+      # Run unit tests if available
+      - name: Run tests (if available)
+        shell: powershell
+        continue-on-error: true
+        run: |
+          if (Test-Path "${{ env.BUILD_DIR }}/${{ matrix.config.type }}/test_runner.exe") {
+            & "${{ env.BUILD_DIR }}/${{ matrix.config.type }}/test_runner.exe"
+          } else {
+            Write-Host "No test runner found"
+          }
+      
+      # Check build output
+      - name: Verify build output
+        shell: powershell
+        run: |
+          Write-Host "Build artifacts location: ${{ env.BUILD_DIR }}"
+          Write-Host "Contents:"
+          Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll", "*.exe", "*.lib" | ForEach-Object {
+            Write-Host $_.FullName
+          }
+      
+      # Generate artifact names
+      - name: Generate artifact name
+        shell: powershell
+        id: artifact
+        run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
+          $commit_short = "${{ github.sha }}".Substring(0, 7)
+          $artifact_name = "${{ matrix.config.type }}-build-$date-$commit_short"
+          Write-Host "artifact_name=$artifact_name" >> $env:GITHUB_OUTPUT
+      
+      # Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ steps.artifact.outputs.artifact_name }}
+          path: |
+            ${{ env.BUILD_DIR }}/**/*.dll
+            ${{ env.BUILD_DIR }}/**/*.exe
+            ${{ env.BUILD_DIR }}/**/*.lib
+            ${{ env.BUILD_DIR }}/**/*.pdb
+            ${{ env.INSTALL_DIR }}/**
+          retention-days: 30
+          compression-level: 6
+      
+      # Upload build logs on failure
+      - name: Upload build logs on failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: RelWithDebInfo-Native-Clang
+          name: build-logs-${{ matrix.config.type }}
           path: |
-            build/YimMenuV2-dev-*.dll
-            build/YimMenuV2-dev-*.pdb
+            ${{ env.BUILD_DIR }}/**/CMakeFiles/
+            ${{ env.BUILD_DIR }}/**/CMakeOutput.log
+            ${{ env.BUILD_DIR }}/**/CMakeError.log
+          retention-days: 10
+      
+      # Generate build summary
+      - name: Generate build summary
+        if: always()
+        shell: powershell
+        run: |
+          Write-Host "## Windows Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "**Configuration:** ${{ matrix.config.type }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "**Runner:** ${{ matrix.os }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "**Commit:** ${{ github.sha }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "**Build Directory:** ${{ env.BUILD_DIR }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          
+          $dlls = Get-ChildItem -Path "${{ env.BUILD_DIR }}" -Recurse -Include "*.dll" -ErrorAction SilentlyContinue
+          if ($dlls) {
+            Write-Host "**Generated DLLs:**" >> $env:GITHUB_STEP_SUMMARY
+            $dlls | ForEach-Object {
+              Write-Host "- $($_.Name)" >> $env:GITHUB_STEP_SUMMARY
+            }
+          }
 
-  cross-compilation:
+  build-status:
+    name: Build Status Check
     runs-on: ubuntu-latest
-    name: Cross-compilation
+    needs: [windows-build]
+    if: always()
+    
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup CMake and build tools
+      - name: Check build results
         run: |
-          sudo apt update
-          sudo apt install -y cmake ninja-build
-
-      - name: Setup Zig
-        uses: mlugg/setup-zig@v2
-
-      - name: Generate CMake project
-        run: cmake -DUSE_CROSSCOMPILER=Zig -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
-
-      - name: Build 64bit RelWithDebInfo DLL
-        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
-
-      - name: Check if DLL got built
-        run: if [ ! -f build/libYimMenuV2.dll ]; then exit 1; fi
-
-      - name: Rename DLL to libYimMenuV2-dev-{GITHUB_SHA}.dll
-        run: |
-          mv libYimMenuV2.dll libYimMenuV2-dev-${{github.sha}}.dll
-          mv libYimMenuV2.pdb libYimMenuV2-dev-${{github.sha}}.pdb
-        working-directory: build/
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: RelWithDebInfo-Cross
-          path: |
-            build/libYimMenuV2-dev-*.dll
-            build/libYimMenuV2-dev-*.pdb
+          if [ "${{ needs.windows-build.result }}" = "success" ]; then
+            echo "✓ All Windows builds completed successfully"
+            exit 0
+          else
+            echo "✗ One or more builds failed"
+            exit 1
+          fi

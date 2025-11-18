@@ -9,8 +9,8 @@ namespace YimMenu
 {
     // Command definitions (must be declared before use)
     BoolCommand enableVehiclePreview{"enablevehiclepreview", "Vehicle Preview", "Enable vehicle preview before spawning", true};
-    FloatCommand previewRotationSpeed{"previewrotationspeed", "Preview Rotation Speed", "Rotation speed for vehicle previews", 15.0f, 1.0f, 60.0f, 1.0f};
-    IntCommand previewAlpha{"previewalpha", "Preview Opacity", "Opacity of preview vehicles (0-255)", 128, 32, 255, 1};
+    FloatCommand previewRotationSpeed{"previewrotationspeed", "Preview Rotation Speed", "Rotation speed for vehicle previews", 1.0f, 60.0f, 15.0f};
+    IntCommand previewAlpha{"previewalpha", "Preview Opacity", "Opacity of preview vehicles (0-255)", 32, 255, 128};
 
     VehiclePreview& VehiclePreview::Get()
     {

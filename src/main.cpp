@@ -80,7 +80,7 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenGunLocker::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::OpenStreetDealerMenu::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&SavedPlayers::RunScript));
-		ScriptMgr::AddScript(std::make_unique<Script>([](void*) {
+		ScriptMgr::AddScript(std::make_unique<Script>([]() {
 			while (g_Running)
 			{
 				VehiclePreview::Get().Update();

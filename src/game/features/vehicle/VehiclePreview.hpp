@@ -22,8 +22,8 @@ namespace YimMenu
         
     private:
         VehiclePreview() = default;
-        
-        Vehicle m_PreviewVehicle;
+
+        Vehicle m_PreviewVehicle{nullptr};
         bool m_Active = false;
         bool m_NetworkedPreview = false;
         float m_RotationSpeed = 15.0f; // degrees per second

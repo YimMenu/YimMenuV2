@@ -155,8 +155,8 @@ namespace YimMenu
 	{
 		for (auto& [key, value] : state.items())
 		{
-			if (m_CommandHotkeys.contains(std::atoi(key.data())))
-				m_CommandHotkeys[std::atoi(key.data())].m_Chain = value.get<std::vector<int>>();
+			if (m_CommandHotkeys.contains(static_cast<uint32_t>(std::stoul(key.data()))))
+				m_CommandHotkeys[static_cast<uint32_t>(std::stoul(key.data()))].m_Chain = value.get<std::vector<int>>();
 		}
 	}
 

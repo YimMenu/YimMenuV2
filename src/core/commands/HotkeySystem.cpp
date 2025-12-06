@@ -142,11 +142,17 @@ namespace YimMenu
 
 	void HotkeySystem::SaveStateImpl(nlohmann::json& state)
 	{
-		for (auto& hotkey : m_CommandHotkeys)
+		for (const auto& hotkey : m_CommandHotkeys)
 		{
+			std::string key = std::to_string(hotkey.first);
+
 			if (!hotkey.second.m_Chain.empty())
 			{
-				state[std::to_string(hotkey.first).data()] = hotkey.second.m_Chain;
+				state[key] = hotkey.second.m_Chain;
+			}
+			else if (state.contains(key))
+			{
+				state.erase(key);
 			}
 		}
 	}

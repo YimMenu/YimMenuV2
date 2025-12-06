@@ -35,6 +35,8 @@ namespace YimMenu::Submenus
 
 		for (auto& [name, link] : sortedCommands)
 		{
+			if (name.empty())
+				continue;
 			DrawHotkey(link, name);
 		}
 	};

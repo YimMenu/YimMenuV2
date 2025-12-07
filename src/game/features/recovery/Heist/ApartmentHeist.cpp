@@ -94,6 +94,20 @@ namespace YimMenu::Features
 			}
 		};
 
+		class SkipSwiping : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
+				{
+					*ScriptLocal(thread, 32611).As<int*>() = 8;
+					*ScriptLocal(thread, 63634).As<int*>() = 5;
+				}
+			}
+		};
+
 		class InstantFinish : public Command
 		{
 			using Command::Command;
@@ -139,6 +153,7 @@ namespace YimMenu::Features
 		static Setup _ApartmentHeistSetup{"apartmentheistsetup", "Setup", "Sets up current apartment heist"};
 		static SkipHacking _ApartmentHeistSkipHacking{"apartmentheistskiphacking", "Skip Hacking", "Skips hacking process"};
 		static SkipDrilling _ApartmentHeistSkipDrilling{"apartmentheistskipdrilling", "Skip Drilling", "Skips drilling process"};
+		static SkipSwiping _ApartmentHeistSkipSwiping{"apartmentheistskipswiping", "Skip Swiping", "Skips cardswiping process"};
 		static InstantFinish _ApartmentHeistInstantFinish{"apartmentheistinstantfinish", "Instant Finish", "Instantly passes the heist"};
 		static InstantFinishPacific _ApartmentHeistInstantFinishPacific{"apartmentheistinstantfinishpacific", "Instant Finish (Pacific)", "Instantly passes Pacific Standard Job"};
 	}

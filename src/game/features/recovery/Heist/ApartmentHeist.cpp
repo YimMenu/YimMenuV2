@@ -153,7 +153,7 @@ namespace YimMenu::Features
 		static Setup _ApartmentHeistSetup{"apartmentheistsetup", "Setup", "Sets up current apartment heist"};
 		static SkipHacking _ApartmentHeistSkipHacking{"apartmentheistskiphacking", "Skip Hacking", "Skips hacking process"};
 		static SkipDrilling _ApartmentHeistSkipDrilling{"apartmentheistskipdrilling", "Skip Drilling", "Skips drilling process"};
-		static SkipSwiping _ApartmentHeistSkipSwiping{"apartmentheistskipswiping", "Skip Swiping", "Skips cardswiping process"};
+		static SkipSwiping _ApartmentHeistSkipSwiping{"apartmentheistskipswiping", "Skip Swiping", "Skips card swiping process"};
 		static InstantFinish _ApartmentHeistInstantFinish{"apartmentheistinstantfinish", "Instant Finish", "Instantly passes the heist"};
 		static InstantFinishPacific _ApartmentHeistInstantFinishPacific{"apartmentheistinstantfinishpacific", "Instant Finish (Pacific)", "Instantly passes Pacific Standard Job"};
 	}

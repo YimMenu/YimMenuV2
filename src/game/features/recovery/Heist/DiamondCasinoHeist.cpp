@@ -339,8 +339,8 @@ namespace YimMenu::Features
 			{
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
 				{
-					*ScriptLocal(thread, 32611).As<int*>() = 8;
-					*ScriptLocal(thread, 63634).As<int*>() = 5;
+					*ScriptLocal(thread, 32616).As<int*>() = 8;
+					*ScriptLocal(thread, 63640).As<int*>() = 5;
 				}
 			}
 		};

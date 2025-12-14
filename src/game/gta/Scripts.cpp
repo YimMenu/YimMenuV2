@@ -325,7 +325,7 @@ namespace YimMenu::Scripts
 		rand_int_2 ^= (random_int ^ -2024791401); // TODO: this is a pretty ghetto way to create random numbers
 		rand_int_2 ^= (random_int ^ 917391583);
 
-		auto bypass_global = ScriptGlobal(1986361); // this global will bypass the new checks added this update
+		auto bypass_global = ScriptGlobal(1990822); // this global will bypass the new checks added this update
 		auto old_val = *bypass_global.As<int*>();
 		*bypass_global.As<int*>() = rand_int_2 ^ rand() ^ time(0);
 		

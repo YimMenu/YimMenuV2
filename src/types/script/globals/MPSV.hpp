@@ -67,8 +67,8 @@ static_assert(sizeof(MPSV_Entry) == 143 * 8);
 
 struct MPSV
 {
-	SCR_ARRAY<MPSV_Entry, 547> Entries;
+	SCR_ARRAY<MPSV_Entry, 607> Entries;
 
 	static MPSV* Get();
 };
-static_assert(sizeof(MPSV) == 78222 * 8);
+static_assert(sizeof(MPSV) == 86802 * 8);

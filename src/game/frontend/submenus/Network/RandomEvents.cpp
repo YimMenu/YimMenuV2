@@ -41,6 +41,9 @@ namespace YimMenu::Submenus
 		GHOSTHUNT,
 		XMAS_TRUCK,
 		COMMUNITY_OUTREACH,
+		GETAWAY_DRIVER,
+		SURVIVAL_GROUPING,
+		VALENTINE_CHEATER,
 
 		MAX_EVENTS
 	};
@@ -90,8 +93,8 @@ namespace YimMenu::Submenus
 	{
 		if (event == ARMOURED_TRUCK) // It doesn't have tunables
 		{
-			setCooldown = *ScriptGlobal(262145).At(33719).As<int*>();
-			setAvailability = *ScriptGlobal(262145).At(33720).As<int*>();
+			setCooldown = *ScriptGlobal(262145).At(33807).As<int*>();
+			setAvailability = *ScriptGlobal(262145).At(33808).As<int*>();
 		}
 		else
 		{

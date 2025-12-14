@@ -10,10 +10,10 @@ namespace YimMenu::Features
 
 		virtual void OnTick() override
 		{
-			constexpr auto is_incoming_call = ScriptGlobal(22612);
-			constexpr auto is_phone_call_in_progress = ScriptGlobal(22608);
-			constexpr auto phone_call_state = ScriptGlobal(22602);
-			constexpr auto calling_character = ScriptGlobal(8391);
+			constexpr auto is_incoming_call = ScriptGlobal(23010);
+			constexpr auto is_phone_call_in_progress = ScriptGlobal(23006);
+			constexpr auto phone_call_state = ScriptGlobal(23000);
+			constexpr auto calling_character = ScriptGlobal(8779);
 
 			if (*Pointers.IsSessionStarted)
 			{

@@ -569,6 +569,7 @@ struct GlobalPlayerBDEntry
 	NETWORK_INDEX DeliveryBikeNetId;
 	NETWORK_INDEX BountyTransporterNetId; // added b3258
 	NETWORK_INDEX FieldDusterNetId;       // added b3407
+	NETWORK_INDEX MansionHeliNetId;       // added b3407
 	SCR_BOOL PAD_0057;                    // (@59 as of b3407)
 	uint64_t PAD_0058[15];                // confirmed these are not used by PC scripts
 	PLAYER_BLIP PlayerBlip;
@@ -684,7 +685,7 @@ struct GlobalPlayerBDEntry
 	SCR_BOOL CanSpawnGunVan;
 };
 
-static_assert(sizeof(GlobalPlayerBDEntry) == 467 * 8);
+static_assert(sizeof(GlobalPlayerBDEntry) == 468 * 8);
 
 struct GlobalPlayerBD
 {
@@ -692,4 +693,4 @@ struct GlobalPlayerBD
 
 	static GlobalPlayerBD* Get();
 };
-static_assert(sizeof(GlobalPlayerBD) == 14945 * 8);
+static_assert(sizeof(GlobalPlayerBD) == 14977 * 8);

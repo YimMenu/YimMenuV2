@@ -480,10 +480,10 @@ struct FIELD_HANGAR_DATA
 };
 static_assert(sizeof(FIELD_HANGAR_DATA) == 2 * 8);
 
-#define NUM_PROPERTY_INTERIORS \
-	33 // (30 -> 31) b3095    \
-	    // (31 -> 32) b3258    \
-	    // (32 -> 33) b3407
+#define NUM_PROPERTY_INTERIORS 36 // (30 -> 31) b3095 \
+	                              // (31 -> 32) b3258 \
+	                              // (32 -> 33) b3407 \
+	                              // (33 -> 36) b3717
 
 struct PROPERTY_DATA
 {
@@ -574,7 +574,7 @@ struct PROPERTY_DATA
 	HACKER_DEN_DATA HackerDenData;
 	FIELD_HANGAR_DATA FieldHangarData;
 };
-static_assert(sizeof(PROPERTY_DATA) == 543 * 8);
+static_assert(sizeof(PROPERTY_DATA) == 549 * 8);
 
 struct BIKER_CONTRACTS
 {
@@ -688,7 +688,7 @@ struct GPBD_FM_Entry
 	SCR_INT ApartmentEnterFlags;
 	// SCR_VEC3 AvengerMissionStartPosition; removed b889g9
 };
-static_assert(sizeof(GPBD_FM_Entry) == 877 * 8);
+static_assert(sizeof(GPBD_FM_Entry) == 883 * 8);
 
 struct GPBD_FM
 {
@@ -696,4 +696,4 @@ struct GPBD_FM
 
 	static GPBD_FM* Get();
 };
-static_assert(sizeof(GPBD_FM) == 28065 * 8);
+static_assert(sizeof(GPBD_FM) == 28257 * 8);

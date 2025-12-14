@@ -23,7 +23,10 @@ namespace YimMenu
 	    "Possessed Animals",
 	    "Ghosts Exposed",
 	    "Happy Holidays Hauler",
-	    "Community Outreach"});
+	    "Community Outreach",
+	    "Getaway Driver",
+	    "Stoner Survival",
+	    "Valentine Cheater"});
 
 	static constexpr auto randomEventScripts = std::to_array({"fm_content_drug_vehicle"_J,
 	    "fm_content_movie_props"_J,
@@ -45,7 +48,10 @@ namespace YimMenu
 	    "fm_content_possessed_animals"_J,
 	    "fm_content_ghosthunt"_J,
 	    "fm_content_xmas_truck"_J,
-	    "fm_content_community_outreach"_J});
+	    "fm_content_community_outreach"_J,
+	    "fm_content_getaway_driver"_J,
+	    "fm_content_survival_grouping"_J,
+	    "fm_content_valentine_cheater"_J,});
 
 	static constexpr auto randomEventCooldowns = std::to_array({
 	    "SUM22_RE_DRUG_VEHICLE_INACTIVE_TIME"_J,
@@ -69,6 +75,9 @@ namespace YimMenu
 	    "SUM23_RE_GHOSTHUNT_INACTIVE_TIME"_J,
 	    "XMAS_TRUCK_INACTIVE_TIME"_J,
 	    "RE_COMMUNITY_OUTREACH_INACTIVE_TIME"_J,
+	    "RE_GETAWAY_DRIVER_INACTIVE_TIME"_J,
+	    "RE_SURVIVAL_GROUPING_INACTIVE_TIME"_J,
+	    "RE_VALENTINES_CHEATER_INACTIVE_TIME"_J,
 	});
 
 	static constexpr auto randomEventAvailabilities = std::to_array({
@@ -93,5 +102,8 @@ namespace YimMenu
 	    "SUM23_RE_GHOSTHUNT_AVAILABLE_TIME"_J,
 	    "XMAS_TRUCK_AVAILABLE_TIME"_J,
 	    "RE_COMMUNITY_OUTREACH_AVAILABLE_TIME"_J,
+	    "RE_GETAWAY_DRIVER_AVAILABLE_TIME"_J,
+	    "RE_SURVIVAL_GROUPING_AVAILABLE_TIME"_J,
+	    "RE_VALENTINES_CHEATER_AVAILABLE_TIME"_J,
 	});
 }

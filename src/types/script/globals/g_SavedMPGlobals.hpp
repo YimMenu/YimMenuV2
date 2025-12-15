@@ -166,7 +166,7 @@ struct MP_GENERAL_SAVED
 	SCR_INT ReceiveLJCashTime;                      // 1302
 	SCR_INT LastAccProp;                            // 1303
 	SCR_INT Multi1PropVal;                          // 1304
-	SCR_ARRAY<uint64_t, 31> PropAryVal;             // 1305
+	SCR_ARRAY<uint64_t, 34> PropAryVal;             // 1305
 	SCR_INT LastAccSmplInt;                         // 1337
 	SCR_INT KrPatchUpdate;                          // 1338
 	SCR_ARRAY<uint64_t, 273> OutfitCompDraw;        // 1339
@@ -199,7 +199,7 @@ struct MP_GENERAL_SAVED
 	SCR_ARRAY<GAMER_HANDLE, 3> LastGOJobGamer;      // 4383
 	SCR_ARRAY<TEXT_LABEL_63, 3> LastGOJobGamerName; // 4423
 };
-static_assert(sizeof(MP_GENERAL_SAVED) == 4472 * 8);
+static_assert(sizeof(MP_GENERAL_SAVED) == 4475 * 8);
 
 struct MP_BOUNTY_SAVED
 {
@@ -241,11 +241,11 @@ struct g_SavedMPGlobalsEntry
 	MP_PROPERTY_SAVED PropertySaved;      // 7
 	CAR_APP_ORDER CarAppOrder;            // 593
 	MP_GENERAL_SAVED GeneralSaved;        // 681
-	MP_BOUNTY_SAVED BountySaved;          // 5153
-	MP_ATM_SAVED ATMSaved;                // 5394
-	MP_SCRIPT_SAVES_DATA ScriptSavesData; // 5544
+	MP_BOUNTY_SAVED BountySaved;          // 5156
+	MP_ATM_SAVED ATMSaved;                // 5397
+	MP_SCRIPT_SAVES_DATA ScriptSavesData; // 5547
 };
-static_assert(sizeof(g_SavedMPGlobalsEntry) == 5571 * 8);
+static_assert(sizeof(g_SavedMPGlobalsEntry) == 5574 * 8);
 
 struct g_SavedMPGlobals
 {
@@ -253,4 +253,4 @@ struct g_SavedMPGlobals
 
 	static g_SavedMPGlobals* Get();
 };
-static_assert(sizeof(g_SavedMPGlobals) == 5572 * 8);
+static_assert(sizeof(g_SavedMPGlobals) == 5575 * 8);

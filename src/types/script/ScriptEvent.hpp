@@ -238,7 +238,9 @@ struct SCRIPT_EVENT_COLLECT_COLLECTABLE : public SCRIPT_EVENT
 		Tagging = 19,
 		SprayCans = 20,
 		Yuanbao = 21,
-		SmokeOnTheWater = 22
+		SmokeOnTheWater = 22,
+		GoldenClover = 23, // this is the first collectible to be daily but in-game time
+		LuckyClover = 24
 	};
 
 	REGISTER_SCRIPT_EVENT(SCRIPT_EVENT_COLLECT_COLLECTABLE, CollectCollectable);

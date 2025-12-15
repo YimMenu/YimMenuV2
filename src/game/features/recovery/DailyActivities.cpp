@@ -89,6 +89,7 @@ namespace YimMenu::Features
 		Stats::SetPackedBool(54679, completed); // Smoke on the Water Product 8
 		Stats::SetPackedBool(54680, completed); // Smoke on the Water Product 9
 		Stats::SetPackedBool(54681, completed); // Smoke on the Water Product 10
+		Stats::SetPackedBool(54735, completed); // Golden Clover
 		// Street Dealers
 		for (int i = 0; i < 3; ++i)
 		{
@@ -165,13 +166,13 @@ namespace YimMenu::Features
 
 	static joaat_t GetNextExoticExportsVehicleHash()
 	{
-		constexpr ScriptGlobal order(1946095);
+		constexpr ScriptGlobal order(1950369);
 		for (int i = 1; i <= 10; i++)
 		{
 			auto offset = *order.At(i).As<int*>();
 			if (!GPBD_Flow::Get()->Entries[Self::GetPlayer().GetId()].TunerCBVDeliveredFlags.IsSet(offset))
 			{
-				auto hash = *ScriptGlobal(1946084 + (offset + 1)).As<joaat_t*>();
+				auto hash = *ScriptGlobal(1950358 + (offset + 1)).As<joaat_t*>();
 				return hash;
 			}
 		}
@@ -204,7 +205,7 @@ namespace YimMenu::Features
 				}
 			}
 
-			auto streetDealerData = ScriptLocal(m_Thread, 256).At(12);
+			auto streetDealerData = ScriptLocal(m_Thread, 258).At(12);
 
 			if (!initialized)
 			{
@@ -527,13 +528,13 @@ namespace YimMenu::Features
 			bool partime = Stats::GetPackedInt(34838 + (index * 4)) == location;
 			bool landing = Stats::GetPackedInt(34839 + (index * 4)) == location;
 
-			*ScriptGlobal(1975726).As<int*>() = 1;
-			*ScriptGlobal(1975726).At(1).As<int*>() = 1;
-			*ScriptGlobal(1975726).At(3).As<int*>() = 5;
-			*ScriptGlobal(1975726).At(4).As<int*>() = location + 1;
-			*ScriptGlobal(1975726).At(8).At(1).As<int*>() = checkpointReward.Get<int>() / (1 + (checkpoints * 9));
-			*ScriptGlobal(1975726).At(8).At(2).As<int*>() = parTimeReward.Get<int>() / (1 + (partime * 9));
-			*ScriptGlobal(1975726).At(8).At(3).As<int*>() = landingReward.Get<int>() / (1 + (landing * 9));
+			*ScriptGlobal(1979960).As<int*>() = 1;
+			*ScriptGlobal(1979960).At(1).As<int*>() = 1;
+			*ScriptGlobal(1979960).At(3).As<int*>() = 5;
+			*ScriptGlobal(1979960).At(4).As<int*>() = location + 1;
+			*ScriptGlobal(1979960).At(8).At(1).As<int*>() = checkpointReward.Get<int>() / (1 + (checkpoints * 9));
+			*ScriptGlobal(1979960).At(8).At(2).As<int*>() = parTimeReward.Get<int>() / (1 + (partime * 9));
+			*ScriptGlobal(1979960).At(8).At(3).As<int*>() = landingReward.Get<int>() / (1 + (landing * 9));
 
 			SET_SKYDIVE_COMPLETED data;
 			data.SkydiveIndex = index;
@@ -543,7 +544,7 @@ namespace YimMenu::Features
 			data.AccurateLanding = TRUE;
 			data.Send();
 
-			ScriptGlobal(1979681).At(4).As<SCR_BITSET<uint64_t>*>()->Clear(3);
+			ScriptGlobal(1983929).At(4).As<SCR_BITSET<uint64_t>*>()->Clear(3);
 		}
 	};
 
@@ -655,8 +656,8 @@ namespace YimMenu::Features
 			{
 				thread->m_Context.m_State = rage::scrThread::State::PAUSED;
 
-				*ScriptLocal(thread, 3088).At(131).At(1).As<int*>() = FreemodeGeneral::Get()->DailyReset.Seed % 14; // if we don't init this, the par time duration function will return 0 and the COMPLETED stat will be set to 0, which is bad
-				*ScriptLocal(thread, 144).At(4).As<int*>() = 0;
+				*ScriptLocal(thread, 3103).At(131).At(1).As<int*>() = FreemodeGeneral::Get()->DailyReset.Seed % 14; // if we don't init this, the par time duration function will return 0 and the COMPLETED stat will be set to 0, which is bad
+				*ScriptLocal(thread, 146).At(4).As<int*>() = 0;
 				static ScriptFunction onBTTEnd("fm_content_bicycle_time_trial"_J,
 				    ScriptPointer("OnBTTEnd", "64 ? ? ? 5D ? ? ? 75 77").Add(1).Rip());
 				onBTTEnd.Call<void>();
@@ -795,8 +796,8 @@ namespace YimMenu::Features
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					int combination = *ScriptLocal(thread, 144).At(22).At(i, 2).At(1).As<int*>();
-					*ScriptLocal(thread, 144).At(22).At(i, 2).As<float*>() = combination;
+					int combination = *ScriptLocal(thread, 146).At(22).At(i, 2).At(1).As<int*>();
+					*ScriptLocal(thread, 146).At(22).At(i, 2).As<float*>() = combination;
 				}
 			}
 		}
@@ -812,7 +813,7 @@ namespace YimMenu::Features
 				return;
 
 			static ScriptFunction getStreetDealerCoords("freemode"_J,
-			    ScriptPointer("GetStreetDealerCoords", "5D ? ? ? 5D ? ? ? 5D ? ? ? 18").Add(1).Rip());
+			    ScriptPointer("GetStreetDealerCoords", "5D ? ? ? 5D ? ? ? 5D ? ? ? 18 1F").Add(1).Rip());
 			if (auto coords = getStreetDealerCoords.Call<Vector3>(
 			        FreemodeGeneral::Get()->StreetDealers.Dealers[streetDealerIndex.GetState()].Location))
 				Self::GetPed().TeleportTo(coords);
@@ -914,7 +915,7 @@ namespace YimMenu::Features
 
 			if (auto thread = Scripts::FindScriptThread("fm_content_daily_bounty"_J))
 			{
-				if (auto coords = *ScriptLocal(thread, 241).At(434).At(1).At(0, 4).As<Vector3*>())
+				if (auto coords = *ScriptLocal(thread, 243).At(434).At(1).At(0, 4).As<Vector3*>())
 				{
 					Self::GetPed().TeleportTo(coords);
 				}
@@ -961,9 +962,9 @@ namespace YimMenu::Features
 				if (index < 0 || index >= wildlifePhotographyAnimalHashes.size())
 					return;
 
-				ScriptGlobal(2708777).At(544).As<SCR_BITSET<uint64_t>*>()->Set(6);
-				*ScriptGlobal(2708777).At(548).As<joaat_t*>() = wildlifePhotographyAnimalHashes[index];
-				*ScriptGlobal(2708777).At(549).As<int*>() = *Pointers.GameTimer - 1; // bypass 2 sec delay
+				ScriptGlobal(2709409).At(545).As<SCR_BITSET<uint64_t>*>()->Set(6);
+				*ScriptGlobal(2709409).At(549).As<joaat_t*>() = wildlifePhotographyAnimalHashes[index];
+				*ScriptGlobal(2709409).At(550).As<int*>() = *Pointers.GameTimer - 1; // bypass 2 sec delay
 			}
 			else
 			{
@@ -1024,6 +1025,46 @@ namespace YimMenu::Features
 		}
 	};
 
+	class TeleportToGoldenClover : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+				return;
+
+			if (!Stats::GetPackedBool(54735))
+			{
+				TeleportToCollectable(SCRIPT_EVENT_COLLECT_COLLECTABLE::eCollectables::GoldenClover, 0);
+			}
+			else
+			{
+				Notifications::Show("Golden Clover", "Golden Clover has already been collected.", NotificationType::Error);
+			}
+		}
+	};
+
+	class CollectGoldenClover : public Command
+	{
+		using Command::Command;
+
+		virtual void OnCall() override
+		{
+			if (!*Pointers.IsSessionStarted)
+				return;
+
+			if (!Stats::GetPackedBool(54735))
+			{
+				CollectCollectable(SCRIPT_EVENT_COLLECT_COLLECTABLE::eCollectables::GoldenClover, 0);
+			}
+			else
+			{
+				Notifications::Show("Golden Clover", "Golden Clover has already been collected.", NotificationType::Error);
+			}
+		}
+	};
+
 	static SetAllActivitiesCompleted _SetAllActivitiesCompleted{"setallactivitiescompleted", "Set All Activities Completed", "Switch session to apply the changes."};
 	static ResetAllActivities _ResetAllActivities{"resetallactivities", "Reset All Activities", "Switch session to apply the changes."};
 
@@ -1072,4 +1113,7 @@ namespace YimMenu::Features
 
 	static TeleportToProduct _TeleportToProduct{"tptoproduct", "Teleport to Product", "Teleports to the selected product."};
 	static CollectProduct _CollectProduct{"collectproduct", "Collect Product", "Collects the selected product."};
+
+	static TeleportToGoldenClover _TeleportToGoldenClover{"tptogoldenclover", "Teleport to Golden Clover", "Teleports to the Golden Clover."};
+	static CollectGoldenClover _CollectGoldenClover{"collectgoldenclover", "Collect Golden Clover", "Collects the Golden Clover."};
 }

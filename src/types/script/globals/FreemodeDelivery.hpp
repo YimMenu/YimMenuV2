@@ -12,14 +12,14 @@ static_assert(sizeof(DeliveryPosData) == 6 * 8);
 struct FreemodeDelivery
 {
 	SCR_INT DeliveryFlags; // 0
-	SCR_ARRAY<DeliveryPosData, 1004> DeliveryPosData; // 1
-	SCR_BOOL DeliveryInVehicle; // 6026
-	SCR_BOOL DeliveryNotInVehicle; // 6027
-	TIMER DeliveryCooldown1; // 6028
-	SCR_INT CooldownFrameCount1; // 6030
-	TIMER DeliveryCooldown2; // 6031
-	SCR_INT CooldownFrameCount2; // 6033
+	SCR_ARRAY<DeliveryPosData, 1008> DeliveryPosData; // 1
+	SCR_BOOL DeliveryInVehicle; // 6050
+	SCR_BOOL DeliveryNotInVehicle; // 6051
+	TIMER DeliveryCooldown1; // 6052
+	SCR_INT CooldownFrameCount1; // 6054
+	TIMER DeliveryCooldown2; // 6055
+	SCR_INT CooldownFrameCount2; // 6057
 
 	static FreemodeDelivery* Get();
 };
-//static_assert(sizeof(FreemodeDelivery) == 6237 * 8);
+//static_assert(sizeof(FreemodeDelivery) == 6260 * 8);

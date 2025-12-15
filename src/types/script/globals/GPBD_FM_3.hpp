@@ -158,6 +158,7 @@ struct BOSS_GOON
 	SCR_BITSET<eBossGoonFlags> Flags;
 	SCR_INT Flags2; // TODO
 	SCR_INT Flags3; // TODO
+	SCR_INT Flags4; // added b3717
 	SCR_INT TotalBossGoonTime;
 	SCR_ARRAY<uint64_t, 2> BossGoonUUID;
 	SCR_ARRAY<uint64_t, 8> Goons;
@@ -222,6 +223,7 @@ struct BOSS_GOON
 	SCR_BOOL CasinoLimoActive;
 	SCR_BOOL CasinoLuxuryCarActive;
 	SCR_HASH CasinoLuxuryCarModel;
+	SCR_INT PAD_0309; // added b3717
 	CASINO_HEIST_PREP CasinoHeistPrep;
 	SCR_INT CayoPrepIndex;
 	SCR_INT CompanySUVDestination;
@@ -279,9 +281,11 @@ struct BOSS_GOON
 	SCR_INT NightclubMissionIndex;
 	SCR_INT NightclubDefendMissionIndex;
 	uint64_t PAD_0478[18]; // TODO
+	SCR_HASH PAD_0501;     // added b3717
+	SCR_INT PAD_0502;      // added b3717
 	SCR_BOOL DoubleActionCacheLocationRevealed;
 };
-static_assert(sizeof(BOSS_GOON) == 500 * 8);
+static_assert(sizeof(BOSS_GOON) == 504 * 8);
 
 struct MC_STATS
 {
@@ -348,7 +352,7 @@ struct GBPD_FM_3_Entry
 	SCR_INT CasinoFlowProgress;
 	SCR_ARRAY<uint64_t, 1> DailyObjectiveFlags; // @607 as of 1.67
 };
-static_assert(sizeof(GBPD_FM_3_Entry) == 611 * 8);
+static_assert(sizeof(GBPD_FM_3_Entry) == 615 * 8);
 
 struct GPBD_FM_3
 {
@@ -356,4 +360,4 @@ struct GPBD_FM_3
 
 	static GPBD_FM_3* Get();
 };
-static_assert(sizeof(GPBD_FM_3) == 19553 * 8);
+static_assert(sizeof(GPBD_FM_3) == 19681 * 8);

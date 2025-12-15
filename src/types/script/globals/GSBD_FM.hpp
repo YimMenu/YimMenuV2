@@ -24,13 +24,12 @@ struct WEAPON_PICKUPS
 	SCR_INT LastMeleeWeaponPickupTime;
 	SCR_INT LastProjectilePickupTime;
 	SCR_INT LastGunPickupTime;
-	SCR_ARRAY<uint64_t, 96> Indices; // size increased in b3095 (62 -> 95)
-	                                 // and in b3407 (95 -> 96)
-	SCR_ARRAY<uint64_t, 96> Owners;
+	SCR_ARRAY<uint64_t, 95> Indices; // size increased in b3095 (62 -> 95) // and in b3407 (95 -> 96) // one of PICKUP_WEAPON_VINTAGEPISTOL removed in b1013.17g9
+	SCR_ARRAY<uint64_t, 95> Owners;
 	SCR_INT SpawnCounter;
 	SCR_INT AmmoCount;
 };
-static_assert(sizeof(WEAPON_PICKUPS) == 200 * 8);
+static_assert(sizeof(WEAPON_PICKUPS) == 198 * 8);
 
 struct BIKER_CONTRACTS_SERVER
 {
@@ -43,14 +42,14 @@ static_assert(sizeof(BIKER_CONTRACTS_SERVER) == 10 * 8);
 
 struct GSBD_FM
 {
-	SCR_ARRAY<uint64_t, 2> ModelSwapBits;
+	SCR_ARRAY<uint64_t, 2> ModelSwapBits; // 0
 	SCR_INT PAD_0003; // unused
-	SCR_ARRAY<PLAYER_BOUNTY, 32> PlayerBounties;
+	SCR_ARRAY<PLAYER_BOUNTY, 32> PlayerBounties; // 4
 	uint64_t PAD_0101[5];                  // unused
 	SCR_ARRAY<uint64_t, 2> MuggingPlayers; // 0 = mugger, 1 = merryweather mercs
 	SCR_ARRAY<uint64_t, 2> MuggedPlayers;
 	uint64_t PAD_0112[4];             // unused
-	SCR_ARRAY<uint64_t, 62> PAD_0116; // TODO b3407 (61 -> 62)
+	SCR_ARRAY<uint64_t, 65> PAD_0116; // TODO b3407 (61 -> 62), 62 -> 65
 	SCR_INT ShopProcessingBitset;
 	SCR_ARRAY<uint64_t, NUM_CONTACTS> ActiveContactServiceBitsets;
 	SCR_ARRAY<ACTIVE_CONTACT_SERVICE, 32> ActiveContactServices;
@@ -67,4 +66,4 @@ struct GSBD_FM
 
 	static GSBD_FM* Get();
 };
-static_assert(sizeof(GSBD_FM) == 650 * 8);
+static_assert(sizeof(GSBD_FM) == 653 * 8);

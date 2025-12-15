@@ -4,6 +4,9 @@ on: [ push, pull_request ]
 
 jobs:
   native-compilation:
+    strategy:
+      matrix:
+        compiler: [ MSVC, Clang ]
     runs-on: [ self-hosted, Windows ]
     name: Native Compilation
     steps:
@@ -17,8 +20,13 @@ jobs:
         with:
           arch: amd64
 
-      - name: Generate CMake project
+      - name: Generate CMake project (Clang)
         run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+        if: matrix.compiler == 'Clang'
+
+      - name: Generate CMake project (MSVC)
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+        if: matrix.compiler == 'MSVC'
 
       - name: Build 64bit RelWithDebInfo DLL
         run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
@@ -37,7 +45,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RelWithDebInfo-Native-Clang
+          name: RelWithDebInfo-Native-${{ matrix.compiler }}
           path: |
             build/YimMenuV2-dev-*.dll
             build/YimMenuV2-dev-*.pdb

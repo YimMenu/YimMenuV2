@@ -119,5 +119,6 @@ namespace YimMenu
 	    "WEAPON_STUNROD"_J,
 	    "WEAPON_STRICKLER"_J,
 	    "WEAPON_BRIEFCASE_03"_J,
+	    "WEAPON_NEWSPAPER"_J
 	});
 }

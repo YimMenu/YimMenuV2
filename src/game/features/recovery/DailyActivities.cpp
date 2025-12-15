@@ -813,7 +813,7 @@ namespace YimMenu::Features
 				return;
 
 			static ScriptFunction getStreetDealerCoords("freemode"_J,
-			    ScriptPointer("GetStreetDealerCoords", "5D ? ? ? 5D ? ? ? 5D ? ? ? 18").Add(1).Rip());
+			    ScriptPointer("GetStreetDealerCoords", "5D ? ? ? 5D ? ? ? 5D ? ? ? 18 1F").Add(1).Rip());
 			if (auto coords = getStreetDealerCoords.Call<Vector3>(
 			        FreemodeGeneral::Get()->StreetDealers.Dealers[streetDealerIndex.GetState()].Location))
 				Self::GetPed().TeleportTo(coords);

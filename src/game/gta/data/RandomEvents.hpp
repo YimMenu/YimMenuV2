@@ -26,7 +26,8 @@ namespace YimMenu
 	    "Community Outreach",
 	    "Getaway Driver",
 	    "Stoner Survival",
-	    "Valentine Cheater"});
+	    "Valentine Cheater",
+	});
 
 	static constexpr auto randomEventScripts = std::to_array({"fm_content_drug_vehicle"_J,
 	    "fm_content_movie_props"_J,
@@ -51,7 +52,8 @@ namespace YimMenu
 	    "fm_content_community_outreach"_J,
 	    "fm_content_getaway_driver"_J,
 	    "fm_content_survival_grouping"_J,
-	    "fm_content_valentine_cheater"_J,});
+	    "fm_content_valentine_cheater"_J,
+	});
 
 	static constexpr auto randomEventCooldowns = std::to_array({
 	    "SUM22_RE_DRUG_VEHICLE_INACTIVE_TIME"_J,
@@ -60,7 +62,7 @@ namespace YimMenu
 	    "SUM22_RE_VEHICLE_LIST_INACTIVE_TIME"_J,
 	    "STANDARDCONTROLLERVOLUME_COOLDOWN"_J,
 	    "STANDARDTARGETTINGTIME_COOLDOWN"_J,
-	    "SSP2_COOLDOWN"_J
+	    "SSP2_COOLDOWN"_J,
 	    "SUM22_RE_SMUGGLER_TRAIL_INACTIVE_TIME"_J,
 	    "NC_SOURCE_TRUCK_COOLDOWN"_J,
 	    "SUM22_RE_SMUGGLER_PLANE_INACTIVE_TIME"_J,

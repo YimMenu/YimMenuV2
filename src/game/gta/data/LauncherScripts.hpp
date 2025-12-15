@@ -223,6 +223,13 @@ namespace YimMenu
 	    "fm_content_weed_shop_delivery"_J,
 	    "fm_content_tycoon_odd_jobs"_J,
 	    "fm_content_cutscene"_J,
+	    "fm_content_firefighter"_J,
+	    "fm_content_forklift_operator"_J,
+	    "fm_content_postal_worker"_J,
+	    "fm_content_getaway_driver"_J,
+	    "fm_content_survival_grouping"_J,
+	    "fm_content_valentine_cheater"_J,
+	    "fm_content_survival"_J,
 	    "AM_BOAT_TAXI"_J,
 	    "AM_HELI_TAXI"_J,
 	    "fm_hold_up_tut"_J,
@@ -251,9 +258,9 @@ namespace YimMenu
 	    "fm_Bj_race_controler"_J,
 	    "fm_deathmatch_controler"_J,
 	    "fm_hideout_controler"_J,
-	    "fm_mission_controller"_J,
+	    "fm_mission_controller_2020"_J, // Public_Mission_Controller, fm_mission_controller
 	    "FM_Race_Controler"_J,
-	    "FM_Horde_Controler"_J,
+	    "FM_Horde_Controler"_J, // FM_Survival_Controller
 	    "dont_cross_the_line"_J,
 	    "am_darts_apartment"_J,
 	    "AM_Armwrestling_Apartment"_J,
@@ -264,11 +271,13 @@ namespace YimMenu
 	    "gunslinger_arcade"_J,
 	    "wizard_arcade"_J,
 	    "AM_CASINO_LIMO"_J,
+	    "AM_MANSION_LIMO"_J,
 	    "AM_CASINO_LUXURY_CAR"_J,
+	    "AM_MANSION_LUXURY_CAR"_J,
 	    "Degenatron Games"_J,
 	    "ggsm_arcade"_J,
 	    "puzzle"_J,
 	    "camhedz_arcade"_J,
-	    "SCTV"_J,	
+	    "SCTV"_J
 	});
 }

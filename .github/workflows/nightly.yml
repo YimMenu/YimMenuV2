@@ -29,7 +29,7 @@ jobs:
           fi
 
   build_nightly:
-    runs-on: [self-hosted, Windows]
+    runs-on: windows-latest
     name: Build Nightly
     needs: check_recent_commit
     if: needs.check_recent_commit.outputs.should_run == 'true'
@@ -40,6 +40,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v2
 
       - name: Check CMake version
         run: cmake --version

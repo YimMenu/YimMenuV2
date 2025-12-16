@@ -4,10 +4,13 @@ on: [ push, pull_request ]
 
 jobs:
   native-compilation:
-    runs-on: [ self-hosted, Windows ]
+    runs-on: windows-latest
     name: Native Compilation
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v2
 
       - name: Check CMake version
         run: cmake --version

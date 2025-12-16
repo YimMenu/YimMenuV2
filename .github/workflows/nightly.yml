@@ -44,7 +44,7 @@ jobs:
       - name: Install LLVM
         uses: KyleMayes/install-llvm-action@v2
         with:
-          version: "18.0"
+          version: "17.0"
 
       - name: Check CMake version
         run: cmake --version

@@ -528,13 +528,13 @@ namespace YimMenu::Features
 			bool partime = Stats::GetPackedInt(34838 + (index * 4)) == location;
 			bool landing = Stats::GetPackedInt(34839 + (index * 4)) == location;
 
-			*ScriptGlobal(1979960).As<int*>() = 1;
-			*ScriptGlobal(1979960).At(1).As<int*>() = 1;
-			*ScriptGlobal(1979960).At(3).As<int*>() = 5;
-			*ScriptGlobal(1979960).At(4).As<int*>() = location + 1;
-			*ScriptGlobal(1979960).At(8).At(1).As<int*>() = checkpointReward.Get<int>() / (1 + (checkpoints * 9));
-			*ScriptGlobal(1979960).At(8).At(2).As<int*>() = parTimeReward.Get<int>() / (1 + (partime * 9));
-			*ScriptGlobal(1979960).At(8).At(3).As<int*>() = landingReward.Get<int>() / (1 + (landing * 9));
+			*ScriptGlobal(1979961).As<int*>() = 1;
+			*ScriptGlobal(1979961).At(1).As<int*>() = 1;
+			*ScriptGlobal(1979961).At(3).As<int*>() = 5;
+			*ScriptGlobal(1979961).At(4).As<int*>() = location + 1;
+			*ScriptGlobal(1979961).At(8).At(1).As<int*>() = checkpointReward.Get<int>() / (1 + (checkpoints * 9));
+			*ScriptGlobal(1979961).At(8).At(2).As<int*>() = parTimeReward.Get<int>() / (1 + (partime * 9));
+			*ScriptGlobal(1979961).At(8).At(3).As<int*>() = landingReward.Get<int>() / (1 + (landing * 9));
 
 			SET_SKYDIVE_COMPLETED data;
 			data.SkydiveIndex = index;
@@ -544,7 +544,7 @@ namespace YimMenu::Features
 			data.AccurateLanding = TRUE;
 			data.Send();
 
-			ScriptGlobal(1983929).At(4).As<SCR_BITSET<uint64_t>*>()->Clear(3);
+			ScriptGlobal(1983930).At(4).As<SCR_BITSET<uint64_t>*>()->Clear(3);
 		}
 	};
 

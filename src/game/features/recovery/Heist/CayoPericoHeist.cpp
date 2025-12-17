@@ -25,7 +25,7 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				auto base = ScriptGlobal(1980034).At(831).At(56);
+				auto base = ScriptGlobal(1980035).At(831).At(56);
 
 				*base.At(0, 1).As<int*>() = _CayoPericoHeistCut1.GetState();
 				*base.At(1, 1).As<int*>() = _CayoPericoHeistCut2.GetState();

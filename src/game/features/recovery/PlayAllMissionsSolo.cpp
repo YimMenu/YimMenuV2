@@ -113,7 +113,7 @@ namespace YimMenu::Features
 
 			if (!m_ShouldFailMissionPatch3)
 			{
-				m_ShouldFailMissionPatch3 = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("ShouldFailMissionPatch3", "50 ? ? 78 82 06 1F 56 2E 01"), {0x00, 0x00, 0x00, 0x00, 0x72});
+				m_ShouldFailMissionPatch3 = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("ShouldFailMissionPatch3", "50 ? ? 78 82 06 1F 56 ? ? 71"), {0x00, 0x00, 0x00, 0x00, 0x72});
 			}
 			m_ShouldFailMissionPatch3->Enable();
 

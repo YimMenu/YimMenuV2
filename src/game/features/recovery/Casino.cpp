@@ -79,13 +79,11 @@ virtual void OnDisable() override
 				{
 					ScriptMgr::Yield();
 					spin_state = ScriptLocal("casino_slots"_J, spin_state_var).As<int*>();
+					if (spin_state == nullptr){
+						return;
+					}
 				}
-				casinoSlotsScriptHostPlayer = NETWORK::NETWORK_GET_HOST_OF_SCRIPT("casino_slots", -1, 0);
-				casinoSlotsScriptHostPlayerId = casinoSlotsScriptHostPlayer.GetId();
-				if (casinoSlotsScriptHostPlayerId != selfPlayerId)
-				{
-					Scripts::ForceScriptHost(Scripts::FindScriptThread("casino_slots"_J));
-				}
+
 				for (int slots_iter = 3; slots_iter <= 196; ++slots_iter)
 				{
 					if (!slots_blacklist.contains(slots_iter))

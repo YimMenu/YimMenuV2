@@ -44,11 +44,11 @@ namespace YimMenu::Features
 						}
 					}
 				}
-				if (needs_run && *spin_state >= 8 && *spin_state <= 15)
+				if (needs_run)
 				{
 					for (int slots_iter = 3; slots_iter <= 196; ++slots_iter)
 					{
-						if (!slots_blacklist.contains(slots_iter))
+						if (!slots_blacklist.contains(slots_iter) && *spin_state >= 8 && *spin_state <= 15)
 						{
 							int slot_result = 6;
 							*ScriptLocal("casino_slots"_J, slots_random_results_table + slots_iter).As<int*>() = slot_result;
@@ -69,10 +69,10 @@ namespace YimMenu::Features
 				{
 					Scripts::ForceScriptHost(Scripts::FindScriptThread("casino_slots"_J));
 				}
-
+				int* spin_state = ScriptLocal("casino_slots"_J, spin_state_var).As<int*>();
 				for (int slots_iter = 3; slots_iter <= 196; ++slots_iter)
 				{
-					if (!slots_blacklist.contains(slots_iter))
+					if (!slots_blacklist.contains(slots_iter) && *spin_state >= 8 && *spin_state <= 15)
 					{
 						int slot_result = 6;
 						std::srand(static_cast<unsigned int>(std::time(0)) + slots_iter);

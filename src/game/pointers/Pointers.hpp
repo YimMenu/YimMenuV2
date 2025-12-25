@@ -23,7 +23,7 @@ namespace rage
 	class fwVehiclePool;
 	class rlSessionInfo;
 	class rlGamerHandle;
-	class rlTaskStatus;
+	struct rlTaskStatus;
 	class rlScTaskStatus;
 	class rlSessionByGamerTaskResult;
 	class rlQueryPresenceAttributesContext;
@@ -167,6 +167,10 @@ namespace YimMenu
 		PVOID GetAnticheatInitializedHash2;
 		CAnticheatContext** AnticheatContext;
 		BytePatch AbilityBarPatch;
+		PVOID MatchmakingAdvertise;
+		PVOID MatchmakingUpdate;
+		PVOID MatchmakingUnadvertise;
+		PVOID MatchmakingSessionDetailSendResponse;
 	};
 
 	struct Pointers : PointerData

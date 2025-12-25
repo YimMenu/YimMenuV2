@@ -1,6 +1,7 @@
 #include "SavedVehicles.hpp"
-
+#include "core/commands/BoolCommand.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/backend/ScriptMgr.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "core/util/Strings.hpp"
 #include "game/backend/Self.hpp"
@@ -10,37 +11,48 @@
 
 namespace YimMenu::Submenus
 {
+	static BoolCommand spawnInsideSavedVehicle{"spawninsidesavedveh", "Spawn Inside", "Spawn inside the vehicle."};
+
 	std::shared_ptr<Category> BuildSavedVehiclesMenu()
 	{
 		static std::string folder{}, file{};
 		static std::vector<std::string> folders{}, files{};
 		static char vehicle_file_name_input[64]{};
-		static char save_folder[50]{};
+		static char newFolder[50]{};
 
 		auto persistCar = std::make_shared<Category>("Saved Vehicles");
 
+		persistCar->AddItem(std::make_shared<BoolCommandItem>("spawninsidesavedveh"_J));
+
 		persistCar->AddItem(std::make_unique<ImGuiItem>([] {
-			static auto drawSaveVehicleButton = [](const char* folderToSaveIn) {
+			static auto drawSaveVehicleButton = [](bool saveToNewFolder) {
 				if (!Self::GetVehicle() || !Self::GetVehicle().IsValid())
 					return;
 
 				if (ImGui::Button("Save"))
-				{
-					std::string yo = vehicle_file_name_input;
-					ZeroMemory(vehicle_file_name_input, sizeof(vehicle_file_name_input));
+					FiberPool::Push([saveToNewFolder] {
+						std::string fileName = vehicle_file_name_input;
+						strcpy(vehicle_file_name_input, "");
 
-					if (!TrimString(yo).size())
-					{
-						Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
-						return;
-					}
+						if (!TrimString(fileName).size())
+						{
+							Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
+							return;
+						}
 
-					ReplaceString(yo, ".", ""); // so that .. does not throw error by custom file system when it sees say bob..json
-					yo += ".json";
+						ReplaceString(fileName, ".", ""); // filename say "bob.." will throw relative path error from Folder::GetFile
+						fileName += ".json";
 
-					SavedVehicles::Save(folderToSaveIn, yo);
-					SavedVehicles::RefreshList(folder, folders, files);
-				}
+						SavedVehicles::Save(saveToNewFolder ? newFolder : folder, fileName);
+
+						if (saveToNewFolder)
+						{
+							folder = newFolder; // set current folder to newly created folder
+							strcpy(newFolder, "");
+						}
+
+						SavedVehicles::RefreshList(folder, folders, files);
+					});
 				ImGui::SameLine();
 				if (ImGui::Button("Populate Name"))
 					FiberPool::Push([] {
@@ -50,7 +62,9 @@ namespace YimMenu::Submenus
 			};
 
 			if (ImGui::Button("Refresh List"))
-				SavedVehicles::RefreshList(folder, folders, files);
+				FiberPool::Push([] {
+					SavedVehicles::RefreshList(folder, folders, files);
+				});
 
 			ImGui::SetNextItemWidth(300.f);
 			auto folder_display = folder.empty() ? "Root" : folder.c_str();
@@ -59,14 +73,18 @@ namespace YimMenu::Submenus
 				if (ImGui::Selectable("Root", folder == ""))
 				{
 					folder.clear();
-					SavedVehicles::RefreshList(folder, folders, files);
+					FiberPool::Push([] {
+						SavedVehicles::RefreshList(folder, folders, files);
+					});
 				}
 
 				for (std::string folder_name : folders)
 					if (ImGui::Selectable(folder_name.c_str(), folder == folder_name))
 					{
 						folder = folder_name;
-						SavedVehicles::RefreshList(folder, folders, files);
+						FiberPool::Push([] {
+							SavedVehicles::RefreshList(folder, folders, files);
+						});
 					}
 
 				ImGui::EndCombo();
@@ -113,11 +131,11 @@ namespace YimMenu::Submenus
 				{
 					ImGui::Text("Folder Name");
 					ImGui::SetNextItemWidth(250);
-					ImGui::InputText("##foldername", save_folder, IM_ARRAYSIZE(save_folder));
-					drawSaveVehicleButton(save_folder);
+					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
+					drawSaveVehicleButton(true);
 				}
 				else
-					drawSaveVehicleButton(folder.c_str());
+					drawSaveVehicleButton(false);
 			}
 			ImGui::EndGroup();
 
@@ -129,7 +147,9 @@ namespace YimMenu::Submenus
 				ImGui::Spacing();
 				if (ImGui::Button("Yes"))
 				{
-					SavedVehicles::Load(folder, file);
+					FiberPool::Push([] {
+						SavedVehicles::Load(folder, file, spawnInsideSavedVehicle.GetState());
+					});
 					open_modal = false;
 					ImGui::CloseCurrentPopup();
 				}

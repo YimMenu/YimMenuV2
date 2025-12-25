@@ -129,6 +129,7 @@ namespace YimMenu::Submenus
 	{
 		auto menu = std::make_unique<Category>("Scripts");
 
+		auto tabBar = std::make_unique<TabBarItem>("Scripts");
 		auto threads = std::make_unique<TabItem>("Threads");
 		auto script = std::make_unique<TabItem>("Start Script");
 
@@ -242,21 +243,25 @@ namespace YimMenu::Submenus
 					ImGui::EndGroup();
 					ImGui::TreePop();
 				}
-				RenderBytecode(curProgram);
+				if (ImGui::TreeNode("Bytecode"))
+				{
+					RenderBytecode(curProgram);
+					ImGui::TreePop();
+				}
 			}
 		}));
 
 		script->AddItem(std::make_unique<ImGuiItem>([] {
 			static std::string scriptSearch = "";
-			static std::string scriptName = "";
 			static std::string stackSizeName = stackSizes[0].first;
+			static std::optional<int> launcherIndex = std::nullopt;
 			static int stackSize = 0;
 			static std::int64_t* args = nullptr;
 			static int argCount = 0;
 			static int previousArgCount = 0;
 			static bool pauseAfterStarting = false;
 
-			ImGui::InputTextWithHint("Script Name", "Search", &scriptSearch);
+			bool modified = ImGui::InputTextWithHint("Script Name", "Search", &scriptSearch);
 
 			if (ImGui::BeginCombo("Stack Size", stackSizeName.c_str()))
 			{
@@ -312,10 +317,10 @@ namespace YimMenu::Submenus
 					std::transform(lowerScript.begin(), lowerScript.end(), lowerScript.begin(), ::tolower);
 					if (lowerScript.find(lowerSearch) != std::string::npos)
 					{
-						if (ImGui::Selectable(script, scriptName == script))
+						if (ImGui::Selectable(script, scriptSearch == script))
 						{
 							scriptSearch = script;
-							scriptName = script;
+							modified = true;
 						}
 					}
 				}
@@ -323,12 +328,17 @@ namespace YimMenu::Submenus
 				ImGui::EndListBox();
 			}
 
+			if (modified)
+			{
+				launcherIndex = Scripts::GetLauncherIndexFromScript(Joaat(scriptSearch));
+			}
+
 			ImGui::Checkbox("Pause After Starting", &pauseAfterStarting);
 
 			if (ImGui::Button("Start Script"))
 			{
 				FiberPool::Push([] {
-					auto hash = Joaat(scriptName);
+					auto hash = Joaat(scriptSearch);
 
 					if (!SCRIPT::DOES_SCRIPT_WITH_NAME_HASH_EXIST(hash))
 					{
@@ -374,16 +384,31 @@ namespace YimMenu::Submenus
 					Notifications::Show("Start Script", std::format("Started script with ID {}.", id), NotificationType::Success);
 				});
 			}
+
+			if (launcherIndex && *Pointers.IsSessionStarted)
+			{
+				ImGui::SameLine();
+				if (ImGui::Button("Start Session Script"))
+				{
+					FiberPool::Push([] {
+						Scripts::StartLauncherScript(Joaat(scriptSearch));
+					});
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Start Script With Event"))
+				{
+					FiberPool::Push([] {
+						Scripts::ForceScriptOnPlayer(Joaat(scriptSearch), -1);
+					});
+				}
+			}
 		}));
 
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::BeginTabBar("Scripts");
-		}));
-		menu->AddItem(std::move(threads));
-		menu->AddItem(std::move(script));
-		menu->AddItem(std::make_shared<ImGuiItem>([] {
-			ImGui::EndTabBar();
-		}));
+		tabBar->AddItem(std::move(threads));
+		tabBar->AddItem(std::move(script));
+
+		menu->AddItem(std::move(tabBar));
+
 		return menu;
 	}
 }

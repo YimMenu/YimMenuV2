@@ -1,43 +1,32 @@
 #include "SpawnVehicle.hpp"
+#include "core/commands/BoolCommand.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/frontend/Notifications.hpp"
 #include "game/backend/Self.hpp"
+#include "game/backend/PersonalVehicles.hpp"
 #include "game/gta/data/Vehicles.hpp"
-#include "game/gta/Vehicle.hpp"
 #include "game/gta/Natives.hpp"
 
 namespace YimMenu::Submenus
 {
-	static Vector3 GetVehicleSpawnLoc(joaat_t hash, bool spawnInside)
+	static BoolCommand spawnInsideVehicle{"spawninsideveh", "Spawn Inside", "Spawn inside the vehicle."};
+	static BoolCommand spawnVehicleMaxed{"spawnvehmaxed", "Spawn Maxed", "Spawn the vehicle maxed."};
+	static BoolCommand spawnInsidePersonalVehicle{"spawninsidepv", "Spawn Inside", "Spawn inside the personal vehicle."};
+	static BoolCommand spawnClonePersonalVehicle{"spawnclonepv", "Spawn Clone", "Spawn a clone of the persone vehicle."};
+
+	std::shared_ptr<TabItem> RenderSpawnNewVehicle()
 	{
-		float y_offset = 0;
+		auto tab = std::make_shared<TabItem>("New Vehicle");
 
-		if (Self::GetVehicle().IsValid())
-		{
-			Vector3 min, max, result;
-			MISC::GET_MODEL_DIMENSIONS(hash, &min, &max);
-			result = max - min;
-			y_offset = result.y;
-		}
-		else if (!spawnInside)
-		{
-			y_offset = 5.f;
-		}
-
-		return ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(Self::GetPed().GetHandle(), 0.f, y_offset, 0.f);
-	}
-
-	std::shared_ptr<Category> BuildSpawnVehicleMenu()
-	{
-		auto menu = std::make_shared<Category>("Spawn");
+		auto spawn = std::make_shared<Group>("Spawn");
+		auto settings = std::make_shared<Group>("Settings");
 
 		static std::vector<std::string> vehicleNames{};
 		static std::vector<int> vehicleClasses{};
 		static int selectedClass{-1};
-		static bool spawnInside{};
-		static bool spawnMaxed{};
 
-		menu->AddItem(std::make_unique<ImGuiItem>([] {
+		spawn->AddItem(std::make_unique<ImGuiItem>([] {
 			static bool init = [] {
 				FiberPool::Push([] {
 					std::unordered_map<std::string, int> nameCount;
@@ -94,50 +83,168 @@ namespace YimMenu::Submenus
 				ImGui::EndCombo();
 			}
 
-			const int visible = std::min(10, static_cast<int>(vehicleNames.size()));
+			const int visible = std::min(20, static_cast<int>(vehicleNames.size()));
 			const float height = visible * ImGui::GetTextLineHeightWithSpacing();
 			if (ImGui::BeginListBox("##vehicles", {300.f, height}))
 			{
-				std::string lower = search;
-				std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-				for (int veh = 0; veh < vehicleNames.size(); veh++)
+				if (vehicleNames.empty())
 				{
-					if (vehicleNames[veh].empty())
-						continue;
-
-					auto hash = g_VehicleHashes[veh];
-					auto name = vehicleNames[veh];
-					auto lowerName = name;
-					std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
-
-					bool matchesSearch = lowerName.find(lower) != std::string::npos;
-					bool matchesClass = selectedClass == -1 || vehicleClasses[veh] == selectedClass;
-					if (matchesSearch && matchesClass)
+					ImGui::Text("Natives not cached yet.");
+				}
+				else
+				{
+					std::string lower = search;
+					std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+					for (int veh = 0; veh < vehicleNames.size(); veh++)
 					{
-						ImGui::PushID(hash);
-						if (ImGui::Selectable(name.c_str()))
+						auto hash = g_VehicleHashes[veh];
+						auto name = vehicleNames[veh];
+						auto lowerName = name;
+						std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+						bool matchesSearch = lowerName.find(lower) != std::string::npos;
+						bool matchesClass = selectedClass == -1 || vehicleClasses[veh] == selectedClass;
+						if (matchesSearch && matchesClass)
 						{
-							FiberPool::Push([hash] {
-								auto handle = Vehicle::Create(hash, GetVehicleSpawnLoc(hash, spawnInside), Self::GetPed().GetHeading());
+							ImGui::PushID(hash);
+							if (ImGui::Selectable(name.c_str()))
+							{
+								FiberPool::Push([hash] {
+									auto handle = Vehicle::Create(hash, Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), hash), Self::GetPed().GetHeading());
 
-								if (spawnInside)
-									Self::GetPed().SetInVehicle(handle);
+									if (spawnInsideVehicle.GetState())
+										Self::GetPed().SetInVehicle(handle);
 
-								if (spawnMaxed)
-									handle.Upgrade();
-							});
+									if (spawnVehicleMaxed.GetState())
+										handle.Upgrade();
+								});
+							}
+							ImGui::PopID();
 						}
-						ImGui::PopID();
 					}
 				}
 
 				ImGui::EndListBox();
 			}
-
-			ImGui::Checkbox("Spawn Inside", &spawnInside);
-			ImGui::SameLine();
-			ImGui::Checkbox("Spawn Maxed", &spawnMaxed);
 		}));
+
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawninsideveh"_J));
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawnvehmaxed"_J));
+
+		tab->AddItem(spawn);
+		tab->AddItem(settings);
+		return tab;
+	}
+
+	std::shared_ptr<TabItem> RenderSpawnPersonalVehicle()
+	{
+		auto tab = std::make_shared<TabItem>("Personal Vehicle");
+
+		auto spawn = std::make_shared<Group>("Spawn");
+		auto settings = std::make_shared<Group>("Settings");
+
+		static std::string selectedGarageStr{""};
+
+		spawn->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!*Pointers.IsSessionStarted)
+				return ImGui::TextDisabled("Join GTA Online.");
+
+			PersonalVehicles::Update();
+
+			static char search[64];
+			ImGui::SetNextItemWidth(300.f);
+			ImGui::InputTextWithHint("Name", "Search", search, sizeof(search));
+
+			ImGui::SetNextItemWidth(300.f);
+			if (ImGui::BeginCombo("Garage", selectedGarageStr.empty() ? "All" : selectedGarageStr.c_str()))
+			{
+				if (ImGui::Selectable("All", selectedGarageStr.empty()))
+				{
+					selectedGarageStr.clear();
+				}
+				for (auto garage : PersonalVehicles::GetGarages())
+				{
+					if (ImGui::Selectable(garage.c_str(), garage == selectedGarageStr))
+					{
+						selectedGarageStr = garage;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			const int visible = std::min(20, static_cast<int>(PersonalVehicles::GetPersonalVehicles().size()));
+			const float height = visible * ImGui::GetTextLineHeightWithSpacing();
+			if (ImGui::BeginListBox("##personalvehicles", {300.f, height}))
+			{
+				if (PersonalVehicles::GetPersonalVehicles().empty())
+				{
+					ImGui::Text("Stats not loaded yet.");
+				}
+				else
+				{
+					std::string lowerSearch = search;
+					std::transform(lowerSearch.begin(), lowerSearch.end(), lowerSearch.begin(), tolower);
+					for (const auto& it : PersonalVehicles::GetPersonalVehicles())
+					{
+						const auto& label = it.first;
+						const auto& personalVeh = it.second;
+
+						auto lowerName = label;
+						std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+						bool matchesSearch = lowerName.find(lowerSearch) != std::string::npos;
+						bool matchesGarage = selectedGarageStr.empty() || personalVeh->GetGarage() == selectedGarageStr;
+						if (matchesSearch && matchesGarage)
+						{
+							ImGui::PushID(personalVeh->GetId());
+							if (ImGui::Selectable(label.c_str()))
+							{
+								FiberPool::Push([&personalVeh] {
+									if (spawnClonePersonalVehicle.GetState())
+									{
+										auto coords  = Vehicle::GetSpawnLocRelToPed(Self::GetPed().GetHandle(), personalVeh->GetModel());
+										auto heading = Self::GetPed().GetHeading();
+										auto handle  = personalVeh->Clone(coords, heading);
+										
+										if (spawnInsidePersonalVehicle.GetState())
+											Self::GetPed().SetInVehicle(handle);
+									}
+									else
+									{
+										if (!personalVeh->Request(spawnInsidePersonalVehicle.GetState()))
+											Notifications::Show("Spawn Personal Vehicle", "Failed to spawn Personal Vehicle.", NotificationType::Error);
+									}
+								});
+							}
+							ImGui::PopID();
+						}
+					}
+				}
+
+				ImGui::EndListBox();
+			}
+		}));
+
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawninsidepv"_J));
+		settings->AddItem(std::make_shared<BoolCommandItem>("spawnclonepv"_J));
+
+
+		tab->AddItem(spawn);
+		tab->AddItem(settings);
+		return tab;
+	}
+
+	std::shared_ptr<Category> BuildSpawnVehicleMenu()
+	{
+		auto menu = std::make_shared<Category>("Spawn");
+
+		auto tabBar = std::make_shared<TabBarItem>("Spawn");
+
+		tabBar->AddItem(RenderSpawnNewVehicle());
+		tabBar->AddItem(RenderSpawnPersonalVehicle());
+
+		menu->AddItem(std::move(tabBar));
 
 		return menu;
 	}

@@ -67,11 +67,11 @@ static_assert(sizeof(RANDOM_EVENTS_CLIENT_EVENT_DATA) == 3 * 8);
 struct RANDOM_EVENTS_CLIENT_DATA
 {
 	alignas(8) eRandomEventClientInitState InitState;         // 0
-	SCR_ARRAY<RANDOM_EVENTS_CLIENT_EVENT_DATA, 21> EventData; // 1
-	SCR_BITSET<uint64_t> IsParticipantInEventFlags;           // 65
-	SCR_INT UNK_0066;                                         // 66 (unused)
+	SCR_ARRAY<RANDOM_EVENTS_CLIENT_EVENT_DATA, 24> EventData; // 1
+	SCR_BITSET<uint64_t> IsParticipantInEventFlags;           // 75
+	SCR_INT UNK_0076;                                         // 76 (unused)
 };
-static_assert(sizeof(RANDOM_EVENTS_CLIENT_DATA) == 67 * 8);
+static_assert(sizeof(RANDOM_EVENTS_CLIENT_DATA) == 76 * 8);
 
 struct HOCW_DATA
 {
@@ -124,9 +124,10 @@ struct GPBD_FM_2_Entry
 	SCR_VEC3 CoronaPosition;                           // 40
 	GANGOPS_DATA GangopsData;                          // 43
 	RANDOM_EVENTS_CLIENT_DATA RandomEventsClientData;  // 82
-	SALVAGE_YARD_VEHICLE_SALE_DATA SYVehSaleData;      // 149 added b889g9
+	SALVAGE_YARD_VEHICLE_SALE_DATA SYVehSaleData;      // 158 added b889g9
+	uint64_t PAD_0210[105];
 };
-static_assert(sizeof(GPBD_FM_2_Entry) == 201 * 8);
+static_assert(sizeof(GPBD_FM_2_Entry) == 315 * 8);
 
 struct GPBD_FM_2
 {
@@ -134,4 +135,4 @@ struct GPBD_FM_2
 
 	static GPBD_FM_2* Get();
 };
-static_assert(sizeof(GPBD_FM_2) == 6433 * 8);
+static_assert(sizeof(GPBD_FM_2) == 10081 * 8);

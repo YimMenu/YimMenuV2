@@ -9,6 +9,7 @@
 
 #include "game/pointers/Pointers.hpp" // game import in core!
 #include "game/gta/Natives.hpp"       // game import in core!
+#include "game/frontend/GUI.hpp"
 
 namespace YimMenu
 {
@@ -94,7 +95,7 @@ namespace YimMenu
 	{
 		while (g_Running)
 		{
-			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified)
+			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified && !GUI::IsUsingKeyboard())
 			{
 				for (auto& [hash, link] : m_CommandHotkeys)
 				{
@@ -141,11 +142,17 @@ namespace YimMenu
 
 	void HotkeySystem::SaveStateImpl(nlohmann::json& state)
 	{
-		for (auto& hotkey : m_CommandHotkeys)
+		for (const auto& hotkey : m_CommandHotkeys)
 		{
+			std::string key = std::to_string(hotkey.first);
+
 			if (!hotkey.second.m_Chain.empty())
 			{
-				state[std::to_string(hotkey.first).data()] = hotkey.second.m_Chain;
+				state[key] = hotkey.second.m_Chain;
+			}
+			else if (state.contains(key))
+			{
+				state.erase(key);
 			}
 		}
 	}
@@ -154,8 +161,8 @@ namespace YimMenu
 	{
 		for (auto& [key, value] : state.items())
 		{
-			if (m_CommandHotkeys.contains(std::atoi(key.data())))
-				m_CommandHotkeys[std::atoi(key.data())].m_Chain = value.get<std::vector<int>>();
+			if (m_CommandHotkeys.contains(static_cast<uint32_t>(std::stoul(key.data()))))
+				m_CommandHotkeys[static_cast<uint32_t>(std::stoul(key.data()))].m_Chain = value.get<std::vector<int>>();
 		}
 	}
 

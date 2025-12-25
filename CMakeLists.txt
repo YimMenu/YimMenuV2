@@ -9,6 +9,7 @@ include(cmake/async-logger.cmake)
 include(cmake/imgui.cmake)
 include(cmake/json.cmake)
 include(cmake/minhook.cmake)
+include(cmake/luajit.cmake)
 
 # source
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
@@ -35,7 +36,28 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${imgui_SOURCE_DIR}"
     "${minhook_SOURCE_DIR}/include"
     "${minhook_SOURCE_DIR}/src/hde"
+    "${luajit_SOURCE_DIR}/src"
+    "${luajit_BINARY_DIR}/src"
 )
 
 message(STATUS "Setting up linked libraries")
-target_link_libraries(${PROJECT_NAME} PRIVATE AsyncLogger imgui minhook nlohmann_json::nlohmann_json dbghelp d3dcompiler dwmapi)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    # Project dependencies
+    AsyncLogger
+    imgui
+    minhook
+    nlohmann_json::nlohmann_json
+    dbghelp
+
+    # ImGui dependencies
+    $<IF:$<BOOL:${CROSSCOMPILE}>,d3dcompiler_47,d3dcompiler>
+    dwmapi
+    gdi32
+    libluajit
+)
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+    # Do not warn about non-reproducible code
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-date-time>
+    $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wno-date-time>
+)

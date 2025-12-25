@@ -85,7 +85,7 @@ struct GSBD
 	SCR_BOOL PAD_0816; // always set to FALSE
 	SCR_INT PAD_0817;  // unused
 	CEO_COLORS CeoColors;
-	SMPL_INTERIOR_DATA_SERVER SimpleInteriorData;
+	//SMPL_INTERIOR_DATA_SERVER SimpleInteriorData;
 	LEAVE_CLUBHOUSE_SERVER LeaveClubhouse;
 	SCR_ARRAY<IE_DELIVERY_INFO, 32> IEDeliveryInfos;
 	SCR_INT PAD_1397;
@@ -95,4 +95,4 @@ struct GSBD
 
 	static GSBD* Get();
 };
-static_assert(sizeof(GSBD) == 1499 * 8);
+static_assert(sizeof(GSBD) == 1264 * 8);

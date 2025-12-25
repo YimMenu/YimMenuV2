@@ -5,11 +5,35 @@
 #include "types/script/globals/GPBD_FM_3.hpp"
 #include "types/script/globals/GlobalPlayerBD.hpp"
 #include "types/script/ScriptEvent.hpp"
+#include "core/scripting/LuaManager.hpp"
+#include "core/util/Joaat.hpp"
 
 namespace YimMenu::Hooks
 {
+	static bool CheckLuaScripts(Player player, CScriptedGameEvent& event)
+	{
+		return LuaManager::DispatchEvent("menu.script_event_received"_J, [player, &event](lua_State* state)
+		{
+			// TODO: pass a Player instance
+			lua_pushinteger(state, player.GetId());
+
+			lua_newtable(state);
+			auto length = event.m_ArgsSize / 8;
+			for (int i = 0; i < length; i++)
+			{
+				lua_pushinteger(state, i == 0 ? (ptrdiff_t)(int)event.m_Args[i] : event.m_Args[i]);
+				lua_rawseti(state, -2, i + 1);
+			}
+
+			return 2;
+		}, true);
+	}
+
 	bool Network::HandleScriptedGameEvent(Player player, CScriptedGameEvent& event)
 	{
+		if (!CheckLuaScripts(player, event))
+			return false;
+
 		SCRIPT_EVENT* script_event = reinterpret_cast<SCRIPT_EVENT*>(event.m_Args);
 
 		switch (static_cast<ScriptEventIndex>(script_event->GetEventIndex()))

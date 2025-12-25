@@ -6,34 +6,9 @@
 
 namespace YimMenu::Features
 {
-	static StringCommand _VehicleModelName{"vehmodelname", "Vehicle Model", "The model name of the vehicle you wish to spawn."};
 	static StringCommand _PedModelName{"pedmodelname", "Ped Model", "The model name of the ped you wish to spawn."};
 	static StringCommand _ObjectModelName{"objectmodelname", "Object Model", "The model name of the object you wish to spawn."};
 
-	class SpawnVehicle : public Command
-	{
-		using Command::Command;
-
-		virtual void OnCall() override
-		{
-			auto model = _VehicleModelName.GetString();
-			if (!model.length())
-			{
-				Notifications::Show("Spawn Vehicle", "No model name provided.", NotificationType::Error);
-				return;
-			}
-
-			auto modelHash = Joaat(model);
-			if (STREAMING::IS_MODEL_IN_CDIMAGE(modelHash))
-			{
-				Vehicle::Create(modelHash, Self::GetPed().GetPosition(), Self::GetPed().GetHeading());
-			}
-			else
-			{
-				Notifications::Show("Spawn Vehicle", "Invalid model name provided.", NotificationType::Error);
-			}
-		}
-	};
 
 	class SpawnPed : public Command
 	{
@@ -85,7 +60,6 @@ namespace YimMenu::Features
 		}
 	};
 
-	static SpawnVehicle _SpawnVehicle{"spawnvehicle", "Spawn Vehicle", "Spawns a vehicle at your current location."};
 	static SpawnPed _SpawnPed{"spawnped", "Spawn Ped", "Spawns a ped at your current location."};
 	static SpawnObject _SpawnObject{"spawnobject", "Spawn Object", "Spawns an object at your current location."};
 }

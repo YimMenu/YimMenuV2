@@ -1,6 +1,7 @@
 #include "core/commands/Command.hpp"
 #include "core/frontend/Notifications.hpp"
-#include "types/script/globals/MPSV.hpp"
+#include "game/backend/PersonalVehicles.hpp"
+#include "game/pointers/Pointers.hpp"
 
 namespace YimMenu::Features
 {
@@ -10,27 +11,21 @@ namespace YimMenu::Features
 
 		virtual void OnCall() override
 		{
-			if (auto mpsv = MPSV::Get())
-			{
-				int count = 0;
-				for (int i = 0; i < *(int*)mpsv; i++)
-				{
-					if (mpsv->Entries[i].PersonalVehicleFlags.IsSet(1) && mpsv->Entries[i].PersonalVehicleFlags.IsSet(2))
-					{
-						mpsv->Entries[i].PersonalVehicleFlags.Clear(1);
-						mpsv->Entries[i].PersonalVehicleFlags.Clear(6);
-						mpsv->Entries[i].PersonalVehicleFlags.Clear(16);
-						mpsv->Entries[i].PersonalVehicleFlags.Set(0);
-						mpsv->Entries[i].PersonalVehicleFlags.Set(11);
-						count++;
-					}
-				}
+			if (!*Pointers.IsSessionStarted)
+				return;
 
-				if (count > 0)
-					Notifications::Show("Fix All Vehicles", std::format("{} vehicles fixed.", count), NotificationType::Success);
-				else
-					Notifications::Show("Fix All Vehicles", "No vehicles to fix.");
+			int count = 0;
+			for (const auto& it : PersonalVehicles::GetPersonalVehicles())
+			{
+				const auto& personalVeh = it.second;
+				if (personalVeh->Repair())
+					count++;
 			}
+
+			if (count > 0)
+				Notifications::Show("Fix All Vehicles", std::format("{} vehicles fixed.", count), NotificationType::Success);
+			else
+				Notifications::Show("Fix All Vehicles", "No vehicles to fix.");
 		}
 	};
 

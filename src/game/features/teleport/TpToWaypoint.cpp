@@ -14,22 +14,18 @@ namespace YimMenu::Features
 		constexpr int max_attempts = 20;
 		float ground_z = vec.z;
 		int current_attempts = 0;
+		bool found_ground = false;
 
 		do
 		{
 			STREAMING::REQUEST_COLLISION_AT_COORD(vec.x, vec.y, vec.z);
 
-			float water_height;
-			if (WATER::GET_WATER_HEIGHT(vec.x, vec.y, vec.z, &water_height))
-			{
-				vec.z = water_height;
-				return;
-			}
-
+			// find ground first and if found set z to new value and break
 			if (MISC::GET_GROUND_Z_FOR_3D_COORD(vec.x, vec.y, max_ground_check, &ground_z, false, false))
 			{
 				vec.z = ground_z + 1.0f;
-				return;
+				found_ground = true;
+				break;
 			}
 
 			if (current_attempts % 3 == 0)
@@ -40,8 +36,18 @@ namespace YimMenu::Features
 			++current_attempts;
 			ScriptMgr::Yield();
 		} while (current_attempts < max_attempts);
+		
+		// whether ground was found or not check for water height
+		float water_height;
+		if (WATER::GET_WATER_HEIGHT(vec.x, vec.y, vec.z, &water_height))
+		{
+			vec.z = water_height;
+			return;
+		}	
 
-		vec.z = PATHFIND::GET_APPROX_HEIGHT_FOR_POINT(vec.x, vec.y); // fallback value
+		// fallback value
+		if (!found_ground)
+			vec.z = PATHFIND::GET_APPROX_HEIGHT_FOR_POINT(vec.x, vec.y);
 	}
 
 	class TpToWaypoint : public Command

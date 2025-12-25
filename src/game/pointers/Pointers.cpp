@@ -174,7 +174,7 @@ namespace YimMenu
 			RequestControl = ptr.Add(5).Add(1).Rip().As<Functions::RequestControl>();
 		});
 
-		constexpr auto spectatePatchPtrn = Pattern<"74 26 66 83 FF 0D 77 20 0F B7 C7">("SpectatePatch");
+		constexpr auto spectatePatchPtrn = Pattern<"74 ? 66 83 FF 0D">("SpectatePatch");
 		scanner.Add(spectatePatchPtrn, [this](PointerCalculator ptr) {
 			SpectatePatch = BytePatches::Add(ptr.As<std::uint8_t*>(), 0xEB);
 		});
@@ -370,9 +370,9 @@ namespace YimMenu
 			SetJoinRequestPoolTypePatch = BytePatches::Add(ptr.Sub(5).As<std::uint8_t*>(), std::to_array<std::uint8_t>({0xB8, 0x00, 0x00, 0x00, 0x00}));
 		});
 
-		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"83 FD 05 ? ? ? 00 00 00 48 8B">("HandleJoinRequestIgnorePoolPatch");
+		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"41 83 FF 05 74 ? 42 8B 84 F5">("HandleJoinRequestIgnorePoolPatch");
 		scanner.Add(handleJoinRequestIgnorePoolPatchPtrn, [this](PointerCalculator ptr) {
-			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.Add(4).As<std::uint8_t*>(), 0xEB);
+			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0x39, 0xC9, 0x90, 0x90}));
 		});
 
 		constexpr auto statsMpCharacterMappingDataPtrn = Pattern<"48 8D 0D ? ? ? ? 89 F2 0F 28 74 24 ? 48 83 C4 38">("CStatsMpCharacterMappingData");
@@ -385,9 +385,9 @@ namespace YimMenu
 			HasGTAPlus = addr.Add(3).Rip().As<int*>();
 		});
 
-		constexpr auto battlEyeServerProcessPlayerJoinPtrn = Pattern<"BA 2D AD 45 3F">("BattlEyeServerProcessPlayerJoin");
+		constexpr auto battlEyeServerProcessPlayerJoinPtrn = Pattern<"48 89 10 48 89 48 10 89 F9">("BattlEyeServerProcessPlayerJoin");
 		scanner.Add(battlEyeServerProcessPlayerJoinPtrn, [this](PointerCalculator ptr) {
-			BattlEyeServerProcessPlayerJoin = ptr.Sub(0x72).As<PVOID>();
+			BattlEyeServerProcessPlayerJoin = ptr.Sub(4).Rip().As<PVOID*>()[1];
 		});
 
 		constexpr auto gameDataHashPtrn = Pattern<"48 8D 3D ? ? ? ? 69 C9">("GameDataHash");
@@ -435,6 +435,26 @@ namespace YimMenu
 		constexpr auto abilityBarPatchPtrn = Pattern<"75 39 48 85 F6 74 1A 48 89 F1 E8">("AbilityBarPatch");
 		scanner.Add(abilityBarPatchPtrn, [this](PointerCalculator ptr) {
 			AbilityBarPatch = BytePatches::Add(ptr.As<std::uint16_t*>(), 0x9090);
+		});
+
+		static constexpr auto doMatchmakingAdvertisePtrn = Pattern<"C7 47 30 01 00 00 00 E9 92">("MatchmakingAdvertise");
+		scanner.Add(doMatchmakingAdvertisePtrn, [this](PointerCalculator addr) {
+			MatchmakingAdvertise = addr.Sub(0xC).Rip().As<PVOID>();
+		});
+
+		static constexpr auto doMatchmakingUpdatePtrn = Pattern<"C7 47 30 02 00 00 00 EB 7A">("MatchmakingUpdate");
+		scanner.Add(doMatchmakingUpdatePtrn, [this](PointerCalculator addr) {
+			MatchmakingUpdate = addr.Sub(0x8).Rip().As<PVOID>();
+		});
+
+		static constexpr auto doMatchmakingUnadvertisePtrn = Pattern<"C7 86 C8 01 00 00 04 00 00 00">("MatchmakingUnadvertise");
+		scanner.Add(doMatchmakingUnadvertisePtrn, [this](PointerCalculator addr) {
+			MatchmakingUnadvertise = addr.Sub(0xC).Rip().As<PVOID>();
+		});
+
+		static constexpr auto matchmakingSessionDetailSendResponsePtrn = Pattern<"48 B8 01 00 00 00 0D 00 00 00">("SessionDetailSendResponse");
+		scanner.Add(matchmakingSessionDetailSendResponsePtrn, [this](PointerCalculator addr) {
+			MatchmakingSessionDetailSendResponse = addr.Add(0x2F).Rip().As<PVOID>();
 		});
 
 		if (!scanner.Scan())

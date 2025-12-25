@@ -33,9 +33,15 @@ namespace YimMenu
 			GetInstance().RunScriptImpl();
 		}
 
+		static void Update()
+		{
+			GetInstance().UpdateImpl();
+		}
+
 	private:
 		Self();
 		void RunScriptImpl();
+		void UpdateImpl();
 
 		static Self& GetInstance()
 		{

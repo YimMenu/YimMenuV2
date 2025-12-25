@@ -4,6 +4,8 @@
 
 #include <format>
 
+#include "core/util/Wine.hpp"
+
 namespace YimMenu
 {
 	LogColor LogSink::GetColor(const eLogLevel level)
@@ -28,6 +30,12 @@ namespace YimMenu
 	std::string LogSink::FormatConsole(const LogMessagePtr msg)
 	{
 		std::stringstream out;
+
+		static std::optional<bool> simplified = std::nullopt;
+		if (!simplified.has_value())
+			simplified = InWine();
+		if (simplified.value_or(false))
+			return FormatFile(msg);
 
 		const auto timestamp = std::format("{0:%H:%M:%S}", msg->Timestamp());
 		const auto& location = msg->Location();

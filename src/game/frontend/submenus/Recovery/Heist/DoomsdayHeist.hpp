@@ -1,3 +1,4 @@
+#pragma once
 #include "game/frontend/submenus/Recovery/HeistModifier.hpp"
 
 namespace YimMenu::Submenus

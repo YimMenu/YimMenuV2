@@ -10,6 +10,8 @@
 #include "core/hooking/CallHook.hpp"
 #include "core/memory/ModuleMgr.hpp"
 #include "core/renderer/Renderer.hpp"
+#include "core/util/Wine.hpp"
+#include "core/scripting/LuaManager.hpp"
 #include "game/backend/AnticheatBypass.hpp"
 #include "game/backend/Players.hpp"
 #include "game/backend/SavedLocations.hpp"
@@ -70,6 +72,7 @@ namespace YimMenu
 		ScriptMgr::AddScript(std::make_unique<Script>(&Self::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&GUI::RunScript));
 		FiberPool::Init(16);
+		ScriptMgr::AddScript(std::make_unique<Script>(&LuaManager::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&HotkeySystem::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Commands::RunScript));
 		ScriptMgr::AddScript(std::make_unique<Script>(&Features::SavePersonalVehicle::RunScript));
@@ -81,6 +84,9 @@ namespace YimMenu
 			LOG(WARNING) << "Socialclub patterns failed to load";
 
 		Notifications::Show("YimMenuV2", "Loaded succesfully", NotificationType::Success);
+
+		if (InWine().value_or(false))
+		    LOG(INFO) << "Running in Wine!";
 
 		while (g_Running)
 		{

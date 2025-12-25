@@ -73,14 +73,6 @@ namespace YimMenu
 			}
 		}
 
-		for (rage::gameSkeletonData& i : Pointers.GameSkeleton->m_SysData)
-		{
-			if (i.m_Hash != 0xA0F39FB6 && i.m_Hash != "TamperActions"_J)
-				continue;
-			// this is integrity checked and runs before we patch it, so it isn't very useful anymore
-			//i.m_InitFunc = Pointers.Nullsub;
-			i.m_ShutdownFunc = Pointers.Nullsub;
-		}
 
 		if (patched)
 		{
@@ -128,12 +120,16 @@ namespace YimMenu
 
 		if (m_IsFSLLoaded)
 		{
-			HMODULE hFSL = GetModuleHandleA("WINMM.dll");
-			if (hFSL)
+			Module* FSL = nullptr;
+			for (auto& module : ModuleMgr.GetModules())
+				if (module.first == "WINMM.dll"_J && module.second->IsExported("LawnchairGetVersion"))
+					FSL = module.second.get();
+
+			if (FSL)
 			{
-				auto LawnchairGetVersion = reinterpret_cast<FnGetVersion>(GetProcAddress(hFSL, "LawnchairGetVersion"));
-				auto LawnchairIsProvidingLocalSaves = reinterpret_cast<FnLocalSaves>(GetProcAddress(hFSL, "LawnchairIsProvidingLocalSaves"));
-				auto LawnchairIsProvidingBattlEyeBypass = reinterpret_cast<FnBattlEyeBypass>(GetProcAddress(hFSL, "LawnchairIsProvidingBattlEyeBypass"));
+				auto LawnchairGetVersion = FSL->GetExport<FnGetVersion>("LawnchairGetVersion");
+				auto LawnchairIsProvidingLocalSaves = FSL->GetExport<FnLocalSaves>("LawnchairIsProvidingLocalSaves");
+				auto LawnchairIsProvidingBattlEyeBypass = FSL->GetExport<FnBattlEyeBypass>("LawnchairIsProvidingBattlEyeBypass");
 
 				if (LawnchairGetVersion && LawnchairIsProvidingLocalSaves && LawnchairIsProvidingBattlEyeBypass)
 				{
@@ -155,12 +151,12 @@ namespace YimMenu
 		if (m_BattlEyeRunning)
 			LOGF(WARNING, "If you are not running an actual BattlEye bypass, exit the game immediately and ensure that BE is properly disabled");
 
-		if (!m_FSLProvidesBEBypass)
+		if (!m_FSLProvidesBEBypass && !m_BattlEyeRunning)
 			Pointers.BattlEyeStatusUpdatePatch->Apply();
 
 		while (true)
 		{
-			if (!m_FSLProvidesBEBypass)
+			if (!m_FSLProvidesBEBypass && !m_BattlEyeRunning)
 			{
 				*Pointers.BERestartStatus = 0;
 				*Pointers.NeedsBERestart = false;

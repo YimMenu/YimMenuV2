@@ -40,15 +40,33 @@ namespace YimMenu::Submenus
 		char m_AsString[12];
 	};
 
-	static StatInfo GetStatInfo(const char* name_str)
+	// https://stackoverflow.com/questions/66897068/can-trim-of-a-string-be-done-inplace-with-c20-ranges
+	static std::string_view TrimString(std::string_view string)
+	{
+		return std::string_view{
+		    std::ranges::find_if_not(
+		        string,
+		        [](auto c) {
+			        return std::isspace(c);
+		        }),
+		    std::ranges::find_if_not(
+		        string | std::views::reverse,
+		        [](auto c) {
+			        return std::isspace(c);
+		        }).base()};
+	}
+
+	static StatInfo GetStatInfo(std::string_view name_str)
 	{
 		StatInfo name{};
-		auto len = strlen(name_str);
+		auto len = name_str.length();
 
 		// not sure why people do this
 		if (len > 1 && name_str[0] == '$')
 		{
-			name_str++;
+			auto it = name_str.begin();
+			std::advance(it, 1);
+			name_str = std::string_view{it, name_str.end()};
 			len--;
 			name.m_Normalized = true;
 		}
@@ -126,7 +144,7 @@ namespace YimMenu::Submenus
 		{
 		case sStatData::Type::_BOOL:
 			STATS::STAT_SET_BOOL(hash, value.m_AsBool, true);
-			break;
+			return;
 		case sStatData::Type::FLOAT:
 			STATS::STAT_SET_FLOAT(hash, value.m_AsFloat, true);
 			return;
@@ -145,6 +163,64 @@ namespace YimMenu::Submenus
 			return;
 		case sStatData::Type::STRING:
 			STATS::STAT_SET_STRING(hash, value.m_AsString, true);
+			return;
+		default:
+			return; // data type not supported
+		}
+	}
+
+	// TODO: don't call std::string_view::data()
+	static void WriteStatWithStringValue(std::uint32_t hash, std::string_view value, sStatData* data)
+	{
+		switch (data->GetType())
+		{
+		case sStatData::Type::_BOOL:
+		{
+			bool _bool = false;
+			std::string as_string(value);
+			std::transform(as_string.begin(), as_string.end(), as_string.begin(), [](char c) {
+				return tolower(c);
+			});
+
+			if (as_string == "true" || as_string == "1")
+			{
+				_bool = true;
+			}
+
+			STATS::STAT_SET_BOOL(hash, _bool, true);
+			return;
+		}
+		case sStatData::Type::FLOAT:
+		{
+			auto _float = std::strtof(value.data(), nullptr);
+			STATS::STAT_SET_FLOAT(hash, _float, true);
+			return;
+		}
+		case sStatData::Type::INT:
+		case sStatData::Type::UINT32:
+		case sStatData::Type::UINT16:
+		case sStatData::Type::UINT8:
+		{
+			auto _int = std::strtol(value.data(), nullptr, 10);
+			STATS::STAT_SET_INT(hash, _int, true);
+			return;
+		}
+		case sStatData::Type::INT64:
+		{
+			auto int64_ = std::strtoll(value.data(), nullptr, 10);
+			data->SetInt64(int64_); // TODO this isn't a good idea! natives can't set this
+			return;
+		}
+		case sStatData::Type::UINT64:
+		{
+			auto uint64_ = std::strtoull(value.data(), nullptr, 10);
+
+			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)uint64_, 0, 32, true);
+			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)(uint64_ >> 32), 32, 32, true);
+			return;
+		}
+		case sStatData::Type::STRING:
+			STATS::STAT_SET_STRING(hash, value.data(), true);
 			return;
 		default:
 			return; // data type not supported
@@ -241,6 +317,7 @@ namespace YimMenu::Submenus
 		auto normal = std::make_shared<Group>("Regular");
 		auto packed = std::make_shared<Group>("Packed");
 		auto packed_range = std::make_shared<Group>("Packed Range");
+		auto from_clipboard = std::make_shared<Group>("From Clipboard");
 
 		normal->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!NativeInvoker::AreHandlersCached())
@@ -265,7 +342,7 @@ namespace YimMenu::Submenus
 				ImGui::Text("Normalized name to: %s", current_info.m_Name.data());
 			}
 
-			bool can_edit = !current_info.m_Data->IsServerAuthoritative() || AnticheatBypass::IsFSLProvidingLocalSaves(); // TODO: a lot of false positives and negatives with this one
+			bool can_edit = !current_info.m_Data->IsControlledByNetshop();
 
 			RenderStatEditor(value, current_info.m_Data);
 
@@ -336,9 +413,41 @@ namespace YimMenu::Submenus
 				});
 		}));
 
+		from_clipboard->AddItem(std::make_unique<ImGuiItem>([] {
+			if (!NativeInvoker::AreHandlersCached())
+				return ImGui::TextDisabled("Natives not cached yet");
+
+			if (ImGui::Button("Load from Clipboard"))
+			{
+				auto clip_text = std::string(ImGui::GetClipboardText());
+				FiberPool::Push([clip_text] {
+					for (auto line : clip_text | std::ranges::views::split('\n'))
+					{
+						auto components = TrimString(std::string_view{line.begin(), line.end()}) | std::ranges::views::split('=') | std::ranges::to<std::vector<std::string>>();
+
+						if (components.size() != 2)
+						{
+							LOGF(WARNING, "Load From Clipboard: line \"{}\" is malformed", std::string_view{line.begin(), line.end()});
+							continue;
+						}
+
+						auto info = GetStatInfo(TrimString(components[0]));
+						if (!info.IsValid())
+						{
+							LOGF(WARNING, "Load From Clipboard: cannot find stat {}", components[0]);
+							continue;
+						}
+
+						WriteStatWithStringValue(info.m_NameHash, TrimString(components[1]), info.m_Data);
+					}
+				});
+			}
+		}));
+
 		menu->AddItem(std::move(normal));
 		menu->AddItem(std::move(packed));
 		menu->AddItem(std::move(packed_range));
+		menu->AddItem(std::move(from_clipboard));
 		return menu;
 	}
 }

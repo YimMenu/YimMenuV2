@@ -120,12 +120,22 @@ namespace YimMenu::Submenus
 
 		menu->AddItem(playerOptionsGroup);
 
-		teleportGroup->AddItem(std::make_shared<PlayerCommandItem>("tptoplayer"_J, "Teleport To"));
-		teleportGroup->AddItem(std::make_shared<PlayerCommandItem>("bring"_J));
+		
 		auto customPlayerTp = std::make_shared<Group>("", 1);
 		customPlayerTp->AddItem(std::make_shared<Vector3CommandItem>("playertpcoord"_J, ""));
 		customPlayerTp->AddItem(std::make_shared<PlayerCommandItem>("tpplayertocoord"_J, "Teleport"));
+		auto tpToProperty = std::make_shared<Group>("", 1);
+		tpToProperty->AddItem(std::make_shared<ListCommandItem>("sendtopropertyindex"_J, "##selproperty"));
+		tpToProperty->AddItem(std::make_shared<PlayerCommandItem>("sendtoproperty"_J));
+		auto tpToInterior = std::make_shared<Group>("", 1);
+		tpToInterior->AddItem(std::make_shared<ListCommandItem>("sendtointeriorindex"_J, "##selinterior"));
+		tpToInterior->AddItem(std::make_shared<PlayerCommandItem>("sendtointerior"_J));
+		teleportGroup->AddItem(tpToProperty);
+		teleportGroup->AddItem(tpToInterior);
+		teleportGroup->AddItem(std::make_shared<PlayerCommandItem>("tptoplayer"_J, "Teleport To"));
+		teleportGroup->AddItem(std::make_shared<PlayerCommandItem>("bring"_J));
 		teleportGroup->AddItem(customPlayerTp);
+
 		menu->AddItem(teleportGroup);
 
 		return menu;

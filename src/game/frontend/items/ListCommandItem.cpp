@@ -46,7 +46,7 @@ namespace YimMenu
 				m_SelectedItem = "";
 
 			auto size = ImGui::CalcTextSize(largest_string);
-			m_ItemWidth = size.x + 25.0f;
+			m_ItemWidth = size.x + 40.0f;
 		}
 
 		ImGui::SetNextItemWidth(m_ItemWidth.value());

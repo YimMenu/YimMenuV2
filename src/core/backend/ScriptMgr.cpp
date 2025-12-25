@@ -1,4 +1,5 @@
 #include "ScriptMgr.hpp"
+#include "core/scripting/LuaManager.hpp"
 
 namespace YimMenu
 {
@@ -67,7 +68,9 @@ namespace YimMenu
 
 	void ScriptMgr::YieldImpl(std::optional<std::chrono::high_resolution_clock::duration> time)
 	{
-		if (auto script = static_cast<Script*>(GetFiberData()))
+		if (auto script = LuaManager::GetRunningCoroutine())
+			LuaScript::GetScript(script).Yield(script, time ? std::chrono::duration_cast<std::chrono::milliseconds>(*time).count() : 0);
+		else if (auto script = static_cast<Script*>(GetFiberData()))
 			script->Yield(time);
 	}
 

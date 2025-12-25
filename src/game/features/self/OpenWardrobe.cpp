@@ -105,7 +105,7 @@ namespace YimMenu::Features
 		{
 			if (auto thread = Scripts::FindScriptThread("wardrobe_mp"_J))
 			{
-				if (*ScriptLocal(thread, 189).At(46).At(9).As<int*>() == 4)
+				if (*ScriptLocal(thread, 191).At(46).At(9).As<int*>() == 4)
 				{
 					shouldCleanupWardrobePatch->Disable();
 					isWardrobeOpenedPatch->Disable();

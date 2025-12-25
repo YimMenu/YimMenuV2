@@ -118,9 +118,115 @@ enum class NativeIndex
 {natives_buf}
 // clang-format on
 """)
-    
+
+# make sure we block obvious footguns
+lua_blacklist = {
+    "WAIT": "Use script.yield instead",
+    "REGISTER_SCRIPT_VARIABLE": "Not allowed",
+    "UNREGISTER_SCRIPT_VARIABLE": "Not allowed",
+    "FORCE_CHECK_SCRIPT_VARIABLES": "Not allowed",
+    "NETWORK_DELETE_CHARACTER": "Not allowed",
+    "NETWORK_MANUAL_DELETE_CHARACTER": "Not allowed",
+    "NET_GAMESERVER_DELETE_CHARACTER": "Not allowed",
+    "NETWORK_REPORT_CODE_TAMPER": "Not allowed",
+    "ADD_OWNED_EXPLOSION": "ADD_OWNED_EXPLOSION is no longer safe to use",
+    # more telemetry
+    "START_BEING_BOSS": "Not allowed",
+    "START_BEING_GOON": "Not allowed",
+    "END_BEING_BOSS": "Not allowed",
+    "END_BEING_GOON": "Not allowed",
+    "HIRED_LIMO": "Not allowed",
+    "ORDER_BOSS_VEHICLE": "Not allowed",
+    "CHANGE_UNIFORM": "Not allowed",
+    "CHANGE_GOON_LOOKING_FOR_WORK": "Not allowed",
+    "SEND_METRIC_GHOSTING_TO_PLAYER": "Not allowed",
+    "SEND_METRIC_VIP_POACH": "Not allowed",
+    "SEND_METRIC_PUNISH_BODYGUARD": "Not allowed",
+}
+
+def get_blacklist_reason(native: str):
+    if native in lua_blacklist:
+        return lua_blacklist[native]
+    if "PLAYSTATS" in native:
+        return "Not allowed" # there's no good reason for scripts to call telemetry natives
+    return None
+
+def native_type_to_lua_type(type: str):
+    if type == "void":
+        return "n" # nothing
+    elif type == "const char*" or type == "char*":
+        return "s" # string
+    elif type == "int" or type == "Any":
+        return "i" # int
+    elif type == "Hash":
+        return "h" # hash
+    elif type == "float":
+        return "f" # float
+    elif type == "BOOL":
+        return "b" # boolean
+    elif type == "Vector3" or type == "Vector3*":
+        return "v" # vector
+    elif "*" in type:
+        return "p" # pointer
+    else:
+        return "i" # Ped, Entity, etc.
+
+
+def generate_lua_func_signature(native: NativeFunc):
+    sig = ""
+    n = 0
+    for arg in native.args:
+        sig += chr(97 + n) + ","
+        n += 1
+        if n >= 26:
+            n = -32 # switch to uppercase letters (97 - 30 = A)
+    sig = sig[:-1]
+    return sig
+
+def generate_lua_param_string(native: NativeFunc):
+    string = ""
+    for arg in native.args:
+        string += native_type_to_lua_type(arg.type)
+    string += "=" + native_type_to_lua_type(native.return_type)
+    return string
+
+def create_lua_func(native: NativeFunc):
+    blacklist_reason = get_blacklist_reason(native.name)
+    sign = generate_lua_func_signature(native)
+    if sign != "":
+        sign = ","+sign
+    using_varargs = len(native.args) > 2
+    if blacklist_reason:
+        return f"{native.name}=function()error('{blacklist_reason}')end,"
+    return f"{native.name}=function({"..." if using_varargs else generate_lua_func_signature(native)}){"" if native.return_type == "void" else "return "}_I({native.native_index},'{generate_lua_param_string(native)}'{",..." if using_varargs else sign})end,"
+
+# does MSVC still live in the 2000s?
+def chunkstring(string, length):
+    return (string[0+i:length+i] for i in range(0, len(string), length))
+
+def create_lua_namespace(name: str, natives: list[NativeFunc]):
+    string = f"{name}={{"
+    for native in natives:
+        string += create_lua_func(native)
+    string = string[:-1] + "}"
+    chunks = chunkstring(string, 15000)
+    real_string = "\t"
+    for chunk in chunks:
+        real_string += '"' + chunk + '"'
+    real_string += ",\n"
+    return real_string
+
+def create_lua_defs():
+    with open("../../scripting/libraries/NativeDefs.cpp", "w+") as file:
+        string = "#include \"NativeDefs.hpp\"\n\nconst char* g_LuaNativeDefs[] = \n{\n"
+        for ns, natives_list in natives.items():
+            string += create_lua_namespace(ns, natives_list)
+        string += f"}};\n\nint g_NumLuaNativeDefs = {len(natives.items())};"
+        file.write(string)
+  
 if __name__ == "__main__":
     load_natives_data()
     load_crossmap_data()
     write_crossmap_header()
     write_natives_header()
+    create_lua_defs()

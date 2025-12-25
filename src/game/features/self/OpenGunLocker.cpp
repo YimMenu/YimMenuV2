@@ -45,7 +45,7 @@ namespace YimMenu::Features
 			}
 
 			static ScriptFunction runGunLockerMenu("AM_MP_AUTO_SHOP"_J, ScriptPointer("RunGunLockerMenu", "2D 06 08 00 00 38 03 5D ? ? ? 57 03 00"));
-			auto gunLockerData = ScriptLocal(m_Thread, 292).At(583);
+			auto gunLockerData = ScriptLocal(m_Thread, 294).At(584);
 
 			int unused;
 			runGunLockerMenu.Call<void>(gunLockerData.As<void*>(), &unused, eSimpleInteriorIndex::SIMPLE_INTERIOR_AUTO_SHOP_MISSION_ROW, Self::GetPlayer().GetId(), false, true);

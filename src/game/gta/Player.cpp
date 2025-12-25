@@ -12,6 +12,7 @@
 #include "game/backend/Players.hpp"
 #include "game/gta/Vehicle.hpp"
 #include "types/network/sync/nodes/vehicle/CVehicleProximityMigrationDataNode.hpp"
+#include "game/backend/Self.hpp"
 
 namespace YimMenu
 {
@@ -350,6 +351,20 @@ namespace YimMenu
 	int Player::GetMaxArmour()
 	{
 		return PLAYER::GET_PLAYER_MAX_ARMOUR(GetId()); // Not checking IsValid to let GetId return 0 in SP
+	}
+
+	int Player::GetGroup()
+	{
+		return PLAYER::GET_PLAYER_GROUP(GetId());
+	}
+
+	void Player::SetPed(Ped ped, bool delete_old)
+	{
+		auto old_ped = Self::GetPed();
+		PLAYER::CHANGE_PLAYER_PED(GetId(), ped.GetHandle(), true, true);
+		Self::Update();
+		if (delete_old)
+			old_ped.Delete();
 	}
 
 	bool Player::operator==(Player other)

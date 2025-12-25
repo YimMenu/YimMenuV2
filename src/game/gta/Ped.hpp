@@ -3,6 +3,7 @@
 #include "Vehicle.hpp"
 
 enum class PedConfigFlag : std::uint32_t;
+enum class PedCombatAttribute : std::uint32_t;
 
 namespace YimMenu
 {
@@ -29,6 +30,9 @@ namespace YimMenu
 		// config flags
 		bool GetConfigFlag(PedConfigFlag flag);
 		void SetConfigFlag(PedConfigFlag flag, bool value);
+
+		// combat attributes
+		void SetCombatAttribute(PedCombatAttribute attribute, bool value);
 
 		// relationships
 		bool IsEnemy();
@@ -57,8 +61,22 @@ namespace YimMenu
 		int GetArmour();
 		void SetArmour(int amount);
 
+		// groups
+		void SetLeaderOfGroup(int group);
+		void AddToGroup(int group);
+		void RemoveFromGroup();
+		bool IsMemberOfGroup(int group);
+
+		// outfits
+		void RandomizeOutfit();
+
+		// tasks
+		void StartScenario(std::string_view name, int duration = -1, bool entry_anim = true);
+		void SetKeepTask(bool keep);
+
 		// misc
 		void ClearDamage();
 		void SetMaxTimeUnderwater(int time);
+		void SetAsCop();
 	};
 }

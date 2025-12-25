@@ -43,21 +43,21 @@ namespace YimMenu::Features
 			NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS, NativeIndex::GET_EVER_HAD_BAD_PACK_ORDER, &PackOrderHook);
 
 			constexpr std::array<std::uint32_t, 16> validHashes = {
-			    1593646755, // 0
-			    1001,       // 1
-			    3512952254, // 2
+			    1222354255, // 0
+			    1017,       // 1
+			    2008403316, // 2
 			    472,        // 3
 			    0,          // 4
 			    0,          // 5
-			    536496578,  // 6
+			    1061472380, // 6
 			    0,          // 7
 			    0,          // 8
 			    1731098795, // 9
 			    234493012,  // 10
-			    18695,      // 11
-			    2920965528, // 12
+			    19919,      // 11
+			    4002619495, // 12
 			    307143837,  // 13
-			    90457876,   // 14
+			    2941593772, // 14
 			    200299391,  // 15
 			};
 			if (auto hashes = Pointers.GameDataHash)
@@ -93,7 +93,7 @@ namespace YimMenu::Hooks
 	uint32_t Network::GetDLCHash(void* manager, uint32_t seed)
 	{
 		if (YimMenu::Features::_SpoofDataHash.GetState())
-			return 1925672375;
+			return 2784221708;
 
 		return BaseHook::Get<Network::GetDLCHash, DetourHook<decltype(&Network::GetDLCHash)>>()->Original()(manager, seed);
 	}

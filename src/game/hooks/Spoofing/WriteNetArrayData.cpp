@@ -13,7 +13,8 @@ namespace YimMenu::Hooks
 		eFreemodeState m_LastState;
 
 	public:
-		FreemodeStateKick(Player player, void* array)
+		FreemodeStateKick(Player player, void* array) :
+			m_Enabled(), m_LastState()
 		{
 			if (player.GetData().m_RunFreemodeStateKick && array == GSBD::Get())
 			{

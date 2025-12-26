@@ -9,6 +9,7 @@ namespace YimMenu
 	    "fm_lts_creator"_J,
 	    "fm_deathmatch_creator"_J,
 	    "fm_capture_creator"_J,
+	    "public_mission_creator"_J,
 	});
 	
 	class EnableCreatorDevMode : public BoolCommand
@@ -23,7 +24,7 @@ namespace YimMenu
 			{
 				for (int i = 0; i < creatorScripts.size(); i++)
 				{
-					m_IsDevModeEnabledPatches.push_back(ScriptPatches::AddPatch(creatorScripts[i], ScriptPointer("IsDevModeEnabledPatch", "5D ? ? ? 56 ? ? 38 00 46 F0 0B").Add(1).Rip(), {0x2D, 0x00, 0x02, 0x00, 0x00, 0x72, 0x2E, 0x00, 0x01}));
+					m_IsDevModeEnabledPatches.push_back(ScriptPatches::AddPatch(creatorScripts[i], ScriptPointer("IsDevModeEnabledPatch", "5D ? ? ? 2A 56 ? ? 5D ? ? ? 06 1F 56 ? ? 38 00 46 ? ? 76").Add(1).Rip(), {0x2D, 0x00, 0x02, 0x00, 0x00, 0x72, 0x2E, 0x00, 0x01}));
 				}
 			}
 

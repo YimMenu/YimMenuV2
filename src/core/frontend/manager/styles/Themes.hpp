@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <imgui.h>
 #include "core/frontend/manager/Category.hpp"
 #include "game/frontend/items/Items.hpp"
 

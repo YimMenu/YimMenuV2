@@ -3,10 +3,6 @@
 #include "core/commands/Command.hpp"
 #include "core/commands/FloatCommand.hpp"
 #include "core/frontend/manager/styles/Themes.hpp"
-#include <nlohmann/json.hpp>
-#include <filesystem>
-#include <fstream>
-#include <Windows.h>
 #include <regex>
 
 namespace YimMenu

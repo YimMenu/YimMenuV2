@@ -1,9 +1,5 @@
 #include "Themes.hpp"
 #include "core/commands/ColorCommand.hpp"
-#include <filesystem>
-#include <fstream>
-#include <nlohmann/json.hpp>
-#include <Windows.h>
 #include "game/frontend/submenus/Settings/GUISettings.hpp"
 
 namespace YimMenu

@@ -173,7 +173,7 @@ namespace YimMenu
 			RequestControl = ptr.Add(5).Add(1).Rip().As<Functions::RequestControl>();
 		});
 
-		constexpr auto spectatePatchPtrn = Pattern<"74 26 66 83 FF 0D 77 20 0F B7 C7">("SpectatePatch");
+		constexpr auto spectatePatchPtrn = Pattern<"74 ? 66 83 FF 0D">("SpectatePatch");
 		scanner.Add(spectatePatchPtrn, [this](PointerCalculator ptr) {
 			SpectatePatch = BytePatches::Add(ptr.As<std::uint8_t*>(), 0xEB);
 		});
@@ -369,9 +369,9 @@ namespace YimMenu
 			SetJoinRequestPoolTypePatch = BytePatches::Add(ptr.Sub(5).As<std::uint8_t*>(), std::to_array<std::uint8_t>({0xB8, 0x00, 0x00, 0x00, 0x00}));
 		});
 
-		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"83 FD 05 ? ? ? 00 00 00 48 8B">("HandleJoinRequestIgnorePoolPatch");
+		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"41 83 FF 05 74 ? 42 8B 84 F5">("HandleJoinRequestIgnorePoolPatch");
 		scanner.Add(handleJoinRequestIgnorePoolPatchPtrn, [this](PointerCalculator ptr) {
-			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0x39, 0xC9, 0x90}));
+			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0x39, 0xC9, 0x90, 0x90}));
 		});
 
 		constexpr auto statsMpCharacterMappingDataPtrn = Pattern<"48 8D 0D ? ? ? ? 89 F2 0F 28 74 24 ? 48 83 C4 38">("CStatsMpCharacterMappingData");

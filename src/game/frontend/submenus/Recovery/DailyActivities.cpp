@@ -21,6 +21,7 @@ namespace YimMenu::Submenus
 		auto madrazoHitsTab      = std::make_shared<CollapsingHeaderItem>("Madrazo Hits");
 		auto wildlifePhotography = std::make_shared<CollapsingHeaderItem>("Shoot Animals Photography");
 		auto smokeOnTheWater     = std::make_shared<CollapsingHeaderItem>("Smoke on the Water");
+		auto goldenClover        = std::make_shared<CollapsingHeaderItem>("Golden Clover");
 
 		dailyActivities->AddItem(std::make_shared<CommandItem>("setallactivitiescompleted"_J));
 		dailyActivities->AddItem(std::make_shared<CommandItem>("resetallactivities"_J));
@@ -81,6 +82,9 @@ namespace YimMenu::Submenus
 		smokeOnTheWater->AddItem(std::make_shared<CommandItem>("tptoproduct"_J));
 		smokeOnTheWater->AddItem(std::make_shared<CommandItem>("collectproduct"_J));
 
+		goldenClover->AddItem(std::make_shared<CommandItem>("tptogoldenclover"_J));
+		goldenClover->AddItem(std::make_shared<CommandItem>("collectgoldenclover"_J));
+
 		dailyActivities->AddItem(std::move(challengesTab));
 		dailyActivities->AddItem(std::move(hiddenCacheTab));
 		dailyActivities->AddItem(std::move(treasureChestTab));
@@ -96,6 +100,7 @@ namespace YimMenu::Submenus
 		dailyActivities->AddItem(std::move(madrazoHitsTab));
 		dailyActivities->AddItem(std::move(wildlifePhotography));
 		dailyActivities->AddItem(std::move(smokeOnTheWater));
+		dailyActivities->AddItem(std::move(goldenClover));
 		return dailyActivities;
 	}
 }

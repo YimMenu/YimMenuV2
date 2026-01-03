@@ -7,7 +7,7 @@ struct g_AMC_playerBD_Entry
 	SCR_ARRAY<TIMER, NUM_CONTACTS> UsedContactServicesTimer;   // only index 2 (mugger) is actually used by the scripts. the rest is just a waste of bandwidth
 	SCR_ARRAY<uint64_t, NUM_CONTACTS> ContactServiceCooldowns; // same as above
 };
-static_assert(sizeof(g_AMC_playerBD_Entry) == 254 * 8); // -> 251 in b812g9
+static_assert(sizeof(g_AMC_playerBD_Entry) == 260 * 8); // -> 251 in b812g9
 
 struct g_AMC_playerBD
 {
@@ -15,4 +15,4 @@ struct g_AMC_playerBD
 
 	static g_AMC_playerBD* Get();
 };
-static_assert(sizeof(g_AMC_playerBD) == 8129 * 8);
+static_assert(sizeof(g_AMC_playerBD) == 8321 * 8);

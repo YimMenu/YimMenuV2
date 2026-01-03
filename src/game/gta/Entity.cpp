@@ -122,7 +122,7 @@ namespace YimMenu
 		return ENTITY::IS_ENTITY_A_MISSION_ENTITY(GetHandle()); // TODO: detect more mission states
 	}
 
-	int Entity::GetModel()
+	Hash Entity::GetModel()
 	{
 		ENTITY_ASSERT_VALID();
 		return ENTITY::GET_ENTITY_MODEL(GetHandle());

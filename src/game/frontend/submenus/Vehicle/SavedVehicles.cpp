@@ -30,32 +30,29 @@ namespace YimMenu::Submenus
 					return;
 
 				if (ImGui::Button("Save"))
-				{
-					std::string fileName = vehicle_file_name_input;
-					strcpy(vehicle_file_name_input, "");
+					FiberPool::Push([saveToNewFolder] {
+						std::string fileName = vehicle_file_name_input;
+						strcpy(vehicle_file_name_input, "");
 
-					if (!TrimString(fileName).size())
-					{
-						Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
-						return;
-					}
+						if (!TrimString(fileName).size())
+						{
+							Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
+							return;
+						}
 
-					ReplaceString(fileName, ".", ""); // filename say "bob.." will throw relative path error from Folder::GetFile
-					fileName += ".json";
+						ReplaceString(fileName, ".", ""); // filename say "bob.." will throw relative path error from Folder::GetFile
+						fileName += ".json";
 
-					SavedVehicles::Save(saveToNewFolder ? newFolder : folder, fileName);
+						SavedVehicles::Save(saveToNewFolder ? newFolder : folder, fileName);
 
-					if (saveToNewFolder)
-					{
-						folder = newFolder; // set current folder to newly created folder
-						strcpy(newFolder, "");
-					}
+						if (saveToNewFolder)
+						{
+							folder = newFolder; // set current folder to newly created folder
+							strcpy(newFolder, "");
+						}
 
-					FiberPool::Push([] {
-						ScriptMgr::Yield(1000ms); // wait for files to save and then refresh
 						SavedVehicles::RefreshList(folder, folders, files);
 					});
-				}
 				ImGui::SameLine();
 				if (ImGui::Button("Populate Name"))
 					FiberPool::Push([] {
@@ -65,7 +62,9 @@ namespace YimMenu::Submenus
 			};
 
 			if (ImGui::Button("Refresh List"))
-				SavedVehicles::RefreshList(folder, folders, files);
+				FiberPool::Push([] {
+					SavedVehicles::RefreshList(folder, folders, files);
+				});
 
 			ImGui::SetNextItemWidth(300.f);
 			auto folder_display = folder.empty() ? "Root" : folder.c_str();
@@ -74,14 +73,18 @@ namespace YimMenu::Submenus
 				if (ImGui::Selectable("Root", folder == ""))
 				{
 					folder.clear();
-					SavedVehicles::RefreshList(folder, folders, files);
+					FiberPool::Push([] {
+						SavedVehicles::RefreshList(folder, folders, files);
+					});
 				}
 
 				for (std::string folder_name : folders)
 					if (ImGui::Selectable(folder_name.c_str(), folder == folder_name))
 					{
 						folder = folder_name;
-						SavedVehicles::RefreshList(folder, folders, files);
+						FiberPool::Push([] {
+							SavedVehicles::RefreshList(folder, folders, files);
+						});
 					}
 
 				ImGui::EndCombo();
@@ -144,7 +147,9 @@ namespace YimMenu::Submenus
 				ImGui::Spacing();
 				if (ImGui::Button("Yes"))
 				{
-					SavedVehicles::Load(folder, file, spawnInsideSavedVehicle.GetState());		
+					FiberPool::Push([] {
+						SavedVehicles::Load(folder, file, spawnInsideSavedVehicle.GetState());
+					});
 					open_modal = false;
 					ImGui::CloseCurrentPopup();
 				}

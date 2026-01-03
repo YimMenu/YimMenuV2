@@ -37,15 +37,15 @@ static_assert(sizeof(RANDOM_EVENTS_FMMC_DATA) == 1 * 8);
 struct RANDOM_EVENTS_MISSION_DATA
 {
 	SCR_INT EventsCount;                             // 0
-	SCR_ARRAY<RANDOM_EVENTS_FMMC_DATA, 21> FMMCData; // 1
+	SCR_ARRAY<RANDOM_EVENTS_FMMC_DATA, 24> FMMCData; // 1
 };
-static_assert(sizeof(RANDOM_EVENTS_MISSION_DATA) == 23 * 8);
+static_assert(sizeof(RANDOM_EVENTS_MISSION_DATA) == 26 * 8);
 
 struct RANDOM_EVENTS_FREEMODE_DATA
 {
-	SCR_ARRAY<RANDOM_EVENTS_LOCAL_DATA, 21> EventData; // 0
-	RANDOM_EVENTS_MISSION_DATA MissionData;            // 253
+	SCR_ARRAY<RANDOM_EVENTS_LOCAL_DATA, 24> EventData; // 0
+	RANDOM_EVENTS_MISSION_DATA MissionData;            // 289
 
 	static RANDOM_EVENTS_FREEMODE_DATA* Get(rage::scrThread* thread);
 };
-static_assert(sizeof(RANDOM_EVENTS_FREEMODE_DATA) == 276 * 8);
+static_assert(sizeof(RANDOM_EVENTS_FREEMODE_DATA) == 315 * 8);

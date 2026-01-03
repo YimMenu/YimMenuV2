@@ -4,7 +4,7 @@ on: [ push, pull_request ]
 
 jobs:
   native-compilation:
-    runs-on: [ self-hosted, Windows ]
+    runs-on: windows-latest
     name: Native Compilation
     steps:
       - uses: actions/checkout@v4

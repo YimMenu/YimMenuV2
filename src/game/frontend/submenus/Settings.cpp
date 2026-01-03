@@ -112,7 +112,7 @@ namespace YimMenu::Submenus
 		AddCategory(std::move(hotkeys));
 		AddCategory(std::move(gui));
 		AddCategory(std::move(game));
-		AddCategory(BuildLuaScriptsMenu());
 		AddCategory(DrawGUISettingsMenu());
+		AddCategory(BuildLuaScriptsMenu());
 	}
 }

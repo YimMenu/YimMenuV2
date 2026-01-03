@@ -4,6 +4,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <Windows.h>
+#include "game/frontend/submenus/Settings/GUISettings.hpp"
 
 namespace YimMenu
 {
@@ -95,37 +96,13 @@ namespace YimMenu
 
 	void SetupStyle()
 	{
-		ImGuiStyle& style = ImGui::GetStyle();
+		// Apply default style first
+		DefaultStyle();
 
-		// Resolve path
-		char* appDataPath = nullptr;
-		size_t len = 0;
-		_dupenv_s(&appDataPath, &len, "APPDATA");
-		std::string settingsPath = std::string(appDataPath ? appDataPath : "") + "\\YimMenuV2\\GUISettings.json";
-		free(appDataPath);
+		// Initialize the color/rounding commands and load saved settings
+		InitializeColorCommands(); // This will call LoadSettings internally
 
-		// Try loading colors from file
-		if (std::filesystem::exists(settingsPath))
-		{
-			std::ifstream file(settingsPath);
-			if (file.is_open())
-			{
-				nlohmann::json json;
-				file >> json;
-				file.close();
-
-				for (int i = 0; i < ImGuiCol_COUNT; ++i)
-				{
-					const char* name = ImGui::GetStyleColorName(i);
-					auto it = json.find(name);
-					if (it != json.end() && it->is_array() && it->size() == 4)
-					{
-						style.Colors[i] = ImVec4((*it)[0], (*it)[1], (*it)[2], (*it)[3]);
-					}
-				}
-				return; // Done applying custom colors
-			}
-		}
-		DefaultStyle();	
+		// Apply loaded colors/rounding to ImGui
+		ApplyThemeToImGui();
 	}
 }

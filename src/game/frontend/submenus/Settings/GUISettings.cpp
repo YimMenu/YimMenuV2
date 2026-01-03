@@ -20,7 +20,7 @@ namespace YimMenu
 		char* path = nullptr;
 		size_t len = 0;
 		_dupenv_s(&path, &len, "APPDATA");
-		std::string full = std::string(path ? path : "") + "\\YimMenuV2\\GUISettings.json";
+		std::string full = std::string(path ? path : "") + "\\YimMenuV2\\themes.json";
 		free(path);
 		return full;
 	}();
@@ -125,6 +125,23 @@ namespace YimMenu
 		std::filesystem::create_directories(std::filesystem::path(kSettingsFile).parent_path());
 		std::ofstream(kSettingsFile) << json.dump(4);
 	}
+
+	void ApplyThemeToImGui()
+	{
+		auto& style = ImGui::GetStyle();
+
+		for (int i = 0; i < ImGuiCol_COUNT; ++i)
+			style.Colors[i] = g_ColorCommands[i]->GetState();
+
+		style.WindowRounding = g_RoundingValues["WindowRounding"];
+		style.FrameRounding = g_RoundingValues["FrameRounding"];
+		style.GrabRounding = g_RoundingValues["GrabRounding"];
+		style.ScrollbarRounding = g_RoundingValues["ScrollbarRounding"];
+		style.ChildRounding = g_RoundingValues["ChildRounding"];
+		style.PopupRounding = g_RoundingValues["PopupRounding"];
+		style.TabRounding = g_RoundingValues["TabRounding"];
+	}
+
 
 	void InitializeColorCommands()
 	{

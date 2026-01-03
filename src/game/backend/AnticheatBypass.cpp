@@ -5,7 +5,6 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/backend/NativeHooks.hpp"
 #include "game/gta/Natives.hpp"
-#include "types/rage/gameSkeleton.hpp"
 #include "types/anticheat/CAnticheatContext.hpp"
 
 using FnGetVersion = int (*)();
@@ -33,57 +32,6 @@ namespace YimMenu
 		return NativeInvoker::GetNativeHandler(NativeIndex::NET_GAMESERVER_BEGIN_SERVICE)(ctx);
 	}
 
-	static void NopGameSkeletonElement(rage::gameSkeletonUpdateElement* element)
-	{
-		// TODO: small memory leak
-		// Hey rockstar if you keep up with this I'll make you integrity check everything until you can't anymore, please grow a brain and realize that this is futile
-		// and kills performance if you're the host
-		auto vtable = *reinterpret_cast<void***>(element);
-		if (vtable[1] == Pointers.Nullsub)
-			return; // already nopped
-
-		auto new_vtable = new void*[3];
-		memcpy(new_vtable, vtable, sizeof(void*) * 3);
-		new_vtable[1] = Pointers.Nullsub;
-		*reinterpret_cast<void***>(element) = new_vtable;
-	}
-
-	static void DefuseSigscanner()
-	{
-		bool patched = false;
-		for (auto mode = Pointers.GameSkeleton->m_UpdateModes; mode; mode = mode->m_Next)
-		{
-			for (auto update_node = mode->m_Head; update_node; update_node = update_node->m_Next)
-			{
-				if (update_node->m_Hash != "Common Main"_J)
-					continue;
-
-				auto group = reinterpret_cast<rage::gameSkeletonUpdateGroup*>(update_node);
-
-				for (auto group_child_node = group->m_Head; group_child_node; group_child_node = group_child_node->m_Next)
-				{
-					// TamperActions is a leftover from the old AC, but still useful to block anyway
-					if (group_child_node->m_Hash != 0xA0F39FB6 && group_child_node->m_Hash != "TamperActions"_J)
-						continue;
-					patched = true;
-
-					NopGameSkeletonElement(reinterpret_cast<rage::gameSkeletonUpdateElement*>(group_child_node));
-				}
-				break;
-			}
-		}
-
-
-		if (patched)
-		{
-			LOGF(VERBOSE, "DefuseSigscanner: Patched out the sigscanner");
-		}
-		else
-		{
-			LOGF(WARNING, "DefuseSigscanner: Failed to patch the sigscanner");
-		}
-	}
-
 	void AnticheatBypass::RunOnStartupImpl()
 	{
 		bool loaded_late = false;
@@ -102,8 +50,6 @@ namespace YimMenu
 
 	void AnticheatBypass::RunScriptImpl()
 	{
-		DefuseSigscanner();
-		
 		NativeHooks::AddHook("shop_controller"_J, NativeIndex::NET_GAMESERVER_BEGIN_SERVICE, &TransactionHook);
 
 		m_IsFSLLoaded = CheckForFSL();

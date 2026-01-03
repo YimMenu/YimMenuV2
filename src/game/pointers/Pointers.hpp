@@ -160,7 +160,6 @@ namespace YimMenu
 		PVOID GetDLCHash;
 		PVOID AssistedAimShouldReleaseEntity;
 		Functions::AssistedAimFindNewTarget AssistedAimFindNewTarget;
-		rage::gameSkeleton* GameSkeleton;
 		PVOID Nullsub;
 		rage::Obf32** AnticheatInitializedHash;
 		PVOID GetAnticheatInitializedHash;
@@ -171,6 +170,7 @@ namespace YimMenu
 		PVOID MatchmakingUpdate;
 		PVOID MatchmakingUnadvertise;
 		PVOID MatchmakingSessionDetailSendResponse;
+		PVOID GameSkeletonUpdate;
 	};
 
 	struct Pointers : PointerData

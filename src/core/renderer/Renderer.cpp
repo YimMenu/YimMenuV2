@@ -190,7 +190,7 @@ namespace YimMenu
 		m_HeapAllocator.Create(m_Device.Get(), m_DescriptorHeap.Get());
 
 		// never returns false, useless to check return
-		ImGui::CreateContext(&GetInstance().m_FontAtlas);
+		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(*Pointers.Hwnd);
 
 		ImGui_ImplDX12_InitInfo init_info = {};

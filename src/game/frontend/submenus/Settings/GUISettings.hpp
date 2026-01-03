@@ -2,7 +2,6 @@
 
 #include "core/frontend/manager/Category.hpp"
 #include "game/frontend/items/Items.hpp"
-#include <memory>
 
 namespace YimMenu
 {

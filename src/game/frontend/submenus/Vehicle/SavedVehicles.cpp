@@ -31,17 +31,14 @@ namespace YimMenu::Submenus
 
 				if (ImGui::Button("Save"))
 					FiberPool::Push([saveToNewFolder] {
-						std::string fileName = vehicle_file_name_input;
+						std::string fileName = TrimString(vehicle_file_name_input);
 						strcpy(vehicle_file_name_input, "");
 
-						if (!TrimString(fileName).size())
+						if (!fileName.size())
 						{
 							Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
 							return;
 						}
-
-						ReplaceString(fileName, ".", ""); // filename say "bob.." will throw relative path error from Folder::GetFile
-						fileName += ".json";
 
 						SavedVehicles::Save(saveToNewFolder ? newFolder : folder, fileName);
 

@@ -69,6 +69,7 @@ namespace YimMenu
 
 		// outfits
 		void RandomizeOutfit();
+		void RandomizeOutfit2();
 
 		// tasks
 		void StartScenario(std::string_view name, int duration = -1, bool entry_anim = true);

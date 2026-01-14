@@ -12,6 +12,17 @@ namespace YimMenu::Submenus
 {
 	static int selected_session_idx = -1;
 
+	std::string GetSessionName(const CustomMatchmaking::session& session)
+	{
+		auto host_rid = session.info.m_HostInfo.m_GamerHandle.m_RockstarId;
+
+		const auto player = SavedPlayers::GetPlayerData(host_rid);
+		if(player)
+			return player->m_Name;
+
+		return std::format("{:X}", session.info.m_SessionToken);
+	}
+
 	void RenderSessionBrowser()
 	{
 		static char name_buf[32];
@@ -30,20 +41,14 @@ namespace YimMenu::Submenus
 					if (!session.is_valid)
 						continue;
 
-					std::string session_str;
-					if (session.attributes.multiplex_count > 1)
-						session_str = std::format("{:X} (x{})", session.info.m_SessionToken, session.attributes.multiplex_count);
-					else
-						session_str = std::format("{:X}", session.info.m_SessionToken);
-
 					auto host_rid = session.info.m_HostInfo.m_GamerHandle.m_RockstarId;
 					auto player   = SavedPlayers::GetPlayerData(host_rid);
 
-					/*
-					if ((g.session_browser.exclude_modder_sessions && player && player->block_join)
-					    || (g.session_browser.filter_multiplexed_sessions && session.attributes.multiplex_count > 1))
-						continue;
-					*/
+					std::string session_str;
+					if (session.attributes.multiplex_count > 1)
+						session_str = std::format("{} (x{})", GetSessionName(session), session.attributes.multiplex_count);
+					else
+						session_str = GetSessionName(session);
 
 					if (ImGui::Selectable(session_str.c_str(), i == selected_session_idx))
 					{
@@ -96,7 +101,6 @@ namespace YimMenu::Submenus
 				if(ImGui::Button("Join"))
 				{
 					FiberPool::Push([session] {
-						LOGF(VERBOSE, "Trying to join session '{:X}' hosted by: {}, at: {}", session.info.m_SessionToken, session.info.m_HostInfo.m_GamerHandle.m_RockstarId, selected_session_idx);
 						Network::JoinSessionInfo(&session.info);
 					});
 				}

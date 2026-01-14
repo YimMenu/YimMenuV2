@@ -1,4 +1,5 @@
 #pragma once
+#include "types/network/rlSessionInfo.hpp"
 #include "types/network/rlTaskStatus.hpp"
 #include "types/network/MatchmakingId.hpp"
 
@@ -20,6 +21,9 @@ namespace YimMenu
 		bool OnUnadvertiseImpl(MatchmakingId* id);
 		void OnSendSessionDetailResponseImpl(rage::rlSessionDetailMsg* message);
 
+		bool MatchmakeImpl(std::optional<int> constraint = std::nullopt, std::optional<bool> enforce_player_limit = std::nullopt);
+		
+
 		CustomMatchmaking();
 
 		static CustomMatchmaking& GetInstance()
@@ -28,9 +32,40 @@ namespace YimMenu
 			return instance;
 		}
 
+	public:
+		constexpr static int MAX_SESSIONS_TO_FIND = 1000;
+
+		struct session_attributes
+		{
+			int discriminator;
+			int player_count;
+			int region;
+			int language;
+			int multiplex_count = 1;
+		};
+
+		struct session
+		{
+			rage::rlSessionInfo info;
+			session_attributes attributes;
+			bool is_valid;
+		};
+
+	private:
+		int m_num_sessions_found = 0;
+		int m_num_valid_sessions = 0;
+		bool m_active            = false;
+		session m_found_sessions[MAX_SESSIONS_TO_FIND];
+
 		std::unordered_map<std::uint32_t, std::vector<MatchmakingId>> m_MultiplexedSessions;
 
+
 	public:
+		static bool Matchmake(std::optional<int> constraint = std::nullopt, std::optional<bool> enforce_player_limit = std::nullopt)
+		{
+			return GetInstance().MatchmakeImpl(constraint, enforce_player_limit);
+		}
+
 		static bool OnAdvertise(int& num_slots, int& available_slots, rage::rlSessionInfo* info, MatchmakingAttributes* attrs, MatchmakingId* id, rage::rlTaskStatus* status)
 		{
 			return GetInstance().OnAdvertiseImpl(num_slots, available_slots, info, attrs, id, status);
@@ -49,6 +84,26 @@ namespace YimMenu
 		static void OnSendSessionDetailResponse(rage::rlSessionDetailMsg* message)
 		{
 			return GetInstance().OnSendSessionDetailResponseImpl(message);
+		}
+
+		static int GetNumFoundSessions()
+		{
+			return GetInstance().m_num_sessions_found;
+		}
+
+		static int GetNumValidSessions()
+		{
+			return GetInstance().m_num_valid_sessions;
+		}
+
+		static session* GetFoundSessions()
+		{
+			return GetInstance().m_found_sessions;
+		}
+
+		static bool IsActive()
+		{
+			return GetInstance().m_active;
 		}
 	};
 }

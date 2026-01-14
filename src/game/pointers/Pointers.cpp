@@ -447,6 +447,16 @@ namespace YimMenu
 			MatchmakingUnadvertise = addr.Sub(0xC).Rip().As<PVOID>();
 		});
 
+		static constexpr auto doMatchmakingFindSessions = Pattern<"4C 89 5C 24 20 E8 ? ? ? ? 84 C0 74 ? C7 47">("MatchmakingFindSessions");
+		scanner.Add(doMatchmakingFindSessions, [this](PointerCalculator addr) {
+			MatchmakingFindSessions = addr.Add(6).Rip().As<PVOID>();
+		});
+
+		static constexpr auto matchmakingFindSessionsResponse = Pattern<"4C 89 CE 49 89 CE">("MatchmakingFindSessionsResponse");
+		scanner.Add(matchmakingFindSessionsResponse, [this](PointerCalculator addr) {
+			MatchmakingFindSessionsResponse = addr.Sub(0x1B).As<PVOID>();
+		});
+
 		static constexpr auto matchmakingSessionDetailSendResponsePtrn = Pattern<"48 B8 01 00 00 00 0D 00 00 00">("SessionDetailSendResponse");
 		scanner.Add(matchmakingSessionDetailSendResponsePtrn, [this](PointerCalculator addr) {
 			MatchmakingSessionDetailSendResponse = addr.Add(0x2F).Rip().As<PVOID>();

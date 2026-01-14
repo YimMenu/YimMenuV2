@@ -2,6 +2,7 @@
 #include "core/util/Joaat.hpp"
 #include "types/network/MatchmakingId.hpp"
 #include "types/network/rlSessionDetail.hpp"
+#include "types/network/NetworkGameFilterMatchmakingComponent.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/IntCommand.hpp"
 #include "core/commands/ListCommand.hpp"
@@ -113,6 +114,131 @@ namespace YimMenu
 	CustomMatchmaking::CustomMatchmaking()
 	{
 
+	}
+
+	bool CustomMatchmaking::MatchmakeImpl(std::optional<int> constraint, std::optional<bool> enforce_player_limit)
+	{
+		for (auto& session : m_found_sessions)
+		{
+			session.is_valid = true;
+		}
+
+		NetworkGameFilterMatchmakingComponent component{};
+		strcpy(component.m_filter_name, "Group");
+		component.m_filter_type    = 1;
+		component.m_game_mode      = 0;
+		component.m_num_parameters = 0;
+		component.m_session_type   = 25600;
+
+		/*
+		if (g.session_browser.region_filter_enabled)
+		{
+			component.SetParameter("MMATTR_REGION", 4, g.session_browser.region_filter);
+		}
+		*/
+
+		if (constraint)
+		{
+			component.SetParameter("MMATTR_DISCRIMINATOR", 0, constraint.value());
+		}
+
+		component.SetParameter("MMATTR_MM_GROUP_2", 2, 30);
+
+		rage::rlTaskStatus state{};
+		static rage::rlSessionInfo result_sessions[MAX_SESSIONS_TO_FIND];
+
+		m_active             = true;
+		m_num_valid_sessions = 0;
+
+		if (BaseHook::Get<Hooks::Matchmaking::MatchmakingFindSessions, DetourHook<decltype(&Hooks::Matchmaking::MatchmakingFindSessions)>>()->Original()(0, 1, &component, MAX_SESSIONS_TO_FIND, result_sessions, &m_num_sessions_found, &state))
+		{
+			while (state.m_Status == 1)
+				ScriptMgr::Yield();
+
+			if (state.m_Status == 3)
+			{
+				std::unordered_map<std::uint64_t, session*> stok_map = {};
+
+				LOGF(VERBOSE, "Matchmaking success, found {} sessions.", m_num_sessions_found);
+
+				for (int i = 0; i < m_num_sessions_found; i++)
+				{
+					m_found_sessions[i].info = result_sessions[i];
+
+					if (auto it = stok_map.find(m_found_sessions[i].info.m_SessionToken); it != stok_map.end())
+					{
+						if (/*g.session_browser.filter_multiplexed_sessions*/true)
+						{
+							it->second->is_valid = false;
+						}
+
+						it->second->attributes.multiplex_count++;
+						m_found_sessions[i].is_valid = false;
+						continue;
+					}
+
+					if (enforce_player_limit.has_value() && enforce_player_limit.value()
+					    && m_found_sessions[i].attributes.player_count >= 30)
+						m_found_sessions[i].is_valid = false;
+
+					/*
+					if (g.session_browser.language_filter_enabled
+					    && (eGameLanguage)m_found_sessions[i].attributes.language != g.session_browser.language_filter)
+						m_found_sessions[i].is_valid = false;
+
+					if (g.session_browser.player_count_filter_enabled
+					    && (m_found_sessions[i].attributes.player_count < g.session_browser.player_count_filter_minimum
+					        || m_found_sessions[i].attributes.player_count > g.session_browser.player_count_filter_maximum))
+					{
+						m_found_sessions[i].is_valid = false;
+					}
+
+					if (g.session_browser.pool_filter_enabled
+					    && ((m_found_sessions[i].attributes.discriminator & (1 << 14)) == (1 << 14))
+					        != (bool)g.session_browser.pool_filter)
+						m_found_sessions[i].is_valid = false;
+
+					*/
+
+					stok_map.emplace(m_found_sessions[i].info.m_SessionToken, &m_found_sessions[i]);
+				}
+
+				if (/*g.session_browser.sort_method*/1 != 0)
+				{
+					std::qsort(m_found_sessions, m_num_sessions_found, sizeof(session), [](const void* a1, const void* a2) -> int {
+						std::strong_ordering result;
+
+						if (/*g.session_browser.sort_method*/1 == 1)
+						{
+							result = (((session*)(a1))->attributes.player_count <=> ((session*)(a2))->attributes.player_count);
+						}
+
+						if (result == 0)
+							return 0;
+
+						if (result > 0)
+							return /*g.session_browser.sort_direction*/1 ? -1 : 1;
+
+						if (result < 0)
+							return /*g.session_browser.sort_direction*/1 ? 1 : -1;
+
+
+						std::unreachable();
+					});
+				}
+
+				m_active = false;
+				return true;
+			}
+		}
+		else
+		{
+			m_active = false;
+			return false;
+		}
+
+		m_active = false;
+		return false;
 	}
 
 	bool CustomMatchmaking::OnAdvertiseImpl(int& num_slots, int& available_slots, rage::rlSessionInfo* info, MatchmakingAttributes* attrs, MatchmakingId* id, rage::rlTaskStatus* status)

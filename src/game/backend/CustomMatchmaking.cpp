@@ -13,34 +13,6 @@
 
 namespace YimMenu::Features
 {
-	static std::vector<std::pair<int, const char*>> g_RegionCodes = {
-	    {0, "CIS"},
-	    {1, "South America"},
-	    {2, "US East"},
-	    {3, "Europe"},
-	    {4, "China"},
-	    {5, "Australia"},
-	    {6, "US West"},
-	    {7, "Japan"},
-	    {8, "Unknown"},
-	};
-
-	static std::vector<std::pair<int, const char*>> g_LanguageTypes = {
-	    {0, "English"},
-	    {1, "French"},
-	    {2, "German"},
-	    {3, "Italian"},
-	    {4, "Spanish (Spain)"},
-	    {5, "Portuguese (Brazil)"},
-	    {6, "Polish"},
-	    {7, "Russian"},
-	    {8, "Korean"},
-	    {9, "Chinese (Traditional)"},
-	    {10, "Japanese"},
-	    {11, "Spanish (Mexico)"},
-	    {12, "Chinese (Simplified)"},
-	};
-
 	BoolCommand _SpoofRegionType{
 	    "mmspoofregiontype",
 	    "Spoof Region Type",

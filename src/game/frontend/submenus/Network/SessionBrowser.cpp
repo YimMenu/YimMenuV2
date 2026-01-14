@@ -37,9 +37,9 @@ namespace YimMenu::Submenus
 						session_str = std::format("{:X}", session.info.m_SessionToken);
 
 					auto host_rid = session.info.m_HostInfo.m_GamerHandle.m_RockstarId;
-					/*
-					auto player   = g_player_database_service->get_player_by_rockstar_id(host_rid);
+					auto player   = SavedPlayers::GetPlayerData(host_rid);
 
+					/*
 					if ((g.session_browser.exclude_modder_sessions && player && player->block_join)
 					    || (g.session_browser.filter_multiplexed_sessions && session.attributes.multiplex_count > 1))
 						continue;
@@ -53,13 +53,12 @@ namespace YimMenu::Submenus
 
 					if (ImGui::IsItemHovered())
 					{
-						auto tool_tip = std::format("Number of Players: {}\nRegion: {}\nLanguage: {}\nHost Rockstar ID: {}\nDiscriminator: {:X}\nIndex: {}",
+						auto tool_tip = std::format("Number of Players: {}\nRegion: {}\nLanguage: {}\nHost Rockstar ID: {}\nDiscriminator: {:X}",
 						    session.attributes.player_count,
-						    /*regions[*/session.attributes.region/*].name*/,
-						    /*languages.at((eGameLanguage)*/session.attributes.language/*)*/,
+						    Features::g_RegionCodes.at(session.attributes.region).second,
+						    Features::g_LanguageTypes.at(session.attributes.language).second,
 						    session.info.m_HostInfo.m_GamerHandle.m_RockstarId, // TODO: this is not accurate
-						    session.attributes.discriminator,
-						    i);
+						    session.attributes.discriminator);
 						ImGui::SetTooltip("%s", tool_tip.c_str());
 					}
 				}
@@ -81,8 +80,8 @@ namespace YimMenu::Submenus
 
 				ImGui::Text("Num Players: %d", session.attributes.player_count);
 				ImGui::Text("Discriminator: 0x%X", session.attributes.discriminator);
-				ImGui::Text("Region: %i", /*regions[*/session.attributes.region/*].name*/);
-				ImGui::Text("Language: %i", /*languages.at((eGameLanguage)*/session.attributes.language/*).data()*/);
+				ImGui::Text("Region: %s", Features::g_RegionCodes.at(session.attributes.region).second);
+				ImGui::Text("Language: %s", Features::g_LanguageTypes.at(session.attributes.language).second);
 
 				auto& data = session.info.m_HostInfo;
 				ImGui::Text("Host Rockstar ID: %llu", data.m_GamerHandle.m_RockstarId);
@@ -189,7 +188,7 @@ namespace YimMenu::Submenus
 		components::help_marker("This will replace the default game matchmaking with a custom one that will use the filters and sorting set here");
 		**/
 
-		static uint32_t discriminator = 730776930;
+		static uint32_t discriminator = 730776930; // 0xA9A8562 for non_cheater pool
 
 		ImGui::InputScalar("Discriminator", ImGuiDataType_U32, &discriminator, nullptr, nullptr, "%08X");
 

@@ -159,8 +159,6 @@ namespace YimMenu
 			{
 				std::unordered_map<std::uint64_t, session*> stok_map = {};
 
-				LOGF(VERBOSE, "Matchmaking success, found {} sessions.", m_num_sessions_found);
-
 				for (int i = 0; i < m_num_sessions_found; i++)
 				{
 					m_found_sessions[i].info = result_sessions[i];

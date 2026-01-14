@@ -57,23 +57,6 @@ namespace YimMenu::Hooks
 {
 	bool Matchmaking::MatchmakingFindSessions(int profile_index, int available_slots, NetworkGameFilterMatchmakingComponent* m_filter, unsigned int max_sessions, rage::rlSessionInfo* result_sessions, int* result_session_count, rage::rlTaskStatus* state)
 	{
-		LOGF(VERBOSE, "MatchmakingFindSessions({}, {}, {}, {}, {}, {}, {})", profile_index, available_slots, (void*)m_filter, max_sessions, (void*)result_sessions, (void*)result_session_count, (void*)state);
-
-		LOG(VERBOSE) << "m_filter_type " << m_filter->m_filter_type;
-		LOG(VERBOSE) << "m_filter_name " << m_filter->m_filter_name;
-		LOG(VERBOSE) << "m_game_mode " << m_filter->m_game_mode;
-		LOG(VERBOSE) << "m_session_type " << m_filter->m_session_type;
-		LOG(VERBOSE) << "m_enabled_params_bitset " << m_filter->m_enabled_params_bitset;
-
-		for (uint32_t i = 0; i < 8; i++)
-		{
-			bool active_param = (m_filter->m_enabled_params_bitset & (1 << i)) != 0;
-			if (active_param)
-			{
-				LOG(VERBOSE) << m_filter->m_param_names[i] << "(" << i << ") = " << m_filter->m_param_values[i];
-			}
-		}
-
 		return BaseHook::Get<Matchmaking::MatchmakingFindSessions, DetourHook<decltype(&Matchmaking::MatchmakingFindSessions)>>()->Original()(profile_index, available_slots, m_filter, max_sessions, result_sessions, result_session_count, state);
 	}
 
@@ -86,9 +69,7 @@ namespace YimMenu::Hooks
 			int i = 0;
 			for (auto result = node->get_child_node("Results")->m_child; result; result = result->m_sibling)
 			{
-				const auto& attributes = result->get_child_node("Attributes")->m_value;
-				LOG(VERBOSE) << "Session " << attributes;
-				const auto& values = split(attributes, ',');
+				const auto& values = split(result->get_child_node("Attributes")->m_value, ',');
 				CustomMatchmaking::GetFoundSessions()[i].attributes.discriminator = std::stoi(values[2]);
 				CustomMatchmaking::GetFoundSessions()[i].attributes.player_count  = std::stoi(values[4]);
 				CustomMatchmaking::GetFoundSessions()[i].attributes.language      = std::stoi(values[5]);

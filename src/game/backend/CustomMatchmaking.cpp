@@ -21,7 +21,7 @@ namespace YimMenu::Features
 	    "mmregiontype",
 	    "Region Type",
 	    "The region to spoof the session to",
-		g_RegionCodes};
+	    g_RegionCodes};
 
 	BoolCommand _SpoofLanguage{
 	    "mmspooflanguage",
@@ -85,22 +85,21 @@ namespace YimMenu
 
 	CustomMatchmaking::CustomMatchmaking()
 	{
-
 	}
 
 	bool CustomMatchmaking::MatchmakeImpl(std::optional<int> constraint, std::optional<bool> enforce_player_limit)
 	{
-		for (auto& session : m_found_sessions)
+		for (auto& session : m_FoundSessions)
 		{
-			session.is_valid = true;
+			session.m_IsValid = true;
 		}
 
 		NetworkGameFilterMatchmakingComponent component{};
-		strcpy(component.m_filter_name, "Group");
-		component.m_filter_type    = 1;
-		component.m_game_mode      = 0;
-		component.m_num_parameters = 0;
-		component.m_session_type   = 25600;
+		strcpy(component.m_FilterName, "Group");
+		component.m_FilterType = 1;
+		component.m_GameMode = 0;
+		component.m_NumParameters = 0;
+		component.m_SessionType = 25600;
 
 		/*
 		if (g.session_browser.region_filter_enabled)
@@ -119,37 +118,37 @@ namespace YimMenu
 		rage::rlTaskStatus state{};
 		static rage::rlSessionInfo result_sessions[MAX_SESSIONS_TO_FIND];
 
-		m_active             = true;
-		m_num_valid_sessions = 0;
+		m_Active = true;
+		m_NumValidSessions = 0;
 
-		if (BaseHook::Get<Hooks::Matchmaking::MatchmakingFindSessions, DetourHook<decltype(&Hooks::Matchmaking::MatchmakingFindSessions)>>()->Original()(0, 1, &component, MAX_SESSIONS_TO_FIND, result_sessions, &m_num_sessions_found, &state))
+		if (BaseHook::Get<Hooks::Matchmaking::MatchmakingFindSessions, DetourHook<decltype(&Hooks::Matchmaking::MatchmakingFindSessions)>>()->Original()(0, 1, &component, MAX_SESSIONS_TO_FIND, result_sessions, &m_NumSessionsFound, &state))
 		{
 			while (state.m_Status == 1)
 				ScriptMgr::Yield();
 
 			if (state.m_Status == 3)
 			{
-				std::unordered_map<std::uint64_t, session*> stok_map = {};
+				std::unordered_map<std::uint64_t, Session*> stok_map = {};
 
-				for (int i = 0; i < m_num_sessions_found; i++)
+				for (int i = 0; i < m_NumSessionsFound; i++)
 				{
-					m_found_sessions[i].info = result_sessions[i];
+					m_FoundSessions[i].m_Info = result_sessions[i];
 
-					if (auto it = stok_map.find(m_found_sessions[i].info.m_SessionToken); it != stok_map.end())
+					if (auto it = stok_map.find(m_FoundSessions[i].m_Info.m_SessionToken); it != stok_map.end())
 					{
-						if (/*g.session_browser.filter_multiplexed_sessions*/true)
+						if (/*g.session_browser.filter_multiplexed_sessions*/ true)
 						{
-							it->second->is_valid = false;
+							it->second->m_IsValid = false;
 						}
 
-						it->second->attributes.multiplex_count++;
-						m_found_sessions[i].is_valid = false;
+						it->second->m_Attributes.m_MultiplexCount++;
+						m_FoundSessions[i].m_IsValid = false;
 						continue;
 					}
 
 					if (enforce_player_limit.has_value() && enforce_player_limit.value()
-					    && m_found_sessions[i].attributes.player_count >= 30)
-						m_found_sessions[i].is_valid = false;
+					    && m_FoundSessions[i].m_Attributes.m_PlayerCount >= 30)
+						m_FoundSessions[i].m_IsValid = false;
 
 					/*
 					if (g.session_browser.language_filter_enabled
@@ -170,44 +169,44 @@ namespace YimMenu
 
 					*/
 
-					stok_map.emplace(m_found_sessions[i].info.m_SessionToken, &m_found_sessions[i]);
+					stok_map.emplace(m_FoundSessions[i].m_Info.m_SessionToken, &m_FoundSessions[i]);
 				}
 
-				if (/*g.session_browser.sort_method*/1 != 0)
+				if (/*g.session_browser.sort_method*/ 1 != 0)
 				{
-					std::qsort(m_found_sessions, m_num_sessions_found, sizeof(session), [](const void* a1, const void* a2) -> int {
+					std::qsort(m_FoundSessions, m_NumSessionsFound, sizeof(Session), [](const void* a1, const void* a2) -> int {
 						std::strong_ordering result;
 
-						if (/*g.session_browser.sort_method*/1 == 1)
+						if (/*g.session_browser.sort_method*/ 1 == 1)
 						{
-							result = (((session*)(a1))->attributes.player_count <=> ((session*)(a2))->attributes.player_count);
+							result = (((Session*)(a1))->m_Attributes.m_PlayerCount <=> ((Session*)(a2))->m_Attributes.m_PlayerCount);
 						}
 
 						if (result == 0)
 							return 0;
 
 						if (result > 0)
-							return /*g.session_browser.sort_direction*/1 ? -1 : 1;
+							return /*g.session_browser.sort_direction*/ 1 ? -1 : 1;
 
 						if (result < 0)
-							return /*g.session_browser.sort_direction*/1 ? 1 : -1;
+							return /*g.session_browser.sort_direction*/ 1 ? 1 : -1;
 
 
 						std::unreachable();
 					});
 				}
 
-				m_active = false;
+				m_Active = false;
 				return true;
 			}
 		}
 		else
 		{
-			m_active = false;
+			m_Active = false;
 			return false;
 		}
 
-		m_active = false;
+		m_Active = false;
 		return false;
 	}
 
@@ -247,7 +246,7 @@ namespace YimMenu
 			auto id_hash = GetIdHash(id);
 
 			m_MultiplexedSessions.emplace(id_hash, std::vector<MatchmakingId>{});
-			
+
 			// create the multiplexed sessions
 			for (int i = 0; i < Features::_MultiplexCount.GetState() - 1; i++)
 			{
@@ -294,7 +293,7 @@ namespace YimMenu
 				auto num_slots_copy = num_slots;
 				auto available_slots_copy = available_slots;
 				FiberPool::Push([session, num_slots_copy, available_slots_copy, info, attrs]() {
-					auto session_copy = session; // the compiler doesn't like it if I use session directly
+					auto session_copy = session;                                                                                                                                                                                    // the compiler doesn't like it if I use session directly
 					BaseHook::Get<Hooks::Matchmaking::MatchmakingUpdate, DetourHook<decltype(&Hooks::Matchmaking::MatchmakingUpdate)>>()->Original()(0, &session_copy, num_slots_copy, available_slots_copy, info, attrs, nullptr); // life's too short to check the task result
 				});
 			}
@@ -331,7 +330,7 @@ namespace YimMenu
 			}
 		}
 
-		return true; 
+		return true;
 	}
 
 	void CustomMatchmaking::OnSendSessionDetailResponseImpl(rage::rlSessionDetailMsg* message)

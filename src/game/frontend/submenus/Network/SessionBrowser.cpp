@@ -12,15 +12,15 @@ namespace YimMenu::Submenus
 {
 	static int selected_session_idx = -1;
 
-	std::string GetSessionName(const CustomMatchmaking::session& session)
+	std::string GetSessionName(const CustomMatchmaking::Session& session)
 	{
-		auto host_rid = session.info.m_HostInfo.m_GamerHandle.m_RockstarId;
+		auto host_rid = session.m_Info.m_HostInfo.m_GamerHandle.m_RockstarId;
 
 		const auto player = SavedPlayers::GetPlayerData(host_rid);
 		if(player)
 			return player->m_Name;
 
-		return std::format("{:X}", session.info.m_SessionToken);
+		return std::format("{:X}", session.m_Info.m_SessionToken);
 	}
 
 	void RenderSessionBrowser()
@@ -38,15 +38,15 @@ namespace YimMenu::Submenus
 				{
 					auto& session = CustomMatchmaking::GetFoundSessions()[i];
 
-					if (!session.is_valid)
+					if (!session.m_IsValid)
 						continue;
 
-					auto host_rid = session.info.m_HostInfo.m_GamerHandle.m_RockstarId;
+					auto host_rid = session.m_Info.m_HostInfo.m_GamerHandle.m_RockstarId;
 					auto player   = SavedPlayers::GetPlayerData(host_rid);
 
 					std::string session_str;
-					if (session.attributes.multiplex_count > 1)
-						session_str = std::format("{} (x{})", GetSessionName(session), session.attributes.multiplex_count);
+					if (session.m_Attributes.m_MultiplexCount > 1)
+						session_str = std::format("{} (x{})", GetSessionName(session), session.m_Attributes.m_MultiplexCount);
 					else
 						session_str = GetSessionName(session);
 
@@ -59,11 +59,11 @@ namespace YimMenu::Submenus
 					if (ImGui::IsItemHovered())
 					{
 						auto tool_tip = std::format("Number of Players: {}\nRegion: {}\nLanguage: {}\nHost Rockstar ID: {}\nDiscriminator: {:X}",
-						    session.attributes.player_count,
-						    Features::g_RegionCodes.at(session.attributes.region).second,
-						    Features::g_LanguageTypes.at(session.attributes.language).second,
-						    session.info.m_HostInfo.m_GamerHandle.m_RockstarId, // TODO: this is not accurate
-						    session.attributes.discriminator);
+						    session.m_Attributes.m_PlayerCount,
+						    Features::g_RegionCodes.at(session.m_Attributes.m_Region).second,
+						    Features::g_LanguageTypes.at(session.m_Attributes.m_Language).second,
+						    session.m_Info.m_HostInfo.m_GamerHandle.m_RockstarId, // TODO: this is not accurate
+						    session.m_Attributes.m_Discriminator);
 						ImGui::SetTooltip("%s", tool_tip.c_str());
 					}
 				}
@@ -83,12 +83,12 @@ namespace YimMenu::Submenus
 			{
 				auto& session = CustomMatchmaking::GetFoundSessions()[selected_session_idx];
 
-				ImGui::Text("Num Players: %d", session.attributes.player_count);
-				ImGui::Text("Discriminator: 0x%X", session.attributes.discriminator);
-				ImGui::Text("Region: %s", Features::g_RegionCodes.at(session.attributes.region).second);
-				ImGui::Text("Language: %s", Features::g_LanguageTypes.at(session.attributes.language).second);
+				ImGui::Text("Num Players: %d", session.m_Attributes.m_PlayerCount);
+				ImGui::Text("Discriminator: 0x%X", session.m_Attributes.m_Discriminator);
+				ImGui::Text("Region: %s", Features::g_RegionCodes.at(session.m_Attributes.m_Region).second);
+				ImGui::Text("Language: %s", Features::g_LanguageTypes.at(session.m_Attributes.m_Language).second);
 
-				auto& data = session.info.m_HostInfo;
+				auto& data = session.m_Info.m_HostInfo;
 				ImGui::Text("Host Rockstar ID: %llu", data.m_GamerHandle.m_RockstarId);
 
 				if(ImGui::Button("Copy Session Info"))
@@ -101,7 +101,7 @@ namespace YimMenu::Submenus
 				if(ImGui::Button("Join"))
 				{
 					FiberPool::Push([session] {
-						Network::JoinSessionInfo(&session.info);
+						Network::JoinSessionInfo(&session.m_Info);
 					});
 				}
 			}

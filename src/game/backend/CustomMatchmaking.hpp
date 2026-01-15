@@ -17,31 +17,31 @@ namespace YimMenu
 	namespace Features
 	{
 		static std::vector<std::pair<int, const char*>> g_RegionCodes = {
-			{0, "CIS"},
-			{1, "South America"},
-			{2, "US East"},
-			{3, "Europe"},
-			{4, "China"},
-			{5, "Australia"},
-			{6, "US West"},
-			{7, "Japan"},
-			{8, "Unknown"},
+		    {0, "CIS"},
+		    {1, "South America"},
+		    {2, "US East"},
+		    {3, "Europe"},
+		    {4, "China"},
+		    {5, "Australia"},
+		    {6, "US West"},
+		    {7, "Japan"},
+		    {8, "Unknown"},
 		};
 
 		static std::vector<std::pair<int, const char*>> g_LanguageTypes = {
-			{0, "English"},
-			{1, "French"},
-			{2, "German"},
-			{3, "Italian"},
-			{4, "Spanish (Spain)"},
-			{5, "Portuguese (Brazil)"},
-			{6, "Polish"},
-			{7, "Russian"},
-			{8, "Korean"},
-			{9, "Chinese (Traditional)"},
-			{10, "Japanese"},
-			{11, "Spanish (Mexico)"},
-			{12, "Chinese (Simplified)"},
+		    {0, "English"},
+		    {1, "French"},
+		    {2, "German"},
+		    {3, "Italian"},
+		    {4, "Spanish (Spain)"},
+		    {5, "Portuguese (Brazil)"},
+		    {6, "Polish"},
+		    {7, "Russian"},
+		    {8, "Korean"},
+		    {9, "Chinese (Traditional)"},
+		    {10, "Japanese"},
+		    {11, "Spanish (Mexico)"},
+		    {12, "Chinese (Simplified)"},
 		};
 	}
 
@@ -53,7 +53,7 @@ namespace YimMenu
 		void OnSendSessionDetailResponseImpl(rage::rlSessionDetailMsg* message);
 
 		bool MatchmakeImpl(std::optional<int> constraint = std::nullopt, std::optional<bool> enforce_player_limit = std::nullopt);
-		
+
 
 		CustomMatchmaking();
 
@@ -66,27 +66,27 @@ namespace YimMenu
 	public:
 		constexpr static int MAX_SESSIONS_TO_FIND = 1000;
 
-		struct session_attributes
+		struct SessionAttributes
 		{
-			int discriminator;
-			int player_count;
-			int region;
-			int language;
-			int multiplex_count = 1;
+			int m_Discriminator;
+			int m_PlayerCount;
+			int m_Region;
+			int m_Language;
+			int m_MultiplexCount = 1;
 		};
 
-		struct session
+		struct Session
 		{
-			rage::rlSessionInfo info;
-			session_attributes attributes;
-			bool is_valid;
+			rage::rlSessionInfo m_Info;
+			SessionAttributes m_Attributes;
+			bool m_IsValid;
 		};
 
 	private:
-		int m_num_sessions_found = 0;
-		int m_num_valid_sessions = 0;
-		bool m_active            = false;
-		session m_found_sessions[MAX_SESSIONS_TO_FIND];
+		int m_NumSessionsFound = 0;
+		int m_NumValidSessions = 0;
+		bool m_Active = false;
+		Session m_FoundSessions[MAX_SESSIONS_TO_FIND];
 
 		std::unordered_map<std::uint32_t, std::vector<MatchmakingId>> m_MultiplexedSessions;
 
@@ -119,22 +119,22 @@ namespace YimMenu
 
 		static int GetNumFoundSessions()
 		{
-			return GetInstance().m_num_sessions_found;
+			return GetInstance().m_NumSessionsFound;
 		}
 
 		static int GetNumValidSessions()
 		{
-			return GetInstance().m_num_valid_sessions;
+			return GetInstance().m_NumValidSessions;
 		}
 
-		static session* GetFoundSessions()
+		static Session* GetFoundSessions()
 		{
-			return GetInstance().m_found_sessions;
+			return GetInstance().m_FoundSessions;
 		}
 
 		static bool IsActive()
 		{
-			return GetInstance().m_active;
+			return GetInstance().m_Active;
 		}
 	};
 }

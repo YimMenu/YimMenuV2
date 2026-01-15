@@ -70,10 +70,10 @@ namespace YimMenu::Hooks
 			for (auto result = node->get_child_node("Results")->m_child; result; result = result->m_sibling)
 			{
 				const auto& values = split(result->get_child_node("Attributes")->m_value, ',');
-				CustomMatchmaking::GetFoundSessions()[i].attributes.discriminator = std::stoi(values[2]);
-				CustomMatchmaking::GetFoundSessions()[i].attributes.player_count  = std::stoi(values[4]);
-				CustomMatchmaking::GetFoundSessions()[i].attributes.language      = std::stoi(values[5]);
-				CustomMatchmaking::GetFoundSessions()[i].attributes.region        = std::stoi(values[6]);
+				CustomMatchmaking::GetFoundSessions()[i].m_Attributes.m_Discriminator = std::stoi(values[2]);
+				CustomMatchmaking::GetFoundSessions()[i].m_Attributes.m_PlayerCount  = std::stoi(values[4]);
+				CustomMatchmaking::GetFoundSessions()[i].m_Attributes.m_Language      = std::stoi(values[5]);
+				CustomMatchmaking::GetFoundSessions()[i].m_Attributes.m_Region        = std::stoi(values[6]);
 				i++;
 			}
 		}

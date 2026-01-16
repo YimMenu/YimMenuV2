@@ -4,6 +4,7 @@
 #include "core/frontend/Notifications.hpp"
 #include "game/backend/CustomMatchmaking.hpp"
 #include "game/backend/SavedPlayers.hpp"
+#include "game/frontend/items/Items.hpp"
 #include "game/gta/Network.hpp"
 #include "game/pointers/Pointers.hpp"
 #include "imgui.h"
@@ -108,90 +109,6 @@ namespace YimMenu::Submenus
 			ImGui::EndChild();
 		}
 
-		/*
-		if (ImGui::TreeNode("Filters"))
-		{
-			ImGui::Checkbox("Region", &g.session_browser.region_filter_enabled);
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("It is highly recommended to keep this filter enabled");
-
-			if (g.session_browser.region_filter_enabled)
-			{
-				ImGui::SameLine();
-
-				if (ImGui::BeginCombo("###region_select", regions[g.session_browser.region_filter].name))
-				{
-					for (const auto& region : regions)
-					{
-						if (ImGui::Selectable(region.name, g.session_browser.region_filter == region.id))
-						{
-							g.session_browser.region_filter = region.id;
-						}
-					}
-					ImGui::EndCombo();
-				}
-			}
-
-			ImGui::Checkbox("Language", &g.session_browser.language_filter_enabled);
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("Setting a correct region filter for the language will help tremendously");
-
-			if (g.session_browser.language_filter_enabled)
-			{
-				ImGui::SameLine();
-
-				if (ImGui::BeginCombo("###language_select", languages.at(g.session_browser.language_filter).data()))
-				{
-					for (const auto& [id, language] : languages)
-					{
-						if (ImGui::Selectable(language.data(), g.session_browser.language_filter == id))
-						{
-							g.session_browser.language_filter = id;
-						};
-					}
-					ImGui::EndCombo();
-				}
-			}
-
-			ImGui::Checkbox("Players", &g.session_browser.player_count_filter_enabled);
-
-			if (g.session_browser.player_count_filter_enabled)
-			{
-				ImGui::InputInt("Minimum", &g.session_browser.player_count_filter_minimum);
-				ImGui::InputInt("Maximum", &g.session_browser.player_count_filter_maximum);
-			}
-
-			ImGui::Checkbox("Pool Type", &g.session_browser.pool_filter_enabled);
-			if (g.session_browser.pool_filter_enabled)
-			{
-				ImGui::SameLine();
-				ImGui::Combo("###pooltype", &g.session_browser.pool_filter, "Normal\0Bad Sport\0");
-			}
-
-			ImGui::Checkbox("Filter Multiplexed Sessions", &g.session_browser.filter_multiplexed_sessions);
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("Removes advertised sessions");
-
-			ImGui::Checkbox("Exclude Modder Sessions", &g.session_browser.exclude_modder_sessions);
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("Excludes hosts that you have blocked in the Player Database");
-
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Sorting"))
-		{
-			ImGui::Combo("Sort By", &g.session_browser.sort_method, "Off\0Player Count\0");
-			if (g.session_browser.sort_method != 0)
-				ImGui::Combo("Direction", &g.session_browser.sort_direction, "Ascending\0Descending\0");
-			ImGui::TreePop();
-		}
-
-		ImGui::Checkbox("Replace Game Matchmaking", &g.session_browser.replace_game_matchmaking);
-		ImGui::SameLine();
-		components::help_marker("This will replace the default game matchmaking with a custom one that will use the filters and sorting set here");
-		**/
-
 		static uint32_t discriminator = 730776930; // 0xA9A8562 for non_cheater pool
 
 		ImGui::InputScalar("Discriminator", ImGuiDataType_U32, &discriminator, nullptr, nullptr, "%08X");
@@ -211,6 +128,22 @@ namespace YimMenu::Submenus
 	{
 		auto menu = std::make_shared<Category>("Session Browser");
 		menu->AddItem(std::make_unique<ImGuiItem>(RenderSessionBrowser));
+
+		auto filters = std::make_shared<Group>("Filters");
+
+		filters->AddItem(std::make_shared<BoolCommandItem>("mmlanguagefilterenabled"_J));
+		filters->AddItem(std::make_shared<ListCommandItem>("mmlanguagefilter"_J));
+		
+		filters->AddItem(std::make_shared<BoolCommandItem>("mmfiltermultiplexedsessions"_J));
+		
+		filters->AddItem(std::make_shared<BoolCommandItem>("mmplayercountfilterenabled"_J));
+		filters->AddItem(std::make_shared<IntCommandItem>("mmplayercountfiltermin"_J));
+		filters->AddItem(std::make_shared<IntCommandItem>("mmplayercountfiltermax"_J));
+
+		filters->AddItem(std::make_shared<ListCommandItem>("mmsortmethod"_J));
+		filters->AddItem(std::make_shared<ListCommandItem>("mmsortdirection"_J));
+
+		menu->AddItem(filters);
 
 		return menu;
 	}

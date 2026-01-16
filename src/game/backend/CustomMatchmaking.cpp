@@ -13,6 +13,15 @@
 
 namespace YimMenu::Features
 {
+	static std::vector<std::pair<int, const char*>> g_SortMethods = {
+	    {0, "Off"},
+	    {1, "Player Count"},
+	};
+	static std::vector<std::pair<int, const char*>> g_SortDirections = {
+	    {0, "Ascending"},
+	    {1, "Descending"},
+	};
+
 	BoolCommand _SpoofRegionType{
 	    "mmspoofregiontype",
 	    "Spoof Region Type",
@@ -56,6 +65,50 @@ namespace YimMenu::Features
 	    2,
 	    7,
 	    5};
+
+	BoolCommand _LanguageFilterEnabled{
+	    "mmlanguagefilterenabled",
+	    "Filter By Language",
+	    "Filter sessions by language"};
+	ListCommand _LanguageFilter{
+	    "mmlanguagefilter",
+	    "Language",
+	    "The language to filter",
+	    g_LanguageTypes};
+	BoolCommand _FilterMultiplexedSessions{
+	    "mmfiltermultiplexedsessions",
+	    "Filter Multiplexed Sessions",
+	    "Filter out multiplexed sessions"};
+
+	BoolCommand _PlayerCountFilterEnabled{
+	    "mmplayercountfilterenabled",
+	    "Filter By Player Count",
+	    "Filter by player count"};
+	IntCommand _PlayerCountFilterMin{
+	    "mmplayercountfiltermin",
+	    "Player Count Minimum",
+	    "Minimum players filter",
+	    1,
+	    32,
+	    25};
+	IntCommand _PlayerCountFilterMax{
+	    "mmplayercountfiltermax",
+	    "Player Count Maximum",
+	    "Maximum players filter",
+	    1,
+	    32,
+	    25};
+
+	ListCommand _SortMethod{
+	    "mmsortmethod",
+	    "Sort By",
+	    "",
+	    g_SortMethods};
+	ListCommand _SortDirection{
+	    "mmsortdirection",
+	    "Sort Direction",
+	    "",
+	    g_SortDirections};
 }
 
 namespace YimMenu
@@ -101,13 +154,6 @@ namespace YimMenu
 		component.m_NumParameters = 0;
 		component.m_SessionType = 25600;
 
-		/*
-		if (g.session_browser.region_filter_enabled)
-		{
-			component.SetParameter("MMATTR_REGION", 4, g.session_browser.region_filter);
-		}
-		*/
-
 		if (constraint)
 		{
 			component.SetParameter("MMATTR_DISCRIMINATOR", 0, constraint.value());
@@ -136,7 +182,7 @@ namespace YimMenu
 
 					if (auto it = stok_map.find(m_FoundSessions[i].m_Info.m_SessionToken); it != stok_map.end())
 					{
-						if (/*g.session_browser.filter_multiplexed_sessions*/ true)
+						if (Features::_FilterMultiplexedSessions.GetState())
 						{
 							it->second->m_IsValid = false;
 						}
@@ -150,34 +196,26 @@ namespace YimMenu
 					    && m_FoundSessions[i].m_Attributes.m_PlayerCount >= 30)
 						m_FoundSessions[i].m_IsValid = false;
 
-					/*
-					if (g.session_browser.language_filter_enabled
-					    && (eGameLanguage)m_found_sessions[i].attributes.language != g.session_browser.language_filter)
-						m_found_sessions[i].is_valid = false;
+					if (Features::_LanguageFilterEnabled.GetState()
+					    && m_FoundSessions[i].m_Attributes.m_Language != Features::_LanguageFilter.GetState())
+						m_FoundSessions[i].m_IsValid = false;
 
-					if (g.session_browser.player_count_filter_enabled
-					    && (m_found_sessions[i].attributes.player_count < g.session_browser.player_count_filter_minimum
-					        || m_found_sessions[i].attributes.player_count > g.session_browser.player_count_filter_maximum))
+					if (Features::_PlayerCountFilterEnabled.GetState()
+					    && (m_FoundSessions[i].m_Attributes.m_PlayerCount < Features::_PlayerCountFilterMin.GetState()
+					        || m_FoundSessions[i].m_Attributes.m_PlayerCount > Features::_PlayerCountFilterMax.GetState()))
 					{
-						m_found_sessions[i].is_valid = false;
+						m_FoundSessions[i].m_IsValid = false;
 					}
-
-					if (g.session_browser.pool_filter_enabled
-					    && ((m_found_sessions[i].attributes.discriminator & (1 << 14)) == (1 << 14))
-					        != (bool)g.session_browser.pool_filter)
-						m_found_sessions[i].is_valid = false;
-
-					*/
 
 					stok_map.emplace(m_FoundSessions[i].m_Info.m_SessionToken, &m_FoundSessions[i]);
 				}
 
-				if (/*g.session_browser.sort_method*/ 1 != 0)
+				if (Features::_SortMethod.GetState() != 0)
 				{
 					std::qsort(m_FoundSessions, m_NumSessionsFound, sizeof(Session), [](const void* a1, const void* a2) -> int {
 						std::strong_ordering result;
 
-						if (/*g.session_browser.sort_method*/ 1 == 1)
+						if (Features::_SortMethod.GetState() == 1)
 						{
 							result = (((Session*)(a1))->m_Attributes.m_PlayerCount <=> ((Session*)(a2))->m_Attributes.m_PlayerCount);
 						}
@@ -186,10 +224,10 @@ namespace YimMenu
 							return 0;
 
 						if (result > 0)
-							return /*g.session_browser.sort_direction*/ 1 ? -1 : 1;
+							return Features::_SortDirection.GetState() ? -1 : 1;
 
 						if (result < 0)
-							return /*g.session_browser.sort_direction*/ 1 ? 1 : -1;
+							return Features::_SortDirection.GetState() ? 1 : -1;
 
 
 						std::unreachable();

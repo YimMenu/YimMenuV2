@@ -213,7 +213,7 @@ namespace YimMenu
 				if (Features::_SortMethod.GetState() != 0)
 				{
 					std::qsort(m_FoundSessions, m_NumSessionsFound, sizeof(Session), [](const void* a1, const void* a2) -> int {
-						std::strong_ordering result(0);
+						std::strong_ordering result = std::strong_ordering::equal;
 
 						if (Features::_SortMethod.GetState() == 1)
 						{

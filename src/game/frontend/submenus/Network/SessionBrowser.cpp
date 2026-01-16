@@ -54,7 +54,7 @@ namespace YimMenu::Submenus
 					if (ImGui::Selectable(session_str.c_str(), i == selected_session_idx))
 					{
 						selected_session_idx = i;
-						//g_pointers->m_gta.m_encode_session_info(&session.info, session_info, 0xA9, nullptr);
+						Pointers.EncodeSessionInfo(&session.m_Info, session_info, 0xA9, nullptr);
 					}
 
 					if (ImGui::IsItemHovered())

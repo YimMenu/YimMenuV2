@@ -462,6 +462,11 @@ namespace YimMenu
 			MatchmakingSessionDetailSendResponse = addr.Add(0x2F).Rip().As<PVOID>();
 		});
 
+		static constexpr auto encodeSessionInfoPtrn = Pattern<"E8 ? ? ? ? 48 85 C0 74 ? 48 89 BC">("EncodeSessionInfo");
+		scanner.Add(encodeSessionInfoPtrn, [this](PointerCalculator addr) {
+			EncodeSessionInfo = addr.Add(1).Rip().As<Functions::EncodeSessionInfo>();
+		});
+
 		static constexpr auto gameSkeletonUpdatePtrn = Pattern<"56 48 83 EC 20 48 8B 81 40 01 00 00 48 85 C0">("GameSkeletonUpdate");
 		scanner.Add(gameSkeletonUpdatePtrn, [this](PointerCalculator addr) {
 			GameSkeletonUpdate = addr.As<PVOID>();

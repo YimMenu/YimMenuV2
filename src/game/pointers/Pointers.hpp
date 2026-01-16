@@ -72,6 +72,7 @@ namespace YimMenu
 		using GetAvatars = bool (*)(rage::rlGetAvatarsContext* context, rage::rlGetAvatarsPlayerList* players);
 		using AssistedAimFindNewTarget = bool (*)(__int64 a1);
 		using MatchmakingFindSessions = bool (*)(int profile_index, int available_slots, NetworkGameFilterMatchmakingComponent* m_filter, unsigned int max_sessions, rage::rlSessionInfo* result_sessions, int* result_session_count, rage::rlTaskStatus* state);
+		using EncodeSessionInfo = bool (*)(rage::rlSessionInfo* info, char* buffer, int buffer_size, int* bytes_written);
 	}
 
 	struct PointerData
@@ -174,6 +175,7 @@ namespace YimMenu
 		PVOID MatchmakingSessionDetailSendResponse;
 		PVOID MatchmakingFindSessions;
 		PVOID MatchmakingFindSessionsResponse;
+		Functions::EncodeSessionInfo EncodeSessionInfo;
 		PVOID GameSkeletonUpdate;
 	};
 

@@ -65,6 +65,37 @@ namespace YimMenu::Submenus
 					ImGui::SetClipboardText(std::to_string(rid1).c_str());
 				}
 
+				auto& platformAccountId = Players::GetSelected().GetHandle()->m_PlatformAccountId;
+				switch (platformAccountId.m_Platform)
+				{
+				case PlatformAccountId::PLATFORM_XBOX:
+					ImGui::Text("Xbox User ID:");
+					ImGui::SameLine();
+					if (ImGui::SmallButton(std::to_string(platformAccountId.m_XboxUserId).c_str()))
+					{
+						ImGui::SetClipboardText(std::to_string(platformAccountId.m_XboxUserId).c_str());
+					}
+					break;
+				case PlatformAccountId::PLATFORM_STEAM:
+					ImGui::Text("Steam ID:");
+					ImGui::SameLine();
+					if (ImGui::SmallButton(std::to_string(platformAccountId.m_SteamId).c_str()))
+					{
+						ImGui::SetClipboardText(std::to_string(platformAccountId.m_SteamId).c_str());
+					}
+					break;
+				case PlatformAccountId::PLATFORM_EPIC:
+					ImGui::Text("Epic Account ID:");
+					ImGui::SameLine();
+					if (ImGui::SmallButton(platformAccountId.m_EpicAccountId))
+					{
+						ImGui::SetClipboardText(platformAccountId.m_EpicAccountId);
+					}
+					break;
+				default:
+					break;
+				}
+
 
 				auto ip = Players::GetSelected().GetExternalAddress();
 
@@ -83,14 +114,14 @@ namespace YimMenu::Submenus
 				if (ImGui::Button("View SC Profile"))
 					FiberPool::Push([] {
 						uint64_t handle[13];
-						NETWORK::NETWORK_HANDLE_FROM_PLAYER(Players::GetSelected().GetId(), handle, sizeof(handle));
+						NETWORK::NETWORK_HANDLE_FROM_PLAYER(Players::GetSelected().GetId(), handle, std::size(handle));
 						NETWORK::NETWORK_SHOW_PROFILE_UI(handle);
 					});
 				ImGui::SameLine();
 				if (ImGui::Button("Add Friend"))
 					FiberPool::Push([] {
 						uint64_t handle[13];
-						NETWORK::NETWORK_HANDLE_FROM_PLAYER(Players::GetSelected().GetId(), handle, sizeof(handle));
+						NETWORK::NETWORK_HANDLE_FROM_PLAYER(Players::GetSelected().GetId(), handle, std::size(handle));
 						NETWORK::NETWORK_ADD_FRIEND(handle, "");
 					});
 

@@ -21,6 +21,7 @@ namespace rage
 	class rlSessionDetailMsg;
 	class rlSessionInfo;
 	struct rlTaskStatus;
+	struct gameSkeleton;
 }
 
 class MatchmakingAttributes;
@@ -44,6 +45,7 @@ namespace YimMenu::Hooks
 	namespace Anticheat
 	{
 		extern void QueueDependency(__int64 a1);
+		extern void GameSkeletonUpdate(rage::gameSkeleton* skeleton, int type);
 		extern bool PrepareMetricForSending(rage::JsonSerializer* ser, void* a2, void* a3, rage::rlMetric* metric);
 		extern BOOL GetThreadContext(HANDLE hThread, LPCONTEXT lpContext);
 		extern void HttpStartRequest(void* request);
@@ -87,6 +89,7 @@ namespace YimMenu::Hooks
 		extern void ReceiveNetMessage(void* a1, rage::netConnectionManager* mgr, rage::netEvent* event);
 		extern void ReceiveNetGameEvent(Player player, uint16_t event_id, uint32_t event_index, uint32_t event_handled_bits, rage::datBitBuffer& buffer);
 		extern bool HandleScriptedGameEvent(Player player, CScriptedGameEvent& event);
+		extern uint32_t GetDLCHash(void* manager, uint32_t seed);
 		extern int GetPoolType();
 	}
 

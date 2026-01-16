@@ -1,5 +1,6 @@
 #pragma once
 #include "types/rage/RTTI.hpp"
+#include "PlatformAccountId.hpp"
 
 namespace rage
 {
@@ -31,7 +32,8 @@ namespace rage
 
 		int m_AccountId;                             //0x0008
 		int64_t m_RockstarId;                        //0x0010
-		char pad_0018[0x38];                         //0x0018 voice chat stuff
+		PlatformAccountId m_PlatformAccountId;       //0x0018
+		uint32_t unk_0048;                           //0x0048
 		CNonPhysicalPlayerData* m_NonPhysicalPlayer; //0x0050
 		uint32_t m_MessageId;                        //0x0058
 		char pad_005C[4];                            //0x005C

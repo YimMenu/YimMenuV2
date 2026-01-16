@@ -21,6 +21,7 @@ namespace YimMenu::Submenus
 
 		misc->AddItem(std::make_shared<CommandItem>("apartmentheistskiphacking"_J));
 		misc->AddItem(std::make_shared<CommandItem>("apartmentheistskipdrilling"_J));
+		misc->AddItem(std::make_shared<CommandItem>("apartmentheistskipswiping"_J));
 		misc->AddItem(std::make_shared<CommandItem>("apartmentheistinstantfinish"_J));
 		misc->AddItem(std::make_shared<CommandItem>("apartmentheistinstantfinishpacific"_J));
 

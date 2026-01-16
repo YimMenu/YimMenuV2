@@ -9,16 +9,15 @@ namespace YimMenu
 	class Command
 	{
 	private:
-		std::string m_Name;
-		std::string m_Label;
-		std::string m_Description;
-		joaat_t m_Hash;
-
 		int m_NumArgs = 0; // TODO: currently unused
 
 	protected:
 		virtual void OnCall() = 0;
 		void MarkDirty();
+		std::string m_Name;
+		std::string m_Label;
+		std::string m_Description;
+		joaat_t m_Hash;
 
 	public:
 		Command(std::string name, std::string label, std::string description, int num_args = 0);

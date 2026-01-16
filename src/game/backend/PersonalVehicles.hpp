@@ -23,9 +23,9 @@ namespace YimMenu
 		public:
 			PersonalVehicle(int id, MPSV_Entry* data);
 
-			int GetId();
+			int GetId() const;
 			MPSV_Entry* GetData();
-			joaat_t GetModel();
+			joaat_t GetModel() const;
 			std::string GetPlate();
 			std::string GetName();
 			std::string GetGarage();

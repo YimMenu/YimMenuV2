@@ -27,7 +27,7 @@ namespace YimMenu::Submenus
 
 	static bool ShouldRenderPlayer(std::string_view name, std::string_view search)
 	{
-		if (!search[0])
+		if (search.empty())
 			return true;
 
 		if (name.size() < search.size())

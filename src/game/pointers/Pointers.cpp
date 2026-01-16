@@ -4,6 +4,7 @@
 #include "core/memory/ModuleMgr.hpp"
 #include "core/memory/PatternScanner.hpp"
 #include "core/util/Joaat.hpp"
+#include "types/network/rlSessionInfo.hpp"
 #include "types/rage/atArray.hpp"
 
 namespace YimMenu
@@ -389,6 +390,17 @@ namespace YimMenu
 			BattlEyeServerProcessPlayerJoin = ptr.Sub(4).Rip().As<PVOID*>()[1];
 		});
 
+		constexpr auto gameDataHashPtrn = Pattern<"48 8D 3D ? ? ? ? 69 C9">("GameDataHash");
+		scanner.Add(gameDataHashPtrn, [this](PointerCalculator ptr) {
+			GameDataHash = ptr.Add(3).Rip().As<CGameDataHash*>();
+		});
+
+		constexpr auto getDLCHashPtrn = Pattern<"31 D2 E8 ? ? ? ? 3B 84">("GetDLCHash&DLCManager");
+		scanner.Add(getDLCHashPtrn, [this](PointerCalculator ptr) {
+			DLCManager = ptr.Sub(4).Rip().As<void**>();
+			GetDLCHash = ptr.Add(3).Rip().As<PVOID>();
+		});
+
 		constexpr auto assistedAimShouldReleaseEntityPtrn = Pattern<"80 7F 28 04 75 6A">("AssistedAimShouldReleaseEntity");
 		scanner.Add(assistedAimShouldReleaseEntityPtrn, [this](PointerCalculator ptr) {
 			AssistedAimShouldReleaseEntity = ptr.Sub(0xF).As<PVOID>();
@@ -397,11 +409,6 @@ namespace YimMenu
 		constexpr auto assistedAimFindNewTargetPtrn = Pattern<"0F 84 C9 00 00 00 48 89 CE 48 89 F9">("AssistedAimFindNewTarget");
 		scanner.Add(assistedAimFindNewTargetPtrn, [this](PointerCalculator ptr) {
 			AssistedAimFindNewTarget = ptr.Sub(0x33).As<Functions::AssistedAimFindNewTarget>();
-		});
-
-		constexpr auto gameSkeletonPtrn = Pattern<"0F B6 C0 8D 14 00 83 C2 02">("GameSkeleton");
-		scanner.Add(gameSkeletonPtrn, [this](PointerCalculator ptr) {
-			GameSkeleton = ptr.Add(0x9).Add(3).Rip().As<rage::gameSkeleton*>();
 		});
 
 		constexpr auto anticheatInitializedHashPtrn = Pattern<"89 9E C8 00 00 00 48 8B 0D ? ? ? ? 48 85 C9 74 46">("AnticheatInitializedHash&GetAnticheatInitializedHash");
@@ -443,6 +450,11 @@ namespace YimMenu
 		static constexpr auto matchmakingSessionDetailSendResponsePtrn = Pattern<"48 B8 01 00 00 00 0D 00 00 00">("SessionDetailSendResponse");
 		scanner.Add(matchmakingSessionDetailSendResponsePtrn, [this](PointerCalculator addr) {
 			MatchmakingSessionDetailSendResponse = addr.Add(0x2F).Rip().As<PVOID>();
+		});
+
+		static constexpr auto gameSkeletonUpdatePtrn = Pattern<"56 48 83 EC 20 48 8B 81 40 01 00 00 48 85 C0">("GameSkeletonUpdate");
+		scanner.Add(gameSkeletonUpdatePtrn, [this](PointerCalculator addr) {
+			GameSkeletonUpdate = addr.As<PVOID>();
 		});
 
 		if (!scanner.Scan())

@@ -1,8 +1,10 @@
 #include "LuaScripts.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/filemgr/FileMgr.hpp"
 #include "core/scripting/LuaManager.hpp"
 #include "core/frontend/widgets/imgui_colors.h"
+#include <shellapi.h>
 
 namespace YimMenu::Submenus
 {
@@ -13,6 +15,19 @@ namespace YimMenu::Submenus
 		static std::shared_ptr<LuaScript> selectedScript;
 
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
+			if (ImGui::Button("Open Folder"))
+			{
+				auto path = FileMgr::GetProjectFolder("./scripts").Path();
+				ShellExecuteA(nullptr, "open", path.string().c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Reload All"))
+			{
+				LuaManager::ForAllLoadedScripts([](std::shared_ptr<LuaScript>& script) {
+					script->Reload();
+				});
+			}
+
 			const float height = 15 * ImGui::GetTextLineHeightWithSpacing();
 			if (ImGui::BeginListBox("##luascripts", {300.f, height}))
 			{

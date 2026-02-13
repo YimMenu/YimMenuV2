@@ -37,11 +37,13 @@ namespace YimMenu::Features
 				return;
 			}
 
+			Vehicle vehicle(closest_vehicle);
+
 			// Check if we can find an empty seat
 			int seat_index = -1; // -1 is driver seat
-			for (int i = -1; i < VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(closest_vehicle); i++)
+			for (int i = -1; i < VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle.GetHandle()); i++)
 			{
-				if (VEHICLE::IS_VEHICLE_SEAT_FREE(closest_vehicle, i))
+				if (VEHICLE::IS_VEHICLE_SEAT_FREE(vehicle.GetHandle(), i, false))
 				{
 					seat_index = i;
 					break;
@@ -55,9 +57,9 @@ namespace YimMenu::Features
 			}
 
 			// Teleport to vehicle and enter it
-			auto vehicle_pos = Vehicle(closest_vehicle).GetPosition();
+			auto vehicle_pos = vehicle.GetPosition();
 			self_ped.TeleportTo(vehicle_pos);
-			PED::SET_PED_INTO_VEHICLE(self_ped.GetHandle(), closest_vehicle, seat_index);
+			PED::SET_PED_INTO_VEHICLE(self_ped.GetHandle(), vehicle.GetHandle(), seat_index);
 			Notifications::Show("Teleport", "Teleported to nearest vehicle");
 		}
 	};

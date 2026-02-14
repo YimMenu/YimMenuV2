@@ -7,6 +7,7 @@
 #include "game/backend/Self.hpp"
 #include "game/backend/SavedVehicles.hpp"
 #include "game/gta/Vehicle.hpp"
+#include "game/gta/Natives.hpp"
 #include "misc/cpp/imgui_stdlib.h"
 
 namespace YimMenu::Submenus
@@ -58,6 +59,39 @@ namespace YimMenu::Submenus
 					FiberPool::Push([] {
 						std::string name = Self::GetVehicle().GetFullName();
 						strcpy(vehicle_file_name_input, name.c_str());
+					});
+				ImGui::SameLine();
+				if (ImGui::Button("From Nearest Vehicle"))
+					FiberPool::Push([] {
+						constexpr float SEARCH_RADIUS = 500.0f;
+						auto self_ped = Self::GetPed();
+						
+						if (!self_ped)
+						{
+							Notifications::Show("Saved Vehicles", "Failed to get player ped", NotificationType::Warning);
+							return;
+						}
+						
+						auto self_pos = self_ped.GetPosition();
+						Vehicle closest_vehicle = VEHICLE::GET_CLOSEST_VEHICLE(
+							self_pos.x,
+							self_pos.y,
+							self_pos.z,
+							SEARCH_RADIUS,
+							0,
+							70
+						);
+						
+						if (!closest_vehicle)
+						{
+							Notifications::Show("Saved Vehicles", "No vehicles found nearby", NotificationType::Warning);
+							return;
+						}
+						
+						Vehicle vehicle(closest_vehicle);
+						std::string name = vehicle.GetFullName();
+						strcpy(vehicle_file_name_input, name.c_str());
+						Notifications::Show("Saved Vehicles", std::format("Vehicle name set to: {}", name));
 					});
 			};
 

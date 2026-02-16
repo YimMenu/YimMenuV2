@@ -60,7 +60,9 @@ namespace YimMenu::Submenus
 						std::string name = Self::GetVehicle().GetFullName();
 						strcpy(vehicle_file_name_input, name.c_str());
 					});
-				ImGui::SameLine();
+			};
+
+			static auto drawNearestVehicleButton = []() {
 				if (ImGui::Button("From Nearest Vehicle"))
 					FiberPool::Push([] {
 						constexpr float SEARCH_RADIUS = 500.0f;
@@ -170,6 +172,9 @@ namespace YimMenu::Submenus
 				}
 				else
 					drawSaveVehicleButton(false);
+
+				ImGui::SameLine();
+				drawNearestVehicleButton();
 			}
 			ImGui::EndGroup();
 

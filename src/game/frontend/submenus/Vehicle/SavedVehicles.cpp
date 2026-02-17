@@ -27,6 +27,9 @@ namespace YimMenu::Submenus
 
 		persistCar->AddItem(std::make_unique<ImGuiItem>([] {
 			static auto drawSaveButton = [](bool saveToNewFolder) {
+				if (!Self::GetVehicle() || !Self::GetVehicle().IsValid())
+					return;
+
 				if (ImGui::Button("Save"))
 					FiberPool::Push([saveToNewFolder] {
 						std::string fileName = vehicle_file_name_input;

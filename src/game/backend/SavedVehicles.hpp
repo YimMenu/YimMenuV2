@@ -11,6 +11,7 @@ namespace YimMenu
 
 		static void RefreshList(std::string folderName, std::vector<std::string>& folders, std::vector<std::string>& files);
 		static void Save(std::string folderName, std::string fileName);
+		static void SaveVehicle(Vehicle vehicle, std::string folderName, std::string fileName);
 		static void Load(std::string folderName, std::string fileName, bool spawnInside);
 
 	private:

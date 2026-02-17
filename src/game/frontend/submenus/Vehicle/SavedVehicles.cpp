@@ -26,10 +26,7 @@ namespace YimMenu::Submenus
 		persistCar->AddItem(std::make_shared<BoolCommandItem>("spawninsidesavedveh"_J));
 
 		persistCar->AddItem(std::make_unique<ImGuiItem>([] {
-			static auto drawSaveVehicleButton = [](bool saveToNewFolder) {
-				if (!Self::GetVehicle() || !Self::GetVehicle().IsValid())
-					return;
-
+			static auto drawSaveButton = [](bool saveToNewFolder) {
 				if (ImGui::Button("Save"))
 					FiberPool::Push([saveToNewFolder] {
 						std::string fileName = vehicle_file_name_input;
@@ -54,6 +51,12 @@ namespace YimMenu::Submenus
 
 						SavedVehicles::RefreshList(folder, folders, files);
 					});
+			};
+
+			static auto drawPopulateButton = []() {
+				if (!Self::GetVehicle() || !Self::GetVehicle().IsValid())
+					return;
+
 				ImGui::SameLine();
 				if (ImGui::Button("Populate Name"))
 					FiberPool::Push([] {
@@ -94,6 +97,53 @@ namespace YimMenu::Submenus
 						std::string name = vehicle.GetFullName();
 						strcpy(vehicle_file_name_input, name.c_str());
 						Notifications::Show("Saved Vehicles", std::format("Vehicle name set to: {}", name));
+					});
+				ImGui::SameLine();
+				if (ImGui::Button("Save Nearest"))
+					FiberPool::Push([] {
+						constexpr float SEARCH_RADIUS = 500.0f;
+						auto self_ped = Self::GetPed();
+						
+						if (!self_ped)
+						{
+							Notifications::Show("Saved Vehicles", "Failed to get player ped", NotificationType::Warning);
+							return;
+						}
+						
+						std::string fileName = vehicle_file_name_input;
+						
+						if (!TrimString(fileName).size())
+						{
+							Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
+							return;
+						}
+						
+						auto self_pos = self_ped.GetPosition();
+						Vehicle closest_vehicle = VEHICLE::GET_CLOSEST_VEHICLE(
+							self_pos.x,
+							self_pos.y,
+							self_pos.z,
+							SEARCH_RADIUS,
+							0,
+							70
+						);
+						
+						if (!closest_vehicle)
+						{
+							Notifications::Show("Saved Vehicles", "No vehicles found nearby", NotificationType::Warning);
+							return;
+						}
+						
+						Vehicle vehicle(closest_vehicle);
+						
+						ReplaceString(fileName, ".", "");
+						fileName += ".json";
+						
+						SavedVehicles::SaveVehicle(vehicle, folder.empty() ? newFolder : folder, fileName);
+						
+						strcpy(vehicle_file_name_input, "");
+						SavedVehicles::RefreshList(folder, folders, files);
+						Notifications::Show("Saved Vehicles", std::format("Saved {}", vehicle.GetFullName()), NotificationType::Success);
 					});
 			};
 
@@ -168,11 +218,12 @@ namespace YimMenu::Submenus
 					ImGui::Text("Folder Name");
 					ImGui::SetNextItemWidth(250);
 					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
-					drawSaveVehicleButton(true);
+					drawSaveButton(true);
 				}
 				else
-					drawSaveVehicleButton(false);
+					drawSaveButton(false);
 
+				drawPopulateButton();
 				ImGui::SameLine();
 				drawNearestVehicleButton();
 			}

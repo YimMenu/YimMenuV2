@@ -140,6 +140,19 @@ namespace YimMenu
 			Notifications::Show("Persist Car", "Tried to save a vehicle which does not exist", NotificationType::Warning);
 	}
 
+	void SavedVehicles::SaveVehicle(Vehicle vehicle, std::string folderName, std::string fileName)
+	{
+		if (vehicle && vehicle.IsValid())
+		{
+			const auto file = SavedVehicles::CheckFolder(folderName).GetFile(fileName);
+			std::ofstream file_stream(file.Path(), std::ios::out | std::ios::trunc);
+			file_stream << SavedVehicles::GetJson(vehicle).dump(4);
+			file_stream.close();
+		}
+		else
+			Notifications::Show("Persist Car", "Tried to save a vehicle which does not exist", NotificationType::Warning);
+	}
+
 	void SavedVehicles::Load(std::string folderName, std::string fileName, bool spawnInside)
 	{
 		if (!fileName.empty())

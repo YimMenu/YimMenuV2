@@ -129,6 +129,11 @@ namespace YimMenu
 	void NativeHooks::DestroyImpl()
 	{
 		for (auto& [_, program] : m_RegisteredPrograms)
+		{
 			program->Cleanup();
+		}
+		m_RegisteredPrograms.clear();
+		
+		m_RegisteredHooks.clear();
 	}
 }

@@ -79,7 +79,7 @@ namespace YimMenu
 	{
 		BaseHook::DisableAll();
 		m_MinHook.ApplyQueued();
-
+		
 		for (auto it : BaseHook::Hooks())
 		{
 			delete it;

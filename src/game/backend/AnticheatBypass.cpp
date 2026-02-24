@@ -13,6 +13,8 @@ using FnBattlEyeBypass = bool (*)();
 
 namespace YimMenu
 {
+	static bool HooksInitialized = false;
+	
 	static bool CheckForFSL()
 	{
 		int num_versions = 0;
@@ -50,7 +52,11 @@ namespace YimMenu
 
 	void AnticheatBypass::RunScriptImpl()
 	{
-		NativeHooks::AddHook("shop_controller"_J, NativeIndex::NET_GAMESERVER_BEGIN_SERVICE, &TransactionHook);
+		if (!HooksInitialized)
+		{
+			NativeHooks::AddHook("shop_controller"_J, NativeIndex::NET_GAMESERVER_BEGIN_SERVICE, &TransactionHook);
+			HooksInitialized = true;
+		}
 
 		m_IsFSLLoaded = CheckForFSL();
 		m_BattlEyeRunning = (NETWORK::_NETWORK_GET_GAME_RESTART_REASON() == 0 && GetModuleHandleA("BEClient_x64.dll")) && !m_IsFSLLoaded;

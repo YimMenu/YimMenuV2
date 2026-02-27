@@ -25,6 +25,7 @@ namespace YimMenu
 
 		// mods
 		void Upgrade();
+		void RandomizeUpgrade();
 		std::string GetPlateText();
 		void SetPlateText(std::string_view text);
 		std::map<int, int32_t> GetOwnedMods();

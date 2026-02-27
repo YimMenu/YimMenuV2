@@ -196,6 +196,12 @@ namespace YimMenu::Submenus
 							Self::GetVehicle().Upgrade();
 							currentVeh = -1;
 						});
+					ImGui::SameLine();
+					if (ImGui::Button("Randomize Mods"))
+						FiberPool::Push([] {
+							Self::GetVehicle().RandomizeUpgrade();
+							currentVeh = -1;
+						});
 				}
 				ImGui::SeparatorText("Mod Options");
 				{

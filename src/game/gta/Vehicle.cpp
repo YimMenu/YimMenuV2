@@ -116,6 +116,29 @@ namespace YimMenu
 		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
 	}
 
+	void Vehicle::RandomizeUpgrade()
+	{
+		ENTITY_ASSERT_VALID();
+		ENTITY_ASSERT_CONTROL();
+		ENTITY_ASSERT_SCRIPT_CONTEXT();
+
+		auto veh = GetHandle();
+
+		VEHICLE::SET_VEHICLE_MOD_KIT(veh, 0);
+
+		for (int t = (int)VehicleModType::MOD_SPOILERS; t < (int)VehicleModType::MOD_LIGHTBAR; t++)
+		{
+			int numMods = VEHICLE::GET_NUM_VEHICLE_MODS(veh, t);
+			if (numMods > 0)
+			{
+				int randomMod = rand() % numMods;
+				VEHICLE::SET_VEHICLE_MOD(veh, t, randomMod, false);
+			}
+		}
+
+		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
+	}
+
 	std::string Vehicle::GetPlateText()
 	{
 		ENTITY_ASSERT_VALID();

@@ -55,6 +55,12 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
+		static int RandomizeUpgrade(lua_State* state)
+		{
+			GetObject<YimMenu::Vehicle>(state, 1).RandomizeUpgrade();
+			return 0;
+		}
+
 		static int GetPlateText(lua_State* state)
 		{
 			auto text = GetObject<YimMenu::Vehicle>(state, 1).GetPlateText();
@@ -130,8 +136,7 @@ namespace YimMenu::Lua
 					SetFunction(state, GetGear, "get_gear");
 					SetFunction(state, GetRevRatio, "get_rev_ratio");
 					SetFunction(state, GetSpeed, "get_speed");
-					SetFunction(state, Upgrade, "upgrade");
-					SetFunction(state, GetPlateText, "get_plate_text");
+					SetFunction(state, Upgrade, "upgrade");				SetFunction(state, RandomizeUpgrade, "randomize_upgrade");					SetFunction(state, GetPlateText, "get_plate_text");
 					SetFunction(state, SetPlateText, "set_plate_text");
 					SetFunction(state, IsSeatFree, "is_seat_free");
 					SetFunction(state, SupportsBoost, "supports_boost");

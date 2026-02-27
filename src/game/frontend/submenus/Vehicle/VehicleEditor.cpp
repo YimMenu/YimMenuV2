@@ -8,6 +8,9 @@
 #include "game/gta/data/VehicleValues.hpp"
 #include "game/gta/data/ModNames.hpp"
 
+#include <cstring>
+#include <cstdlib>
+
 namespace YimMenu::Submenus
 {
 	std::shared_ptr<Category> BuildVehicleEditorMenu()
@@ -18,6 +21,28 @@ namespace YimMenu::Submenus
 		static bool isBennys = false;
 		static int selected_slot = -1;
 		static char plate[9] = "";
+
+		// Generate a random license plate with meaningful characters
+		auto generateRandomPlate = [] {
+			std::string randomPlate;
+			// First 3 characters: Mix of letters and numbers
+			for (int i = 0; i < 3; i++) {
+				if (rand() % 2 == 0) {
+					randomPlate += (char)('A' + (rand() % 26));
+				} else {
+					randomPlate += (char)('0' + (rand() % 10));
+				}
+			}
+			// Next 4 characters: Primarily numbers with occasional letters
+			for (int i = 0; i < 4; i++) {
+				if (rand() % 3 == 0) {
+					randomPlate += (char)('A' + (rand() % 26));
+				} else {
+					randomPlate += (char)('0' + (rand() % 10));
+				}
+			}
+			return randomPlate;
+		};
 
 		static std::map<int, int32_t> owned_mods{};
 		static std::map<int, std::string> slot_display_names{};
@@ -198,8 +223,14 @@ namespace YimMenu::Submenus
 						});
 					ImGui::SameLine();
 					if (ImGui::Button("Randomize Mods"))
-						FiberPool::Push([] {
+						FiberPool::Push([&generateRandomPlate] {
 							Self::GetVehicle().RandomizeUpgrade();
+							// Generate random plate
+							std::string randomPlate = generateRandomPlate();
+							// Copy to plate buffer
+							strcpy(plate, randomPlate.c_str());
+							// Apply the new plate
+							Self::GetVehicle().SetPlateText(randomPlate);
 							currentVeh = -1;
 						});
 				}

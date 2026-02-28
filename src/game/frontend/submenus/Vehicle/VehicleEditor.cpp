@@ -50,22 +50,20 @@ namespace YimMenu::Submenus
 			"VELOCITY", "WATCHMAN", "XENOTYPE", "YARDSTICK", "ZILLION"
 		};
 
-		// Leetspeak mapping - letters to their number equivalents
-		static const std::map<char, char> leetMap = {
-			{'a', '4'}, {'A', '4'},
-			{'e', '3'}, {'E', '3'},
-			{'i', '1'}, {'I', '1'},
-			{'o', '0'}, {'O', '0'},
-			{'s', '5'}, {'S', '5'},
-			{'t', '7'}, {'T', '7'},
-			{'l', '1'}, {'L', '1'},
-			{'b', '8'}, {'B', '8'},
-			{'g', '9'}, {'G', '9'},
-			{'z', '2'}, {'Z', '2'}
-		};
-
 		// Convert word to leetspeak by randomly replacing vulnerable letters
-		auto convertToLeetspeak = [&leetMap](const std::string& word) -> std::string {
+		auto convertToLeetspeak = [](const std::string& word) -> std::string {
+			static const std::map<char, char> leetMap = {
+				{'a', '4'}, {'A', '4'},
+				{'e', '3'}, {'E', '3'},
+				{'i', '1'}, {'I', '1'},
+				{'o', '0'}, {'O', '0'},
+				{'s', '5'}, {'S', '5'},
+				{'t', '7'}, {'T', '7'},
+				{'l', '1'}, {'L', '1'},
+				{'b', '8'}, {'B', '8'},
+				{'g', '9'}, {'G', '9'},
+				{'z', '2'}, {'Z', '2'}
+			};
 			std::string leetWord;
 			for (char c : word) {
 				auto it = leetMap.find(c);
@@ -80,7 +78,7 @@ namespace YimMenu::Submenus
 		};
 
 		// Generate a random license plate with 7-letter words and optional leetspeak
-		auto generateRandomPlate = [&sevenLetterWords, &convertToLeetspeak] {
+		auto generateRandomPlate = [&convertToLeetspeak] {
 			std::string randomPlate;
 			const std::string& word = sevenLetterWords[rand() % sevenLetterWords.size()];
 			

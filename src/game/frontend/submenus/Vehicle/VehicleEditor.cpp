@@ -22,25 +22,85 @@ namespace YimMenu::Submenus
 		static int selected_slot = -1;
 		static char plate[9] = "";
 
-		// Generate a random license plate with meaningful characters
-		auto generateRandomPlate = [] {
+		// 7-letter words for perfect license plates (8 chars = 7 letters + 1 digit)
+		// Distributed A-Z for variety
+		static const std::vector<std::string> sevenLetterWords = {
+			// 3-5 Letters (Short & Punchy)
+			"ACE", "BAD", "COW", "DOG", "EGG", "FLY", "GUM", "HEX", "INK", "JET", "KEY", "LUX", "MAX",
+			"NEO", "OWL", "PRO", "QUY", "RUN", "SKY", "TAX", "USE", "VEX", "WAR", "XEN", "YAK", "ZEN",
+			"BOLT", "DARK", "EDGE", "FAST", "GRIT", "HAWK", "IRON", "JUMP", "KING", "LAVA", "MINT", 
+			"NOVA", "PACK", "ROAD", "STAR", "TANK", "UNIT", "VIBE", "WOLF", "ZINC", "ALPHA", "BRAVO",
+
+			// 6 Letters
+			"ACTION", "BEYOND", "CHANCE", "DANGER", "ENERGY", "FLIGHT", "GALAXY", "HUNTER", "IMPACT",
+			"JOKERS", "KNIGHT", "LEGEND", "MATRIX", "NATURE", "OXYGEN", "PLAYER", "QUARTZ", "ROCKET",
+			"SPIRIT", "TARGET", "UPWARD", "VECTOR", "WIZARD", "XENONS", "YELLOW", "ZODIAC",
+
+			// 7 Letters (Your Previous Target)
+			"ABANDON", "ABILITY", "ACADEMY", "AIRPORT", "AWESOME", "BALANCE", "BICYCLE", "CAPTAIN",
+			"CENTURY", "CLASSIC", "DYNAMIC", "ECONOMY", "EXHIBIT", "FOREVER", "FREEDOM", "GLACIER",
+			"HISTORY", "IMAGINE", "JUSTICE", "KINGDOM", "LOYALTY", "MAXIMUM", "MYSTERY", "NIRVANA",
+			"OPTIMUM", "PACIFIC", "PHANTOM", "QUALITY", "RADICAL", "SILENCE", "THUNDER", "UNKNOWN",
+			"VAMPIRE", "VICTORY", "WHISPER", "XEROTIC", "YANKEE", "ZEPHYR",
+
+			// 8 Letters (Premium Plates)
+			"ABSOLUTE", "BOUNDARY", "CHAMPION", "DATABASE", "ELECTRIC", "FEARLESS", "GUARDIAN",
+			"HORIZON", "INFINITY", "JUDGMENT", "KEYBOARD", "LIGHTING", "MOUNTAIN", "NEGATIVE",
+			"OVERLORD", "PLATINUM", "QUANTITY", "RELIANCE", "STARDUST", "TERMINAL", "ULTIMATE",
+			"VELOCITY", "WATCHMAN", "XENOTYPE", "YARDSTICK", "ZILLION"
+		};
+
+		// Leetspeak mapping - letters to their number equivalents
+		static const std::map<char, char> leetMap = {
+			{'a', '4'}, {'A', '4'},
+			{'e', '3'}, {'E', '3'},
+			{'i', '1'}, {'I', '1'},
+			{'o', '0'}, {'O', '0'},
+			{'s', '5'}, {'S', '5'},
+			{'t', '7'}, {'T', '7'},
+			{'l', '1'}, {'L', '1'},
+			{'b', '8'}, {'B', '8'},
+			{'g', '9'}, {'G', '9'},
+			{'z', '2'}, {'Z', '2'}
+		};
+
+		// Convert word to leetspeak by randomly replacing vulnerable letters
+		auto convertToLeetspeak = [&leetMap](const std::string& word) -> std::string {
+			std::string leetWord;
+			for (char c : word) {
+				auto it = leetMap.find(c);
+				// Replace letter with number ~40% of the time if it's in the map
+				if (it != leetMap.end() && rand() % 10 < 4) {
+					leetWord += it->second;
+				} else {
+					leetWord += c;
+				}
+			}
+			return leetWord;
+		};
+
+		// Generate a random license plate with 7-letter words and optional leetspeak
+		auto generateRandomPlate = [&sevenLetterWords, &convertToLeetspeak] {
 			std::string randomPlate;
-			// First 3 characters: Mix of letters and numbers
-			for (int i = 0; i < 3; i++) {
-				if (rand() % 2 == 0) {
-					randomPlate += (char)('A' + (rand() % 26));
-				} else {
-					randomPlate += (char)('0' + (rand() % 10));
-				}
+			const std::string& word = sevenLetterWords[rand() % sevenLetterWords.size()];
+			
+			// 60% chance for leetspeak conversion, 40% chance for pure word
+			if (rand() % 10 < 6) {
+				randomPlate = convertToLeetspeak(word);
+			} else {
+				randomPlate = word;
 			}
-			// Next 4 characters: Primarily numbers with occasional letters
-			for (int i = 0; i < 4; i++) {
-				if (rand() % 3 == 0) {
-					randomPlate += (char)('A' + (rand() % 26));
-				} else {
-					randomPlate += (char)('0' + (rand() % 10));
-				}
+			
+			// Add single digit to fill 8 characters (0-50% chance to add digit)
+			if (rand() % 2 == 0) {
+				randomPlate += (char)('0' + (rand() % 10));
 			}
+			
+			// Ensure max 8 chars
+			if (randomPlate.length() > 8) {
+				randomPlate = randomPlate.substr(0, 8);
+			}
+			
 			return randomPlate;
 		};
 
@@ -223,7 +283,7 @@ namespace YimMenu::Submenus
 						});
 					ImGui::SameLine();
 					if (ImGui::Button("Randomize Mods"))
-						FiberPool::Push([&generateRandomPlate] {
+					FiberPool::Push([generateRandomPlate] {
 							Self::GetVehicle().RandomizeUpgrade();
 							// Generate random plate
 							std::string randomPlate = generateRandomPlate();

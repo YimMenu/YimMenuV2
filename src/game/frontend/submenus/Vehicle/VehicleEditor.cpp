@@ -238,7 +238,7 @@ namespace YimMenu::Submenus
 
 		auto vehicleEditor = std::make_shared<Category>("Vehicle Editor");
 
-		vehicleEditor->AddItem(std::make_unique<ImGuiItem>([] {
+		vehicleEditor->AddItem(std::make_unique<ImGuiItem>([generateRandomPlate] {
 			if (!Self::GetVehicle())
 			{
 				ImGui::Text("Please enter a vehicle.");
@@ -281,7 +281,7 @@ namespace YimMenu::Submenus
 						});
 					ImGui::SameLine();
 					if (ImGui::Button("Randomize Mods"))
-					FiberPool::Push([generateRandomPlate] {
+						FiberPool::Push([generateRandomPlate] {
 							Self::GetVehicle().RandomizeUpgrade();
 							// Generate random plate
 							std::string randomPlate = generateRandomPlate();

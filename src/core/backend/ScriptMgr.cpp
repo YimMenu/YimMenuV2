@@ -54,7 +54,6 @@ namespace YimMenu
 	void ScriptMgr::DestroyImpl()
 	{
 		std::lock_guard lock(m_Mutex);
-		
 		m_Scripts.clear();
 	}
 

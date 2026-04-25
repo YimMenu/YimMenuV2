@@ -33,7 +33,7 @@ namespace YimMenu
 
 		static bool IsUsingKeyboard()
 		{
-			return ImGui::GetIO().WantCaptureKeyboard;
+			return ImGui::GetIO().WantTextInput;
 		}
 
 		static void RunScript()

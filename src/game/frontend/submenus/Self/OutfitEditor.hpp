@@ -9,6 +9,4 @@ namespace YimMenu
 	bool LoadOutfit(const std::string& name);
 	std::vector<std::string> GetSavedOutfits();
 	bool DeleteOutfit(const std::string& name);
-	void ExportOutfitToClipboard();
-	bool ImportOutfitFromClipboard();
 }

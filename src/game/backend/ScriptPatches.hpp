@@ -37,6 +37,11 @@ namespace YimMenu
 		{
 			return GetInstance().AddPatchImpl(script, pointer, patch);
 		}
+		
+		static void RemovePatch(const std::shared_ptr<Patch>& patch)
+		{
+			GetInstance().RemovePatchImpl(patch);
+		}
 
 		static void RegisterProgram(rage::scrProgram* program)
 		{
@@ -69,6 +74,7 @@ namespace YimMenu
 		}
 
 		std::shared_ptr<Patch> AddPatchImpl(joaat_t script, ScriptPointer pointer, std::vector<uint8_t> patch);
+		void RemovePatchImpl(const std::shared_ptr<Patch>& patch);
 		void RegisterProgramImpl(rage::scrProgram* program);
 		void UnregisterProgramImpl(rage::scrProgram* program);
 		void OnScriptVMEnterImpl(rage::scrProgram* program);

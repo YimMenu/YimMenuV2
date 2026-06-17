@@ -38,5 +38,11 @@ namespace YimMenu
 				CallImpl(params);
 			}
 		}
+		
+		//for Lua binding
+		void Invoke(const std::vector<std::uint64_t>& args, void* returnValue = nullptr, std::uint32_t returnSize = 0)
+		{
+			CallImpl(args, returnValue, returnSize);
+		}
 	};
 }

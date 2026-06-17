@@ -49,24 +49,12 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
-		static int RegisterEventHandler(lua_State* state)
-		{
-			auto event_name = GetHashArgument(state, 1);
-			luaL_checktype(state, 2, LUA_TFUNCTION);      
-			lua_pushvalue(state, 2);                    
-			int handler = luaL_ref(state, LUA_REGISTRYINDEX); 
-
-			LuaScript::GetScript(state).AddEventHandler(event_name, handler);
-			return 0;
-		}
-
 		virtual void Register(lua_State* state) override
 		{
 			lua_newtable(state);
 			SetFunction(state, RunInCallback, "run_in_callback");
 			SetFunction(state, Yield, "yield");
 			SetFunction(state, IsInsideCallback, "is_inside_callback");
-			SetFunction(state, RegisterEventHandler, "register_event_handler");
 			lua_setglobal(state, "script");
 		}
 	};

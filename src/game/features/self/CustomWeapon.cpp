@@ -101,7 +101,7 @@ namespace YimMenu::Features
 
 					entityPos = entity.GetPosition();
 
-					Vector3 rot = CAM::GET_GAMEPLAY_CAM_ROT(2);
+					Vector3 rot = CAMERA::GET_GAMEPLAY_CAM_ROT(2);
 					float pitch = Math::DegToRad(rot.x); // vertical
 					// float roll = rot.y;
 					float yaw = Math::DegToRad(rot.z + 90); // horizontal
@@ -267,11 +267,11 @@ namespace YimMenu::Features
 					}
 					else
 					{
-						Vector3 location = CAM::GET_GAMEPLAY_CAM_COORD();
+						Vector3 location = CAMERA::GET_GAMEPLAY_CAM_COORD();
 
 						FiberPool::Push([location, modelHash]() {
 							constexpr int rotation_order = 2;
-							auto rot = CAM::GET_GAMEPLAY_CAM_ROT(rotation_order);
+							auto rot = CAMERA::GET_GAMEPLAY_CAM_ROT(rotation_order);
 
 							float pitch = Math::DegToRad(rot.x); // vertical
 							//float roll = rot.y;

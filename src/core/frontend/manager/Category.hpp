@@ -21,6 +21,16 @@ namespace YimMenu
 			m_Items.insert(m_Items.begin(), std::move(item));
 		}
 
+		void RemoveItem(const std::shared_ptr<UIItem>& item)
+		{
+			std::erase(m_Items, item);
+		}
+
+		const std::vector<std::shared_ptr<UIItem>>& GetItems() const
+		{
+			return m_Items;
+		}
+
 		void Draw();
 		int GetLength();
 

@@ -21,4 +21,9 @@ namespace YimMenu::Stats
 	extern void SetPackedInt(int index, int value);
 	extern bool GetPackedBool(int index);
 	extern int GetPackedInt(int index);
+
+	extern void SetMaskedBool(std::string statName, int bitIndex, bool value);
+	extern void SetMaskedInt(std::string statName, int bitStart, int bitSize, int value);
+	extern bool GetMaskedBool(std::string statName, int bitIndex);
+	extern int GetMaskedInt(std::string statName, int bitIndex, int bitSize);
 }

@@ -148,6 +148,16 @@ namespace YimMenu
 			m_Items.push_back(std::move(item));
 		}
 
+		void RemoveItem(const std::shared_ptr<UIItem>& item)
+		{
+			std::erase(m_Items, item);
+		}
+
+		const std::string& GetName() const
+		{
+			return m_Name;
+		}
+
 	private:
 		std::string m_Name;
 		int m_ItemsPerRow;

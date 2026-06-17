@@ -21,7 +21,14 @@ namespace YimMenu
 
 	public:
 		Command(std::string name, std::string label, std::string description, int num_args = 0);
+		virtual ~Command() = default;
 		void Call();
+
+		// Lua-created commands override this so runtime commands don't leave entries behind in the config file.
+		virtual bool ShouldSaveState() const
+		{
+			return true;
+		}
 
 		virtual void SaveState(nlohmann::json& value) {};
 		virtual void LoadState(nlohmann::json& value) {};

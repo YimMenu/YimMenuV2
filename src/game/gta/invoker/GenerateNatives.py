@@ -147,8 +147,8 @@ lua_blacklist = {
 def get_blacklist_reason(native: str):
     if native in lua_blacklist:
         return lua_blacklist[native]
-    if "PLAYSTATS" in native:
-        return "Not allowed" # there's no good reason for scripts to call telemetry natives
+    #if "PLAYSTATS" in native:
+    #    return "Not allowed"
     return None
 
 def native_type_to_lua_type(type: str):
@@ -223,10 +223,98 @@ def create_lua_defs():
             string += create_lua_namespace(ns, natives_list)
         string += f"}};\n\nint g_NumLuaNativeDefs = {len(natives.items())};"
         file.write(string)
-  
+
+LUA_KEYWORDS = {
+    "and", "break", "do", "else", "elseif", "end", "false", "for", "function",
+    "goto", "if", "in", "local", "nil", "not", "or", "repeat", "return",
+    "then", "true", "until", "while",
+}
+
+INTEGER_TYPES = {
+    "int", "Any", "Hash", "Ped", "Vehicle", "Entity", "Object", "Player",
+    "Blip", "Cam", "FireId", "Interior", "Pickup", "ScrHandle",
+}
+
+def native_type_to_luals(native_type: str, is_return: bool) -> str | None:
+    """Maps a native C type to a LuaLS type annotation. Returns None for `void`
+    return types so the caller can omit the @return tag."""
+    if native_type == "void":
+        return None if is_return else "any"
+    if native_type in ("const char*", "char*"):
+        return "string"
+    if native_type == "Hash":
+        # Hash arguments accept either a joaat'd string or an integer hash;
+        # natives return the integer form.
+        return "integer" if is_return else "integer|string"
+    if native_type in INTEGER_TYPES:
+        return "integer"
+    if native_type == "BOOL":
+        return "boolean"
+    if native_type == "float":
+        return "number"
+    if native_type in ("Vector3", "Vector3*"):
+        return "Vector3"
+    if "*" in native_type:
+        # `T*` arguments accept a `pointer` userdata (see core/scripting/
+        # libraries/Pointer.cpp) or nil for NULL. Returned pointers come
+        # back as `pointer` too.
+        return "pointer" if is_return else "pointer|nil"
+    return "integer"
+
+def sanitize_lua_param_name(name: str) -> str:
+    if not name:
+        return "_"
+    if name in LUA_KEYWORDS or name[0].isdigit():
+        return f"p_{name}"
+    return name
+
+def generate_lua_native_stub(native: NativeFunc) -> str:
+    lines = []
+    blacklist_reason = get_blacklist_reason(native.name)
+    if blacklist_reason:
+        lines.append(f"---@deprecated {blacklist_reason}")
+
+    param_names: list[str] = []
+    for arg in native.args:
+        if arg.name == "varargs":
+            lines.append("---@param ... any")
+            param_names.append("...")
+        else:
+            p_name = sanitize_lua_param_name(arg.name)
+            lines.append(f"---@param {p_name} {native_type_to_luals(arg.type, False)}")
+            param_names.append(p_name)
+
+    ret = native_type_to_luals(native.return_type, True)
+    if ret is not None:
+        lines.append(f"---@return {ret}")
+
+    lines.append(f"function {native.namespace}.{native.name}({', '.join(param_names)}) end")
+    return "\n".join(lines)
+
+def create_luals_natives():
+    out_path = "../../../../docs/natives.lua"
+    with open(out_path, "w+", encoding="utf-8") as file:
+        file.write("---@meta\n")
+        file.write("--- GTA native definitions for LuaLS / EmmyLua.\n")
+        file.write("---\n")
+        file.write("--- Each native namespace is a global table populated by `natives.load_natives()`.\n")
+        file.write("--- Blacklisted natives are marked `---@deprecated`\n")
+        file.write("\n")
+
+        for ns, natives_list in natives.items():
+            file.write("-- ============================================================\n")
+            file.write(f"-- {ns}\n")
+            file.write("-- ============================================================\n\n")
+            file.write(f"---@class natives.{ns}\n")
+            file.write(f"{ns} = {{}}\n\n")
+            for native in natives_list:
+                file.write(generate_lua_native_stub(native))
+                file.write("\n\n")
+
 if __name__ == "__main__":
     load_natives_data()
     load_crossmap_data()
     write_crossmap_header()
     write_natives_header()
     create_lua_defs()
+    create_luals_natives()

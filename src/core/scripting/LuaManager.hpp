@@ -44,7 +44,7 @@ namespace YimMenu
 		void SetRunningCoroutineImpl(lua_State* script);
 		void ForAllLoadedScriptsImpl(ForAllLoadedScriptsCallback callback);
 		void ForAllUnloadedScriptsImpl(ForAllUnloadedScriptsCallback callback);
-		bool DispatchEventImpl(std::uint32_t event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result = false);
+		bool DispatchEventImpl(MenuEvent event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result = false);
 		void ForAllResourcesOfTypeImpl(ForAllResourcesOfTypeCallback callback, int type);
 
 		static LuaManager& GetInstance()
@@ -116,8 +116,7 @@ namespace YimMenu
 		}
 
 		// if handle_result is true, the event will be blocked when a callback returns false
-		// events MUST be dispatched from the main thread
-		static bool DispatchEvent(std::uint32_t event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result = false)
+		static bool DispatchEvent(MenuEvent event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result = false)
 		{
 			return GetInstance().DispatchEventImpl(event, add_arguments_cb, handle_result);
 		}

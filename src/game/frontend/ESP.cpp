@@ -304,7 +304,7 @@ namespace YimMenu
 
 	void ESP::Draw()
 	{
-		if (!NativeInvoker::AreHandlersCached() || CAM::IS_SCREEN_FADED_OUT() || HUD::IS_WARNING_MESSAGE_ACTIVE() || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
+		if (!NativeInvoker::AreHandlersCached() || CAMERA::IS_SCREEN_FADED_OUT() || HUD::IS_WARNING_MESSAGE_ACTIVE() || HUD::IS_PAUSE_MENU_ACTIVE() || NETWORK::NETWORK_IS_IN_MP_CUTSCENE())
 			return;
 
 		const auto originalFontSize = ImGui::GetFont()->Scale;

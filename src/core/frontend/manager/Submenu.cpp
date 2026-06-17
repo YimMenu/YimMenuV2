@@ -15,6 +15,13 @@ namespace YimMenu
 		m_Categories.push_back(std::move(category));
 	}
 
+	void Submenu::RemoveCategory(const std::shared_ptr<Category>& category)
+	{
+		std::erase(m_Categories, category);
+		if (m_ActiveCategory == category)
+			m_ActiveCategory = m_Categories.empty() ? nullptr : m_Categories.front();
+	}
+
 	void Submenu::DrawCategorySelectors()
 	{
 		for (auto& category : m_Categories)

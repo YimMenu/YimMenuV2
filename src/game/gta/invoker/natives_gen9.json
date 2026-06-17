@@ -436,7 +436,7 @@
 			]
 		}
 	},
-	"APP": {
+	"APPS": {
 		"0x846AA8E7D55EE5B6": {
 			"name": "APP_DATA_VALID",
 			"jhash": "0x72BDE002",
@@ -1610,7 +1610,7 @@
 		"0x2DE3F0A134FFBC0D": {
 			"name": "GET_NETWORK_ID_FROM_SOUND_ID",
 			"jhash": "0x2576F610",
-			"comment": "Could this be used alongside either, \nSET_NETWORK_ID_EXISTS_ON_ALL_MACHINES or _SET_NETWORK_ID_SYNC_TO_PLAYER to make it so other players can hear the sound while online? It'd be a bit troll-fun to be able to play the Zancudo UFO creepy sounds globally.",
+			"comment": "",
 			"params": [
 				{
 					"type": "int",
@@ -2269,6 +2269,23 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0xAD2191A6E3543189": {
+			"name": "PLAY_PED_AUDIO_EVENT_ANIM",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Ped",
+					"name": "pedHandle"
+				},
+				{
+					"type": "const char*",
+					"name": "audioEvent"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
 		},
 		"0xB35CE999E8EF317E": {
 			"name": "IS_MOBILE_PHONE_RADIO_ACTIVE",
@@ -5234,7 +5251,7 @@
 			"build": "811"
 		}
 	},
-	"CAM": {
+	"CAMERA": {
 		"0x07E5B515DB0636FC": {
 			"name": "RENDER_SCRIPT_CAMS",
 			"jhash": "0x74337969",
@@ -6906,7 +6923,7 @@
 			"build": "811"
 		},
 		"0xDDA77EE33C005AAF": {
-			"name": "_INTERPOLATE_CAM_WITH_PARAMS",
+			"name": "INTERPOLATE_CAMERA_WITH_PARAMS",
 			"jhash": "",
 			"comment": "",
 			"params": [
@@ -6964,7 +6981,10 @@
 				}
 			],
 			"return_type": "void",
-			"build": "811"
+			"build": "811",
+			"old_names": [
+				"_INTERPOLATE_CAM_WITH_PARAMS"
+			]
 		},
 		"0x34CFC4C2A38E83E3": {
 			"name": "_ACTIVATE_CAM_WITH_INTERP_AND_FOV_CURVE",
@@ -12556,7 +12576,7 @@
 		"0x1DD55701034110E5": {
 			"name": "GET_ENTITY_HEIGHT_ABOVE_GROUND",
 			"jhash": "0x57F56A4D",
-			"comment": "Return height (z-dimension) above ground. \nExample: The pilot in a titan plane is 1.844176 above ground.\n\nHow can i convert it to meters?\nEverything seems to be in meters, probably this too.",
+			"comment": "Return height (z-dimension) above ground.\nExample: The pilot in a titan plane is 1.844176 above ground.",
 			"params": [
 				{
 					"type": "Entity",
@@ -13601,7 +13621,7 @@
 		"0xC5F68BE9613E2D18": {
 			"name": "APPLY_FORCE_TO_ENTITY",
 			"jhash": "0xC1C0855A",
-			"comment": "Documented here:\ngtaforums.com/topic/885669-precisely-define-object-physics/\ngtaforums.com/topic/887362-apply-forces-and-momentums-to-entityobject/\n\nforceFlags:\nFirst bit (lowest): Strong force flag, factor 100\nSecond bit: Unkown flag\nThird bit: Momentum flag=1 (vector (x,y,z) is a momentum, more research needed)\nIf higher bits are unequal 0 the function doesn't applay any forces at all.\n(As integer possible values are 0-7)\n\n0: weak force\n1: strong force\n2: same as 0 (2nd bit?)\n3: same as 1\n4: weak momentum\n5: strong momentum\n6: same as 4\n7: same as 5\n\nisLocal: vector defined in local (body-fixed) coordinate frame\nisMassRel: if true the force gets multiplied with the objects mass (this is why it was known as highForce) and different objects will have the same acceleration.\n\np8 !!! Whenever I set this !=0, my script stopped.",
+			"comment": "Documented here:\ngtaforums.com/topic/885669-precisely-define-object-physics/\ngtaforums.com/topic/887362-apply-forces-and-momentums-to-entityobject/\n\nforceFlags:\nFirst bit (lowest): Strong force flag, factor 100\nSecond bit: Unkown flag\nThird bit: Momentum flag=1 (vector (x,y,z) is a momentum, more research needed)\nIf higher bits are unequal 0 the function doesn't applay any forces at all.\n(As integer possible values are 0-7)\n\n0: weak force\n1: strong force\n2: same as 0 (2nd bit?)\n3: same as 1\n4: weak momentum\n5: strong momentum\n6: same as 4\n7: same as 5\n\nisLocal: vector defined in local (body-fixed) coordinate frame\nisMassRel: if true the force gets multiplied with the objects mass (this is why it was known as highForce) and different objects will have the same acceleration.",
 			"params": [
 				{
 					"type": "Entity",
@@ -14423,7 +14443,7 @@
 		"0xAD738C3085FE7E11": {
 			"name": "SET_ENTITY_AS_MISSION_ENTITY",
 			"jhash": "0x5D1F9E0F",
-			"comment": "Makes the specified entity (ped, vehicle or object) persistent. Persistent entities will not automatically be removed by the engine.\n\np1 has no effect when either its on or off \nmaybe a quick disassembly will tell us what it does\n\np2 has no effect when either its on or off \nmaybe a quick disassembly will tell us what it does",
+			"comment": "Makes the specified entity (ped, vehicle or object) persistent. Persistent entities will not automatically be removed by the engine.",
 			"params": [
 				{
 					"type": "Entity",
@@ -14431,11 +14451,11 @@
 				},
 				{
 					"type": "BOOL",
-					"name": "p1"
+					"name": "bScriptHostObject"
 				},
 				{
 					"type": "BOOL",
-					"name": "p2"
+					"name": "bGrabFromOtherScript"
 				}
 			],
 			"return_type": "void",
@@ -17699,6 +17719,27 @@
 			],
 			"return_type": "void",
 			"build": "889"
+		},
+		"0x56581E7E219D6263": {
+			"name": "_GET_MAXIMUM_NUMBER_OF_WATER_CANNONS",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "int",
+			"build": "1013"
+		},
+		"0xE61CBD3ED80E7327": {
+			"name": "_GET_WATER_CANNON_COORDS",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "index"
+				}
+			],
+			"return_type": "Vector3",
+			"build": "1013"
 		}
 	},
 	"GRAPHICS": {
@@ -20404,7 +20445,7 @@
 		"0xAFF33B1178172223": {
 			"name": "SET_BINK_MOVIE_VOLUME",
 			"jhash": "",
-			"comment": "binkMovie: Is return value from _SET_BINK_MOVIE. Has something to do with bink volume? (audRequestedSettings::SetVolumeCurveScale)",
+			"comment": "binkMovie: Is return value from SET_BINK_MOVIE.",
 			"params": [
 				{
 					"type": "int",
@@ -24871,11 +24912,11 @@
 		"0x2FCB133CA50A49EB": {
 			"name": "IS_ACTIVE_SCALEFORM_MOVIE_DELETING",
 			"jhash": "",
-			"comment": "val is 1-20 (0 will return false)",
+			"comment": "",
 			"params": [
 				{
 					"type": "int",
-					"name": "val"
+					"name": "scaleformHandle"
 				}
 			],
 			"return_type": "BOOL",
@@ -24884,11 +24925,11 @@
 		"0x86255B1FC929E33E": {
 			"name": "IS_SCALEFORM_MOVIE_DELETING",
 			"jhash": "",
-			"comment": "val is 1-20. Return is related to INSTRUCTIONAL_BUTTONS, COLOUR_SWITCHER_02, etc?",
+			"comment": "",
 			"params": [
 				{
 					"type": "int",
-					"name": "val"
+					"name": "scaleformHandle"
 				}
 			],
 			"return_type": "BOOL",
@@ -26353,6 +26394,366 @@
 			"old_names": [
 				"_ANIMPOSTFX_STOP_AND_DO_UNK"
 			]
+		}
+	},
+	"GTA": {
+		"0xA4E8E696C532FBC7": {
+			"name": "CREATE_MOBILE_PHONE",
+			"jhash": "0x5BBC5E23",
+			"comment": "Creates a mobile phone of the specified type.\n\nPossible phone types:\n\n0 - Default phone / Michael's phone\n1 - Trevor's phone\n2 - Franklin's phone\n3 - Unused police phone\n4 - Prologue phone\n\nHigher values may crash your game.",
+			"params": [
+				{
+					"type": "int",
+					"name": "phoneType"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x3BC861DF703E5097": {
+			"name": "DESTROY_MOBILE_PHONE",
+			"jhash": "0x1A65037B",
+			"comment": "Destroys the currently active mobile phone.",
+			"params": [],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xCBDD322A73D6D932": {
+			"name": "SET_MOBILE_PHONE_SCALE",
+			"jhash": "0x09BCF1BE",
+			"comment": "The minimum/default is 500.0f. If you plan to make it bigger set it's position as well. Also this seems to need to be called in a loop as when you close the phone the scale is reset. If not in a loop you'd need to call it everytime before you re-open the phone.",
+			"params": [
+				{
+					"type": "float",
+					"name": "scale"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xBB779C0CA917E865": {
+			"name": "SET_MOBILE_PHONE_ROTATION",
+			"jhash": "0x209C28CF",
+			"comment": "Last parameter is unknown and always zero.",
+			"params": [
+				{
+					"type": "float",
+					"name": "rotX"
+				},
+				{
+					"type": "float",
+					"name": "rotY"
+				},
+				{
+					"type": "float",
+					"name": "rotZ"
+				},
+				{
+					"type": "Any",
+					"name": "p3"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x1CEFB61F193070AE": {
+			"name": "GET_MOBILE_PHONE_ROTATION",
+			"jhash": "0x17A29F23",
+			"comment": "",
+			"params": [
+				{
+					"type": "Vector3*",
+					"name": "rotation"
+				},
+				{
+					"type": "Vehicle",
+					"name": "p1"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x693A5C6D6734085B": {
+			"name": "SET_MOBILE_PHONE_POSITION",
+			"jhash": "0x841800B3",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "posX"
+				},
+				{
+					"type": "float",
+					"name": "posY"
+				},
+				{
+					"type": "float",
+					"name": "posZ"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x584FDFDA48805B86": {
+			"name": "GET_MOBILE_PHONE_POSITION",
+			"jhash": "0xB2E1E1A0",
+			"comment": "",
+			"params": [
+				{
+					"type": "Vector3*",
+					"name": "position"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xF511F759238A5122": {
+			"name": "SCRIPT_IS_MOVING_MOBILE_PHONE_OFFSCREEN",
+			"jhash": "0x29828690",
+			"comment": "If bool Toggle = true so the mobile is hide to screen.\nIf bool Toggle = false so the mobile is show to screen.",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xC4E2813898C97A4B": {
+			"name": "CAN_PHONE_BE_SEEN_ON_SCREEN",
+			"jhash": "0x5F978584",
+			"comment": "This one is weird and seems to return a TRUE state regardless of whether the phone is visible on screen or tucked away.\n\n\nI can confirm the above. This function is hard-coded to always return 1.",
+			"params": [],
+			"return_type": "BOOL",
+			"build": "811"
+		},
+		"0x375A706A5C2FD084": {
+			"name": "SET_MOBILE_PHONE_DOF_STATE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "811",
+			"old_names": [
+				"_SET_MOBILE_PHONE_UNK"
+			]
+		},
+		"0x95C9E72F3D7DEC9B": {
+			"name": "CELL_SET_INPUT",
+			"jhash": "",
+			"comment": "For move the finger of player, the value of int goes 1 at 5.",
+			"params": [
+				{
+					"type": "int",
+					"name": "direction"
+				}
+			],
+			"return_type": "void",
+			"build": "811",
+			"old_names": [
+				"_MOVE_FINGER",
+				"_CELL_CAM_MOVE_FINGER"
+			]
+		},
+		"0x44E44169EF70138E": {
+			"name": "CELL_HORIZONTAL_MODE_TOGGLE",
+			"jhash": "",
+			"comment": "if the bool \"Toggle\" is \"true\" so the phone is lean.\nif the bool \"Toggle\" is \"false\" so the phone is not lean.",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "811",
+			"old_names": [
+				"_SET_PHONE_LEAN",
+				"_CELL_CAM_SET_LEAN"
+			]
+		},
+		"0xFDE8F069C542D126": {
+			"name": "CELL_CAM_ACTIVATE",
+			"jhash": "0x234C1AE9",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "p0"
+				},
+				{
+					"type": "BOOL",
+					"name": "p1"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x015C49A93E3E086E": {
+			"name": "CELL_CAM_ACTIVATE_SELFIE_MODE",
+			"jhash": "0x4479B304",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "811",
+			"old_names": [
+				"_DISABLE_PHONE_THIS_FRAME",
+				"_CELL_CAM_DISABLE_THIS_FRAME"
+			]
+		},
+		"0xA2CCBE62CD4C91A4": {
+			"name": "CELL_CAM_ACTIVATE_SHALLOW_DOF_MODE",
+			"jhash": "0xC273BB4D",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x1B0B4AEED5B9B41C": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_SIDE_OFFSET_SCALING",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "p0"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x53F4892D18EC90A4": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_HORZ_PAN_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "horizontalPan"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x3117D84EFA60F77B": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_VERT_PAN_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "vertPan"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x15E69E2802C24B8D": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_ROLL_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "roll"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xAC2890471901861C": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_DISTANCE_SCALING",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "distanceScaling"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xD6ADE981781FCA09": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_HEAD_YAW_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "yaw"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0xF1E22DC13F5EEBAD": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_HEAD_ROLL_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "roll"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x466DA42C89865553": {
+			"name": "CELL_CAM_SET_SELFIE_MODE_HEAD_PITCH_OFFSET",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "float",
+					"name": "pitch"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
+		},
+		"0x439E9BC95B7E7FBE": {
+			"name": "CELL_CAM_IS_CHAR_VISIBLE_NO_FACE_CHECK",
+			"jhash": "0xBEA88097",
+			"comment": "",
+			"params": [
+				{
+					"type": "Entity",
+					"name": "entity"
+				}
+			],
+			"return_type": "BOOL",
+			"build": "811"
+		},
+		"0xB4A53E05F68B6FA1": {
+			"name": "GET_MOBILE_PHONE_RENDER_ID",
+			"jhash": "0x88E4FECE",
+			"comment": "",
+			"params": [
+				{
+					"type": "int*",
+					"name": "renderId"
+				}
+			],
+			"return_type": "void",
+			"build": "811"
 		}
 	},
 	"HUD": {
@@ -29074,7 +29475,7 @@
 		"0xBE6B23FFA53FB442": {
 			"name": "SET_TEXT_COLOUR",
 			"jhash": "0xE54DD2C8",
-			"comment": "colors you input not same as you think?\nA: for some reason its R B G A",
+			"comment": "",
 			"params": [
 				{
 					"type": "int",
@@ -30829,6 +31230,27 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0xF46851AB8B02EF40": {
+			"name": "GET_WAYPOINT_CLEAR_ON_ARRIVAL_MODE",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "int",
+			"build": "1013"
+		},
+		"0x3FFC556B62146F75": {
+			"name": "SET_WAYPOINT_CLEAR_ON_ARRIVAL_MODE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "mode"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
 		"0xB203913733F27884": {
 			"name": "SET_BLIP_BRIGHT",
 			"jhash": "0x72BEE6DF",
@@ -31428,7 +31850,7 @@
 		"0x960C9FF8F616E41C": {
 			"name": "DISPLAY_HELP_TEXT_THIS_FRAME",
 			"jhash": "0x18E3360A",
-			"comment": "The messages are localized strings.\nExamples:\n\"No_bus_money\"\n\"Enter_bus\"\n\"Tour_help\"\n\"LETTERS_HELP2\"\n\"Dummy\"\n\n**The bool appears to always be false (if it even is a bool, as it's represented by a zero)**\n--------\np1 doesn't seem to make a difference, regardless of the state it's in. \n\n\npicture of where on the screen this is displayed? ",
+			"comment": "The messages are localized strings.\nExamples:\n\"No_bus_money\"\n\"Enter_bus\"\n\"Tour_help\"\n\"LETTERS_HELP2\"\n\"Dummy\"\"\n\ncurvedWindow is unused.",
 			"params": [
 				{
 					"type": "const char*",
@@ -31436,7 +31858,7 @@
 				},
 				{
 					"type": "BOOL",
-					"name": "p1"
+					"name": "curvedWindow"
 				}
 			],
 			"return_type": "void",
@@ -32260,6 +32682,19 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0x8EDC335C943465C8": {
+			"name": "IS_HUD_COMPONENT_HIDDEN_THIS_FRAME",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "id"
+				}
+			],
+			"return_type": "BOOL",
+			"build": "1013"
 		},
 		"0x0B4DF1FA60C0E664": {
 			"name": "SHOW_HUD_COMPONENT_THIS_FRAME",
@@ -35391,7 +35826,7 @@
 			"build": "811"
 		}
 	},
-	"ITEMSET": {
+	"ITEMSETS": {
 		"0x35AD299F50D91B24": {
 			"name": "CREATE_ITEMSET",
 			"jhash": "0x0A113B2C",
@@ -37936,7 +38371,7 @@
 		"0x1F464EF988465A81": {
 			"name": "ADD_HOSPITAL_RESTART",
 			"jhash": "0x4F3E3104",
-			"comment": "Returns the index of the newly created hospital spawn point.\n\np3 might be radius?",
+			"comment": "Returns the index of the newly created hospital spawn point.\nwhenToUse: must be 0",
 			"params": [
 				{
 					"type": "float",
@@ -37952,11 +38387,11 @@
 				},
 				{
 					"type": "float",
-					"name": "p3"
+					"name": "heading"
 				},
 				{
-					"type": "Any",
-					"name": "p4"
+					"type": "int",
+					"name": "whenToUse"
 				}
 			],
 			"return_type": "int",
@@ -37982,27 +38417,27 @@
 		"0x452736765B31FC4B": {
 			"name": "ADD_POLICE_RESTART",
 			"jhash": "0xE96C29FE",
-			"comment": "",
+			"comment": "whenToUse: must be 0",
 			"params": [
 				{
 					"type": "float",
-					"name": "p0"
+					"name": "x"
 				},
 				{
 					"type": "float",
-					"name": "p1"
+					"name": "y"
 				},
 				{
 					"type": "float",
-					"name": "p2"
+					"name": "z"
 				},
 				{
 					"type": "float",
-					"name": "p3"
+					"name": "heading"
 				},
 				{
-					"type": "Any",
-					"name": "p4"
+					"type": "int",
+					"name": "whenToUse"
 				}
 			],
 			"return_type": "int",
@@ -39335,7 +39770,7 @@
 		"0x9870ACFB89A90995": {
 			"name": "HAS_BULLET_IMPACTED_IN_AREA",
 			"jhash": "0x902BC7D9",
-			"comment": "p3 - possibly radius?",
+			"comment": "bIsPlayer: checks if the player fired the bullet\nbEntryOnly: only find entry impacts",
 			"params": [
 				{
 					"type": "float",
@@ -39351,15 +39786,15 @@
 				},
 				{
 					"type": "float",
-					"name": "p3"
+					"name": "radius"
 				},
 				{
 					"type": "BOOL",
-					"name": "p4"
+					"name": "bIsPlayer"
 				},
 				{
 					"type": "BOOL",
-					"name": "p5"
+					"name": "bIsEntry"
 				}
 			],
 			"return_type": "BOOL",
@@ -41968,366 +42403,6 @@
 			"build": "811"
 		}
 	},
-	"MOBILE": {
-		"0xA4E8E696C532FBC7": {
-			"name": "CREATE_MOBILE_PHONE",
-			"jhash": "0x5BBC5E23",
-			"comment": "Creates a mobile phone of the specified type.\n\nPossible phone types:\n\n0 - Default phone / Michael's phone\n1 - Trevor's phone\n2 - Franklin's phone\n3 - Unused police phone\n4 - Prologue phone\n\nHigher values may crash your game.",
-			"params": [
-				{
-					"type": "int",
-					"name": "phoneType"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x3BC861DF703E5097": {
-			"name": "DESTROY_MOBILE_PHONE",
-			"jhash": "0x1A65037B",
-			"comment": "Destroys the currently active mobile phone.",
-			"params": [],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xCBDD322A73D6D932": {
-			"name": "SET_MOBILE_PHONE_SCALE",
-			"jhash": "0x09BCF1BE",
-			"comment": "The minimum/default is 500.0f. If you plan to make it bigger set it's position as well. Also this seems to need to be called in a loop as when you close the phone the scale is reset. If not in a loop you'd need to call it everytime before you re-open the phone.",
-			"params": [
-				{
-					"type": "float",
-					"name": "scale"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xBB779C0CA917E865": {
-			"name": "SET_MOBILE_PHONE_ROTATION",
-			"jhash": "0x209C28CF",
-			"comment": "Last parameter is unknown and always zero.",
-			"params": [
-				{
-					"type": "float",
-					"name": "rotX"
-				},
-				{
-					"type": "float",
-					"name": "rotY"
-				},
-				{
-					"type": "float",
-					"name": "rotZ"
-				},
-				{
-					"type": "Any",
-					"name": "p3"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x1CEFB61F193070AE": {
-			"name": "GET_MOBILE_PHONE_ROTATION",
-			"jhash": "0x17A29F23",
-			"comment": "",
-			"params": [
-				{
-					"type": "Vector3*",
-					"name": "rotation"
-				},
-				{
-					"type": "Vehicle",
-					"name": "p1"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x693A5C6D6734085B": {
-			"name": "SET_MOBILE_PHONE_POSITION",
-			"jhash": "0x841800B3",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "posX"
-				},
-				{
-					"type": "float",
-					"name": "posY"
-				},
-				{
-					"type": "float",
-					"name": "posZ"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x584FDFDA48805B86": {
-			"name": "GET_MOBILE_PHONE_POSITION",
-			"jhash": "0xB2E1E1A0",
-			"comment": "",
-			"params": [
-				{
-					"type": "Vector3*",
-					"name": "position"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xF511F759238A5122": {
-			"name": "SCRIPT_IS_MOVING_MOBILE_PHONE_OFFSCREEN",
-			"jhash": "0x29828690",
-			"comment": "If bool Toggle = true so the mobile is hide to screen.\nIf bool Toggle = false so the mobile is show to screen.",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "toggle"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xC4E2813898C97A4B": {
-			"name": "CAN_PHONE_BE_SEEN_ON_SCREEN",
-			"jhash": "0x5F978584",
-			"comment": "This one is weird and seems to return a TRUE state regardless of whether the phone is visible on screen or tucked away.\n\n\nI can confirm the above. This function is hard-coded to always return 1.",
-			"params": [],
-			"return_type": "BOOL",
-			"build": "811"
-		},
-		"0x375A706A5C2FD084": {
-			"name": "SET_MOBILE_PHONE_DOF_STATE",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "toggle"
-				}
-			],
-			"return_type": "void",
-			"build": "811",
-			"old_names": [
-				"_SET_MOBILE_PHONE_UNK"
-			]
-		},
-		"0x95C9E72F3D7DEC9B": {
-			"name": "CELL_SET_INPUT",
-			"jhash": "",
-			"comment": "For move the finger of player, the value of int goes 1 at 5.",
-			"params": [
-				{
-					"type": "int",
-					"name": "direction"
-				}
-			],
-			"return_type": "void",
-			"build": "811",
-			"old_names": [
-				"_MOVE_FINGER",
-				"_CELL_CAM_MOVE_FINGER"
-			]
-		},
-		"0x44E44169EF70138E": {
-			"name": "CELL_HORIZONTAL_MODE_TOGGLE",
-			"jhash": "",
-			"comment": "if the bool \"Toggle\" is \"true\" so the phone is lean.\nif the bool \"Toggle\" is \"false\" so the phone is not lean.",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "toggle"
-				}
-			],
-			"return_type": "void",
-			"build": "811",
-			"old_names": [
-				"_SET_PHONE_LEAN",
-				"_CELL_CAM_SET_LEAN"
-			]
-		},
-		"0xFDE8F069C542D126": {
-			"name": "CELL_CAM_ACTIVATE",
-			"jhash": "0x234C1AE9",
-			"comment": "",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "p0"
-				},
-				{
-					"type": "BOOL",
-					"name": "p1"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x015C49A93E3E086E": {
-			"name": "CELL_CAM_ACTIVATE_SELFIE_MODE",
-			"jhash": "0x4479B304",
-			"comment": "",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "toggle"
-				}
-			],
-			"return_type": "void",
-			"build": "811",
-			"old_names": [
-				"_DISABLE_PHONE_THIS_FRAME",
-				"_CELL_CAM_DISABLE_THIS_FRAME"
-			]
-		},
-		"0xA2CCBE62CD4C91A4": {
-			"name": "CELL_CAM_ACTIVATE_SHALLOW_DOF_MODE",
-			"jhash": "0xC273BB4D",
-			"comment": "",
-			"params": [
-				{
-					"type": "BOOL",
-					"name": "toggle"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x1B0B4AEED5B9B41C": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_SIDE_OFFSET_SCALING",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "p0"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x53F4892D18EC90A4": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_HORZ_PAN_OFFSET",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "horizontalPan"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x3117D84EFA60F77B": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_VERT_PAN_OFFSET",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "vertPan"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x15E69E2802C24B8D": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_ROLL_OFFSET",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "roll"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xAC2890471901861C": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_DISTANCE_SCALING",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "distanceScaling"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xD6ADE981781FCA09": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_HEAD_YAW_OFFSET",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "yaw"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0xF1E22DC13F5EEBAD": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_HEAD_ROLL_OFFSET",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "roll"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x466DA42C89865553": {
-			"name": "CELL_CAM_SET_SELFIE_MODE_HEAD_PITCH_OFFSET",
-			"jhash": "",
-			"comment": "",
-			"params": [
-				{
-					"type": "float",
-					"name": "pitch"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		},
-		"0x439E9BC95B7E7FBE": {
-			"name": "CELL_CAM_IS_CHAR_VISIBLE_NO_FACE_CHECK",
-			"jhash": "0xBEA88097",
-			"comment": "",
-			"params": [
-				{
-					"type": "Entity",
-					"name": "entity"
-				}
-			],
-			"return_type": "BOOL",
-			"build": "811"
-		},
-		"0xB4A53E05F68B6FA1": {
-			"name": "GET_MOBILE_PHONE_RENDER_ID",
-			"jhash": "0x88E4FECE",
-			"comment": "",
-			"params": [
-				{
-					"type": "int*",
-					"name": "renderId"
-				}
-			],
-			"return_type": "void",
-			"build": "811"
-		}
-	},
 	"MONEY": {
 		"0x3DA5ECD1A56CBA6D": {
 			"name": "NETWORK_INITIALIZE_CASH",
@@ -44780,6 +44855,10 @@
 				{
 					"type": "Any",
 					"name": "p5"
+				},
+				{
+					"type": "Any",
+					"name": "p6"
 				}
 			],
 			"return_type": "void",
@@ -50252,6 +50331,10 @@
 				{
 					"type": "int",
 					"name": "warehouseSlot"
+				},
+				{
+					"type": "Any",
+					"name": "p6"
 				}
 			],
 			"return_type": "void",
@@ -52938,7 +53021,7 @@
 		"0xB4AB419E0D86ACAE": {
 			"name": "NETWORK_SESSION_CHANGE_SLOTS",
 			"jhash": "0x6BB93227",
-			"comment": "num player slots allowed in session, seems to work? 32 max",
+			"comment": "",
 			"params": [
 				{
 					"type": "int",
@@ -55044,6 +55127,110 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x72C8588ABE22C972": {
+			"name": "_NETWORK_GET_HOST_BROADCAST_DATA_SIZE_UNSYNCED",
+			"jhash": "",
+			"comment": "Note: this native was added in build 889.19",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "scriptNameHash"
+				},
+				{
+					"type": "int",
+					"name": "instance"
+				},
+				{
+					"type": "Hash",
+					"name": "positionHash"
+				},
+				{
+					"type": "int",
+					"name": "handlerNum"
+				}
+			],
+			"return_type": "int",
+			"build": "889",
+			"unused": true
+		},
+		"0xB99CD664FD4720A1": {
+			"name": "_NETWORK_GET_PLAYER_BROADCAST_DATA_SIZE_UNSYNCED",
+			"jhash": "",
+			"comment": "Note: this native was added in build 889.19",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "scriptNameHash"
+				},
+				{
+					"type": "int",
+					"name": "instance"
+				},
+				{
+					"type": "Hash",
+					"name": "positionHash"
+				},
+				{
+					"type": "int",
+					"name": "handlerNum"
+				}
+			],
+			"return_type": "int",
+			"build": "889",
+			"unused": true
+		},
+		"0xE448693B3EA3B92C": {
+			"name": "_NETWORK_GET_BROADCAST_DATA_HOST_UPDATE_SIZE",
+			"jhash": "",
+			"comment": "Note: this native was added in build 889.19",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "scriptNameHash"
+				},
+				{
+					"type": "int",
+					"name": "instance"
+				},
+				{
+					"type": "Hash",
+					"name": "positionHash"
+				},
+				{
+					"type": "int",
+					"name": "handlerNum"
+				}
+			],
+			"return_type": "int",
+			"build": "889",
+			"unused": true
+		},
+		"0xAC3F722321800755": {
+			"name": "_NETWORK_GET_BROADCAST_DATA_PLAYER_UPDATE_SIZE",
+			"jhash": "",
+			"comment": "Note: this native was added in build 889.19",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "scriptNameHash"
+				},
+				{
+					"type": "int",
+					"name": "instance"
+				},
+				{
+					"type": "Hash",
+					"name": "positionHash"
+				},
+				{
+					"type": "int",
+					"name": "handlerNum"
+				}
+			],
+			"return_type": "int",
+			"build": "889",
+			"unused": true
+		},
 		"0x5D10B3795F3FC886": {
 			"name": "NETWORK_HAS_RECEIVED_HOST_BROADCAST_DATA",
 			"jhash": "0x0B739F53",
@@ -55195,6 +55382,19 @@
 			],
 			"return_type": "Player",
 			"build": "811"
+		},
+		"0xD3DEBE2991FE8098": {
+			"name": "NETWORK_GET_HOST_OF_THREAD",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "int",
+					"name": "threadId"
+				}
+			],
+			"return_type": "Player",
+			"build": "1013"
 		},
 		"0x3B3D11CD9FFCDFC9": {
 			"name": "NETWORK_SET_MISSION_FINISHED",
@@ -56833,7 +57033,7 @@
 			"return_type": "BOOL",
 			"build": "811"
 		},
-		"0x8F5D1AD832AEB06C": {
+		"0xA150A4F065806B1F": {
 			"name": "NETWORK_CAN_COMMUNICATE_WITH_GAMER",
 			"jhash": "0xD05EB7F6",
 			"comment": "",
@@ -56844,12 +57044,9 @@
 				}
 			],
 			"return_type": "BOOL",
-			"build": "811",
-			"old_names": [
-				"_NETWORK_CAN_COMMUNICATE_WITH_GAMER_2"
-			]
+			"build": "811"
 		},
-		"0xA150A4F065806B1F": {
+		"0xEEC02C7C0666D990": {
 			"name": "NETWORK_CAN_TEXT_CHAT_WITH_GAMER",
 			"jhash": "",
 			"comment": "",
@@ -56862,7 +57059,7 @@
 			"return_type": "BOOL",
 			"build": "811",
 			"old_names": [
-				"NETWORK_CAN_COMMUNICATE_WITH_GAMER"
+				"_NETWORK_CAN_COMMUNICATE_WITH_GAMER_2"
 			]
 		},
 		"0xCE60DE011B6C7978": {
@@ -57727,7 +57924,7 @@
 		"0xEEE6EACBE8874FBA": {
 			"name": "NETWORK_CLAN_PLAYER_GET_DESC",
 			"jhash": "0x6EE4A282",
-			"comment": "bufferSize is 35 in the scripts.\n\nbufferSize is the elementCount of p0(desc), sizeof(p0) == 280 == p1*8 == 35 * 8, p2(netHandle) is obtained from NETWORK::NETWORK_HANDLE_FROM_PLAYER.  And no, I can't explain why 35 * sizeof(int) == 280 and not 140, but I'll get back to you on that.\n\nthe answer is: because p0 an int64_t* / int64_t[35].  and FYI p2 is an int64_t[13]\n\nhttps://pastebin.com/cSZniHak",
+			"comment": "bufferSize is 35 in the scripts.\n\nbufferSize is the elementCount of p0(desc), sizeof(p0) == 280 == p1*8 == 35 * 8, p2(netHandle) is obtained from NETWORK::NETWORK_HANDLE_FROM_PLAYER.\n\nhttps://pastebin.com/cSZniHak",
 			"params": [
 				{
 					"type": "Any*",
@@ -58342,6 +58539,27 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0x35AEB4AC7C73C6E1": {
+			"name": "_NETWORK_SET_TUTORIAL_SPECIAL_SESSION",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
+		"0x4666CD7431DE98E2": {
+			"name": "_NETWORK_IS_SPECIAL_TUTORIAL_SESSION",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "BOOL",
+			"build": "1013"
 		},
 		"0xA1607996431332DF": {
 			"name": "IS_NETWORK_ID_OWNED_BY_PARTICIPANT",
@@ -60448,6 +60666,23 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x0C1BF187985B15C8": {
+			"name": "_NETWORK_CLEAR_CLOCK_SYNC_TIME_OVERRIDE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "startGlobalTransition"
+				},
+				{
+					"type": "int",
+					"name": "transitionTime"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
 		"0xCBD02360C5E16871": {
 			"name": "NETWORK_SYNC_CLOCK_TIME_OVERRIDE",
 			"jhash": "",
@@ -61437,6 +61672,19 @@
 			"old_names": [
 				"_NETWORK_COPY_PED_BLEND_DATA"
 			]
+		},
+		"0x67F7C81C1395672A": {
+			"name": "_NETWORK_SET_IGNORE_VEHICLE_RAMMED_BY_NON_VEHICLE",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
 		},
 		"0xF2EAC213D5EA0623": {
 			"name": "GET_NUM_COMMERCE_ITEMS",
@@ -63748,6 +63996,20 @@
 				"_NETWORK_REPORT_MYSELF"
 			]
 		},
+		"0x69D05E1EAD74B9DD": {
+			"name": "_NETWORK_GET_DUMP_OF_ASSET_VERIFIER",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Any*",
+					"name": "p0"
+				}
+			],
+			"return_type": "void",
+			"build": "1013",
+			"unused": true
+		},
 		"0x64D779659BC37B19": {
 			"name": "NETWORK_GET_LAST_ENTITY_POS_RECEIVED_OVER_NETWORK",
 			"jhash": "",
@@ -63953,6 +64215,14 @@
 			"params": [],
 			"return_type": "BOOL",
 			"build": "811"
+		},
+		"0xAB286B2192A71E32": {
+			"name": "NETWORK_HAS_SC_MEMBERSHIP",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "BOOL",
+			"build": "1013"
 		},
 		"0x9FA18B5CD8803086": {
 			"name": "NETWORK_GET_SC_MEMBERSHIP_INFO",
@@ -68108,7 +68378,7 @@
 		"0xE1615EC03B3BB4FD": {
 			"name": "IS_MOUSE_LOOK_INVERTED",
 			"jhash": "",
-			"comment": "Used with IS_LOOK_INVERTED() and negates its affect.\n\n--\n\nNot sure how the person above got that description, but here's an actual example:\n\nif (PAD::IS_USING_KEYBOARD_AND_MOUSE(2)) {\n    if (a_5) {\n        if (PAD::IS_LOOK_INVERTED()) {\n            a_3 *= -1;\n        }\n        if (PAD::IS_MOUSE_LOOK_INVERTED()) {\n            a_3 *= -1;\n        }\n    }\n}",
+			"comment": "",
 			"params": [],
 			"return_type": "BOOL",
 			"build": "811"
@@ -68322,7 +68592,7 @@
 			"build": "811"
 		}
 	},
-	"PATHFIND": {
+	"PATH": {
 		"0xBF1A602B5BA52FEE": {
 			"name": "SET_ROADS_IN_AREA",
 			"jhash": "0xEBC7B918",
@@ -68973,12 +69243,12 @@
 		},
 		"0xC2AB6BFE34E92F8B": {
 			"name": "LOAD_ALL_PATH_NODES",
-			"jhash": "",
-			"comment": "",
+			"jhash": "0xC66E28C3",
+			"comment": "Loads/unloads all path nodes on the map.\nReturns true if all nodes are loaded (effectively ARE_NODES_LOADED_FOR_AREA for the entire map).",
 			"params": [
 				{
 					"type": "BOOL",
-					"name": "set"
+					"name": "bLoadAll"
 				}
 			],
 			"return_type": "BOOL",
@@ -70321,7 +70591,7 @@
 		"0x3317DEDB88C95038": {
 			"name": "IS_PED_DEAD_OR_DYING",
 			"jhash": "0xCBDB7739",
-			"comment": "Seems to consistently return true if the ped is dead.\n\np1 is always passed 1 in the scripts.\n\nI suggest to remove \"OR_DYING\" part, because it does not detect dying phase.\n\nThat's what the devs call it, cry about it.\n\nlol",
+			"comment": "",
 			"params": [
 				{
 					"type": "Ped",
@@ -70329,7 +70599,7 @@
 				},
 				{
 					"type": "BOOL",
-					"name": "p1"
+					"name": "checkMeleeDeathFlags"
 				}
 			],
 			"return_type": "BOOL",
@@ -74614,7 +74884,7 @@
 		"0xA6E7F1CEB523E171": {
 			"name": "GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS",
 			"jhash": "0x4892B882",
-			"comment": "Need to check behavior when drawableId = -1\n\n- Doofy.Ass\nWhy this function doesn't work and return nill value?\nGET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER.PLAYER_PED_ID(), 0, 5)\n\ntick: scripts/addins/menu_execute.lua:51: attempt to call field 'GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS' (a nil value)\n\n\nList of component/props ID\ngtaxscripting.blogspot.com/2016/04/gta-v-peds-component-and-props.html",
+			"comment": "List of component/props ID\ngtaxscripting.blogspot.com/2016/04/gta-v-peds-component-and-props.html",
 			"params": [
 				{
 					"type": "Ped",
@@ -74821,7 +75091,7 @@
 		"0x9414E18B9434C2FE": {
 			"name": "SET_PED_HEAD_BLEND_DATA",
 			"jhash": "0x60746B88",
-			"comment": "The \"shape\" parameters control the shape of the ped's face. The \"skin\" parameters control the skin tone. ShapeMix and skinMix control how much the first and second IDs contribute,(typically mother and father.) ThirdMix overrides the others in favor of the third IDs. IsParent is set for \"children\" of the player character's grandparents during old-gen character creation. It has unknown effect otherwise.\n\nThe IDs start at zero and go Male Non-DLC, Female Non-DLC, Male DLC, and Female DLC.\n\n!!!Can someone add working example for this???\n\ntry this:\n       headBlendData headData;\n       GET_PED_HEAD_BLEND_DATA(PLAYER_PED_ID(), &headData);\n\n       SET_PED_HEAD_BLEND_DATA(PLAYER_PED_ID(), headData.shapeFirst, headData.shapeSecond, headData.shapeThird, headData.skinFirst, headData.skinSecond\n          , headData.skinThird, headData.shapeMix, headData.skinMix, headData.skinThird, 0);\n\n\nFor more info please refer to this topic. \ngtaforums.com/topic/858970-all-gtao-face-ids-pedset-ped-head-blend-data-explained",
+			"comment": "The \"shape\" parameters control the shape of the ped's face. The \"skin\" parameters control the skin tone. ShapeMix and skinMix control how much the first and second IDs contribute,(typically mother and father.) ThirdMix overrides the others in favor of the third IDs. IsParent is set for \"children\" of the player character's grandparents during old-gen character creation. It has unknown effect otherwise.\n\nThe IDs start at zero and go Male Non-DLC, Female Non-DLC, Male DLC, and Female DLC.\n       headBlendData headData;\n       GET_PED_HEAD_BLEND_DATA(PLAYER_PED_ID(), &headData);\n\n       SET_PED_HEAD_BLEND_DATA(PLAYER_PED_ID(), headData.shapeFirst, headData.shapeSecond, headData.shapeThird, headData.skinFirst, headData.skinSecond\n          , headData.skinThird, headData.shapeMix, headData.skinMix, headData.skinThird, 0);\n\n\nFor more info please refer to this topic. \ngtaforums.com/topic/858970-all-gtao-face-ids-pedset-ped-head-blend-data-explained",
 			"params": [
 				{
 					"type": "Ped",
@@ -76995,7 +77265,7 @@
 		"0x56E3B78C5408D9F4": {
 			"name": "CLEAR_PED_BLOOD_DAMAGE_BY_ZONE",
 			"jhash": "0xF210BE69",
-			"comment": "Somehow related to changing ped's clothes.",
+			"comment": "",
 			"params": [
 				{
 					"type": "Ped",
@@ -77936,6 +78206,23 @@
 			],
 			"return_type": "void",
 			"build": "811"
+		},
+		"0xE84EC1735FB39663": {
+			"name": "SET_PED_CAN_BODY_RECOIL_IK",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Ped",
+					"name": "ped"
+				},
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
 		},
 		"0xC11C18092C5530DC": {
 			"name": "SET_PED_CAN_HEAD_IK",
@@ -83972,7 +84259,7 @@
 		"0xCA7DC8329F0A1E9E": {
 			"name": "SET_AIR_DRAG_MULTIPLIER_FOR_PLAYERS_VEHICLE",
 			"jhash": "0xF20F72E5",
-			"comment": "This can be between 1.0f - 14.9f \n\nYou can change the max in IDA from 15.0. I say 15.0 as the function blrs if what you input is greater than or equal to 15.0 hence why it's 14.9 max default.\n\n",
+			"comment": "This can be between 1.0f - 50.0f",
 			"params": [
 				{
 					"type": "Player",
@@ -83989,7 +84276,7 @@
 		"0xA91C6F0FF7D16A13": {
 			"name": "SET_SWIM_MULTIPLIER_FOR_PLAYER",
 			"jhash": "0xB986FF47",
-			"comment": "Swim speed multiplier.\nMultiplier goes up to 1.49\n\nJust call it one time, it is not required to be called once every tick. - Note copied from below native.\n\nNote: At least the IDA method if you change the max float multiplier from 1.5 it will change it for both this and RUN_SPRINT below. I say 1.5 as the function blrs if what you input is greater than or equal to 1.5 hence why it's 1.49 max default.",
+			"comment": "Swim speed multiplier.\nMultiplier goes up to 1.49\n\nJust call it one time, it is not required to be called once every tick. - Note copied from below native.",
 			"params": [
 				{
 					"type": "Player",
@@ -84006,7 +84293,7 @@
 		"0x6DB47AA77FD94E09": {
 			"name": "SET_RUN_SPRINT_MULTIPLIER_FOR_PLAYER",
 			"jhash": "0x825423C2",
-			"comment": "Multiplier goes up to 1.49 any value above will be completely overruled by the game and the multiplier will not take effect, this can be edited in memory however.\n\nJust call it one time, it is not required to be called once every tick.\n\nNote: At least the IDA method if you change the max float multiplier from 1.5 it will change it for both this and SWIM above. I say 1.5 as the function blrs if what you input is greater than or equal to 1.5 hence why it's 1.49 max default.",
+			"comment": "Multiplier goes up to 1.49 any value above will be completely overruled by the game and the multiplier will not take effect.\n\nJust call it one time, it is not required to be called once every tick.",
 			"params": [
 				{
 					"type": "Player",
@@ -92276,11 +92563,11 @@
 					"name": "characterSlot"
 				},
 				{
-					"type": "Any",
+					"type": "int*",
 					"name": "p1"
 				},
 				{
-					"type": "Any",
+					"type": "int*",
 					"name": "p2"
 				}
 			],
@@ -95098,6 +95385,45 @@
 			],
 			"return_type": "void",
 			"build": "889"
+		},
+		"0x4649D80CE1A35BA1": {
+			"name": "_PLAYSTATS_LOBBY_EXIT",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Any*",
+					"name": "p0"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
+		"0xDC00BB9C27347A8F": {
+			"name": "_PLAYSTATS_LOBBY_STARTED",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Any*",
+					"name": "p0"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
+		"0x72289B8C78B02962": {
+			"name": "_PLAYSTATS_CREATOR_END",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Any*",
+					"name": "p0"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
 		}
 	},
 	"STREAMING": {
@@ -96762,6 +97088,32 @@
 				"_GET_USED_CREATOR_MODEL_MEMORY_PERCENTAGE"
 			]
 		},
+		"0x0F7082C60FB479EF": {
+			"name": "_GET_MODEL_ADDITIONAL_COST",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "modelHash"
+				}
+			],
+			"return_type": "float",
+			"build": "1013"
+		},
+		"0x4A91423C04BAADA1": {
+			"name": "_GET_TOTAL_MODEL_COST",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Hash",
+					"name": "modelHash"
+				}
+			],
+			"return_type": "float",
+			"build": "1013"
+		},
 		"0x9A9D1BA639675CF1": {
 			"name": "SET_ISLAND_ENABLED",
 			"jhash": "",
@@ -96781,6 +97133,14 @@
 			"old_names": [
 				"_SET_ISLAND_HOPPER_ENABLED"
 			]
+		},
+		"0x68F1C25420D5F6AA": {
+			"name": "_SET_SPHERICAL_STREAM_DISTANT_HILODS_THIS_FRAME",
+			"jhash": "",
+			"comment": "",
+			"params": [],
+			"return_type": "void",
+			"build": "1013"
 		},
 		"0x7F87B6CE3D8D9DD8": {
 			"name": "IS_GAME_INSTALLED",
@@ -98623,7 +98983,7 @@
 		"0x8FBB6758B3B3E9EC": {
 			"name": "TASK_PLAY_PHONE_GESTURE_ANIMATION",
 			"jhash": "0x1582162C",
-			"comment": "Example from the scripts:\nTASK::TASK_PLAY_PHONE_GESTURE_ANIMATION(PLAYER::PLAYER_PED_ID(), v_3, v_2, v_4, 0.25, 0.25, 0, 0);\n\n=========================================================\n^^ No offense, but Idk how that would really help anyone.\n\nAs for the animDict & animation, they're both store in a global in all 5 scripts. So if anyone would be so kind as to read that global and comment what strings they use. Thanks.\n\nKnown boneMaskTypes'\n\"BONEMASK_HEADONLY\"\n\"BONEMASK_HEAD_NECK_AND_ARMS\"\n\"BONEMASK_HEAD_NECK_AND_L_ARM\"\n\"BONEMASK_HEAD_NECK_AND_R_ARM\"\n\np4 known args - 0.0f, 0.5f, 0.25f\np5 known args - 0.0f, 0.25f\np6 known args - 1 if a global if check is passed.\np7 known args - 1 if a global if check is passed.\n\nThe values found above, I found within the 5 scripts this is ever called in. (fmmc_launcher, fm_deathmatch_controller, fm_impromptu_dm_controller, fm_mission_controller, and freemode).\n=========================================================\n\nFull list of animation dictionaries and anims by DurtyFree: https://github.com/DurtyFree/gta-v-data-dumps/blob/master/animDictsCompact.json",
+			"comment": "Known boneMaskTypes\n\"BONEMASK_HEADONLY\"\n\"BONEMASK_HEAD_NECK_AND_ARMS\"\n\"BONEMASK_HEAD_NECK_AND_L_ARM\"\n\"BONEMASK_HEAD_NECK_AND_R_ARM\"\n\np4 known args - 0.0f, 0.5f, 0.25f\np5 known args - 0.0f, 0.25f\np6 known args - 1 if a global if check is passed.\np7 known args - 1 if a global if check is passed.\n\nThe values found above, I found within the 5 scripts this is ever called in. (fmmc_launcher, fm_deathmatch_controller, fm_impromptu_dm_controller, fm_mission_controller, and freemode).\n=========================================================\n\nFull list of animation dictionaries and anims by DurtyFree: https://github.com/DurtyFree/gta-v-data-dumps/blob/master/animDictsCompact.json",
 			"params": [
 				{
 					"type": "Ped",
@@ -100419,7 +100779,7 @@
 		"0xBD2A8EC3AF4DE7DB": {
 			"name": "TASK_USE_MOBILE_PHONE",
 			"jhash": "0x225A38C8",
-			"comment": "Actually has 3 params, not 2.\n\np0: Ped\np1: int (or bool?)\np2: int",
+			"comment": "",
 			"params": [
 				{
 					"type": "Ped",
@@ -104781,6 +105141,19 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x613A431BCD5A22EB": {
+			"name": "_GET_VEHICLE_ALLOW_HOMING_MISSLE_LOCKON_SYNCED",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Vehicle",
+					"name": "vehicle"
+				}
+			],
+			"return_type": "BOOL",
+			"build": "1013"
+		},
 		"0x1DDA078D12879EEE": {
 			"name": "SET_VEHICLE_ALLOW_HOMING_MISSLE_LOCKON_SYNCED",
 			"jhash": "",
@@ -106938,7 +107311,7 @@
 		"0xFC40CBF7B90CA77C": {
 			"name": "SET_CAR_BOOT_OPEN",
 			"jhash": "",
-			"comment": "Initially used in Max Payne 3, that's why we know the name.",
+			"comment": "",
 			"params": [
 				{
 					"type": "Vehicle",
@@ -108633,6 +109006,36 @@
 			],
 			"return_type": "Vehicle",
 			"build": "811"
+		},
+		"0x559B6073DB7FFFF9": {
+			"name": "_SET_MAKE_TRAIN_SCAN_FOR_BLOCKING_ENTITIES",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Vehicle",
+					"name": "train"
+				},
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
+		"0x7DFAD92A34F09C00": {
+			"name": "_GET_MISSION_TRAIN_CONFIG_INDEX_BY_NAME",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "const char*",
+					"name": "name"
+				}
+			],
+			"return_type": "int",
+			"build": "1013"
 		},
 		"0xAD464F2E18836BFC": {
 			"name": "IS_MISSION_TRAIN",
@@ -112019,6 +112422,23 @@
 			"return_type": "void",
 			"build": "811"
 		},
+		"0x6CB5B84B78AC55FE": {
+			"name": "SET_VEHICLE_TAIL_BROKEN",
+			"jhash": "",
+			"comment": "",
+			"params": [
+				{
+					"type": "Vehicle",
+					"name": "vehicle"
+				},
+				{
+					"type": "BOOL",
+					"name": "toggle"
+				}
+			],
+			"return_type": "void",
+			"build": "1013"
+		},
 		"0x1A78AD3D8240536F": {
 			"name": "SET_CONVERTIBLE_ROOF_LATCH_STATE",
 			"jhash": "0x0858678C",
@@ -113130,7 +113550,7 @@
 		"0xF3CC740D36221548": {
 			"name": "GET_VEHICLE_COLOR",
 			"jhash": "0x03BC8F1B",
-			"comment": "What's this for? Primary and Secondary RGB have their own natives and this one doesn't seem specific.",
+			"comment": "",
 			"params": [
 				{
 					"type": "Vehicle",
@@ -115893,7 +116313,7 @@
 		"0xB8EF61207C2393A9": {
 			"name": "GET_VEHICLE_HEALTH_PERCENTAGE",
 			"jhash": "0x196BA503",
-			"comment": "0 min 100 max\nstarts at 100\nSeams to have health zones\nFront of vehicle when damaged goes from 100-50 and stops at 50.\nRear can be damaged from 100-0\nOnly tested with two cars.\n\nany idea how this differs from the first one?\n\n--\nMay return the vehicle health on a scale of 0.0 - 100.0 (needs to be confirmed)\n\nexample:\n\nv_F = ENTITY::GET_ENTITY_MODEL(v_3);\nif (((v_F == ${tanker}) || (v_F == ${armytanker})) || (v_F == ${tanker2})) {\n    if (VEHICLE::GET_VEHICLE_HEALTH_PERCENTAGE(v_3) <= 1.0) {\n        NETWORK::NETWORK_EXPLODE_VEHICLE(v_3, 1, 1, -1);\n    }\n}",
+			"comment": "0 min 100 max\nstarts at 100\nSeams to have health zones\nFront of vehicle when damaged goes from 100-50 and stops at 50.\nRear can be damaged from 100-0\nOnly tested with two cars.\n\n--\nMay return the vehicle health on a scale of 0.0 - 100.0 (needs to be confirmed)\n\nexample:\n\nv_F = ENTITY::GET_ENTITY_MODEL(v_3);\nif (((v_F == ${tanker}) || (v_F == ${armytanker})) || (v_F == ${tanker2})) {\n    if (VEHICLE::GET_VEHICLE_HEALTH_PERCENTAGE(v_3) <= 1.0) {\n        NETWORK::NETWORK_EXPLODE_VEHICLE(v_3, 1, 1, -1);\n    }\n}",
 			"params": [
 				{
 					"type": "Vehicle",
@@ -118892,7 +119312,7 @@
 		"0xF46CDC33180FDA94": {
 			"name": "GET_WEAPONTYPE_MODEL",
 			"jhash": "0x44E1C269",
-			"comment": "Returns the model of any weapon.\n\nCan also take an ammo hash?\nsub_6663a(&l_115B, WEAPON::GET_WEAPONTYPE_MODEL(${ammo_rpg}));",
+			"comment": "Returns the model of any weapon.",
 			"params": [
 				{
 					"type": "Hash",
@@ -118988,7 +119408,7 @@
 		"0x3A87E44BB9A01D54": {
 			"name": "GET_CURRENT_PED_WEAPON",
 			"jhash": "0xB0237302",
-			"comment": "The return value seems to indicate returns true if the hash of the weapon object weapon equals the weapon hash.\np2 seems to be 1 most of the time.\n\n\n\n\n\np2 is not implemented\n\ndisassembly said that?\n",
+			"comment": "Returns true if the hash of the equipped weapon object equals the weapon hash.\ndoDeadCheck does nothing in release builds.",
 			"params": [
 				{
 					"type": "Ped",
@@ -119000,7 +119420,7 @@
 				},
 				{
 					"type": "BOOL",
-					"name": "p2"
+					"name": "doDeadCheck"
 				}
 			],
 			"return_type": "BOOL",
@@ -119009,15 +119429,15 @@
 		"0x3B390A939AF0B5FC": {
 			"name": "GET_CURRENT_PED_WEAPON_ENTITY_INDEX",
 			"jhash": "0x5D73CD20",
-			"comment": "",
+			"comment": "doDeadCheck does nothing in release builds.",
 			"params": [
 				{
 					"type": "Ped",
 					"name": "ped"
 				},
 				{
-					"type": "Any",
-					"name": "p1"
+					"type": "BOOL",
+					"name": "doDeadCheck"
 				}
 			],
 			"return_type": "Entity",
@@ -119026,7 +119446,7 @@
 		"0x8483E98E8B888AE2": {
 			"name": "GET_BEST_PED_WEAPON",
 			"jhash": "0xB998D444",
-			"comment": "p1 is always 0 in the scripts.",
+			"comment": "bIgnoreAmmoCheck is always false in the scripts.",
 			"params": [
 				{
 					"type": "Ped",
@@ -119034,7 +119454,7 @@
 				},
 				{
 					"type": "BOOL",
-					"name": "p1"
+					"name": "bIgnoreAmmoCheck"
 				}
 			],
 			"return_type": "Hash",
@@ -119957,7 +120377,7 @@
 		"0xFC4BD125DE7611E4": {
 			"name": "EXPLODE_PROJECTILES",
 			"jhash": "0x35A0B955",
-			"comment": "             WEAPON::EXPLODE_PROJECTILES(PLAYER::PLAYER_PED_ID(), func_221(0x00000003), 0x00000001);",
+			"comment": "",
 			"params": [
 				{
 					"type": "Ped",
@@ -119969,7 +120389,7 @@
 				},
 				{
 					"type": "BOOL",
-					"name": "p2"
+					"name": "instant"
 				}
 			],
 			"return_type": "void",

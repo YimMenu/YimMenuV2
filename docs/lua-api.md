@@ -13,7 +13,7 @@ Scripts live in `%appdata%/YimMenuV2/scripts`. Each script runs in its own sandb
 - **Math**: [Vector3](#vector3)
 - **Entities**: [Entity](#entity) · [Ped](#ped) · [Vehicle](#vehicle) · [entities](#entities)
 - **Players**: [Player](#player) · [players](#players)
-- **Game scripts**: [ScriptGlobal](#scriptglobal) · [ScriptLocal](#scriptlocal) · [ScriptPointer](#scriptpointer) · [ScriptPatch](#scriptpatch) · [ScriptFunction](#scriptfunction) · [ScriptData](#scriptdata) · [scripts](#scripts)
+- **Game scripts**: [ScriptGlobal](#scriptglobal) · [ScriptLocal](#scriptlocal) · [ScriptPointer](#scriptpointer) · [ScriptPatch](#scriptpatch) · [ScriptFunction](#scriptfunction) · [scripts](#scripts)
 - **Natives & online**: [natives](#natives) · [network](#network) · [tunables](#tunables) · [stats](#stats) · [transactions](#transactions)
 - **Files**: [FileMgr](#filemgr)
 - [internal](#internal)
@@ -529,7 +529,7 @@ A pattern-based pointer into a script's bytecode. Construct with `ScriptPointer(
 | `sp:add(offset) -> ScriptPointer` | Advances by `offset` bytes. |
 | `sp:sub(offset) -> ScriptPointer` | Moves back by `offset` bytes. |
 | `sp:rip() -> ScriptPointer` | Resolves a RIP-relative reference. |
-| `sp:scan(target) -> ScriptPointer \| nil` | Scans for the pattern (`target` = script hash or ScriptData). |
+| `sp:scan(target) -> ScriptPointer \| nil` | Scans for the pattern (`target` = script hash). |
 | `sp:get_address() -> integer` | Resolved address. |
 | `sp:get_name() -> string` | Pointer name. |
 
@@ -553,19 +553,6 @@ Calls a function inside a GTA script. Construct with `ScriptFunction(script, scr
 
 #### `fn:call(param_string, ...) -> any`
 Invokes the function. `param_string` describes arg types (`i` int32, `f` float, `h` hash, `b` bool) plus an optional `=<r>` return type (`n` none, `i`, `f`, `b`, `h`). Following arguments map to the type chars. Example: `fn:call("ii=i", 5, 10)`.
-
----
-
-## ScriptData
-
-A snapshot of a loaded script's code pages, for pattern scanning. Construct with `ScriptData(script)`; returns nil if the script isn't loaded.
-
-| Method | Description |
-| --- | --- |
-| `sd:get_size() -> integer` | Snapshot size in bytes. |
-| `sd:get_name() -> string \| nil` | Script name. |
-| `sd:get_code_location(idx) -> integer` | Byte address for a code-location index. |
-| `sd:find_pattern(ida_sig) -> integer \| nil` | First match offset of an IDA signature. |
 
 ---
 

@@ -12,6 +12,30 @@ namespace YimMenu
 
 namespace YimMenu
 {
+	struct CallbackArg
+	{
+		enum class Kind
+		{
+			None,
+			Bool,
+			Int,
+			Number
+		} kind = Kind::None;
+
+		union
+		{
+			bool b;
+			long long i = 0; // wide enough for LuaJIT's 64-bit integers / joaat hashes
+			double n;
+		};
+	};
+
+	struct PendingCoroutine
+	{
+		int func = -1;
+		CallbackArg arg{};
+	};
+
 	class LuaUserInterface
 	{
 		LuaScript* m_Script = nullptr;
@@ -35,7 +59,7 @@ namespace YimMenu
 
 		std::mutex m_TickFunctionsLock;
 		std::unordered_set<int> m_TickFunctions;
-		std::deque<int> m_ThrottledCoroutines;
+		std::deque<PendingCoroutine> m_ThrottledCoroutines;
 		std::chrono::system_clock::time_point m_LastThrotlledCoroutinePush;
 
 		bool m_ShutdownCalled = false;
@@ -78,7 +102,7 @@ namespace YimMenu
 		
 		void AddTickFunction(int func);
 		void RemoveTickFunction(int func);
-		void QueueCoroutine(int coro, bool immediate = false);
+		void QueueCoroutine(int coro, bool immediate = false, CallbackArg arg = {});
 
 		// must be called from the main thread
 		void Tick();

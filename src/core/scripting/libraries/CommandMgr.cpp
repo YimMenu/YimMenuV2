@@ -1,8 +1,12 @@
 #include "core/commands/BoolCommand.hpp"
+#include "core/commands/ColorCommand.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/FloatCommand.hpp"
 #include "core/commands/IntCommand.hpp"
 #include "core/commands/ListCommand.hpp"
+#include "core/commands/StringCommand.hpp"
+#include "core/commands/Vector3Command.hpp"
+#include "game/commands/PlayerCommand.hpp"
 #include "core/scripting/LuaCommands.hpp"
 #include "core/scripting/LuaLibrary.hpp"
 #include "core/scripting/LuaScript.hpp"
@@ -288,6 +292,13 @@ namespace YimMenu::Lua
 		auto hash = GetHashArgument(state, 1);
 		auto* cmd = Commands::GetCommand(hash);
 		if (!cmd)
+		{
+			lua_pushnil(state);
+			return 1;
+		}
+		
+		if (dynamic_cast<PlayerCommand*>(cmd) || dynamic_cast<ColorCommand*>(cmd)
+		    || dynamic_cast<StringCommand*>(cmd) || dynamic_cast<Vector3Command*>(cmd))
 		{
 			lua_pushnil(state);
 			return 1;

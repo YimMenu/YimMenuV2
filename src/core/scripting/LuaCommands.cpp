@@ -129,7 +129,12 @@ namespace YimMenu
 	void LuaIntCommand::OnChange()
 	{
 		if (m_Interface && m_OnChange != LUA_NOREF)
-			m_Interface->QueueCoroutine(m_OnChange, true);
+		{
+			CallbackArg arg;
+			arg.kind = CallbackArg::Kind::Int;
+			arg.i    = GetState();
+			m_Interface->QueueCoroutine(m_OnChange, true, arg);
+		}
 	}
 
 	LuaFloatCommand::LuaFloatCommand(LuaUserInterface* iface, std::string name, std::string label, std::string description, std::optional<float> min, std::optional<float> max, float default_value, int on_change) :
@@ -148,7 +153,12 @@ namespace YimMenu
 	void LuaFloatCommand::OnChange()
 	{
 		if (m_Interface && m_OnChange != LUA_NOREF)
-			m_Interface->QueueCoroutine(m_OnChange, true);
+		{
+			CallbackArg arg;
+			arg.kind = CallbackArg::Kind::Number;
+			arg.n    = GetState();
+			m_Interface->QueueCoroutine(m_OnChange, true, arg);
+		}
 	}
 
 	LuaListCommand::LuaListCommand(LuaUserInterface* iface, std::string name, std::string label, std::string description, std::vector<std::pair<int, std::string>> entries, int default_value, int on_change) :
@@ -179,6 +189,11 @@ namespace YimMenu
 	void LuaListCommand::OnChange()
 	{
 		if (m_Interface && m_OnChange != LUA_NOREF)
-			m_Interface->QueueCoroutine(m_OnChange, true);
+		{
+			CallbackArg arg;
+			arg.kind = CallbackArg::Kind::Int;
+			arg.i    = GetState();
+			m_Interface->QueueCoroutine(m_OnChange, true, arg);
+		}
 	}
 }

@@ -2,7 +2,6 @@
 #include "core/scripting/LuaLibrary.hpp"
 #include "core/scripting/LuaScript.hpp"
 #include "core/scripting/LuaUtils.hpp"
-#include "game/gta/ScriptData.hpp"
 #include "game/gta/ScriptPointer.hpp"
 #include "game/gta/Scripts.hpp"
 #include "types/script/scrProgram.hpp"
@@ -51,16 +50,9 @@ namespace YimMenu::Lua
 		static int Scan(lua_State* state)
 		{
 			auto& self = GetObject<ScriptPointer>(state, 1);
-
-			if (lua_isuserdata(state, 2))
-			{
-				auto& data = GetObject<ScriptData>(state, 2);
-				PushObject<ScriptPointer>(state, self.Scan(&data));
-				return 1;
-			}
-
 			auto hash = GetHashArgument(state, 2);
 			auto* program = Scripts::FindScriptProgram(hash);
+			
 			if (!program)
 			{
 				lua_pushnil(state);

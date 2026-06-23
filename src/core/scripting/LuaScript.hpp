@@ -38,6 +38,7 @@ namespace YimMenu
 			lua_CFunction m_LatentTarget;
 			lua_State* m_CoroState;
 			int m_LastReturnValue;
+			int m_InitialArgs = 0;
 
 			void SetTimeToResume(int millis);
 		};
@@ -113,7 +114,7 @@ namespace YimMenu
 		// we're guaranteed to have a LuaScript for each lua_State, so we can return it as a reference
 		static LuaScript& GetScript(lua_State* state);
 
-		void AddScriptCallback(int func_handle);
+		void AddScriptCallback(int func_handle, CallbackArg arg = {});
 
 		// must be called from a coroutine
 		void Yield(lua_State* state, int millis = 0, bool from_code = true);

@@ -145,13 +145,13 @@ namespace YimMenu
 		m_TickFunctions.erase(func);
 	}
 
-	void LuaUserInterface::QueueCoroutine(int coro, bool immediate)
+	void LuaUserInterface::QueueCoroutine(int coro, bool immediate, CallbackArg arg)
 	{
 		std::lock_guard lock(m_TickFunctionsLock);
 		if (immediate)
-			m_ThrottledCoroutines.push_front(coro);
+			m_ThrottledCoroutines.push_front({coro, arg});
 		else
-			m_ThrottledCoroutines.push_back(coro);
+			m_ThrottledCoroutines.push_back({coro, arg});
 	}
 
 	void LuaUserInterface::Tick()
@@ -159,7 +159,7 @@ namespace YimMenu
 		if (!m_Script)
 			return;
 
-		std::vector<int> to_run_once;
+		std::vector<PendingCoroutine> to_run_once;
 		std::vector<int> to_tick;
 		{
 			std::lock_guard lock(m_TickFunctionsLock);
@@ -167,7 +167,7 @@ namespace YimMenu
 			auto now = std::chrono::system_clock::now();
 			// One coroutine push per ~16ms keeps a long-pressed button or a script
 			// that spams clicks from flooding the callback list.
-			if (!m_ThrottledCoroutines.empty() && now - m_LastThrotlledCoroutinePush >= std::chrono::milliseconds(16)) 
+			if (!m_ThrottledCoroutines.empty() && now - m_LastThrotlledCoroutinePush >= std::chrono::milliseconds(16))
 			{
 				to_run_once.push_back(m_ThrottledCoroutines.front());
 				m_ThrottledCoroutines.pop_front();
@@ -179,9 +179,9 @@ namespace YimMenu
 				to_tick.push_back(func);
 		}
 
-		for (auto func : to_run_once)
-			m_Script->AddScriptCallback(func);
-			
+		for (auto& pending : to_run_once)
+			m_Script->AddScriptCallback(pending.func, pending.arg);
+
 		for (auto func : to_tick)
 			m_Script->AddScriptCallback(func);
 	}

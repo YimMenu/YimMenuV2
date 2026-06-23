@@ -811,7 +811,7 @@ function ScriptPointer:add(offset) end
 function ScriptPointer:sub(offset) end
 ---@return ScriptPointer
 function ScriptPointer:rip() end
----@param target string|integer|ScriptData
+---@param target string|integer
 ---@return ScriptPointer?
 function ScriptPointer:scan(target) end
 ---@return integer
@@ -858,29 +858,6 @@ function ScriptFunction.new(script, script_pointer) end
 ---@param ... any
 ---@return any
 function ScriptFunction:call(param_string, ...) end
-
-------------------------------------------------------------------------------
--- ScriptData
-------------------------------------------------------------------------------
-
----@class ScriptData
----@overload fun(script: string|integer): ScriptData?
-ScriptData = {}
-
----@param script string|integer
----@return ScriptData?
-function ScriptData.new(script) end
-
----@return integer
-function ScriptData:get_size() end
----@return string?
-function ScriptData:get_name() end
----@param idx integer
----@return integer
-function ScriptData:get_code_location(idx) end
----@param ida_sig string
----@return integer?
-function ScriptData:find_pattern(ida_sig) end
 
 ------------------------------------------------------------------------------
 -- scripts

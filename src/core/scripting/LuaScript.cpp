@@ -237,13 +237,22 @@ namespace YimMenu
 		return *script;
 	}
 
-	void LuaScript::AddScriptCallback(int func_handle)
+	void LuaScript::AddScriptCallback(int func_handle, CallbackArg arg)
 	{
 		lua_rawgeti(m_State, LUA_REGISTRYINDEX, func_handle);
 
 		lua_State* coro_state = lua_newthread(m_State);
 		lua_pushvalue(m_State, -2); // duplicate the fn that's 2 below top
 		lua_xmove(m_State, coro_state, 1);
+
+		int initial_args = 0;
+		switch (arg.kind)
+		{
+		case CallbackArg::Kind::Bool:   lua_pushboolean(coro_state, arg.b); initial_args = 1; break;
+		case CallbackArg::Kind::Int:    lua_pushinteger(coro_state, arg.i); initial_args = 1; break;
+		case CallbackArg::Kind::Number: lua_pushnumber(coro_state, arg.n); initial_args = 1; break;
+		case CallbackArg::Kind::None:   break;
+		}
 
 		auto coro_handle = luaL_ref(m_State, LUA_REGISTRYINDEX);
 		lua_pop(m_State, 1); // pop the original fn — nothing else owns it here
@@ -257,6 +266,7 @@ namespace YimMenu
 		callback.m_LatentTarget = nullptr;
 		callback.m_CoroState = nullptr;
 		callback.m_LastReturnValue = -1;
+		callback.m_InitialArgs = initial_args;
 
 		// we don't want to push any additional callbacks to the main array when we're in the middle of running, and potentially deleting, them
 		if (m_RunningScriptCallbacks)
@@ -320,7 +330,8 @@ namespace YimMenu
 			lua_State* coro_state = lua_tothread(m_State, -1);
 			lua_pop(m_State, 1);
 
-			int num_args = 0;
+			int num_args = callback.m_InitialArgs;
+			callback.m_InitialArgs = 0;
 
 			if (callback.m_LastYieldFromCode)
 			{

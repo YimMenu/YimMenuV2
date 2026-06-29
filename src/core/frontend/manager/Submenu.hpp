@@ -18,6 +18,7 @@ namespace YimMenu
 		}
 
 		void AddCategory(std::shared_ptr<Category>&& category);
+		void RemoveCategory(const std::shared_ptr<Category>& category);
 		void DrawCategorySelectors();
 		void SetActiveCategory(const std::shared_ptr<Category> category);
 		void Draw();

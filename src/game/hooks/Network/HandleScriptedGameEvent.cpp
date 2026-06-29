@@ -6,16 +6,16 @@
 #include "types/script/globals/GlobalPlayerBD.hpp"
 #include "types/script/ScriptEvent.hpp"
 #include "core/scripting/LuaManager.hpp"
+#include "core/scripting/LuaUtils.hpp"
 #include "core/util/Joaat.hpp"
 
 namespace YimMenu::Hooks
 {
 	static bool CheckLuaScripts(Player player, CScriptedGameEvent& event)
 	{
-		return LuaManager::DispatchEvent("menu.script_event_received"_J, [player, &event](lua_State* state)
+		return LuaManager::DispatchEvent(MenuEvent::ScriptedGameEventReceived, [player, &event](lua_State* state)
 		{
-			// TODO: pass a Player instance
-			lua_pushinteger(state, player.GetId());
+			Lua::CreateObject<YimMenu::Player>(state, player);
 
 			lua_newtable(state);
 			auto length = event.m_ArgsSize / 8;

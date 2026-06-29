@@ -2,6 +2,7 @@
 #include "core/scripting/LuaScript.hpp"
 #include "core/scripting/LuaUtils.hpp"
 #include "game/gta/ScriptGlobal.hpp"
+#include "types/script/scrVector.hpp"
 
 namespace YimMenu::Lua
 {
@@ -56,6 +57,26 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
+		static int GetString(lua_State* state)
+		{
+			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
+			if (global.CanAccess())
+				lua_pushstring(state, global.As<char*>());
+			else
+				lua_pushnil(state);
+			return 1;
+		}
+
+		static int GetVector3(lua_State* state)
+		{
+			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
+			rage::scrVector value{};
+			if (global.CanAccess())
+				value = *global.As<rage::scrVector*>();
+			CreateObject<rage::fvector3>(state, value);
+			return 1;
+		}
+
 		static int SetInt(lua_State* state)
 		{
 			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
@@ -72,6 +93,35 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
+		static int SetString(lua_State* state)
+		{
+			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
+			if (!global.CanAccess())
+				return 0;
+
+			std::size_t len = 0;
+			auto str        = CheckStringSafe(state, 2, &len);
+			std::size_t cap = lua_isnoneornil(state, 3) ? len + 1 : static_cast<std::size_t>(luaL_checkinteger(state, 3));
+			if (cap == 0)
+				return 0;
+
+			auto dst        = global.As<char*>();
+			std::size_t n   = std::min(len, cap - 1);
+			std::memcpy(dst, str, n);
+			dst[n] = '\0';
+			return 0;
+		}
+
+		static int SetVector3(lua_State* state)
+		{
+			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
+			auto& vec = GetObject<rage::fvector3>(state, 2);
+			auto script_vec = rage::scrVector(vec);
+			if (global.CanAccess())
+				*global.As<rage::scrVector*>() = script_vec;
+			return 0;
+		}
+
 		virtual void Register(lua_State* state) override
 		{
 			luaL_newmetatable(state, "ScriptGlobal");
@@ -82,8 +132,12 @@ namespace YimMenu::Lua
 					SetFunction(state, CanAccess, "can_access");
 					SetFunction(state, GetInt, "get_int");
 					SetFunction(state, GetFloat, "get_float");
+					SetFunction(state, GetString, "get_string");
+					SetFunction(state, GetVector3, "get_vector3");
 					SetFunction(state, SetInt, "set_int");
 					SetFunction(state, SetFloat, "set_float");
+					SetFunction(state, SetString, "set_string");
+					SetFunction(state, SetVector3, "set_vector3");
 				}
 				lua_setfield(state, -2, "__index"); // prototype
 			}

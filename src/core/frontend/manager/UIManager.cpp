@@ -31,6 +31,14 @@ namespace YimMenu
 		m_Submenus.push_back(std::move(submenu));
 	}
 
+	void UIManager::RemoveSubmenuImpl(const std::shared_ptr<Submenu>& submenu)
+	{
+		std::erase(m_Submenus, submenu);
+
+		if (m_ActiveSubmenu == submenu)
+			m_ActiveSubmenu = m_Submenus.empty() ? nullptr : m_Submenus.front();
+	}
+
 	void UIManager::SetActiveSubmenuImpl(const std::shared_ptr<Submenu> submenu)
 	{
 		m_ActiveSubmenu = submenu;

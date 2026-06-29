@@ -32,6 +32,11 @@ namespace YimMenu
 		{
 			GetInstance().AddLoopedCommandImpl(command);
 		}
+		
+		static void RemoveCommand(Command* command)
+		{
+			GetInstance().RemoveCommandImpl(command);
+		}
 
 		static void RunLoopedCommands()
 		{
@@ -75,6 +80,7 @@ namespace YimMenu
 		void AddCommandImpl(Command* command);
 		void AddBoolCommandImpl(BoolCommand* command);
 		void AddLoopedCommandImpl(LoopedCommand* command);
+		void RemoveCommandImpl(Command* command);
 		void EnableBoolCommandsImpl();
 		void RunLoopedCommandsImpl();
 		Command* GetCommandImpl(joaat_t hash);

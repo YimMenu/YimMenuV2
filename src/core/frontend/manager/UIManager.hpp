@@ -22,6 +22,11 @@ namespace YimMenu
 			GetInstance().AddSubmenuImpl(std::move(submenu));
 		}
 
+		static void RemoveSubmenu(const std::shared_ptr<Submenu>& submenu)
+		{
+			GetInstance().RemoveSubmenuImpl(submenu);
+		}
+
 		static void SetActiveSubmenu(const std::shared_ptr<Submenu> submenu)
 		{
 			GetInstance().SetActiveSubmenuImpl(submenu);
@@ -75,6 +80,7 @@ namespace YimMenu
 		}
 
 		void AddSubmenuImpl(const std::shared_ptr<Submenu>&& submenu);
+		void RemoveSubmenuImpl(const std::shared_ptr<Submenu>& submenu);
 		void SetActiveSubmenuImpl(const std::shared_ptr<Submenu> submenu);
 		void DrawImpl();
 		std::shared_ptr<Submenu> GetActiveSubmenuImpl();

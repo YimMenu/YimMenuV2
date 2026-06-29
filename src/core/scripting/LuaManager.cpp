@@ -176,7 +176,7 @@ namespace YimMenu
 			callback(script);
 	}
 
-	bool LuaManager::DispatchEventImpl(std::uint32_t event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result)
+	bool LuaManager::DispatchEventImpl(MenuEvent event, const LuaScript::DispatchEventCallback& add_arguments_cb, bool handle_result)
 	{
 		auto result = true;
 

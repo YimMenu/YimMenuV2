@@ -57,22 +57,34 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
+		static int SetMaskedInt(lua_State* state)
+		{
+			YimMenu::Stats::SetMaskedInt(CheckStringSafe(state, 1), luaL_checkinteger(state, 2), luaL_checkinteger(state, 3), luaL_checkinteger(state, 4));
+			return 0;
+		}
+
+		static int SetMaskedBool(lua_State* state)
+		{
+			YimMenu::Stats::SetMaskedBool(CheckStringSafe(state, 1), luaL_checkinteger(state, 2), CheckBooleanSafe(state, 3));
+			return 0;
+		}
+
 		static int GetInt(lua_State* state)
 		{
 			lua_pushinteger(state, YimMenu::Stats::GetInt(CheckStringSafe(state, 1)));
-			return 0;
+			return 1;
 		}
 
 		static int GetBool(lua_State* state)
 		{
 			lua_pushboolean(state, YimMenu::Stats::GetBool(CheckStringSafe(state, 1)));
-			return 0;
+			return 1;
 		}
 
 		static int GetFloat(lua_State* state)
 		{
 			lua_pushnumber(state, YimMenu::Stats::GetFloat(CheckStringSafe(state, 1)));
-			return 0;
+			return 1;
 		}
 
 		// GetDate
@@ -80,19 +92,31 @@ namespace YimMenu::Lua
 		static int GetString(lua_State* state)
 		{
 			lua_pushstring(state, YimMenu::Stats::GetString(CheckStringSafe(state, 1)));
-			return 0;
+			return 1;
 		}
 
 		static int GetPackedInt(lua_State* state)
 		{
 			lua_pushinteger(state, YimMenu::Stats::GetPackedInt(luaL_checkinteger(state, 1)));
-			return 0;
+			return 1;
 		}
 
 		static int GetPackedBool(lua_State* state)
 		{
 			lua_pushboolean(state, YimMenu::Stats::GetPackedBool(luaL_checkinteger(state, 1)));
-			return 0;
+			return 1;
+		}
+
+		static int GetMaskedInt(lua_State* state)
+		{
+			lua_pushinteger(state, YimMenu::Stats::GetMaskedInt(CheckStringSafe(state, 1), luaL_checkinteger(state, 2), luaL_checkinteger(state, 3)));
+			return 1;
+		}
+
+		static int GetMaskedBool(lua_State* state)
+		{
+			lua_pushboolean(state, YimMenu::Stats::GetMaskedBool(CheckStringSafe(state, 1), luaL_checkinteger(state, 2)));
+			return 1;
 		}
 
 		virtual void Register(lua_State* state) override
@@ -105,12 +129,16 @@ namespace YimMenu::Lua
 			SetFunction(state, SetPackedInt, "set_packed_int");
 			SetFunction(state, SetPackedBool, "set_packed_bool");
 			SetFunction(state, SetPackedBoolRange, "set_packed_bool_range");
+			SetFunction(state, SetMaskedInt, "set_masked_int");
+			SetFunction(state, SetMaskedBool, "set_masked_bool");
 			SetFunction(state, GetInt, "get_int");
 			SetFunction(state, GetBool, "get_bool");
 			SetFunction(state, GetFloat, "get_float");
 			SetFunction(state, GetString, "get_string");
 			SetFunction(state, GetPackedInt, "get_packed_int");
 			SetFunction(state, GetPackedBool, "get_packed_bool");
+			SetFunction(state, GetMaskedInt, "get_masked_int");
+			SetFunction(state, GetMaskedBool, "get_masked_bool");
 			lua_setglobal(state, "stats");
 		}
 	};

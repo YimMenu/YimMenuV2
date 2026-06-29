@@ -1,3 +1,4 @@
+#include "core/memory/PointerCalculator.hpp"
 #include "core/scripting/LuaLibrary.hpp"
 #include "core/scripting/LuaScript.hpp"
 #include "core/scripting/LuaUtils.hpp"
@@ -79,10 +80,17 @@ namespace YimMenu::Lua
 					vectors_to_fix[vector_params++] = &vec;
 					break;
 				}
-				case 'p': // Any*
+				case 'p': // Any* — accepts a `pointer` userdata or nil (NULL).
 				{
-					// idk what to do with this
-					luaL_argerror(state, 3 + i, "Pointers are not supported yet");
+					if (lua_isnoneornil(state, 3 + i))
+					{
+						invoker.PushArg<void*>(nullptr);
+					}
+					else
+					{
+						auto& pc = GetObject<PointerCalculator>(state, 3 + i);
+						invoker.PushArg<void*>(pc.As<void*>());
+					}
 					break;
 				}
 				case '=': // done + return
@@ -123,8 +131,9 @@ namespace YimMenu::Lua
 			case 'v': // Vector3 (not Vector3*)
 				CreateObject<rage::fvector3>(state, invoker.GetReturnValue<rage::scrVector>());
 				return 1;
-			case 'p': // pointer
-				luaL_error(state, "Pointer returns are not supported"); // and probably never will be
+			case 'p': // pointer — returned as a `pointer` userdata.
+				PushObject<PointerCalculator>(state, PointerCalculator(invoker.GetReturnValue<void*>()));
+				return 1;
 			}
 
 			return 0;

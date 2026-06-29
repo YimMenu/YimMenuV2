@@ -1,122 +1,110 @@
 #pragma once
 
-/*
-something like
-
-menu.set_menu_name("Test Interface Menu")
-root = menu.get_root()
-root:add_button("testbtn", "Test Button", function() 
-	notify.info("Test", "Hello")
-end)
-root:add_looped_checkbox("testbox", "Test Checkbox", function()
-	-- on tick
-end, function()
-	-- on enable
-end, function()
-	-- on disable
-end, [should_serialize=true])
-x = root:add_group("Name", 3)
-y = root:add_tab_group
-*/
-
 namespace YimMenu
 {
-	class LuaUserInterface;
-}
-
-namespace YimMenu::Lua
-{
-	class UIRoot;
-
-	class UIElementBase
-	{
-		LuaUserInterface& m_Interface;
-
-	public:
-		UIElementBase(LuaUserInterface& _interface);
-		virtual void Draw() = 0;
-	};
-
-	class UIElementGroup : public UIElementBase
-	{
-		std::string m_Name;
-		int m_NumElems; // num elements per row
-		//std::vector<std::unique_ptr<UIElement>> m_Elements;
-
-	public:
-		UIElementGroup(LuaUserInterface& _interface, std::string_view name, int num_elems = 7);
-		virtual void Draw();
-	};
-
-	class UIElement : public UIElementBase
-	{
-		std::string m_CmdString;
-		std::uint32_t m_CmdHash;
-		std::string m_Label;
-
-	public:
-		virtual void Draw() override = 0;
-	};
-
-	class UIElementWithState : public UIElement
-	{
-		bool m_ShouldSerialize;
-
-	public:
-		virtual void Draw() = 0;
-	};
-
-	class UIElementButton : public UIElement
-	{
-		int m_Function;
-
-	public:
-		virtual void Draw() = 0;
-	};
-
-	class UIButtonCheckbox : public UIElementWithState
-	{
-		bool m_Value;
-		int m_OnChange;
-
-	public:
-		virtual void Draw() = 0;
-	};
-
-	class UIButtonIntSlider : public UIElementWithState
-	{
-		int m_Value;
-		int m_OnChange;
-
-	public:
-		virtual void Draw() = 0;
-	};
-
-	class UIRoot
-	{
-
-	};
+	class LuaScript;
+	class Command;
+	class Submenu;
+	class Category;
+	class Group;
+	class UIItem;
 }
 
 namespace YimMenu
 {
+	struct CallbackArg
+	{
+		enum class Kind
+		{
+			None,
+			Bool,
+			Int,
+			Number
+		} kind = Kind::None;
+
+		union
+		{
+			bool b;
+			long long i = 0; // wide enough for LuaJIT's 64-bit integers / joaat hashes
+			double n;
+		};
+	};
+
+	struct PendingCoroutine
+	{
+		int func = -1;
+		CallbackArg arg{};
+	};
+
 	class LuaUserInterface
 	{
+		LuaScript* m_Script = nullptr;
+
+		std::string m_MenuName;
+		std::string m_MenuIcon;
+
+		std::vector<std::shared_ptr<Submenu>> m_OwnedSubmenus;
+
+		std::vector<std::unique_ptr<Command>> m_OwnedCommands;
+
+		std::vector<std::pair<std::shared_ptr<Submenu>, std::shared_ptr<Category>>> m_AttachedCategories;
+		std::vector<std::pair<std::shared_ptr<Category>, std::shared_ptr<UIItem>>> m_AttachedCategoryItems;
+		std::vector<std::pair<std::shared_ptr<Group>, std::shared_ptr<UIItem>>>    m_AttachedGroupItems;
+
+		std::vector<std::shared_ptr<Group>> m_OwnedGroups;
+
+		std::vector<int> m_RenderCallbacks;
+
+		std::unordered_set<void*> m_ScriptAllocations;
+
 		std::mutex m_TickFunctionsLock;
 		std::unordered_set<int> m_TickFunctions;
-		std::deque<int> m_ThrottledCoroutines;
+		std::deque<PendingCoroutine> m_ThrottledCoroutines;
 		std::chrono::system_clock::time_point m_LastThrotlledCoroutinePush;
-		std::unordered_map<std::uint32_t, Lua::UIElement*> m_ElementsById; 
+
+		bool m_ShutdownCalled = false;
 
 	public:
+		LuaUserInterface();
+		~LuaUserInterface();
+
+		LuaUserInterface(const LuaUserInterface&)            = delete;
+		LuaUserInterface& operator=(const LuaUserInterface&) = delete;
+
+		void Init(LuaScript* script);
+
+		void Shutdown();
+
+		LuaScript* GetScript() { return m_Script; }
+
+		void SetMenuName(std::string_view name);
+		void SetMenuIcon(std::string_view icon);
+		const std::string& GetMenuName() const { return m_MenuName; }
+
+		std::shared_ptr<Submenu> GetOrCreateSubmenu(std::string_view name);
+
+		template<typename T>
+		T* OwnCommand(std::unique_ptr<T>&& command)
+		{
+			auto* raw = command.get();
+			m_OwnedCommands.push_back(std::move(command));
+			return raw;
+		}
+
+		void TrackAttachedCategory(std::shared_ptr<Submenu> parent, std::shared_ptr<Category> category);
+		void TrackAttachedCategoryItem(std::shared_ptr<Category> parent, std::shared_ptr<UIItem> item);
+		void TrackAttachedGroupItem(std::shared_ptr<Group> parent, std::shared_ptr<UIItem> item);
+		void TrackOwnedGroup(std::shared_ptr<Group> group);
+		void TrackRenderCallback(int func_ref);
+
+		void TrackScriptAllocation(void* ptr);
+		bool ReleaseScriptAllocation(void* ptr);
+		
 		void AddTickFunction(int func);
 		void RemoveTickFunction(int func);
-		void QueueCoroutine(int coro, bool immediate = false);
+		void QueueCoroutine(int coro, bool immediate = false, CallbackArg arg = {});
 
 		// must be called from the main thread
 		void Tick();
-
-		// must be called from the DX thread
-		void Draw();
 	};
 }

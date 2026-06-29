@@ -26,17 +26,7 @@ namespace YimMenu
 
 	bool LuaScript::CallFunction(int n_args, int n_results, lua_State* override_state)
 	{
-		auto state = override_state;
-		if (!state)
-			state = m_State;
-
-		if (!LuaManager::IsRunningInMainThread())
-		{
-			LOGF(FATAL, "LuaScript::CallFunction: {} attempted to call a Lua function outside the main thread. This is not allowed", m_ModuleName);
-			lua_pop(state, 1); // pop the function from the stack since we aren't going to call it
-			SetMalfunctioning();
-			return false;
-		}
+		auto state = override_state ? override_state : m_State;
 
 		lua_pushcfunction(state, &ErrorHandler);
 		int handler_index = lua_gettop(state) - n_args - 1;
@@ -151,8 +141,10 @@ namespace YimMenu
 		m_Resources.resize(LuaManager::GetNumResourceTypes());
 		m_State = luaL_newstate();
 		
-		lua_pushlightuserdata(m_State, (void*)this);  
+		lua_pushlightuserdata(m_State, (void*)this);
 		lua_setfield(m_State, LUA_REGISTRYINDEX, "context");
+
+		m_Interface.Init(this);
 
 		LuaManager::LoadLibraries(m_State);
 		
@@ -172,10 +164,35 @@ namespace YimMenu
 
 	LuaScript::~LuaScript()
 	{
+		m_Interface.Shutdown();
+
+		std::lock_guard lock(m_ExecutionLock);
 		if (m_State)
 		{
 			lua_close(m_State);
 			m_State = nullptr;
+		}
+	}
+
+	void LuaScript::Unload()
+	{
+		if (m_LoadState == LoadState::RUNNING)
+		{
+			DispatchEvent(MenuEvent::Unload, [](lua_State* state){
+				return 0;
+			});
+			m_LoadState = LoadState::WANT_UNLOAD;
+		}
+	}
+
+	void LuaScript::Reload()
+	{
+		if (m_LoadState == LoadState::RUNNING)
+		{
+			DispatchEvent(MenuEvent::Unload, [](lua_State* state){
+				return 0;
+			});
+			m_LoadState = LoadState::WANT_RELOAD;
 		}
 	}
 
@@ -220,15 +237,25 @@ namespace YimMenu
 		return *script;
 	}
 
-	void LuaScript::AddScriptCallback(int func_handle)
+	void LuaScript::AddScriptCallback(int func_handle, CallbackArg arg)
 	{
 		lua_rawgeti(m_State, LUA_REGISTRYINDEX, func_handle);
 
 		lua_State* coro_state = lua_newthread(m_State);
-		lua_pushvalue(m_State, 1); // xmove can only move from top of stack, so we have to push the function again even if it's already in the stack
+		lua_pushvalue(m_State, -2); // duplicate the fn that's 2 below top
 		lua_xmove(m_State, coro_state, 1);
 
+		int initial_args = 0;
+		switch (arg.kind)
+		{
+		case CallbackArg::Kind::Bool:   lua_pushboolean(coro_state, arg.b); initial_args = 1; break;
+		case CallbackArg::Kind::Int:    lua_pushinteger(coro_state, arg.i); initial_args = 1; break;
+		case CallbackArg::Kind::Number: lua_pushnumber(coro_state, arg.n); initial_args = 1; break;
+		case CallbackArg::Kind::None:   break;
+		}
+
 		auto coro_handle = luaL_ref(m_State, LUA_REGISTRYINDEX);
+		lua_pop(m_State, 1); // pop the original fn — nothing else owns it here
 
 		ScriptCallback callback;
 		callback.m_Coroutine = coro_handle;
@@ -239,6 +266,7 @@ namespace YimMenu
 		callback.m_LatentTarget = nullptr;
 		callback.m_CoroState = nullptr;
 		callback.m_LastReturnValue = -1;
+		callback.m_InitialArgs = initial_args;
 
 		// we don't want to push any additional callbacks to the main array when we're in the middle of running, and potentially deleting, them
 		if (m_RunningScriptCallbacks)
@@ -265,8 +293,34 @@ namespace YimMenu
 		}
 	}
 
+	void LuaScript::RunRenderCallback(int func_ref)
+	{
+		std::lock_guard lock(m_ExecutionLock);
+
+		if (!m_State || m_LoadState != LoadState::RUNNING || func_ref == LUA_NOREF)
+			return;
+
+		lua_rawgeti(m_State, LUA_REGISTRYINDEX, func_ref); // push the function
+		lua_pushcfunction(m_State, &ErrorHandler);
+		int handler = lua_gettop(m_State) - 1;
+		lua_insert(m_State, handler); // move handler before the function
+
+		if (lua_pcall(m_State, 0, 0, handler) != LUA_OK)
+		{
+			LOGF(FATAL, "{}: {}", m_ModuleName, lua_tostring(m_State, -1));
+			lua_pop(m_State, 1); // pop the stack trace
+			SetMalfunctioning();
+		}
+
+		lua_remove(m_State, handler); // pop the error handler
+	}
+
 	void LuaScript::Tick()
 	{
+		std::lock_guard lock(m_ExecutionLock);
+
+		m_Interface.Tick();
+
 		m_RunningScriptCallbacks = true;
 		std::erase_if(m_ScriptCallbacks, [this](ScriptCallback& callback) {
 			if (callback.m_TimeToResume && *callback.m_TimeToResume > std::chrono::high_resolution_clock::now())
@@ -276,7 +330,8 @@ namespace YimMenu
 			lua_State* coro_state = lua_tothread(m_State, -1);
 			lua_pop(m_State, 1);
 
-			int num_args = 0;
+			int num_args = callback.m_InitialArgs;
+			callback.m_InitialArgs = 0;
 
 			if (callback.m_LastYieldFromCode)
 			{
@@ -333,7 +388,7 @@ namespace YimMenu
 		m_QueuedScriptCallbacks.clear();
 	}
 
-	void LuaScript::AddEventHandler(std::uint32_t event, int handler)
+	void LuaScript::AddEventHandler(MenuEvent event, int handler)
 	{
 		if (auto it = m_EventHandlers.find(event); it != m_EventHandlers.end())
 			it->second.push_back(handler);
@@ -341,33 +396,33 @@ namespace YimMenu
 			m_EventHandlers.emplace(event, std::vector{handler});
 	}
 
-	bool LuaScript::DispatchEvent(std::uint32_t event, const DispatchEventCallback& add_arguments_cb, bool handle_result)
+	bool LuaScript::DispatchEvent(MenuEvent event, const DispatchEventCallback& add_arguments_cb, bool handle_result)
 	{
+		std::lock_guard lock(m_ExecutionLock);
+
+		if (!m_State || m_LoadState != LoadState::RUNNING)
+			return true;
+
+		auto it = m_EventHandlers.find(event);
+		if (it == m_EventHandlers.end())
+			return true;
+
 		bool result = true;
 
-		if (auto it = m_EventHandlers.find(event); it != m_EventHandlers.end())
+		for (auto& handler : it->second)
 		{
-			for (auto& handler : it->second)
+			lua_rawgeti(m_State, LUA_REGISTRYINDEX, handler); // push fn
+			auto num_args = add_arguments_cb(m_State);        // push args
+
+			if (CallFunction(num_args, 1))
 			{
-				lua_rawgeti(m_State, LUA_REGISTRYINDEX, handler);
-				auto num_args = add_arguments_cb(m_State);
-
-				if (CallFunction(num_args, 1))
-				{
-					if (!lua_isnoneornil(m_State, -1))
-					{
-						if (lua_toboolean(m_State, -1) == false)
-						{
-							result = false;
-						}
-					}
-
-					lua_pop(m_State, 1);
-				}
-				
-				if (!result && handle_result)
-					return false;
+				if (!lua_isnoneornil(m_State, -1) && lua_toboolean(m_State, -1) == false)
+					result = false;
+				lua_pop(m_State, 1); // pop return value
 			}
+
+			if (!result && handle_result)
+				return false;
 		}
 
 		return result;

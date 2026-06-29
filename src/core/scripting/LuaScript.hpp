@@ -6,6 +6,15 @@
 
 namespace YimMenu
 {
+	enum class MenuEvent
+	{
+		PlayerLeave,
+		PlayerJoin,
+		ScriptedGameEventReceived,
+		ChatMessageReceived,
+		Unload
+	};
+
 	class LuaScript
 	{
 	public:
@@ -29,6 +38,7 @@ namespace YimMenu
 			lua_CFunction m_LatentTarget;
 			lua_State* m_CoroState;
 			int m_LastReturnValue;
+			int m_InitialArgs = 0;
 
 			void SetTimeToResume(int millis);
 		};
@@ -45,13 +55,13 @@ namespace YimMenu
 		std::vector<ScriptCallback> m_QueuedScriptCallbacks;
 		bool m_RunningScriptCallbacks = false;
 		ScriptCallback* m_CurrentlyExecutingCallback = nullptr;
-		std::unordered_map<std::uint32_t, std::vector<int>> m_EventHandlers;
+		std::unordered_map<MenuEvent, std::vector<int>> m_EventHandlers;
 		std::vector<std::vector<std::shared_ptr<LuaResource>>> m_Resources; // yes, it's a shared pointer stored in a vector of resources stored in a vector of resource types TODO: can we just use raw pointers or even store the resource directly in that array?
 		LuaConfig m_Config;
 		LuaUserInterface m_Interface;
+		
+		std::recursive_mutex m_ExecutionLock;
 
-		// Calls the function at the top of stack. If this returns false the stack would have nothing on it
-		bool CallFunction(int n_args, int n_results, lua_State* override_state = nullptr);
 		int ResumeCoroutine(int n_args, int n_results, lua_State* coro_state);
 		void RemoveScriptCallback(ScriptCallback& callback);
 		void DisableResources();
@@ -81,18 +91,8 @@ namespace YimMenu
 			m_IsMalfunctioning = true;
 		}
 
-		void Unload()
-		{
-			if (m_LoadState == LoadState::RUNNING)
-				m_LoadState = LoadState::WANT_UNLOAD;
-		}
-
-		void Reload()
-		{
-			if (m_LoadState == LoadState::RUNNING)
-				m_LoadState = LoadState::WANT_RELOAD;
-		}
-		
+		void Unload();
+		void Reload();
 		void Pause();
 		void Resume();
 
@@ -114,7 +114,7 @@ namespace YimMenu
 		// we're guaranteed to have a LuaScript for each lua_State, so we can return it as a reference
 		static LuaScript& GetScript(lua_State* state);
 
-		void AddScriptCallback(int func_handle);
+		void AddScriptCallback(int func_handle, CallbackArg arg = {});
 
 		// must be called from a coroutine
 		void Yield(lua_State* state, int millis = 0, bool from_code = true);
@@ -125,9 +125,10 @@ namespace YimMenu
 		{
 			return m_CurrentlyExecutingCallback;
 		}
-
-		void AddEventHandler(std::uint32_t event, int handler);
-		bool DispatchEvent(std::uint32_t event, const DispatchEventCallback& add_arguments_cb, bool handle_result = false);
+		
+		bool CallFunction(int n_args, int n_results, lua_State* override_state = nullptr);
+		void AddEventHandler(MenuEvent event, int handler);
+		bool DispatchEvent(MenuEvent event, const DispatchEventCallback& add_arguments_cb, bool handle_result = false);
 
 		// TODO: add RemoveResource
 		void AddResource(std::shared_ptr<LuaResource>&& resource, int idx);
@@ -138,5 +139,20 @@ namespace YimMenu
 		{
 			return m_Interface;
 		}
+
+		lua_State* GetState() const
+		{
+			return m_State;
+		}
+
+		std::recursive_mutex& GetExecutionLock()
+		{
+			return m_ExecutionLock;
+		}
+
+		// Invokes a registered function ref from a non-script thread (the DX
+		// render thread, for ImGui draw callbacks). Acquires m_ExecutionLock
+		// for mutual exclusion with Tick(). The callback must not yield.
+		void RunRenderCallback(int func_ref);
 	};
 }

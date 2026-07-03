@@ -2,3 +2,4 @@ build/
 .cache
 .vs
 out/
+string-patcher.exe

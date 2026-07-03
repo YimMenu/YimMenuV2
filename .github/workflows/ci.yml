@@ -37,7 +37,8 @@ jobs:
         shell: cmd
         working-directory: build/
         run: |
-          ..\string-patcher.exe YimMenuV2.dll YimMenuV2.dll || exit /b 1
+          ..\string-patcher.exe YimMenuV2.dll YimMenuV2-patched.dll || exit /b 1
+          move /y YimMenuV2-patched.dll YimMenuV2.dll
 
       - name: Rename DLL to YimMenuV2-dev-{GITHUB_SHA}.dll
         run: |

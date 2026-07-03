@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cstdint>
 
 struct PatchTarget {
     const char* search;

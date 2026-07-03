@@ -23,8 +23,10 @@ struct PatchTarget {
 
 static PatchTarget g_targets[] = {
     {"YimMenuV2", 9, 0},
+    {"yimmenu",   8, 0},
     {"YimMenu",   7, 0},
     {"Yim",       3, 0},
+    {"yim",       3, 0},
 };
 
 static const size_t g_numTargets = sizeof(g_targets) / sizeof(g_targets[0]);

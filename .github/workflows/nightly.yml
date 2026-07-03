@@ -32,7 +32,9 @@ jobs:
     runs-on: windows-latest
     name: Build Nightly
     needs: check_recent_commit
-    if: needs.check_recent_commit.outputs.should_run == 'true'
+    if: needs.check_recent_commit.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
+    env:
+      CI_EVASIVE_BUILD: 1
     outputs:
       full_sha: ${{ steps.var.outputs.full_sha }}
       short_sha: ${{ steps.var.outputs.short_sha }}
@@ -49,11 +51,23 @@ jobs:
         with:
           arch: amd64
 
+      - name: Build post-process tool
+        shell: cmd
+        run: |
+          cl tools/string-patcher.cpp /Fe:string-patcher.exe /EHsc /nologo
+
       - name: Generate CMake project
         run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
 
       - name: Build 64bit RelWithDebInfo DLL
         run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
+
+      - name: Apply string obfuscation
+        shell: cmd
+        working-directory: build/
+        run: |
+          ..\string-patcher.exe YimMenuV2.dll YimMenuV2-patched.dll || exit /b 1
+          move /y YimMenuV2-patched.dll YimMenuV2.dll
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -72,8 +86,10 @@ jobs:
   recreate_release:
     runs-on: ubuntu-latest
     name: Recreate Release
-    needs: build_nightly
-    if: needs.check_recent_commit.outputs.should_run == 'true'
+    needs:
+      - build_nightly
+      - check_recent_commit
+    if: needs.check_recent_commit.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 

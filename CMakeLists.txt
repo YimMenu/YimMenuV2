@@ -61,3 +61,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-date-time>
     $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wno-date-time>
 )
+
+# Evasive build: enabled via environment variable (CI) or -DEVASIVE_BUILD=ON
+if(DEFINED ENV{CI_EVASIVE_BUILD} OR EVASIVE_BUILD)
+    message(STATUS "Evasive build enabled — applying hardening toolchain")
+    include(cmake/evasive-toolchain.cmake)
+endif()

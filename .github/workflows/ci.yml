@@ -6,6 +6,8 @@ jobs:
   native-compilation:
     runs-on: windows-latest
     name: Native Compilation
+    env:
+      CI_EVASIVE_BUILD: 1
     steps:
       - uses: actions/checkout@v4
 
@@ -17,6 +19,11 @@ jobs:
         with:
           arch: amd64
 
+      - name: Build post-process tool
+        shell: cmd
+        run: |
+          cl tools/string-patcher.cpp /Fe:string-patcher.exe /EHsc /nologo
+
       - name: Generate CMake project
         run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
 
@@ -25,6 +32,12 @@ jobs:
 
       - name: Check if DLL got built
         run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
+
+      - name: Apply string obfuscation
+        shell: cmd
+        working-directory: build/
+        run: |
+          ..\string-patcher.exe YimMenuV2.dll YimMenuV2.dll || exit /b 1
 
       - name: Rename DLL to YimMenuV2-dev-{GITHUB_SHA}.dll
         run: |

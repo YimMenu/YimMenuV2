@@ -25,8 +25,7 @@ static PatchTarget g_targets[] = {
     {"YimMenuV2", 9, 0},
     {"yimmenu",   8, 0},
     {"YimMenu",   7, 0},
-    {"Yim",       3, 0},
-    {"yim",       3, 0},
+    {"YimMenuV2.pdb", 13, 0},
 };
 
 static const size_t g_numTargets = sizeof(g_targets) / sizeof(g_targets[0]);
@@ -77,6 +76,63 @@ static void writeFile(const char* path, const std::vector<uint8_t>& buf) {
     CloseHandle(h);
 }
 
+// Get list of byte ranges to scan (only PE data sections, skip .text)
+static std::vector<std::pair<size_t, size_t>> getScanRanges(const std::vector<uint8_t>& buf)
+{
+    std::vector<std::pair<size_t, size_t>> ranges;
+
+    if (buf.size() < 0x100)
+        return ranges;
+
+    // Parse DOS header
+    const auto dos = (const IMAGE_DOS_HEADER*)buf.data();
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE)
+        return ranges; // not a PE file, scan entire file
+
+    // Parse NT headers
+    const auto nt  = (const IMAGE_NT_HEADERS*)(buf.data() + dos->e_lfanew);
+    const auto opt = &nt->OptionalHeader;
+
+    // Determine section header offset (PE32 vs PE32+)
+    DWORD sectionOffset;
+    WORD  sectionSize;
+    if (opt->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+        sectionOffset = dos->e_lfanew + FIELD_OFFSET(IMAGE_NT_HEADERS, OptionalHeader) + sizeof(IMAGE_OPTIONAL_HEADER64);
+        sectionSize   = sizeof(IMAGE_SECTION_HEADER);
+    } else if (opt->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+        sectionOffset = dos->e_lfanew + FIELD_OFFSET(IMAGE_NT_HEADERS, OptionalHeader) + sizeof(IMAGE_OPTIONAL_HEADER32);
+        sectionSize   = sizeof(IMAGE_SECTION_HEADER);
+    } else {
+        return ranges;
+    }
+
+    WORD numSections = nt->FileHeader.NumberOfSections;
+    for (WORD i = 0; i < numSections; i++) {
+        const auto section = (const IMAGE_SECTION_HEADER*)(buf.data() + sectionOffset + i * sectionSize);
+
+        // Skip executable sections — patching code corrupts the DLL
+        if (section->Characteristics & IMAGE_SCN_MEM_EXECUTE)
+            continue;
+
+        // Skip directories that don't contain string data
+        if (!(section->Characteristics & IMAGE_SCN_MEM_READ))
+            continue;
+
+        DWORD offset = section->PointerToRawData;
+        DWORD size   = section->SizeOfRawData;
+
+        if (offset > 0 && size > 0 && offset + size <= buf.size()) {
+            ranges.emplace_back(offset, size);
+        }
+    }
+
+    // Fallback: if no data sections found, scan whole file
+    if (ranges.empty())
+        ranges.emplace_back(0, buf.size());
+
+    return ranges;
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s input.dll output.dll\n", argv[0]);
@@ -85,33 +141,55 @@ int main(int argc, char* argv[]) {
 
     srand((unsigned int)time(nullptr));
     auto buf = readFile(argv[1]);
-    size_t patched = 0;
+    auto ranges = getScanRanges(buf);
+    size_t totalPatched = 0;
+
+    printf("Scanning %zu section(s)\n", ranges.size());
 
     for (size_t t = 0; t < g_numTargets; t++) {
         auto& target = g_targets[t];
-        uint8_t key = target.key ? target.key : (uint8_t)((rand() % 255) + 1);
 
-        size_t pos = 0;
-        while ((pos = buf_find(buf, (const uint8_t*)target.search, target.len, pos)) != std::string::npos) {
-            for (size_t i = 0; i < target.len; i++) {
-                buf[pos + i] ^= key;
+        // PDB path: null it out instead of XOR
+        if (target.len == 13 && memcmp(target.search, "YimMenuV2.pdb", 13) == 0) {
+            size_t patched = 0;
+            for (auto& [start, len] : ranges) {
+                size_t end = start + len;
+                size_t pos = start;
+                while ((pos = buf_find(buf, (const uint8_t*)target.search, target.len, pos)) != std::string::npos
+                       && pos < end) {
+                    std::memset(buf.data() + pos, 0, target.len);
+                    patched++;
+                    pos += target.len;
+                }
             }
-            patched++;
-            pos += target.len;
+            if (patched)
+                printf("  PDB path: %zu occurrence(s) nulled\n", patched);
+            totalPatched += patched;
+            continue;
         }
-    }
 
-    // Null out PDB path references
-    const char* pdbStr = "YimMenuV2.pdb";
-    size_t pdbLen = strlen(pdbStr);
-    size_t pos = 0;
-    while ((pos = buf_find(buf, (const uint8_t*)pdbStr, pdbLen, pos)) != std::string::npos) {
-        std::memset(buf.data() + pos, 0, pdbLen);
-        patched++;
-        pos += pdbLen;
+        uint8_t key = (uint8_t)((rand() % 255) + 1);
+        size_t patched = 0;
+
+        for (auto& [start, len] : ranges) {
+            size_t end = start + len;
+            size_t pos = start;
+            while ((pos = buf_find(buf, (const uint8_t*)target.search, target.len, pos)) != std::string::npos
+                   && pos < end) {
+                for (size_t i = 0; i < target.len; i++) {
+                    buf[pos + i] ^= key;
+                }
+                patched++;
+                pos += target.len;
+            }
+        }
+
+        if (patched)
+            printf("  \"%s\": %zu occurrence(s) patched (key 0x%02X)\n", target.search, patched, key);
+        totalPatched += patched;
     }
 
     writeFile(argv[2], buf);
-    printf("Patched %zu occurrences. Output: %s\n", patched, argv[2]);
+    printf("Total: %zu occurrence(s) patched across %zu section(s)\n", totalPatched, ranges.size());
     return 0;
 }

@@ -22,7 +22,7 @@ jobs:
       - name: Build post-process tool
         shell: cmd
         run: |
-          cl tools/string-patcher.cpp /Fe:string-patcher.exe /EHsc /nologo
+          cl tools/string-patcher.cpp /Fe:string-patcher.exe /EHsc /std:c++17 /nologo
 
       - name: Generate CMake project
         run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja

@@ -38,7 +38,7 @@ jobs:
     if: needs.check_recent_commit.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
     env:
       CI_EVASIVE_BUILD: 0
-      CI_RUN_PATCHER: 0
+      CI_RUN_PATCHER: 1
     outputs:
       full_sha: ${{ steps.var.outputs.full_sha }}
       short_sha: ${{ steps.var.outputs.short_sha }}

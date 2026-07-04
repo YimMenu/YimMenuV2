@@ -37,7 +37,8 @@ jobs:
     needs: check_recent_commit
     if: needs.check_recent_commit.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
     env:
-      CI_EVASIVE_BUILD: 1
+      CI_EVASIVE_BUILD: 0
+      CI_RUN_PATCHER: 0
     outputs:
       full_sha: ${{ steps.var.outputs.full_sha }}
       short_sha: ${{ steps.var.outputs.short_sha }}
@@ -55,6 +56,7 @@ jobs:
           arch: amd64
 
       - name: Build post-process tool
+        if: env.CI_RUN_PATCHER == '1'
         shell: cmd
         run: |
           cl tools/string-patcher.cpp /Fe:string-patcher.exe /EHsc /std:c++17 /nologo
@@ -66,6 +68,7 @@ jobs:
         run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
 
       - name: Apply string obfuscation
+        if: env.CI_RUN_PATCHER == '1'
         shell: cmd
         working-directory: build/
         run: |

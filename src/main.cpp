@@ -28,14 +28,27 @@
 
 namespace YimMenu
 {
+	// Filled in by string-patcher.exe with the per-build XOR key for "YimMenuV2"
+	// Sentinel "EVKEY!!\0" lets the patcher locate this in the binary
+	volatile char g_EvasiveSentinel[8] = { 'E', 'V', 'K', 'E', 'Y', '!', '!', 0 };
+
 	DWORD Main(void*)
 	{
-		const auto documents = std::filesystem::path(std::getenv("appdata")) / "YimMenuV2";
+		// Decode the folder name (was XOR'd by string-patcher.exe)
+		std::string folderName = "YimMenuV2";
+		if (g_EvasiveSentinel[0] != 'E')
+		{
+			uint8_t xorKey = (uint8_t)g_EvasiveSentinel[0];
+			for (auto& c : folderName)
+				c ^= xorKey;
+		}
+		const auto documents = std::filesystem::path(std::getenv("appdata")) / folderName;
+
 		FileMgr::Init(documents);
 
-		LogHelper::Init("YimMenuV2", FileMgr::GetProjectFile("./cout.log"));
+		LogHelper::Init(folderName, FileMgr::GetProjectFile("./cout.log"));
 
-		LOGF(INFO, "Welcome to YimMenuV2! Build date: {} at {}", __DATE__, __TIME__);
+		LOGF(INFO, "Welcome to {}! Build date: {} at {}", folderName, __DATE__, __TIME__);
 
 		g_HotkeySystem.RegisterCommands();
 		SavedLocations::FetchSavedLocations();

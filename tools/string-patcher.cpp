@@ -22,16 +22,11 @@ struct PatchTarget {
 };
 
 static PatchTarget g_targets[] = {
-    {"YimMenuV2", 9, 0},
     {"yimmenu",   8, 0},
     {"YimMenu",   7, 0},
-    {"YimMenuV2.pdb", 13, 0},
 };
 
 static const size_t g_numTargets = sizeof(g_targets) / sizeof(g_targets[0]);
-
-// Filled with the XOR key used for "YimMenuV2" — embedded in binary for runtime decode
-static uint8_t g_yimMenuV2Key = 0;
 
 static size_t buf_find(const std::vector<uint8_t>& buf, const uint8_t* needle,
                        size_t needleLen, size_t start) {
@@ -174,10 +169,6 @@ int main(int argc, char* argv[]) {
         uint8_t key = (uint8_t)((rand() % 255) + 1);
         size_t patched = 0;
 
-        // Track key used for "YimMenuV2" — needed by main.cpp to decode folder path
-        if (target.len == 9 && memcmp(target.search, "YimMenuV2", 9) == 0)
-            g_yimMenuV2Key = key;
-
         for (auto& [start, len] : ranges) {
             size_t end = start + len;
             size_t pos = start;
@@ -194,25 +185,6 @@ int main(int argc, char* argv[]) {
         if (patched)
             printf("  \"%s\": %zu occurrence(s) patched (key 0x%02X)\n", target.search, patched, key);
         totalPatched += patched;
-    }
-
-    // Embed XOR key into the sentinel g_EvasiveSentinel in main.cpp
-    if (g_yimMenuV2Key)
-    {
-        const char sentinel[] = { 'E', 'V', 'K', 'E', 'Y', '!', '!', 0 };
-        for (auto& [start, len] : ranges)
-        {
-            size_t pos = start;
-            while ((pos = buf_find(buf, (const uint8_t*)sentinel, 7, pos)) != std::string::npos
-                   && pos + 8 < start + len)
-            {
-                buf[pos] = g_yimMenuV2Key;
-                for (size_t i = 1; i < 8; i++)
-                    buf[pos + i] = 0;
-                printf("  Key slot: wrote key 0x%02X at offset 0x%zX\n", g_yimMenuV2Key, pos);
-                break; // only one instance expected
-            }
-        }
     }
 
     writeFile(argv[2], buf);

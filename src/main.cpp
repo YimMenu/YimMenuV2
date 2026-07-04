@@ -28,14 +28,24 @@
 
 namespace YimMenu
 {
+	// Construct folder name at runtime so "YimMenuV2" never appears as a
+	// contiguous string in the binary (avoiding XOR corruption from patcher)
+	static std::string GetFolderName()
+	{
+		std::string n = "YimM";
+		n += "enuV2";
+		return n;
+	}
+
 	DWORD Main(void*)
 	{
-		const auto documents = std::filesystem::path(std::getenv("appdata")) / "YimMenuV2";
+		auto folderName = GetFolderName();
+		const auto documents = std::filesystem::path(std::getenv("appdata")) / folderName;
 		FileMgr::Init(documents);
 
-		LogHelper::Init("YimMenuV2", FileMgr::GetProjectFile("./cout.log"));
+		LogHelper::Init(folderName, FileMgr::GetProjectFile("./cout.log"));
 
-		LOGF(INFO, "Welcome to YimMenuV2! Build date: {} at {}", __DATE__, __TIME__);
+		LOGF(INFO, "Welcome to {}! Build date: {} at {}", folderName, __DATE__, __TIME__);
 
 		g_HotkeySystem.RegisterCommands();
 		SavedLocations::FetchSavedLocations();

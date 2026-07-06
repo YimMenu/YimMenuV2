@@ -83,10 +83,42 @@ namespace YimMenu
 	static ImVec4 Blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
 	static ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	static bool WorldToScreenPoint(rage::fvector3 worldCoords, float* screenX, float* screenY)
+	{
+		if (!Pointers.Viewport)
+			return false;
+
+		const rage::matrix44& view = Pointers.Viewport->ViewMatrix;
+		const rage::matrix44& proj = Pointers.Viewport->ProjectionMatrix;
+
+		float viewX = worldCoords.x * view.rows[0].x + worldCoords.y * view.rows[1].x + worldCoords.z * view.rows[2].x + view.rows[3].x;
+		float viewY = worldCoords.x * view.rows[0].y + worldCoords.y * view.rows[1].y + worldCoords.z * view.rows[2].y + view.rows[3].y;
+		float viewZ = worldCoords.x * view.rows[0].z + worldCoords.y * view.rows[1].z + worldCoords.z * view.rows[2].z + view.rows[3].z;
+
+		float clipX = viewX * proj.rows[0].x + viewY * proj.rows[1].x + viewZ * proj.rows[2].x + proj.rows[3].x;
+		float clipY = viewX * proj.rows[0].y + viewY * proj.rows[1].y + viewZ * proj.rows[2].y + proj.rows[3].y;
+		float clipW = viewX * proj.rows[0].w + viewY * proj.rows[1].w + viewZ * proj.rows[2].w + proj.rows[3].w;
+
+		if (clipW < 0.001f)
+		{
+			*screenX = 0.0f;
+			*screenY = 0.0f;
+			return false;
+		}
+
+		float ndcX = clipX / clipW;
+		float ndcY = clipY / clipW;
+
+		*screenX = (ndcX * 0.5f) + 0.5f;
+		*screenY = 0.5f - (ndcY * 0.5f);
+
+		return true;
+	}
+
 	static auto worldToScreen = [](rage::fvector3 coords) {
 		float screen_x{}, screen_y{};
 
-		GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(coords.x, coords.y, coords.z, &screen_x, &screen_y);
+		WorldToScreenPoint(coords, &screen_x, &screen_y);
 
 		return ImVec2{screen_x * (*Pointers.ScreenResX), screen_y * (*Pointers.ScreenResY)};
 	};
@@ -95,23 +127,51 @@ namespace YimMenu
 	{
 		if (!ped.IsValid())
 			return;
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(headBone)), worldToScreen(ped.GetBonePosition(neckBone)), color, 1.5f);
 
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(leftShoulderBone)), color, 1.5f);
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(leftShoulderBone)), worldToScreen(ped.GetBonePosition(leftElbowBone)), color, 1.5f);
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(leftElbowBone)), worldToScreen(ped.GetBonePosition(leftHandBone)), color, 1.5f);
+		// Helper lambda for safe bone drawing.
+		// Using auto for bone types to avoid dependency on a specific enum.
+		auto DrawBone = [&](auto bone1, auto bone2) {
+			float x1, y1, x2, y2;
 
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(rightShoulderBone)), color, 1.5f);
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(rightShoulderBone)), worldToScreen(ped.GetBonePosition(rightElbowBone)), color, 1.5f);
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(rightElbowBone)), worldToScreen(ped.GetBonePosition(rightHandBone)), color, 1.5f);
+			// Get the 3D coordinates of both bones
+			rage::fvector3 pos1 = ped.GetBonePosition(bone1);
+			rage::fvector3 pos2 = ped.GetBonePosition(bone2);
 
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(neckBone)), worldToScreen(ped.GetBonePosition(torsoBone)), color, 1.5f);
+			// Check that BOTH points are in front of the camera.
+			// Thanks to the && operator, if the first point is behind the camera, the second won't even be calculated.
+			if (WorldToScreenPoint(pos1, &x1, &y1) && WorldToScreenPoint(pos2, &x2, &y2))
+			{
+				// Convert normalized coordinates (0.0 - 1.0) to absolute screen pixels.
+				ImVec2 p1 = ImVec2(x1 * (*Pointers.ScreenResX), y1 * (*Pointers.ScreenResY));
+				ImVec2 p2 = ImVec2(x2 * (*Pointers.ScreenResX), y2 * (*Pointers.ScreenResY));
 
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(torsoBone)), worldToScreen(ped.GetBonePosition(leftKneeBone)), color, 1.5f);
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(leftKneeBone)), worldToScreen(ped.GetBonePosition(leftFootBone)), color, 1.5f);
+				drawList->AddLine(p1, p2, color, 1.5f);
+			}
+		};
 
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(torsoBone)), worldToScreen(ped.GetBonePosition(rightKneeBone)), color, 1.5f);
-		drawList->AddLine(worldToScreen(ped.GetBonePosition(rightKneeBone)), worldToScreen(ped.GetBonePosition(rightFootBone)), color, 1.5f);
+		// Head and neck
+		DrawBone(headBone, neckBone);
+
+		// Left arm
+		DrawBone(neckBone, leftShoulderBone);
+		DrawBone(leftShoulderBone, leftElbowBone);
+		DrawBone(leftElbowBone, leftHandBone);
+
+		// Right arm
+		DrawBone(neckBone, rightShoulderBone);
+		DrawBone(rightShoulderBone, rightElbowBone);
+		DrawBone(rightElbowBone, rightHandBone);
+
+		// Torso
+		DrawBone(neckBone, torsoBone);
+
+		// Left leg
+		DrawBone(torsoBone, leftKneeBone);
+		DrawBone(leftKneeBone, leftFootBone);
+
+		// Right leg
+		DrawBone(torsoBone, rightKneeBone);
+		DrawBone(rightKneeBone, rightFootBone);
 	}
 
 	//TODO : Very bare bones currently, expand and possibly refactor

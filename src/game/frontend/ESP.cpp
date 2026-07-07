@@ -99,20 +99,20 @@ namespace YimMenu
 		float clipY = viewX * proj.rows[0].y + viewY * proj.rows[1].y + viewZ * proj.rows[2].y + proj.rows[3].y;
 		float clipW = viewX * proj.rows[0].w + viewY * proj.rows[1].w + viewZ * proj.rows[2].w + proj.rows[3].w;
 
-		if (clipW < 0.001f)
+		if (clipW > 0)
+		{
+			float ndcX = clipX / clipW;
+			float ndcY = clipY / clipW;
+			*screenX = (ndcX * 0.5f) + 0.5f;
+			*screenY = 0.5f - (ndcY * 0.5f);
+			return true;
+		}
+		else
 		{
 			*screenX = 0.0f;
 			*screenY = 0.0f;
 			return false;
 		}
-
-		float ndcX = clipX / clipW;
-		float ndcY = clipY / clipW;
-
-		*screenX = (ndcX * 0.5f) + 0.5f;
-		*screenY = 0.5f - (ndcY * 0.5f);
-
-		return true;
 	}
 
 	static auto worldToScreen = [](rage::fvector3 coords) {

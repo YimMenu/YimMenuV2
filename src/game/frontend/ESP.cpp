@@ -12,6 +12,38 @@
 #include "game/gta/invoker/Invoker.hpp"
 #include "game/gta/Natives.hpp"
 
+static bool WorldToScreenPoint(rage::fvector3 worldCoords, float* screenX, float* screenY)
+{
+	if (!YimMenu::Pointers.Viewport)
+		return false;
+
+	const rage::matrix44& view = YimMenu::Pointers.Viewport->ViewMatrix;
+	const rage::matrix44& proj = YimMenu::Pointers.Viewport->ProjectionMatrix;
+
+	float viewX = worldCoords.x * view.rows[0].x + worldCoords.y * view.rows[1].x + worldCoords.z * view.rows[2].x + view.rows[3].x;
+	float viewY = worldCoords.x * view.rows[0].y + worldCoords.y * view.rows[1].y + worldCoords.z * view.rows[2].y + view.rows[3].y;
+	float viewZ = worldCoords.x * view.rows[0].z + worldCoords.y * view.rows[1].z + worldCoords.z * view.rows[2].z + view.rows[3].z;
+
+	float clipX = viewX * proj.rows[0].x + viewY * proj.rows[1].x + viewZ * proj.rows[2].x + proj.rows[3].x;
+	float clipY = viewX * proj.rows[0].y + viewY * proj.rows[1].y + viewZ * proj.rows[2].y + proj.rows[3].y;
+	float clipW = viewX * proj.rows[0].w + viewY * proj.rows[1].w + viewZ * proj.rows[2].w + proj.rows[3].w;
+
+	if (clipW > 0)
+	{
+		float ndcX = clipX / clipW;
+		float ndcY = clipY / clipW;
+		*screenX = (ndcX * 0.5f) + 0.5f;
+		*screenY = 0.5f - (ndcY * 0.5f);
+		return true;
+	}
+	else
+	{
+		*screenX = 0.0f;
+		*screenY = 0.0f;
+		return false;
+	}
+}
+
 namespace
 {
 	// Human
@@ -83,37 +115,7 @@ namespace YimMenu
 	static ImVec4 Blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
 	static ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	static bool WorldToScreenPoint(rage::fvector3 worldCoords, float* screenX, float* screenY)
-	{
-		if (!Pointers.Viewport)
-			return false;
-
-		const rage::matrix44& view = Pointers.Viewport->ViewMatrix;
-		const rage::matrix44& proj = Pointers.Viewport->ProjectionMatrix;
-
-		float viewX = worldCoords.x * view.rows[0].x + worldCoords.y * view.rows[1].x + worldCoords.z * view.rows[2].x + view.rows[3].x;
-		float viewY = worldCoords.x * view.rows[0].y + worldCoords.y * view.rows[1].y + worldCoords.z * view.rows[2].y + view.rows[3].y;
-		float viewZ = worldCoords.x * view.rows[0].z + worldCoords.y * view.rows[1].z + worldCoords.z * view.rows[2].z + view.rows[3].z;
-
-		float clipX = viewX * proj.rows[0].x + viewY * proj.rows[1].x + viewZ * proj.rows[2].x + proj.rows[3].x;
-		float clipY = viewX * proj.rows[0].y + viewY * proj.rows[1].y + viewZ * proj.rows[2].y + proj.rows[3].y;
-		float clipW = viewX * proj.rows[0].w + viewY * proj.rows[1].w + viewZ * proj.rows[2].w + proj.rows[3].w;
-
-		if (clipW > 0)
-		{
-			float ndcX = clipX / clipW;
-			float ndcY = clipY / clipW;
-			*screenX = (ndcX * 0.5f) + 0.5f;
-			*screenY = 0.5f - (ndcY * 0.5f);
-			return true;
-		}
-		else
-		{
-			*screenX = 0.0f;
-			*screenY = 0.0f;
-			return false;
-		}
-	}
+	
 
 	static auto worldToScreen = [](rage::fvector3 coords) {
 		float screen_x{}, screen_y{};

@@ -15,6 +15,8 @@ namespace YimMenu
 	void ListCommand::LoadState(nlohmann::json& value)
 	{
 		m_State = value;
+		MarkDirty();
+		OnChange();
 	}
 
 	ListCommand::ListCommand(std::string name, std::string label, std::string description, std::vector<std::pair<int, const char*>> list, int def_val) :

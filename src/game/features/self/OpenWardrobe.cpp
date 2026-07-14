@@ -70,7 +70,7 @@ namespace YimMenu::Features
 
 			if (!isItemLockedByStatPatch1)
 			{
-				isItemLockedByStatPatch1 = ScriptPatches::AddPatch("wardrobe_mp"_J, ScriptPointer("IsItemLockedByStatPatch1", "38 00 65 02 F7 B6 C6 31 09 00 31 46 A9 B0 28 04"), {0x71, 0x2E, 0x03, 0x01});
+				isItemLockedByStatPatch1 = ScriptPatches::AddPatch("wardrobe_mp"_J, ScriptPointer("IsItemLockedByStatPatch1", "38 00 65 02 F7 B6 C6 31"), {0x71, 0x2E, 0x03, 0x01});
 			}
 			isItemLockedByStatPatch1->Enable();
 

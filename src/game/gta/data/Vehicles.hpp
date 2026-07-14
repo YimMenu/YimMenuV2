@@ -949,6 +949,20 @@ namespace YimMenu
 	    "zr380"_J,
 	    "zr3802"_J,
 	    "zr3803"_J,
-	    "ztype"_J
+	    "ztype"_J,
+	    "caracara3"_J,
+	    "cartuccia"_J,
+	    "driftcoquette"_J,
+	    "driftdominator8"_J,
+	    "driftelegy"_J,
+	    "estride"_J,
+	    "horus"_J,
+	    "laufer"_J,
+	    "lrcgt"_J,
+	    "merula"_J,
+	    "polignus"_J,
+	    "trflat2"_J,
+	    "velenogt"_J,
+	    "warden"_J
     });
 }

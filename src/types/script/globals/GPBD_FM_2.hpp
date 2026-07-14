@@ -52,8 +52,8 @@ struct GANGOPS_DATA
 	SCR_BOOL QuittedPlanningScreen;                   // 29
 	SCR_BOOL IsTutorialActive;                        // 30
 	SCR_ARRAY<uint64_t, 4> IsTutorialActiveForPlayer; // 31
-	TIMER FinaleForceLaunchTimer;                     // 36 (H2_FINALE_FORCE_LAUNCH_TIME)
-	SCR_BOOL IsFinaleForceLaunched;                   // 38 (if players don't click ready in 3 minutes)
+	TIMER FinaleForceLaunchTimer;                     // 36
+	SCR_BOOL IsFinaleForceLaunched;                   // 38
 };
 static_assert(sizeof(GANGOPS_DATA) == 39 * 8);
 
@@ -69,7 +69,7 @@ struct RANDOM_EVENTS_CLIENT_DATA
 	alignas(8) eRandomEventClientInitState InitState;         // 0
 	SCR_ARRAY<RANDOM_EVENTS_CLIENT_EVENT_DATA, 24> EventData; // 1
 	SCR_BITSET<uint64_t> IsParticipantInEventFlags;           // 75
-	SCR_INT UNK_0076;                                         // 76 (unused)
+	SCR_INT UNK_0076;                                         // 76
 };
 static_assert(sizeof(RANDOM_EVENTS_CLIENT_DATA) == 76 * 8);
 
@@ -112,7 +112,7 @@ struct GPBD_FM_2_Entry
 	SCR_INT NumVotes;                                  // 19
 	SCR_INT MaxVotes;                                  // 20
 	SCR_INT PlayerTeam;                                // 21
-	uint64_t PAD_0022[8];                              // 22 (mission stuff)
+	uint64_t PAD_0022[8];                              // 22
 	SCR_INT TunableCloudCRC;                           // 30
 	SCR_INT CatalogCloudCRC;                           // 31
 	SCR_INT UNK_0032;                                  // 32
@@ -124,10 +124,11 @@ struct GPBD_FM_2_Entry
 	SCR_VEC3 CoronaPosition;                           // 40
 	GANGOPS_DATA GangopsData;                          // 43
 	RANDOM_EVENTS_CLIENT_DATA RandomEventsClientData;  // 82
-	SALVAGE_YARD_VEHICLE_SALE_DATA SYVehSaleData;      // 158 added b889g9
-	uint64_t PAD_0210[105];
+	SALVAGE_YARD_VEHICLE_SALE_DATA SYVehSaleData;      // 158
+
+	uint64_t PAD_0210[111];
 };
-static_assert(sizeof(GPBD_FM_2_Entry) == 315 * 8);
+static_assert(sizeof(GPBD_FM_2_Entry) == 321 * 8);
 
 struct GPBD_FM_2
 {
@@ -135,4 +136,4 @@ struct GPBD_FM_2
 
 	static GPBD_FM_2* Get();
 };
-static_assert(sizeof(GPBD_FM_2) == 10081 * 8);
+static_assert(sizeof(GPBD_FM_2) == 10273 * 8);

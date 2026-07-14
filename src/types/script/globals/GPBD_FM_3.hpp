@@ -319,7 +319,7 @@ struct GBPD_FM_3_Entry
 	SCR_BOOL TimeTrialActive; // verify
 	BOSS_GOON BossGoon;
 	uint64_t PAD_507[3]; // unused
-	SCR_INT ScriptEventReplayProtectionCounter; // "uniqueId"
+	SCR_INT ScriptEventReplayProtectionCounter;
 	TIMER CoronaForcedLaunchTimer;
 	LEAVE_IN_HELI LeaveInHeli;
 	SCR_INT OfficeDesktopFlags; // bit 0 -> login, bit 1 -> map

@@ -480,7 +480,8 @@ struct FIELD_HANGAR_DATA
 };
 static_assert(sizeof(FIELD_HANGAR_DATA) == 2 * 8);
 
-#define NUM_PROPERTY_INTERIORS 36 // (30 -> 31) b3095 \
+#define NUM_PROPERTY_INTERIORS \
+	36 // (30 -> 31) b3095 \
 	                              // (31 -> 32) b3258 \
 	                              // (32 -> 33) b3407 \
 	                              // (33 -> 36) b3717
@@ -529,7 +530,7 @@ struct PROPERTY_DATA
 	SCR_INT PAD_0299;
 	DEFUNCT_BASE_DATA DefunctBaseData;
 	SCR_INT AvengerInteriorDecorFlags; // "PACKED_MP_INT_ARMORY_AIRCRAFT_INTERIOR_v0"
-	uint64_t PAD_0308[2]; // one field removed here b889g9
+	uint64_t PAD_0308[2];              // one field removed here b889g9
 	BUSINESS_HUB_DATA BusinessHubData;
 	NIGHTCLUB_DATA NightclubData;
 	SCR_INT PAD_0365;

@@ -107,7 +107,7 @@ namespace YimMenu
 			ScriptGlobals = ptr.Add(7).Add(3).Rip().As<std::int64_t**>();
 		});
 
-		constexpr auto sendNetworkDamagePtrn = Pattern<"0F B6 41 28 04 FE 3C 03 0F 87 EA">("SendNetworkDamage");
+		constexpr auto sendNetworkDamagePtrn = Pattern<"0F B6 41 28 04 FE 3C 03 0F 87 ? ? ? ? 48 83 BF D0 00 00 00 00">("SendNetworkDamage");
 		scanner.Add(sendNetworkDamagePtrn, [this](PointerCalculator ptr) {
 			TriggerWeaponDamageEvent = ptr.Sub(0x51).As<Functions::TriggerWeaponDamageEvent>();
 		});
@@ -199,10 +199,10 @@ namespace YimMenu
 			NetEventMgr = ptr.Add(3).Rip().As<rage::netEventMgr**>();
 		});
 
-		constexpr auto sendEventAckPtrn = Pattern<"84 C0 75 ? 89 EE 49 8D AD">("SendEventAck");
+		constexpr auto sendEventAckPtrn = Pattern<"84 C0 75 ? 44 89 F5 4D 8D B4 24 08 C4 02 00">("SendEventAck");
 		scanner.Add(sendEventAckPtrn, [this](PointerCalculator ptr) {
 			EventAck = ptr.Sub(4).Rip().As<Functions::EventAck>();
-			SendEventAck = ptr.Add(0x13).Add(1).Rip().As<Functions::SendEventAck>();
+			SendEventAck = ptr.Add(0x15).Add(1).Rip().As<Functions::SendEventAck>();
 		});
 
 		constexpr auto queueDependencyPtrn = Pattern<"0F 29 46 50 48 8D 05">("QueueDependency&SigScanMemory");
@@ -216,9 +216,9 @@ namespace YimMenu
 			ScriptVM = ptr.Sub(0x24).As<Functions::ScriptVM>();
 		});
 
-		constexpr auto prepareMetricForSendingPtrn = Pattern<"48 89 F9 FF 50 20 48 8D 15">("PrepareMetricForSending");
+		constexpr auto prepareMetricForSendingPtrn = Pattern<"48 89 F1 FF 50 20 48 8D 15 ? ? ? ? 48 89 F9 49 89 C0">("PrepareMetricForSending");
 		scanner.Add(prepareMetricForSendingPtrn, [this](PointerCalculator ptr) {
-			PrepareMetricForSending = ptr.Sub(0x26).As<PVOID>();
+			PrepareMetricForSending = ptr.Sub(0x4B).As<PVOID>();
 		});
 
 		constexpr auto beDataPtrn = Pattern<"48 C7 05 ? ? ? ? 00 00 00 00 E8 ? ? ? ? 48 89 C1 E8 ? ? ? ? E8 ? ? ? ? BD 0A 00 00 00">("BEData");
@@ -228,18 +228,10 @@ namespace YimMenu
 			IsBEBanned = ptr.Add(3).Rip().Add(8).Add(4).Add(8).Add(4).As<bool*>();
 		});
 
-		constexpr auto battlEyeStatusUpdatePatchPtrn = Pattern<"80 B9 92 0A 00 00 01">("BattlEyeStatusUpdatePatch");
+		constexpr auto battlEyeStatusUpdatePatchPtrn = Pattern<"80 B9 92 0A 00 00 01 48 81 D1 90 0A 00 00">("BattlEyeStatusUpdatePatch");
 		scanner.Add(battlEyeStatusUpdatePatchPtrn, [this](PointerCalculator ptr) {
-			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.As<void*>(), 
-				// since arxan obfuscated this subroutine, return mid-function instead
-				// TODO: this might break in a later update
-				std::to_array<std::uint8_t>({
-					0x48, 0x83, 0xC4, 0x38, // add rsp, 38h
-					0x5F,                   // pop rdi
-					0x5E,                   // pop rsi
-					0xC3                    // ret
-				})
-			);
+			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.Add(0x10C).As<void*>(),
+				std::to_array<std::uint8_t>({0x31, 0xC0, 0xC3})); // xor eax, eax; ret
 		});
 
 		constexpr auto writeNetArrayDataPtrn = Pattern<"0F 84 06 03 00 00 0F B6 83">("WriteNetArrayData");
@@ -304,9 +296,9 @@ namespace YimMenu
 			NetworkSession = ptr.Add(0x17).Add(3).Rip().As<CNetworkSession**>();
 		});
 
-		constexpr auto joinSessionByInfoPtrn = Pattern<"B0 01 40 84 E9 0F 85 32 FD FF FF 48 89 F1">("JoinSessionByInfo");
+		constexpr auto joinSessionByInfoPtrn = Pattern<"41 57 41 56 56 57 55 53 48 83 EC 68 44 89 CF 45 89 C7 48 89 D5 48 89 CE B1 01">("JoinSessionByInfo");
 		scanner.Add(joinSessionByInfoPtrn, [this](PointerCalculator ptr) {
-			JoinSessionByInfo = ptr.Sub(0x7).Add(1).Rip().As<Functions::JoinSessionByInfo>();
+			JoinSessionByInfo = ptr.As<Functions::JoinSessionByInfo>();
 		});
 
 		constexpr auto getSessionByGamerHandle = Pattern<"48 C7 84 24 80 00 00 00 10 00 00 08">("GetSessionByGamerHandle");
@@ -370,7 +362,7 @@ namespace YimMenu
 			SetJoinRequestPoolTypePatch = BytePatches::Add(ptr.Sub(5).As<std::uint8_t*>(), std::to_array<std::uint8_t>({0xB8, 0x00, 0x00, 0x00, 0x00}));
 		});
 
-		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"41 83 FF 05 74 ? 42 8B 84 F5">("HandleJoinRequestIgnorePoolPatch");
+		constexpr auto handleJoinRequestIgnorePoolPatchPtrn = Pattern<"41 83 FF 05 74 ? 41 83 FF 01">("HandleJoinRequestIgnorePoolPatch");
 		scanner.Add(handleJoinRequestIgnorePoolPatchPtrn, [this](PointerCalculator ptr) {
 			HandleJoinRequestIgnorePoolPatch = BytePatches::Add(ptr.As<void*>(), std::to_array<std::uint8_t>({0x39, 0xC9, 0x90, 0x90}));
 		});

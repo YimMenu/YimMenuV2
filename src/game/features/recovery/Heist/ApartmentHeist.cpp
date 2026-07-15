@@ -22,8 +22,8 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				auto base1 = ScriptGlobal(1936013).At(1);
-				auto base2 = ScriptGlobal(1937981).At(3008);
+				auto base1 = ScriptGlobal(1936406).At(1);
+				auto base2 = ScriptGlobal(1938374).At(3008);
 
 				*base1.At(0, 1).As<int*>() = 100 - (_ApartmentHeistCut1.GetState() + _ApartmentHeistCut2.GetState() + _ApartmentHeistCut3.GetState() + _ApartmentHeistCut4.GetState());
 				*base1.At(1, 1).As<int*>() = _ApartmentHeistCut2.GetState();
@@ -75,8 +75,8 @@ namespace YimMenu::Features
 			{
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
 				{
-					*ScriptLocal(thread, 12223).At(24).As<int*>() = 7;
-					*ScriptLocal(thread, 10217).As<int*>() = *ScriptLocal(thread, 10217).As<int*>() | (1 << 9);
+					*ScriptLocal(thread, 12239).At(24).As<int*>() = 7;
+					*ScriptLocal(thread, 10233).As<int*>() = *ScriptLocal(thread, 10233).As<int*>() | (1 << 9);
 				}
 			}
 		};
@@ -89,7 +89,7 @@ namespace YimMenu::Features
 			{
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
 				{
-					*ScriptLocal(thread, 10511).At(11).As<float*>() = 100.0f;
+					*ScriptLocal(thread, 10567).At(11).As<float*>() = 100.0f;
 				}
 			}
 		};
@@ -103,7 +103,7 @@ namespace YimMenu::Features
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller"_J))
 				{
 					*ScriptLocal(thread, 32616).As<int*>() = 8;
-					*ScriptLocal(thread, 63640).As<int*>() = 5;
+					*ScriptLocal(thread, 64655).As<int*>() = 5;
 				}
 			}
 		};
@@ -119,10 +119,10 @@ namespace YimMenu::Features
 					Scripts::ForceScriptHost(thread);
 					ScriptMgr::Yield(500ms);
 
-					*ScriptLocal(thread, 20395).At(1725).At(0, 1).As<int*>() = 80;
-					*ScriptLocal(thread, 20395).As<int*>() = 12;
-					*ScriptLocal(thread, 29016).At(0, 1).As<int*>() = 99999;
-					*ScriptLocal(thread, 32472).At(0, 294).At(68).As<int*>() = 99999;
+					*ScriptLocal(thread, 20412).At(1725).At(0, 1).As<int*>() = 80;
+					*ScriptLocal(thread, 20412).As<int*>() = 12;
+					*ScriptLocal(thread, 29326).At(0, 1).As<int*>() = 99999;
+					*ScriptLocal(thread, 32785).At(0, 294).At(68).As<int*>() = 99999;
 				}
 				// TODO: find a way of getting current heist info so that InstantFinishPacific can be implemented here conditionally.
 			}
@@ -139,11 +139,11 @@ namespace YimMenu::Features
 					Scripts::ForceScriptHost(thread);
 					ScriptMgr::Yield(500ms);
 
-					*ScriptLocal(thread, 20395).At(2686).As<int*>() = 1875000;
-					*ScriptLocal(thread, 20395).At(1062).As<int*>() = 5;
-					*ScriptLocal(thread, 20395).As<int*>() = 12;
-					*ScriptLocal(thread, 29016).At(0, 1).As<int*>() = 99999;
-					*ScriptLocal(thread, 32472).At(0, 294).At(68).As<int*>() = 99999;
+					*ScriptLocal(thread, 20412).At(2686).As<int*>() = 1875000;
+					*ScriptLocal(thread, 20412).At(1062).As<int*>() = 5;
+					*ScriptLocal(thread, 20412).As<int*>() = 12;
+					*ScriptLocal(thread, 29326).At(0, 1).As<int*>() = 99999;
+					*ScriptLocal(thread, 32785).At(0, 294).At(68).As<int*>() = 99999;
 				}
 			}
 		};

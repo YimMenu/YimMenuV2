@@ -16,9 +16,9 @@ namespace YimMenu::Features
 	{
 		using LoopedCommand::LoopedCommand;
 
-		int slots_random_results_table = 1350;
+		int slots_random_results_table = 1357;
 		std::set<int> slots_blacklist = {9, 21, 22, 87, 152};
-		int spin_state_var = 1668;
+		int spin_state_var = 1675;
 		std::set<int> spin_state_whitelist = {8, 14};
 
 		virtual void OnTick() override

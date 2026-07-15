@@ -93,8 +93,8 @@ namespace YimMenu::Submenus
 	{
 		if (event == ARMOURED_TRUCK) // It doesn't have tunables
 		{
-			setCooldown = *ScriptGlobal(262145).At(33807).As<int*>();
-			setAvailability = *ScriptGlobal(262145).At(33808).As<int*>();
+			setCooldown = *ScriptGlobal(262145).At(33808).As<int*>();
+			setAvailability = *ScriptGlobal(262145).At(33809).As<int*>();
 		}
 		else
 		{

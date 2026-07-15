@@ -687,8 +687,9 @@ struct GPBD_FM_Entry
 	// int64_t PAD_0861[2]; removed b889g9
 	SCR_INT ApartmentEnterFlags;
 	// SCR_VEC3 AvengerMissionStartPosition; removed b889g9
+	SCR_INT UnkCutsceneState; // added b1158.13g9, used in fmmc_launcher
 };
-static_assert(sizeof(GPBD_FM_Entry) == 883 * 8);
+static_assert(sizeof(GPBD_FM_Entry) == 884 * 8);
 
 struct GPBD_FM
 {
@@ -696,4 +697,4 @@ struct GPBD_FM
 
 	static GPBD_FM* Get();
 };
-static_assert(sizeof(GPBD_FM) == 28257 * 8);
+static_assert(sizeof(GPBD_FM) == 28289 * 8);

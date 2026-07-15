@@ -43,43 +43,43 @@ namespace YimMenu::Features
 			case eAppVinewoodMenuSafe::NIGHTCLUB:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.NightclubData.SafeCashValue > 0)
-					*ScriptGlobal(2708832).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708943).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::ARCADE:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.ArcadeData.SafeCashValue > 0)
-					*ScriptGlobal(2708841).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708952).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::AGENCY:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.FixerHQData.SafeCashValue > 0)
-					*ScriptGlobal(2708850).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708961).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::SALVAGE_YARD:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.SalvageYardData.TotalEarnings > 0)
-					*ScriptGlobal(2708859).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708970).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::BAIL_OFFICE:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.BailShopData.SafeCashValue > 0)
-					*ScriptGlobal(2708868).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708979).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::GARMENT_FACTORY:
 			{
 				if (GPBD_FM::Get()->Entries[Self::GetPlayer().GetId()].PropertyData.HackerDenData.SafeCashValue > 0)
-					*ScriptGlobal(2708883).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2708994).As<BOOL*>() = TRUE;
 				break;
 			}
 			case eAppVinewoodMenuSafe::HANDS_ON_CAR_WASH:
 			{
 				if (GPBD_FM_2::Get()->Entries[Self::GetPlayer().GetId()].SYVehSaleData.HOWCData.SafeCashValue > 0)
-					*ScriptGlobal(2708890).As<BOOL*>() = TRUE;
+					*ScriptGlobal(2709001).As<BOOL*>() = TRUE;
 				break;
 			}
 			}

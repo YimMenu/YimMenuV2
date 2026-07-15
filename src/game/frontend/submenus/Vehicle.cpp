@@ -1,4 +1,6 @@
 #include "Vehicle.hpp"
+#include "core/commands/BoolCommand.hpp"
+#include "core/commands/Commands.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "game/frontend/submenus/Vehicle/SpawnVehicle.hpp"
 #include "Vehicle/VehicleEditor.hpp"
@@ -7,7 +9,7 @@
 namespace YimMenu::Submenus
 {
 	Vehicle::Vehicle() :
-		#define ICON_FA_CAR "\xef\x86\xb9"
+#define ICON_FA_CAR "\xef\x86\xb9"
 	    Submenu::Submenu("Vehicle", ICON_FA_CAR)
 	{
 		auto main = std::make_shared<Category>("Main");
@@ -21,6 +23,16 @@ namespace YimMenu::Submenus
 		globals->AddItem(std::make_shared<BoolCommandItem>("hornboost"_J));
 		globals->AddItem(std::make_shared<BoolCommandItem>("modifyboostbehavior"_J));
 		globals->AddItem(std::make_shared<ConditionalItem>("modifyboostbehavior"_J, std::make_shared<ListCommandItem>("boostbehavior"_J)));
+		globals->AddItem(std::make_shared<BoolCommandItem>("autodrive"_J));
+		globals->AddItem(std::make_shared<BoolCommandItem>("npcautodrive"_J));
+		auto isAutoDriveEnabled = [] {
+			const auto playerAutoDrive = Commands::GetCommand<BoolCommand>("autodrive"_J);
+			const auto npcAutoDrive = Commands::GetCommand<BoolCommand>("npcautodrive"_J);
+			return (playerAutoDrive && playerAutoDrive->GetState())
+			    || (npcAutoDrive && npcAutoDrive->GetState());
+		};
+		globals->AddItem(std::make_shared<ConditionalItem>(isAutoDriveEnabled, std::make_shared<IntCommandItem>("autodrivespeed"_J)));
+		globals->AddItem(std::make_shared<ConditionalItem>(isAutoDriveEnabled, std::make_shared<ListCommandItem>("autodrivestyle"_J)));
 
 		tools->AddItem(std::make_shared<CommandItem>("enterlastvehicle"_J));
 		tools->AddItem(std::make_shared<CommandItem>("repairvehicle"_J));

@@ -8,6 +8,7 @@
 #include "game/gta/Natives.hpp"
 #include "types/pad/ControllerInputs.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 #include <string_view>
@@ -27,23 +28,50 @@ namespace YimMenu::Features
 			NoControl
 		};
 
+		enum class ManualInput
+		{
+			None,
+			Drive,
+			ExitVehicle
+		};
+
 		static constexpr float manual_input_deadzone = 0.2f;
 
 		AutoDriveInternal::RoadDriveController m_Route;
 		AutoDriveInternal::SessionToken m_Session;
 		FailureReason m_FailureReason = FailureReason::None;
 
-		static bool HasManualDrivingInput()
+		static float GetControlMagnitude(ControllerInputs input)
 		{
-			const auto steering = std::abs(PAD::GET_CONTROL_NORMAL(0, static_cast<int>(ControllerInputs::INPUT_VEH_MOVE_LR)));
-			const auto accelerate = std::abs(PAD::GET_CONTROL_NORMAL(0, static_cast<int>(ControllerInputs::INPUT_VEH_ACCELERATE)));
-			const auto brake = std::abs(PAD::GET_CONTROL_NORMAL(0, static_cast<int>(ControllerInputs::INPUT_VEH_BRAKE)));
+			const auto action = static_cast<int>(input);
+			return std::max(
+			    std::abs(PAD::GET_CONTROL_NORMAL(0, action)),
+			    std::abs(PAD::GET_DISABLED_CONTROL_NORMAL(0, action)));
+		}
 
-			return steering > manual_input_deadzone
+		static bool IsControlPressed(ControllerInputs input)
+		{
+			const auto action = static_cast<int>(input);
+			return PAD::IS_CONTROL_PRESSED(0, action)
+			    || PAD::IS_DISABLED_CONTROL_PRESSED(0, action);
+		}
+
+		static ManualInput GetManualDrivingInput()
+		{
+			if (IsControlPressed(ControllerInputs::INPUT_VEH_EXIT))
+				return ManualInput::ExitVehicle;
+
+			const auto steering = GetControlMagnitude(ControllerInputs::INPUT_VEH_MOVE_LR);
+			const auto accelerate = GetControlMagnitude(ControllerInputs::INPUT_VEH_ACCELERATE);
+			const auto brake = GetControlMagnitude(ControllerInputs::INPUT_VEH_BRAKE);
+
+			if (steering > manual_input_deadzone
 			    || accelerate > manual_input_deadzone
 			    || brake > manual_input_deadzone
-			    || PAD::IS_CONTROL_PRESSED(0, static_cast<int>(ControllerInputs::INPUT_VEH_HANDBRAKE))
-			    || PAD::IS_CONTROL_PRESSED(0, static_cast<int>(ControllerInputs::INPUT_VEH_EXIT));
+			    || IsControlPressed(ControllerInputs::INPUT_VEH_HANDBRAKE))
+				return ManualInput::Drive;
+
+			return ManualInput::None;
 		}
 
 		void SetFailure(FailureReason reason, std::string_view message = {})
@@ -133,15 +161,33 @@ namespace YimMenu::Features
 
 			auto driver = Self::GetPed();
 			auto vehicle = Self::GetVehicle();
-			if (!ValidateDriver(driver, vehicle))
-				return;
+			const auto isCurrentDriver = driver
+			    && vehicle
+			    && VEHICLE::GET_PED_IN_VEHICLE_SEAT(vehicle.GetHandle(), -1, false) == driver.GetHandle();
 
-			if (HasManualDrivingInput())
+			const auto manualInput = m_Route.HasTask() || isCurrentDriver
+			    ? GetManualDrivingInput()
+			    : ManualInput::None;
+			if (manualInput != ManualInput::None)
 			{
 				AutoDriveInternal::Coordinator::Release(m_Session);
 				SetState(false);
+
+				if (manualInput == ManualInput::ExitVehicle
+				    && driver
+				    && vehicle
+				    && ENTITY::DOES_ENTITY_EXIST(driver.GetHandle())
+				    && ENTITY::DOES_ENTITY_EXIST(vehicle.GetHandle())
+				    && PED::IS_PED_IN_VEHICLE(driver.GetHandle(), vehicle.GetHandle(), false))
+				{
+					TASK::TASK_LEAVE_VEHICLE(driver.GetHandle(), vehicle.GetHandle(), 0);
+				}
+
 				return;
 			}
+
+			if (!ValidateDriver(driver, vehicle))
+				return;
 
 			if (m_Route.Tick(driver, vehicle, "Auto Drive started.") == AutoDriveInternal::RouteResult::DestinationReached)
 			{

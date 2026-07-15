@@ -441,6 +441,11 @@ namespace YimMenu::Features::AutoDriveInternal
 		m_IsBringingToHalt = false;
 	}
 
+	bool RoadDriveController::HasTask() const
+	{
+		return m_HasTask;
+	}
+
 	void RoadDriveController::AssignVehicle(Ped driver, Vehicle vehicle)
 	{
 		m_DriverHandle = driver.GetHandle();

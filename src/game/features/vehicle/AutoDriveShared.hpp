@@ -103,6 +103,7 @@ namespace YimMenu::Features::AutoDriveInternal
 	public:
 		RouteResult Tick(Ped driver, Vehicle vehicle, std::string_view startMessage);
 		void ClearTask(bool clearPedTask = true, bool clearVehicleTask = true);
+		bool HasTask() const;
 	};
 
 	bool IsSupportedRoadVehicle(Vehicle vehicle);

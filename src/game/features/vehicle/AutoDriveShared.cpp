@@ -446,6 +446,26 @@ namespace YimMenu::Features::AutoDriveInternal
 		return m_HasTask;
 	}
 
+	RoadDriveStatus RoadDriveController::GetStatus() const
+	{
+		RoutePhase phase = RoutePhase::Idle;
+		switch (m_Mode)
+		{
+		case Mode::Navigation: phase = RoutePhase::Navigation; break;
+		case Mode::TargetLost: phase = RoutePhase::TargetLost; break;
+		case Mode::Wander: phase = RoutePhase::Wander; break;
+		case Mode::Arrived: phase = RoutePhase::Arrived; break;
+		default: break;
+		}
+
+		return {
+		    phase,
+		    m_Target.m_Source,
+		    m_Target.m_Position,
+		    m_RoadTarget,
+		    m_HasTask};
+	}
+
 	void RoadDriveController::AssignVehicle(Ped driver, Vehicle vehicle)
 	{
 		m_DriverHandle = driver.GetHandle();

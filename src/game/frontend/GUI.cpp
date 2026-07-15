@@ -3,6 +3,7 @@
 #include "Menu.hpp"
 #include "ESP.hpp"
 #include "Overlay.hpp"
+#include "AutoDriveHUD.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/renderer/Renderer.hpp"
 #include "core/frontend/Notifications.hpp"
@@ -39,6 +40,11 @@ namespace YimMenu
 			    ChatDisplay::Draw();
 		    },
 		    -5);
+		Renderer::AddRendererCallBack(
+		    [&] {
+			    AutoDriveHUD::Draw();
+		    },
+		    -7);
 		Renderer::AddRendererCallBack(
 		    [&] {
 			    Overlay::Draw();

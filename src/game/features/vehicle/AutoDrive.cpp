@@ -1,4 +1,5 @@
 #include "AutoDriveShared.hpp"
+#include "AutoDriveHudTelemetry.hpp"
 
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/Commands.hpp"
@@ -86,6 +87,7 @@ namespace YimMenu::Features
 
 		void ClearOwnedSession()
 		{
+			AutoDriveInternal::AutoDriveHudTelemetry::Clear(m_Session);
 			m_Route.ClearTask();
 			m_FailureReason = FailureReason::None;
 		}
@@ -187,9 +189,14 @@ namespace YimMenu::Features
 			}
 
 			if (!ValidateDriver(driver, vehicle))
+			{
+				AutoDriveInternal::AutoDriveHudTelemetry::Clear(m_Session);
 				return;
+			}
 
-			if (m_Route.Tick(driver, vehicle, "Auto Drive started.") == AutoDriveInternal::RouteResult::DestinationReached)
+			const auto routeResult = m_Route.Tick(driver, vehicle, "Auto Drive started.");
+			AutoDriveInternal::AutoDriveHudTelemetry::Update(m_Session, driver, vehicle, m_Route.GetStatus());
+			if (routeResult == AutoDriveInternal::RouteResult::DestinationReached)
 			{
 				AutoDriveInternal::Coordinator::Release(m_Session);
 				SetState(false);

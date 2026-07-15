@@ -1,4 +1,5 @@
 #include "AutoDriveShared.hpp"
+#include "AutoDriveHudTelemetry.hpp"
 
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/Commands.hpp"
@@ -90,6 +91,7 @@ namespace YimMenu::Features
 
 		void ClearOwnedSession()
 		{
+			AutoDriveInternal::AutoDriveHudTelemetry::Clear(m_Session);
 			Vehicle vehicle(0);
 			if (m_VehicleHandle && ENTITY::DOES_ENTITY_EXIST(m_VehicleHandle))
 				vehicle = Vehicle(m_VehicleHandle);
@@ -351,9 +353,14 @@ namespace YimMenu::Features
 				driver = Ped(m_DriverHandle);
 
 			if (!ValidateActiveSession(player, vehicle, driver))
+			{
+				AutoDriveInternal::AutoDriveHudTelemetry::Clear(m_Session);
 				return;
+			}
 
-			if (m_Route.Tick(driver, vehicle, "NPC Auto Drive started.") == AutoDriveInternal::RouteResult::DestinationReached)
+			const auto routeResult = m_Route.Tick(driver, vehicle, "NPC Auto Drive started.");
+			AutoDriveInternal::AutoDriveHudTelemetry::Update(m_Session, driver, vehicle, m_Route.GetStatus());
+			if (routeResult == AutoDriveInternal::RouteResult::DestinationReached)
 			{
 				AutoDriveInternal::Coordinator::Release(m_Session);
 				SetState(false);

@@ -25,6 +25,7 @@ namespace YimMenu::Submenus
 		globals->AddItem(std::make_shared<ConditionalItem>("modifyboostbehavior"_J, std::make_shared<ListCommandItem>("boostbehavior"_J)));
 		globals->AddItem(std::make_shared<BoolCommandItem>("autodrive"_J));
 		globals->AddItem(std::make_shared<BoolCommandItem>("npcautodrive"_J));
+		globals->AddItem(std::make_shared<BoolCommandItem>("autodrivehud"_J));
 		auto isAutoDriveEnabled = [] {
 			const auto playerAutoDrive = Commands::GetCommand<BoolCommand>("autodrive"_J);
 			const auto npcAutoDrive = Commands::GetCommand<BoolCommand>("npcautodrive"_J);

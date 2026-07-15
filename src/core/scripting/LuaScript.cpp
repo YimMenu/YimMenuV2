@@ -104,7 +104,7 @@ namespace YimMenu
 		for (int i = 0; i < m_Resources.size(); i++)
 		{
 			if (!m_Resources[i].size())
-				return;
+				continue;
 
 			auto type = LuaManager::GetResourceType(i);
 			type->Lock();
@@ -121,7 +121,7 @@ namespace YimMenu
 		for (int i = 0; i < m_Resources.size(); i++)
 		{
 			if (!m_Resources[i].size())
-				return;
+				continue;
 
 			auto type = LuaManager::GetResourceType(i);
 			type->Lock();

@@ -270,7 +270,7 @@ namespace YimMenu
 
 	void Renderer::WaitForLastFrame()
 	{
-		FrameContext FrameCtx = GetInstance().m_FrameContext[GetInstance().m_FrameIndex % GetInstance().m_SwapChainDesc.BufferCount];
+		FrameContext& FrameCtx = GetInstance().m_FrameContext[GetInstance().m_FrameIndex % GetInstance().m_SwapChainDesc.BufferCount];
 
 		UINT64 FenceValue = FrameCtx.FenceValue;
 
@@ -299,7 +299,7 @@ namespace YimMenu
 		HANDLE WaitableObjects[] = {GetInstance().m_SwapchainWaitableObject, nullptr};
 		DWORD NumWaitableObjets = 1;
 
-		FrameContext FrameCtx = GetInstance().m_FrameContext[NextFrameIndex % GetInstance().m_SwapChainDesc.BufferCount];
+		FrameContext& FrameCtx = GetInstance().m_FrameContext[NextFrameIndex % GetInstance().m_SwapChainDesc.BufferCount];
 		UINT64 FenceValue = FrameCtx.FenceValue;
 		if (FenceValue != 0) // means no fence was signaled
 		{

@@ -16,6 +16,8 @@ namespace YimMenu
 
 		auto message_id = Joaat(title + message);
 
+		std::lock_guard<std::mutex> lock(m_mutex);
+
 		auto exists = std::find_if(m_Notifications.begin(), m_Notifications.end(), [&](auto& notification) {
 			return notification.second.m_Identifier == message_id;
 		});
@@ -40,7 +42,6 @@ namespace YimMenu
 			notification.m_ContextFuncName = context_function_name.empty() ? "Context Function" : context_function_name;
 		}
 
-		std::lock_guard<std::mutex> lock(m_mutex);
 		auto result = m_Notifications.insert(std::make_pair(title + message, notification));
 
 		return notification;

@@ -93,6 +93,10 @@ namespace YimMenu
 				}
 			}
 		}
+		else
+		{
+			LOGF(FATAL, "YimMenu requires FSL to be loaded. Please get it from UnknownCheats.me");
+		}
 
 		if (m_BattlEyeRunning)
 			LOGF(WARNING, "If you are not running an actual BattlEye bypass, exit the game immediately and ensure that BE is properly disabled");

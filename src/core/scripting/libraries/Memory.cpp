@@ -52,7 +52,7 @@ namespace YimMenu::Lua
 		static int ScanPattern(lua_State* state)
 		{
 			auto sig    = CheckStringSafe(state, 1);
-			auto* gta5  = ModuleMgr.Get("GTA5.exe"_J);
+			auto* gta5  = ModuleMgr.Get("GTA5_Enhanced.exe"_J);
 			if (!gta5)
 			{
 				lua_pushnil(state);

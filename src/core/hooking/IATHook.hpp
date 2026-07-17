@@ -42,6 +42,7 @@ namespace YimMenu
 	inline bool IATHook<T>::Enable()
 	{
 		*m_HookLocation = m_HookFunc;
+		m_Enabled = true;
 		return true;
 	}
 
@@ -49,6 +50,7 @@ namespace YimMenu
 	inline bool IATHook<T>::Disable()
 	{
 		*m_HookLocation = m_OriginalFunc;
+		m_Enabled = false;
 		return true;
 	}
 

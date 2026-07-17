@@ -5,6 +5,13 @@ namespace YimMenu
 	CallHookMemory::CallHookMemory()
 	{
 		m_Memory = VirtualAlloc((void*)((uintptr_t)GetModuleHandle(0) + 0x40000000), 1024, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+		if (!m_Memory)
+			m_Memory = VirtualAlloc(nullptr, 1024, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+		if (!m_Memory)
+		{
+			LOGF(FATAL, "CallHookMemory: Failed to allocate jump sequence memory");
+			throw std::runtime_error("CallHookMemory: Failed to allocate jump sequence memory");
+		}
 		m_Offset = 0;
 	}
 

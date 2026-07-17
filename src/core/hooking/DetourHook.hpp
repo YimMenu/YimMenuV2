@@ -61,10 +61,10 @@ namespace YimMenu
 
 		if (const auto result = MH_QueueEnableHook(m_TargetFunc); result != MH_OK)
 		{
-			throw std::runtime_error("Failed to queue hook to be enabled.");
-
+			LOGF(FATAL, "Failed to queue hook to be enabled: {}", Name());
 			return false;
 		}
+		m_Enabled = true;
 		return true;
 	}
 
@@ -76,10 +76,10 @@ namespace YimMenu
 
 		if (const auto result = MH_QueueDisableHook(m_TargetFunc); result != MH_OK)
 		{
-			throw std::runtime_error("Failed to queue hook to be disable.");
-
+			LOGF(FATAL, "Failed to queue hook to be disabled: {}", Name());
 			return false;
 		}
+		m_Enabled = false;
 		return true;
 	}
 
@@ -91,10 +91,10 @@ namespace YimMenu
 
 		if (const auto result = MH_EnableHook(m_TargetFunc); result != MH_OK)
 		{
-			throw std::runtime_error("Failed to enable hook right now.");
-
+			LOGF(FATAL, "Failed to enable hook right now: {}", Name());
 			return false;
 		}
+		m_Enabled = true;
 		return true;
 	}
 
@@ -106,10 +106,10 @@ namespace YimMenu
 
 		if (const auto result = MH_DisableHook(m_TargetFunc); result != MH_OK)
 		{
-			throw std::runtime_error("Failed to disable hook right now.");
-
+			LOGF(FATAL, "Failed to disable hook right now: {}", Name());
 			return false;
 		}
+		m_Enabled = false;
 		return true;
 	}
 

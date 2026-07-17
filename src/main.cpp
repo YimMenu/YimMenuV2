@@ -30,7 +30,13 @@ namespace YimMenu
 {
 	DWORD Main(void*)
 	{
-		const auto documents = std::filesystem::path(std::getenv("appdata")) / "YimMenuV2";
+		const auto appdata = std::getenv("appdata");
+		if (!appdata)
+		{
+			MessageBoxA(nullptr, "Failed to get APPDATA environment variable", "YimMenuV2", MB_ICONERROR);
+			goto EARLY_UNLOAD;
+		}
+		const auto documents = std::filesystem::path(appdata) / "YimMenuV2";
 		FileMgr::Init(documents);
 
 		LogHelper::Init("YimMenuV2", FileMgr::GetProjectFile("./cout.log"));

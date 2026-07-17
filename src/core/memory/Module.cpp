@@ -11,7 +11,7 @@ namespace YimMenu
 		const auto ntHeader = GetNtHeader();
 		if (ntHeader)
 		{
-			m_Size = ntHeader->OptionalHeader.SizeOfCode;
+			m_Size = ntHeader->OptionalHeader.SizeOfImage;
 		}
 	}
 

@@ -74,6 +74,7 @@ namespace YimMenu
 				if (signature[instructionIdx] && signature[instructionIdx].value() != instruction[instructionIdx])
 				{
 					found = false;
+					break;
 				}
 			}
 

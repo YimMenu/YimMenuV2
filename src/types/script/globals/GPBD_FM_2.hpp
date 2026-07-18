@@ -85,9 +85,9 @@ struct SALVAGE_YARD_VEHICLE_SALE_DATA
 {
 	uint64_t PAD_0000[27];
 	HOCW_DATA HOWCData; // 27
-	uint64_t PAD_0043[9];
+	uint64_t PAD_0043[115];
 };
-static_assert(sizeof(SALVAGE_YARD_VEHICLE_SALE_DATA) == 52 * 8);
+static_assert(sizeof(SALVAGE_YARD_VEHICLE_SALE_DATA) == 158 * 8);
 
 struct GPBD_FM_2_Entry
 {
@@ -125,9 +125,10 @@ struct GPBD_FM_2_Entry
 	GANGOPS_DATA GangopsData;                          // 43
 	RANDOM_EVENTS_CLIENT_DATA RandomEventsClientData;  // 82
 	SALVAGE_YARD_VEHICLE_SALE_DATA SYVehSaleData;      // 158 added b889g9
-	uint64_t PAD_0210[105];
+	SCR_INT GangopsFlowMissionProg;                    // 316
+	SCR_ARRAY<uint64_t, 3> TrickOrTreatFlags;          // 317 96-bit flag bitset for effects
 };
-static_assert(sizeof(GPBD_FM_2_Entry) == 315 * 8);
+static_assert(sizeof(GPBD_FM_2_Entry) == 321 * 8);
 
 struct GPBD_FM_2
 {
@@ -135,4 +136,4 @@ struct GPBD_FM_2
 
 	static GPBD_FM_2* Get();
 };
-static_assert(sizeof(GPBD_FM_2) == 10081 * 8);
+static_assert(sizeof(GPBD_FM_2) == 10273 * 8);

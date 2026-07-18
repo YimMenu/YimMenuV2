@@ -65,6 +65,8 @@ namespace YimMenu
 
 			return false;
 		}
+
+		m_Enabled = true;
 		return true;
 	}
 
@@ -80,6 +82,8 @@ namespace YimMenu
 
 			return false;
 		}
+
+		m_Enabled = false;
 		return true;
 	}
 
@@ -95,6 +99,8 @@ namespace YimMenu
 
 			return false;
 		}
+
+		m_Enabled = true;
 		return true;
 	}
 
@@ -110,6 +116,8 @@ namespace YimMenu
 
 			return false;
 		}
+
+		m_Enabled = false;
 		return true;
 	}
 

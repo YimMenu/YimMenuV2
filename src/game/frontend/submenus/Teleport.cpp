@@ -49,10 +49,10 @@ namespace YimMenu::Submenus
 		InputTextWithHint("Category", "Category", &category).Draw();
 
 		ImGui::PushItemWidth(200);
-		InputTextWithHint("Location name", "New location", &newLocationName).Draw();
+		InputTextWithHint("Location Name", "New location", &newLocationName).Draw();
 		ImGui::PopItemWidth();
 
-		if (ImGui::Button("Save current location")) // Button widget still crashes
+		if (ImGui::Button("Save Current Location")) // Button widget still crashes
 		{
 			FiberPool::Push([=] {
 				if (newLocationName.empty())

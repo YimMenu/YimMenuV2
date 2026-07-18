@@ -8,9 +8,12 @@ namespace YimMenu::Submenus
 
 		auto target    = std::make_shared<Group>("Primary Target", 1);
 		auto general   = std::make_shared<Group>("General", 2);
-		auto preps     = std::make_shared<Group>("Prep Work", 2);
-		auto scoping   = std::make_shared<Group>("Scoping", 2);
-		auto misc      = std::make_shared<Group>("Misc", 2);
+
+		auto vehicles  = std::make_shared<CollapsingHeaderItem>("Vehicles");
+		auto equipment = std::make_shared<CollapsingHeaderItem>("Equipment");
+		auto intel     = std::make_shared<CollapsingHeaderItem>("Intel");
+
+		auto config    = std::make_shared<Group>("Heist Config", 2);
 		auto action    = std::make_shared<Group>("", 1);
 
 		target->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistprimarytarget"_J));
@@ -20,44 +23,49 @@ namespace YimMenu::Submenus
 		general->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistpowerdrills"_J));
 		general->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistempcharges"_J));
 
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopeout"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistalphamail"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisthazmat"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheiststaffkeycard"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisttacticalequip"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisthackingdevice"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistaccesscode"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistunmarkedweapons"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistcaracara"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilator"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchez"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistprepemp"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistguardshipments"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistguardroutesprep"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistglasscutterprep"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistpowerdrillsprep"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistempchargesprep"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistcaracaraprep"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilatorprep"_J));
-		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchezprep"_J));
+		// Vehicles
+		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistcaracara"_J));
+		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilator"_J));
+		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchez"_J));
+		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistcaracaraprep"_J));
+		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilatorprep"_J));
+		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchezprep"_J));
 
-		scoping->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopesecondary"_J));
-		scoping->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopepoi"_J));
+		// Equipment
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisthazmat"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheiststaffkeycard"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisttacticalequip"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisthackingdevice"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistaccesscode"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistunmarkedweapons"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistguardshipments"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistprepemp"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistguardroutesprep"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistglasscutterprep"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistpowerdrillsprep"_J));
+		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistempchargesprep"_J));
 
-		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
-		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
-		misc->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistkeyloc"_J));
-		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetkeyloc"_J));
-		misc->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistseed"_J));
-		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetseed"_J));
+		// Intel
+		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopeout"_J));
+		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistalphamail"_J));
+		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopesecondary"_J));
+		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopepoi"_J));
+
+		config->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistkeyloc"_J));
+		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetkeyloc"_J));
+		config->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistseed"_J));
+		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetseed"_J));
+		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
+		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
 
 		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J));
 
 		tab->AddItem(target);
 		tab->AddItem(general);
-		tab->AddItem(preps);
-		tab->AddItem(scoping);
-		tab->AddItem(misc);
+		tab->AddItem(vehicles);
+		tab->AddItem(equipment);
+		tab->AddItem(intel);
+		tab->AddItem(config);
 		tab->AddItem(action);
 
 		return tab;

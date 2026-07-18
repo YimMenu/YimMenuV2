@@ -15,7 +15,7 @@ namespace YimMenu::Submenus
 
 		auto config    = std::make_shared<Group>("Heist Config", 2);
 		auto shortcuts = std::make_shared<Group>("Shortcuts", 2);
-		auto laser     = std::make_shared<Group>("Laser Room", 1);
+		auto laser     = std::make_shared<Group>("Teleport", 1);
 		auto action    = std::make_shared<Group>("", 1);
 
 		target->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistprimarytarget"_J));
@@ -59,9 +59,10 @@ namespace YimMenu::Submenus
 		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
 		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
 
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpfirst"_J));
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpsecond"_J));
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpthird"_J));
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpinsidepressurization"_J));
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpcctv"_J));
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttplasers"_J));
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttplobbystairs"_J));
 
 		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J));
 

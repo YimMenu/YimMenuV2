@@ -4,12 +4,13 @@ namespace YimMenu::Submenus
 {
 	std::shared_ptr<TabItem> RenderKortzCenterHeistMenu()
 	{
-		auto tab = std::make_shared<TabItem>("Kortz Center Heist");
+		auto tab   = std::make_shared<TabItem>("Kortz Center Heist");
 
 		auto target    = std::make_shared<Group>("Primary Target", 1);
 		auto general   = std::make_shared<Group>("General", 2);
 		auto preps     = std::make_shared<Group>("Prep Work", 2);
 		auto scoping   = std::make_shared<Group>("Scoping", 2);
+		auto misc      = std::make_shared<Group>("Misc", 2);
 		auto action    = std::make_shared<Group>("", 1);
 
 		target->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistprimarytarget"_J));
@@ -35,16 +36,28 @@ namespace YimMenu::Submenus
 		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistguardroutesprep"_J));
 		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistglasscutterprep"_J));
 		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistpowerdrillsprep"_J));
+		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistempchargesprep"_J));
+		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistcaracaraprep"_J));
+		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilatorprep"_J));
+		preps->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchezprep"_J));
 
 		scoping->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopesecondary"_J));
 		scoping->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopepoi"_J));
 
-		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J, "Setup##kortz"));
+		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
+		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
+		misc->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistkeyloc"_J));
+		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetkeyloc"_J));
+		misc->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistseed"_J));
+		misc->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetseed"_J));
+
+		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J));
 
 		tab->AddItem(target);
 		tab->AddItem(general);
 		tab->AddItem(preps);
 		tab->AddItem(scoping);
+		tab->AddItem(misc);
 		tab->AddItem(action);
 
 		return tab;

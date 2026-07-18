@@ -1,6 +1,7 @@
 #include "core/commands/Command.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/ListCommand.hpp"
+#include "core/commands/IntCommand.hpp"
 #include "game/gta/Stats.hpp"
 
 namespace YimMenu::Features
@@ -67,6 +68,71 @@ namespace YimMenu::Features
 		static BoolCommand _KortzCenterScopeSecondary{"kortzcenterheistscopesecondary", "Secondary Targets", "Scope secondary targets", true};
 		static BoolCommand _KortzCenterScopePOI{"kortzcenterheistscopepoi", "Points of Interest", "Scope points of interest", true};
 
+		// --- Cooldown Resets ---
+		class ResetCooldown : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Stats::SetInt("MPX_K26_HEIST_COOLDOWN", 0);
+			}
+		};
+
+		class ResetCooldownHard : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Stats::SetInt("MPX_K26_HEIST_COOLDOWN_HARD", 0);
+			}
+		};
+
+		// --- Manhole Key Location ---
+		static std::vector<std::pair<int, const char*>> manholeKeyLocs = {
+		    {0,  "Random"},
+		    {1,  "Garage A"},
+		    {2,  "Garage B"},
+		    {3,  "Garage C"},
+		    {4,  "Office Desk"},
+		    {5,  "Security Room"},
+		    {6,  "Cafeteria"},
+		    {7,  "Maintenance"},
+		    {8,  "Parking L2"},
+		    {9,  "Parking L3"},
+		    {10, "Rooftop"},
+		    {11, "Alley Trash"},
+		    {12, "Construction"},
+		    {13, "Subway"},
+		    {14, "Bus Stop"},
+		    {15, "Street Drain"}
+		};
+		static ListCommand _KortzCenterKeyLoc{"kortzcenterheistkeyloc", "Manhole Key", "Manhole key location", manholeKeyLocs, 0};
+
+		class SetKeyLoc : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Stats::SetInt("MPX_K26_MANHOLE_KEY_LOC", _KortzCenterKeyLoc.GetState());
+			}
+		};
+
+		// --- Secondary Loot Seed ---
+		static IntCommand _KortzCenterSeed{"kortzcenterheistseed", "Loot Seed", "Seed for secondary loot value", 0, 9999, 0};
+
+		class SetSeed : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Stats::SetInt("MPX_K26_HEIST_SEED", _KortzCenterSeed.GetState());
+			}
+		};
+
 		// --- Setup ---
 		class Setup : public Command
 		{
@@ -115,5 +181,11 @@ namespace YimMenu::Features
 		};
 
 		static Setup _KortzCenterSetup{"kortzcenterheistsetup", "Setup", "Sets up Kortz Center heist"};
+
+		// Static instances for new commands
+		static ResetCooldown _KortzCenterResetCooldown{"kortzcenterheistresetcd", "Reset Cooldown", "Resets the normal heist cooldown"};
+		static ResetCooldownHard _KortzCenterResetCooldownHard{"kortzcenterheistresethardcd", "Reset Hard Cooldown", "Resets the hard mode cooldown"};
+		static SetKeyLoc _KortzCenterSetKeyLoc{"kortzcenterheistsetkeyloc", "Set Key Location", "Sets the manhole key location"};
+		static SetSeed _KortzCenterSetSeed{"kortzcenterheistsetseed", "Set Loot Seed", "Sets the secondary loot seed value"};
 	}
 }

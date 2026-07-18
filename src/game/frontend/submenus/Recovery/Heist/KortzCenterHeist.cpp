@@ -14,6 +14,8 @@ namespace YimMenu::Submenus
 		auto intel     = std::make_shared<CollapsingHeaderItem>("Intel");
 
 		auto config    = std::make_shared<Group>("Heist Config", 2);
+		auto shortcuts = std::make_shared<Group>("Shortcuts", 2);
+		auto laser     = std::make_shared<Group>("Laser Room", 1);
 		auto action    = std::make_shared<Group>("", 1);
 
 		target->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistprimarytarget"_J));
@@ -23,7 +25,6 @@ namespace YimMenu::Submenus
 		general->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistpowerdrills"_J));
 		general->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistempcharges"_J));
 
-		// Vehicles
 		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistcaracara"_J));
 		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilator"_J));
 		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchez"_J));
@@ -31,7 +32,6 @@ namespace YimMenu::Submenus
 		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistannihilatorprep"_J));
 		vehicles->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistmanchezprep"_J));
 
-		// Equipment
 		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisthazmat"_J));
 		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheiststaffkeycard"_J));
 		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheisttacticalequip"_J));
@@ -45,7 +45,6 @@ namespace YimMenu::Submenus
 		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistpowerdrillsprep"_J));
 		equipment->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistempchargesprep"_J));
 
-		// Intel
 		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopeout"_J));
 		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistalphamail"_J));
 		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopesecondary"_J));
@@ -53,10 +52,16 @@ namespace YimMenu::Submenus
 
 		config->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistkeyloc"_J));
 		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetkeyloc"_J));
-		config->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistseed"_J));
+		config->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistseed"_J, "Loot Seed (Exp.)"));
 		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetseed"_J));
-		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
-		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
+
+		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistmaxloot"_J));
+		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
+		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
+
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpfirst"_J));
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpsecond"_J));
+		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpthird"_J));
 
 		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J));
 
@@ -66,6 +71,8 @@ namespace YimMenu::Submenus
 		tab->AddItem(equipment);
 		tab->AddItem(intel);
 		tab->AddItem(config);
+		tab->AddItem(shortcuts);
+		tab->AddItem(laser);
 		tab->AddItem(action);
 
 		return tab;

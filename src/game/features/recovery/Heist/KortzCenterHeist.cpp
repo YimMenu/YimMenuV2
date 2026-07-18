@@ -3,6 +3,8 @@
 #include "core/commands/ListCommand.hpp"
 #include "core/commands/IntCommand.hpp"
 #include "game/gta/Stats.hpp"
+#include "game/gta/ScriptGlobal.hpp"
+#include "game/backend/Self.hpp"
 
 namespace YimMenu::Features
 {
@@ -124,7 +126,7 @@ namespace YimMenu::Features
 		};
 
 		// --- Secondary Loot Seed ---
-		static IntCommand _KortzCenterSeed{"kortzcenterheistseed", "Loot Seed", "Seed for secondary loot value", 0, 9999, 0};
+		static IntCommand _KortzCenterSeed{"kortzcenterheistseed", "Loot Seed (Exp.)", "Seed for secondary loot value. Experimental — exact mapping to payout table unknown", 0, 9999, 0};
 
 		class SetSeed : public Command
 		{
@@ -133,6 +135,23 @@ namespace YimMenu::Features
 			virtual void OnCall() override
 			{
 				Stats::SetInt("MPX_K26_HEIST_SEED", _KortzCenterSeed.GetState());
+			}
+		};
+
+		// --- Max Secondary Loot (Exhibit Level 2) ---
+		class MaxSecondaryLoot : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				auto base = ScriptGlobal(4980736).At(29174);
+				int slots[] = {0, 1, 5, 6, 7, 20, 21};
+				for (int i : slots)
+				{
+					*base.At(68 + i * 333).As<int*>() = 0;
+					*base.At(143 + i * 333).As<int*>() = 0;
+				}
 			}
 		};
 
@@ -190,5 +209,44 @@ namespace YimMenu::Features
 		static ResetCooldownHard _KortzCenterResetCooldownHard{"kortzcenterheistresethardcd", "Reset Hard Cooldown", "Resets the hard mode cooldown"};
 		static SetKeyLoc _KortzCenterSetKeyLoc{"kortzcenterheistsetkeyloc", "Set Key Location", "Sets the manhole key location"};
 		static SetSeed _KortzCenterSetSeed{"kortzcenterheistsetseed", "Set Loot Seed", "Sets the secondary loot seed value"};
+		static MaxSecondaryLoot _KortzCenterMaxLoot{"kortzcenterheistmaxloot", "Max Secondary Loot", "Forces all Exhibit 2 slots to premium loot (gold/paintings)"};
+
+		// --- Laser Room Teleports ---
+		class TpLaserRoomFirst : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Self::GetPed().TeleportTo({2636.839f, 5881.282f, -60.961f});
+				Self::GetPed().SetHeading(268.189f);
+			}
+		};
+
+		class TpLaserRoomSecond : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Self::GetPed().TeleportTo({2625.413f, 5874.693f, -60.960f});
+				Self::GetPed().SetHeading(88.189f);
+			}
+		};
+
+		class TpLaserRoomThird : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				Self::GetPed().TeleportTo({2637.002f, 5862.771f, -61.000f});
+				Self::GetPed().SetHeading(265.355f);
+			}
+		};
+
+		static TpLaserRoomFirst _KortzCenterTpFirst{"kortzcenterheisttpfirst", "TP: Laser Room 1", "Teleport to the first laser room position"};
+		static TpLaserRoomSecond _KortzCenterTpSecond{"kortzcenterheisttpsecond", "TP: Laser Room 2", "Teleport to the second laser room position"};
+		static TpLaserRoomThird _KortzCenterTpThird{"kortzcenterheisttpthird", "TP: Laser Room 3", "Teleport to the third laser room position"};
 	}
 }

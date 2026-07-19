@@ -246,56 +246,6 @@ namespace YimMenu::Features
 			}
 		};
 
-		// --- Teleports ---
-		class TpInsidePc : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Self::GetPed().TeleportTo({2627.885f, 5901.763f, -61.000f});
-				Self::GetPed().SetHeading(35.533f);
-			}
-		};
-
-		class TpCctv : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Self::GetPed().TeleportTo({2626.061f, 5907.711f, -61.000f});
-				Self::GetPed().SetHeading(151.094f);
-			}
-		};
-
-		class TpLasers : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Self::GetPed().TeleportTo({2636.805f, 5861.361f, -61.000f});
-				Self::GetPed().SetHeading(264.316f);
-			}
-		};
-
-		class TpLobbyStairs : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Self::GetPed().TeleportTo({2598.052f, 5930.553f, -60.805f});
-				Self::GetPed().SetHeading(125.705f);
-			}
-		};
-
-		static TpInsidePc _KortzCenterTpInsidePc{"kortzcenterheisttpinsidepressurization", "TP: Inside PC", "Teleport inside the computer room"};
-		static TpCctv _KortzCenterTpCctv{"kortzcenterheisttpcctv", "TP: CCTV", "Teleport to the CCTV room"};
-		static TpLasers _KortzCenterTpLasers{"kortzcenterheisttplasers", "TP: Lasers", "Teleport past last laser grid"};
-		static TpLobbyStairs _KortzCenterTpLobbyStairs{"kortzcenterheisttplobbystairs", "TP: Lobby Stairs", "Teleport to lobby stairs (skip hack)"};
-
 		class SetPaintingValue : public Command
 		{
 			using Command::Command;

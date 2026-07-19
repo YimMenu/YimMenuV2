@@ -44,6 +44,7 @@ namespace YimMenu::Features
 		    {26, "Mi O Melee"}
 		};
 		static ListCommand _KortzCenterPrimaryTarget{"kortzcenterheistprimarytarget", "Primary Target", "Primary target", kortzCenterTargets, 0};
+		static IntCommand _KortzCenterPaintingValue{"kortzcenterheistpaintingvalue", "Painting Value", "Value to set for the selected painting target", 0, 9999999, 0};
 
 		// --- General Purchases (MPX_K26_GENERAL_BS bits 5-8) ---
 		static BoolCommand _KortzCenterGuardRoutes{"kortzcenterheistguardroutes", "Guard Routes", "Guard routes purchased", true};
@@ -151,6 +152,8 @@ namespace YimMenu::Features
 		};
 
 		class TakeSecondaryTarget : public Command
+		static SetPaintingValue _KortzCenterSetPaintingValue{"kortzcenterheistsetpaintingvalue", "Set Painting Value", "Sets the payout value for the currently selected primary target"};
+		static SetFirstSaleMultiplier _KortzCenterSetFirstSaleMult{"kortzcenterheistsetfirstsalemult", "Set Multiplier", "Sets the first sale of the week multiplier"};
 		{
 			using Command::Command;
 
@@ -226,6 +229,8 @@ namespace YimMenu::Features
 			}
 		};
 
+		static FloatCommand _KortzCenterFirstSaleMult{"kortzcenterheistfirstsalemult", "First Sale Multiplier", "First sale of the week multiplier (float)", 0.0f, 100.0f, 4.0f};
+
 		// --- Max Secondary Loot (Exhibit Level 2) ---
 		class MaxSecondaryLoot : public Command
 		{
@@ -293,6 +298,27 @@ namespace YimMenu::Features
 		static TpLasers _KortzCenterTpLasers{"kortzcenterheisttplasers", "TP: Lasers", "Teleport past last laser grid"};
 		static TpLobbyStairs _KortzCenterTpLobbyStairs{"kortzcenterheisttplobbystairs", "TP: Lobby Stairs", "Teleport to lobby stairs (skip hack)"};
 
+		class SetPaintingValue : public Command
+		{
+			using Command::Command;
+	
+			virtual void OnCall() override
+			{
+				int targetIdx = _KortzCenterPrimaryTarget.GetState();
+				*ScriptGlobal(262145).At(38004).At(targetIdx + 1).As<int*>() = _KortzCenterPaintingValue.GetState();
+			}
+		};
+	
+		class SetFirstSaleMultiplier : public Command
+		{
+			using Command::Command;
+	
+			virtual void OnCall() override
+			{
+				*ScriptGlobal(262145).At(38199).As<float*>() = _KortzCenterFirstSaleMult.GetState();
+			}
+		};
+	
 		// --- Setup ---
 		// GENERAL_BS: -1 (all bits set), clear unchecked bits
 		// ROBBERY_PROG: -1, clear unchecked bits
@@ -357,5 +383,7 @@ namespace YimMenu::Features
 		static DisableLaserGrid _KortzCenterDisableLaser{"kortzcenterheistdisablelaser", "Disable Laser Grid", "Disables laser security grid"};
 		static TakePrimaryTarget _KortzCenterTakePrimary{"kortzcenterheisttakeprimary", "Take Primary Target", "Takes primary target painting (stand near it)"};
 		static TakeSecondaryTarget _KortzCenterTakeSecondary{"kortzcenterheisttakesecondary", "Take Secondary Target", "Takes secondary loot (stand near it)"};
+		static SetPaintingValue _KortzCenterSetPaintingValue{"kortzcenterheistsetpaintingvalue", "Set Painting Value", "Sets the payout value for the currently selected primary target"};
+		static SetFirstSaleMultiplier _KortzCenterSetFirstSaleMult{"kortzcenterheistsetfirstsalemult", "Set Multiplier", "Sets the first sale of the week multiplier"};
 	}
 }

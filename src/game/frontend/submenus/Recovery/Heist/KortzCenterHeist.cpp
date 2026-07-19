@@ -59,9 +59,9 @@ namespace YimMenu::Submenus
 
 		auto payouts = std::make_shared<Group>("Payouts", 2);
 
-		payouts->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistpaintingvalue"_J));
+		payouts->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistpaintingvalue"_J, std::nullopt, false));
 		payouts->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetpaintingvalue"_J, "Set##paintval"));
-		payouts->AddItem(std::make_shared<FloatCommandItem>("kortzcenterheistfirstsalemult"_J));
+		payouts->AddItem(std::make_shared<FloatCommandItem>("kortzcenterheistfirstsalemult"_J, std::nullopt, false));
 		payouts->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetfirstsalemult"_J, "Set##mult"));
 
 		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J));

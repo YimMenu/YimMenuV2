@@ -160,7 +160,7 @@ namespace YimMenu
 
 	private:
 		std::string m_Name;
-		int m_ItemsPerRow;
+		int m_ItemsPerColumn;
 		std::vector<std::shared_ptr<UIItem>> m_Items;
 	};
 

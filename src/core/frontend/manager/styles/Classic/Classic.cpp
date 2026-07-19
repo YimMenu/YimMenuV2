@@ -17,7 +17,7 @@ namespace YimMenu
 		ImGui::SetNextWindowSize(windowSize, ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_FirstUseEver);
 
-		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse;
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse;
 		auto pos = ImGui::GetCursorPos();
 		if(ImGui::Begin("##ClassicInputWindow", nullptr, flags))
 		{
@@ -42,7 +42,7 @@ namespace YimMenu
 			pos.y -= 28;
 			ImGui::SetCursorPos(ImVec2(pos.x + 130, pos.y));
 
-			if (ImGui::BeginChild("##minisubmenus", ImVec2(0, 50), true, ImGuiWindowFlags_NoScrollbar))
+			if (ImGui::BeginChild("##minisubmenus", ImVec2(0, 50), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
 			{
 				auto activeSubmenu = YimMenu::UIManager::GetActiveSubmenu();
 				if (activeSubmenu)

@@ -305,7 +305,7 @@ namespace YimMenu
 				auto garageOffset = GetPropertyGarageOffset(propertyIterator);
 				for (int garageSlotIterator = 1; garageSlotIterator <= garageSize; garageSlotIterator++)
 				{
-					auto itemInSlot = *ScriptGlobal(1944744).At(garageOffset).At(garageSlotIterator).As<int*>() - 1;
+					auto itemInSlot = *ScriptGlobal(1945138).At(garageOffset).At(garageSlotIterator).As<int*>() - 1;
 					if (itemInSlot == m_Id)
 					{
 						auto staticPropertyString = GetStaticPropertyName(propertyIterator, garageSlotIterator);
@@ -380,7 +380,7 @@ namespace YimMenu
 
 			ScriptMgr::Yield(100ms);
 
-			*ScriptLocal("freemode"_J, 19633).At(176).As<int*>() = 0;
+			*ScriptLocal("freemode"_J, 19672).At(176).As<int*>() = 0;
 
 			if (bring)
 			{

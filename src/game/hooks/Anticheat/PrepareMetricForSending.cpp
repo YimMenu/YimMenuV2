@@ -3,7 +3,7 @@
 
 namespace YimMenu::Hooks
 {
-	bool Anticheat::PrepareMetricForSending(rage::JsonSerializer* ser, void* a2, void* a3, rage::rlMetric* metric)
+	bool Anticheat::PrepareMetricForSending(rage::JsonSerializer* ser, bool* failed, char* a3, uint64_t time, rage::rlMetric* metric)
 	{
 		return false; // don't send any telemetry
 	}

@@ -93,8 +93,8 @@ namespace YimMenu::Submenus
 	{
 		if (event == ARMOURED_TRUCK) // It doesn't have tunables
 		{
-			setCooldown = *ScriptGlobal(262145).At(33807).As<int*>();
-			setAvailability = *ScriptGlobal(262145).At(33808).As<int*>();
+			setCooldown = *ScriptGlobal(262145).At(33808).As<int*>();
+			setAvailability = *ScriptGlobal(262145).At(33809).As<int*>();
 		}
 		else
 		{
@@ -144,6 +144,7 @@ namespace YimMenu::Submenus
 		{
 			for (int event = DRUG_VEHICLE; event < MAX_EVENTS; event++)
 			{
+				// TODO: this can crash the game
 				sendUpdateRECoordsTSECooldownPatches.push_back(ScriptPatches::AddPatch(randomEventScripts[event], ScriptPointer("SendUpdateRECoordsTSECooldownPatch", "43 88 13 2E 00 01"), {0x71, 0x00, 0x00}));
 			}
 		}

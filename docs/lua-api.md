@@ -254,7 +254,7 @@ Pattern scanning and heap allocation. Returns [pointer](#pointer) objects.
 
 | Function | Description |
 | --- | --- |
-| `memory.scan_pattern(pattern) -> pointer \| nil` | Scans `GTA5.exe` for an IDA-format byte signature. |
+| `memory.scan_pattern(pattern) -> pointer \| nil` | Scans `GTA5_Enhanced.exe` for an IDA-format byte signature. |
 | `memory.handle_to_ptr(entity) -> pointer` | Resolves an entity handle to its game pointer. |
 | `memory.ptr_to_handle(ptr) -> integer` | Resolves a game pointer back to an entity handle. |
 | `memory.allocate(size) -> pointer` | Allocates `size` zeroed bytes (auto-freed on unload). |

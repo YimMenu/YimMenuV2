@@ -4,9 +4,7 @@
 #include "core/commands/ListCommand.hpp"
 #include "game/gta/Natives.hpp"
 #include "types/blip/BlipSprite.hpp"
-#include "types/script/HudColor.hpp"
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <format>
@@ -23,7 +21,6 @@ namespace YimMenu::Features::AutoDriveInternal
 	static constexpr int aggressive_driving_flags = 1074529087;
 	static constexpr int reckless_driving_style = 1074529086;
 	static constexpr float target_move_threshold_squared = 25.0f;
-	static constexpr std::array yellow_mission_blip_colours = {5, 16, 20, 28, 33, 60, 66};
 
 	static IntCommand _AutoDriveSpeed{
 	    "autodrivespeed",
@@ -146,7 +143,7 @@ namespace YimMenu::Features::AutoDriveInternal
 		switch (source)
 		{
 		case NavigationTargetSource::UserWaypoint: return 2;
-		case NavigationTargetSource::MissionObjective: return 1;
+		case NavigationTargetSource::GpsRoute: return 1;
 		default: return 0;
 		}
 	}
@@ -166,29 +163,9 @@ namespace YimMenu::Features::AutoDriveInternal
 		return true;
 	}
 
-	static bool IsYellowMissionColour(Blip blip)
+	static bool IsGpsRouteBlip(Blip blip)
 	{
-		const auto blipColour = HUD::GET_BLIP_COLOUR(blip);
-		if (std::find(
-		        yellow_mission_blip_colours.begin(),
-		        yellow_mission_blip_colours.end(),
-		        blipColour)
-		    != yellow_mission_blip_colours.end())
-			return true;
-
-		const auto hudColour = static_cast<HudColor>(HUD::GET_BLIP_HUD_COLOUR(blip));
-		return hudColour == HudColor::HUD_COLOUR_YELLOW
-		    || hudColour == HudColor::HUD_COLOUR_YELLOWLIGHT
-		    || hudColour == HudColor::HUD_COLOUR_YELLOWDARK
-		    || hudColour == HudColor::HUD_COLOUR_OBJECTIVE_ROUTE;
-	}
-
-	static bool IsMissionObjectiveBlip(Blip blip, BlipSprite sprite)
-	{
-		if (!HUD::DOES_BLIP_HAVE_GPS_ROUTE(blip))
-			return false;
-
-		return sprite == BlipSprite::RADAR_OBJECTIVE_YELLOW || IsYellowMissionColour(blip);
+		return HUD::DOES_BLIP_EXIST(blip) && HUD::DOES_BLIP_HAVE_GPS_ROUTE(blip);
 	}
 
 	static NavigationTargetSnapshot GetNavigationTargets(
@@ -199,58 +176,61 @@ namespace YimMenu::Features::AutoDriveInternal
 		NavigationTarget userWaypoint;
 		const auto hasUserWaypoint = TryGetUserWaypoint(userWaypoint);
 
-		static constexpr std::array missionSprites = {
+		static constexpr std::array gpsRouteSprites = {
 		    BlipSprite::RADAR_LEVEL,
 		    BlipSprite::RADAR_HIGHER,
 		    BlipSprite::RADAR_LOWER,
+		    BlipSprite::RADAR_OBJECTIVE_BLUE,
+		    BlipSprite::RADAR_OBJECTIVE_GREEN,
+		    BlipSprite::RADAR_OBJECTIVE_RED,
 		    BlipSprite::RADAR_OBJECTIVE_YELLOW};
 
-		NavigationTarget closestMissionTarget;
-		NavigationTarget replacementMissionTarget;
-		NavigationTarget exactMissionTarget;
-		float closestMissionDistanceSquared = std::numeric_limits<float>::max();
+		NavigationTarget closestGpsTarget;
+		NavigationTarget replacementGpsTarget;
+		NavigationTarget exactGpsTarget;
+		float closestGpsDistanceSquared = std::numeric_limits<float>::max();
 		float replacementDistanceSquared = std::numeric_limits<float>::max();
-		std::size_t closestMissionSpriteIndex = missionSprites.size();
-		std::size_t replacementSpriteIndex = missionSprites.size();
-		bool hasClosestMissionTarget = false;
-		bool hasReplacementMissionTarget = false;
-		bool hasExactMissionTarget = false;
+		std::size_t closestGpsSpriteIndex = gpsRouteSprites.size();
+		std::size_t replacementSpriteIndex = gpsRouteSprites.size();
+		bool hasClosestGpsTarget = false;
+		bool hasReplacementGpsTarget = false;
+		bool hasExactGpsTarget = false;
 
-		for (std::size_t spriteIndex = 0; spriteIndex < missionSprites.size(); ++spriteIndex)
+		for (std::size_t spriteIndex = 0; spriteIndex < gpsRouteSprites.size(); ++spriteIndex)
 		{
-			const auto sprite = missionSprites[spriteIndex];
+			const auto sprite = gpsRouteSprites[spriteIndex];
 			const auto spriteId = static_cast<int>(sprite);
 			for (auto blip = HUD::GET_FIRST_BLIP_INFO_ID(spriteId);
 			    HUD::DOES_BLIP_EXIST(blip);
 			    blip = HUD::GET_NEXT_BLIP_INFO_ID(spriteId))
 			{
-				if (!IsMissionObjectiveBlip(blip, sprite))
+				if (!IsGpsRouteBlip(blip))
 					continue;
 
 				NavigationTarget candidate{
-				    NavigationTargetSource::MissionObjective,
+				    NavigationTargetSource::GpsRoute,
 				    blip,
 				    HUD::GET_BLIP_COORDS(blip)};
 				const auto vehicleDistanceSquared = DistanceSquared2D(vehiclePosition, candidate.m_Position);
-				if (!hasClosestMissionTarget
-				    || vehicleDistanceSquared < closestMissionDistanceSquared
-				    || (vehicleDistanceSquared == closestMissionDistanceSquared
-				        && spriteIndex == closestMissionSpriteIndex
-				        && candidate.m_BlipHandle < closestMissionTarget.m_BlipHandle))
+				if (!hasClosestGpsTarget
+				    || vehicleDistanceSquared < closestGpsDistanceSquared
+				    || (vehicleDistanceSquared == closestGpsDistanceSquared
+				        && spriteIndex == closestGpsSpriteIndex
+				        && candidate.m_BlipHandle < closestGpsTarget.m_BlipHandle))
 				{
-					closestMissionTarget = candidate;
-					closestMissionDistanceSquared = vehicleDistanceSquared;
-					closestMissionSpriteIndex = spriteIndex;
-					hasClosestMissionTarget = true;
+					closestGpsTarget = candidate;
+					closestGpsDistanceSquared = vehicleDistanceSquared;
+					closestGpsSpriteIndex = spriteIndex;
+					hasClosestGpsTarget = true;
 				}
 
-				if (trackedTarget.m_Source != NavigationTargetSource::MissionObjective)
+				if (trackedTarget.m_Source != NavigationTargetSource::GpsRoute)
 					continue;
 
 				if (candidate.m_BlipHandle == trackedTarget.m_BlipHandle)
 				{
-					exactMissionTarget = candidate;
-					hasExactMissionTarget = true;
+					exactGpsTarget = candidate;
+					hasExactGpsTarget = true;
 					continue;
 				}
 
@@ -258,16 +238,16 @@ namespace YimMenu::Features::AutoDriveInternal
 				    trackedTarget.m_Position,
 				    candidate.m_Position);
 				if (replacementDistance <= target_move_threshold_squared
-				    && (!hasReplacementMissionTarget
+				    && (!hasReplacementGpsTarget
 				        || replacementDistance < replacementDistanceSquared
 				        || (replacementDistance == replacementDistanceSquared
 				            && spriteIndex == replacementSpriteIndex
-				            && candidate.m_BlipHandle < replacementMissionTarget.m_BlipHandle)))
+				            && candidate.m_BlipHandle < replacementGpsTarget.m_BlipHandle)))
 				{
-					replacementMissionTarget = candidate;
+					replacementGpsTarget = candidate;
 					replacementDistanceSquared = replacementDistance;
 					replacementSpriteIndex = spriteIndex;
-					hasReplacementMissionTarget = true;
+					hasReplacementGpsTarget = true;
 				}
 			}
 		}
@@ -277,17 +257,17 @@ namespace YimMenu::Features::AutoDriveInternal
 			snapshot.m_HasTrackedTarget = true;
 			snapshot.m_TrackedTarget = userWaypoint;
 		}
-		else if (trackedTarget.m_Source == NavigationTargetSource::MissionObjective)
+		else if (trackedTarget.m_Source == NavigationTargetSource::GpsRoute)
 		{
-			if (hasExactMissionTarget)
+			if (hasExactGpsTarget)
 			{
 				snapshot.m_HasTrackedTarget = true;
-				snapshot.m_TrackedTarget = exactMissionTarget;
+				snapshot.m_TrackedTarget = exactGpsTarget;
 			}
-			else if (hasReplacementMissionTarget)
+			else if (hasReplacementGpsTarget)
 			{
 				snapshot.m_HasTrackedTarget = true;
-				snapshot.m_TrackedTarget = replacementMissionTarget;
+				snapshot.m_TrackedTarget = replacementGpsTarget;
 			}
 		}
 
@@ -296,16 +276,16 @@ namespace YimMenu::Features::AutoDriveInternal
 			snapshot.m_HasPreferredTarget = true;
 			snapshot.m_PreferredTarget = userWaypoint;
 		}
-		else if (trackedTarget.m_Source == NavigationTargetSource::MissionObjective
+		else if (trackedTarget.m_Source == NavigationTargetSource::GpsRoute
 		    && snapshot.m_HasTrackedTarget)
 		{
 			snapshot.m_HasPreferredTarget = true;
 			snapshot.m_PreferredTarget = snapshot.m_TrackedTarget;
 		}
-		else if (hasClosestMissionTarget)
+		else if (hasClosestGpsTarget)
 		{
 			snapshot.m_HasPreferredTarget = true;
-			snapshot.m_PreferredTarget = closestMissionTarget;
+			snapshot.m_PreferredTarget = closestGpsTarget;
 		}
 
 		return snapshot;

@@ -51,7 +51,7 @@ namespace YimMenu::Features::AutoDriveInternal
 	{
 		None,
 		UserWaypoint,
-		MissionObjective
+		GpsRoute
 	};
 
 	enum class RoutePhase

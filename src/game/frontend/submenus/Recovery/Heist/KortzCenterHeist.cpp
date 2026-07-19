@@ -13,9 +13,6 @@ namespace YimMenu::Submenus
 		auto equipment = std::make_shared<CollapsingHeaderItem>("Equipment");
 		auto intel     = std::make_shared<CollapsingHeaderItem>("Intel");
 
-		auto config    = std::make_shared<Group>("Heist Config", 2);
-		auto shortcuts = std::make_shared<Group>("Shortcuts", 2);
-		auto laser     = std::make_shared<Group>("Teleport", 1);
 		auto action    = std::make_shared<Group>("", 1);
 
 		target->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistprimarytarget"_J));
@@ -50,19 +47,22 @@ namespace YimMenu::Submenus
 		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopesecondary"_J));
 		intel->AddItem(std::make_shared<BoolCommandItem>("kortzcenterheistscopepoi"_J));
 
-		config->AddItem(std::make_shared<ListCommandItem>("kortzcenterheistkeyloc"_J));
-		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetkeyloc"_J));
-		config->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistseed"_J, "Loot Seed (Exp.)"));
-		config->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetseed"_J));
+		auto inHeist = std::make_shared<Group>("In-Heist", 2);
 
-		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistmaxloot"_J));
-		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistresetcd"_J));
-		shortcuts->AddItem(std::make_shared<CommandItem>("kortzcenterheistresethardcd"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheistskipfingerprint"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheistskipsignalnodes"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheistskipdatacrack"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheistcutglass"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheistdisablelaser"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheisttakeprimary"_J));
+		inHeist->AddItem(std::make_shared<CommandItem>("kortzcenterheisttakesecondary"_J));
 
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpinsidepressurization"_J));
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttpcctv"_J));
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttplasers"_J));
-		laser->AddItem(std::make_shared<CommandItem>("kortzcenterheisttplobbystairs"_J));
+		auto payouts = std::make_shared<Group>("Payouts", 2);
+
+		payouts->AddItem(std::make_shared<IntCommandItem>("kortzcenterheistpaintingvalue"_J));
+		payouts->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetpaintingvalue"_J, "Set##paintval"));
+		payouts->AddItem(std::make_shared<FloatCommandItem>("kortzcenterheistfirstsalemult"_J));
+		payouts->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetfirstsalemult"_J, "Set##mult"));
 
 		action->AddItem(std::make_shared<CommandItem>("kortzcenterheistsetup"_J));
 
@@ -71,9 +71,8 @@ namespace YimMenu::Submenus
 		tab->AddItem(vehicles);
 		tab->AddItem(equipment);
 		tab->AddItem(intel);
-		tab->AddItem(config);
-		tab->AddItem(shortcuts);
-		tab->AddItem(laser);
+		tab->AddItem(inHeist);
+		tab->AddItem(payouts);
 		tab->AddItem(action);
 
 		return tab;

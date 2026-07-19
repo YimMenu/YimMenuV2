@@ -152,8 +152,6 @@ namespace YimMenu::Features
 		};
 
 		class TakeSecondaryTarget : public Command
-		static SetPaintingValue _KortzCenterSetPaintingValue{"kortzcenterheistsetpaintingvalue", "Set Painting Value", "Sets the payout value for the currently selected primary target"};
-		static SetFirstSaleMultiplier _KortzCenterSetFirstSaleMult{"kortzcenterheistsetfirstsalemult", "Set Multiplier", "Sets the first sale of the week multiplier"};
 		{
 			using Command::Command;
 

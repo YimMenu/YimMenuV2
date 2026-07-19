@@ -162,115 +162,30 @@ namespace YimMenu::Features
 			}
 		};
 
-		// --- Cooldown Resets ---
-		class ResetCooldown : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Stats::SetInt("MPX_K26_HEIST_COOLDOWN", 0);
-			}
-		};
-
-		class ResetCooldownHard : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Stats::SetInt("MPX_K26_HEIST_COOLDOWN_HARD", 0);
-			}
-		};
-
-		// --- Manhole Key Location ---
-		static std::vector<std::pair<int, const char*>> manholeKeyLocs = {
-		    {0,  "Random"},
-		    {1,  "Garage A"},
-		    {2,  "Garage B"},
-		    {3,  "Garage C"},
-		    {4,  "Office Desk"},
-		    {5,  "Security Room"},
-		    {6,  "Cafeteria"},
-		    {7,  "Maintenance"},
-		    {8,  "Parking L2"},
-		    {9,  "Parking L3"},
-		    {10, "Rooftop"},
-		    {11, "Alley Trash"},
-		    {12, "Construction"},
-		    {13, "Subway"},
-		    {14, "Bus Stop"},
-		    {15, "Street Drain"}
-		};
-		static ListCommand _KortzCenterKeyLoc{"kortzcenterheistkeyloc", "Manhole Key", "Manhole key location", manholeKeyLocs, 0};
-
-		class SetKeyLoc : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Stats::SetInt("MPX_K26_MANHOLE_KEY_LOC", _KortzCenterKeyLoc.GetState());
-			}
-		};
-
-		// --- Secondary Loot Seed ---
-		static IntCommand _KortzCenterSeed{"kortzcenterheistseed", "Loot Seed (Exp.)", "Seed for secondary loot value. Experimental — exact mapping to payout table unknown", 0, 9999, 0};
-
-		class SetSeed : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				Stats::SetInt("MPX_K26_HEIST_SEED", _KortzCenterSeed.GetState());
-			}
-		};
-
 		static FloatCommand _KortzCenterFirstSaleMult{"kortzcenterheistfirstsalemult", "First Sale Multiplier", "First sale of the week multiplier (float)", 0.0f, 100.0f, 4.0f};
-
-		// --- Max Secondary Loot (Exhibit Level 2) ---
-		class MaxSecondaryLoot : public Command
-		{
-			using Command::Command;
-
-			virtual void OnCall() override
-			{
-				auto base = ScriptGlobal(4980736).At(29174);
-				int slots[] = {0, 1, 5, 6, 7, 20, 21};
-				for (int i : slots)
-				{
-					*base.At(68 + i * 333).As<int*>() = 0;
-					*base.At(143 + i * 333).As<int*>() = 0;
-				}
-			}
-		};
 
 		class SetPaintingValue : public Command
 		{
 			using Command::Command;
-	
+
 			virtual void OnCall() override
 			{
 				int targetIdx = _KortzCenterPrimaryTarget.GetState();
 				*ScriptGlobal(262145).At(38004).At(targetIdx + 1).As<int*>() = _KortzCenterPaintingValue.GetState();
 			}
 		};
-	
+
 		class SetFirstSaleMultiplier : public Command
 		{
 			using Command::Command;
-	
+
 			virtual void OnCall() override
 			{
 				*ScriptGlobal(262145).At(38199).As<float*>() = _KortzCenterFirstSaleMult.GetState();
 			}
 		};
-	
+
 		// --- Setup ---
-		// GENERAL_BS: -1 (all bits set), clear unchecked bits
-		// ROBBERY_PROG: -1, clear unchecked bits
-		// SCOPING_BS, POI_BS: all/nothing
 		class Setup : public Command
 		{
 			using Command::Command;
@@ -316,13 +231,6 @@ namespace YimMenu::Features
 				Stats::SetInt("MPX_K26_HEIST_TARGET", _KortzCenterPrimaryTarget.GetState());
 			}
 		};
-
-		static Setup _KortzCenterSetup{"kortzcenterheistsetup", "Setup", "Sets up Kortz Center heist"};
-		static ResetCooldown _KortzCenterResetCooldown{"kortzcenterheistresetcd", "Reset Cooldown", "Resets the normal heist cooldown"};
-		static ResetCooldownHard _KortzCenterResetCooldownHard{"kortzcenterheistresethardcd", "Reset Hard Cooldown", "Resets the hard mode cooldown"};
-		static SetKeyLoc _KortzCenterSetKeyLoc{"kortzcenterheistsetkeyloc", "Set Key Location", "Sets the manhole key location"};
-		static SetSeed _KortzCenterSetSeed{"kortzcenterheistsetseed", "Set Loot Seed", "Sets the secondary loot seed value"};
-		static MaxSecondaryLoot _KortzCenterMaxLoot{"kortzcenterheistmaxloot", "Max Secondary Loot", "Forces all Exhibit 2 slots to premium loot (gold/paintings)"};
 
 		static SkipFingerprint _KortzCenterSkipFingerprint{"kortzcenterheistskipfingerprint", "Skip Fingerprint Hack", "Skips fingerprint hacking minigame in computer room"};
 		static SkipSignalNodes _KortzCenterSkipSignalNodes{"kortzcenterheistskipsignalnodes", "Skip Signal Nodes", "Skips signal nodes hacking at vault keypad"};

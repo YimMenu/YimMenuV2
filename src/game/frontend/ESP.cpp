@@ -50,16 +50,25 @@ namespace
 	constexpr int headBone = 31086;
 	constexpr int neckBone = 39317;
 	constexpr int torsoBone = 23553;
-	constexpr int leftHandBone = 18905;
-	constexpr int rightHandBone = 57005;
-	constexpr int leftFootBone = 14201;
-	constexpr int rightFootBone = 52301;
-	constexpr int leftElbowBone = 22711;
-	constexpr int rightElbowBone = 2992;
+
+	// Руки
+	constexpr int leftUpperArmBone = 45509;  // Левое плечо (сустав)
+	constexpr int rightUpperArmBone = 40269; // Правое плечо (сустав)
+
+	constexpr int leftElbowBone = 61163;  // Левый локоть
+	constexpr int rightElbowBone = 28252; // Правый локоть
+
+	constexpr int leftHandBone = 18905;  // Левая кисть
+	constexpr int rightHandBone = 57005; // Правая кисть
+
 	constexpr int leftKneeBone = 46078;
 	constexpr int rightKneeBone = 16335;
-	constexpr int leftShoulderBone = 61163; // TODO verify all the bones
-	constexpr int rightShoulderBone = 28252;
+
+	constexpr int leftFootBone = 14201;
+	constexpr int rightFootBone = 52301;
+
+	constexpr int leftHipBone = 58271;
+	constexpr int rightHipBone = 51826;
 }
 
 namespace YimMenu::Features
@@ -154,25 +163,27 @@ namespace YimMenu
 		// Head and neck
 		DrawBone(headBone, neckBone);
 
-		// Left arm
-		DrawBone(neckBone, leftShoulderBone);
-		DrawBone(leftShoulderBone, leftElbowBone);
+		// Left arm (Шея -> Плечо -> Локоть -> Кисть)
+		DrawBone(neckBone, leftUpperArmBone);
+		DrawBone(leftUpperArmBone, leftElbowBone);
 		DrawBone(leftElbowBone, leftHandBone);
 
-		// Right arm
-		DrawBone(neckBone, rightShoulderBone);
-		DrawBone(rightShoulderBone, rightElbowBone);
+		// Right arm (Шея -> Плечо -> Локоть -> Кисть)
+		DrawBone(neckBone, rightUpperArmBone);
+		DrawBone(rightUpperArmBone, rightElbowBone);
 		DrawBone(rightElbowBone, rightHandBone);
 
 		// Torso
 		DrawBone(neckBone, torsoBone);
 
-		// Left leg
-		DrawBone(torsoBone, leftKneeBone);
+		// Left leg (Торс -> Бедро -> Колено -> Ступня)
+		DrawBone(torsoBone, leftHipBone);
+		DrawBone(leftHipBone, leftKneeBone);
 		DrawBone(leftKneeBone, leftFootBone);
 
-		// Right leg
-		DrawBone(torsoBone, rightKneeBone);
+		// Right leg (Торс -> Бедро -> Колено -> Ступня)
+		DrawBone(torsoBone, rightHipBone);
+		DrawBone(rightHipBone, rightKneeBone);
 		DrawBone(rightKneeBone, rightFootBone);
 	}
 

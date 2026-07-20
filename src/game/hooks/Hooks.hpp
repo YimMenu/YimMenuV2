@@ -46,7 +46,7 @@ namespace YimMenu::Hooks
 	{
 		extern void QueueDependency(__int64 a1);
 		extern void GameSkeletonUpdate(rage::gameSkeleton* skeleton, int type);
-		extern bool PrepareMetricForSending(rage::JsonSerializer* ser, void* a2, void* a3, rage::rlMetric* metric);
+		extern bool PrepareMetricForSending(rage::JsonSerializer* ser, bool* failed, char* a3, uint64_t time, rage::rlMetric* metric);
 		extern BOOL GetThreadContext(HANDLE hThread, LPCONTEXT lpContext);
 		extern void HttpStartRequest(void* request);
 		extern bool BattlEyeServerProcessPlayerJoin(CBattlEyePlayerModifyInterface* server_iface, CBattlEyePlayerModifyContext* context);

@@ -228,21 +228,10 @@ namespace YimMenu
 			IsBEBanned = ptr.Add(3).Rip().Add(8).Add(4).Add(8).Add(4).As<bool*>();
 		});
 
-#if 0
-		constexpr auto battlEyeStatusUpdatePatchPtrn = Pattern<"80 B9 92 0A 00 00 01 48 81 D1 90 0A 00 00">("BattlEyeStatusUpdatePatch");
+		constexpr auto battlEyeStatusUpdatePatchPtrn = Pattern<"C6 05 ? ? ? ? 00 84 C0 0F 84 ? ? ? ? E9">("BattlEyeStatusUpdatePatch");
 		scanner.Add(battlEyeStatusUpdatePatchPtrn, [this](PointerCalculator ptr) {
-			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.As<void*>(), 
-				// since arxan obfuscated this subroutine, return mid-function instead
-				// TODO: this might break in a later update
-				std::to_array<std::uint8_t>({
-					0x48, 0x83, 0xC4, 0x38, // add rsp, 38h
-					0x5F,                   // pop rdi
-					0x5E,                   // pop rsi
-					0xC3                    // ret
-				})
-			);
+			BattlEyeStatusUpdatePatch = BytePatches::Add(ptr.Add(11).Rip().Add(1).Rip().As<void*>(), std::to_array<std::uint8_t>({0xC3}));
 		});
-#endif
 
 		constexpr auto writeNetArrayDataPtrn = Pattern<"0F 84 06 03 00 00 0F B6 83">("WriteNetArrayData");
 		scanner.Add(writeNetArrayDataPtrn, [this](PointerCalculator ptr) {

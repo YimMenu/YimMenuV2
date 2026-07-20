@@ -13,7 +13,7 @@ namespace YimMenu::Submenus
 		general->AddItem(std::make_shared<PlayerCommandItem>("sendsext"_J));
 		general->AddItem(std::make_shared<PlayerCommandItem>("sendphantomcar"_J));
 		general->AddItem(std::make_shared<PlayerCommandItem>("sendgooch"_J));
-		general->AddItem(std::make_shared<PlayerCommandItem>("giveplayerallweapon"_J));
+		general->AddItem(std::make_shared<PlayerCommandItem>("giveweapons"_J));
 
 		bounty->AddItem(std::make_shared<IntCommandItem>("bountyamount"_J, "Amount"));
 		bounty->AddItem(std::make_shared<BoolCommandItem>("anonymousbounty"_J, "Anonymous"));

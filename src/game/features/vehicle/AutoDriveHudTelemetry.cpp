@@ -7,7 +7,7 @@
 
 #include <algorithm>
 #include <array>
-#include <atomic>
+#include <mutex>
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -184,7 +184,8 @@ namespace YimMenu::Features::AutoDriveInternal
 
 		class TelemetryService
 		{
-			std::atomic<std::shared_ptr<const AutoDriveHudSnapshot>> m_Published;
+			std::shared_ptr<const AutoDriveHudSnapshot> m_Published;
+		mutable std::mutex m_PublishedMtx;
 			SessionToken m_ActiveToken{};
 			std::vector<WorldEntity> m_Vehicles;
 			std::vector<WorldEntity> m_Peds;
@@ -703,7 +704,7 @@ namespace YimMenu::Features::AutoDriveInternal
 		public:
 			TelemetryService()
 			{
-				m_Published.store(std::make_shared<const AutoDriveHudSnapshot>());
+				{ std::lock_guard l(m_PublishedMtx); m_Published = std::make_shared<const AutoDriveHudSnapshot>(); }
 			}
 
 			void Update(SessionToken token, Ped driver, Vehicle vehicle, const RoadDriveStatus& status)
@@ -778,7 +779,7 @@ namespace YimMenu::Features::AutoDriveInternal
 				snapshot->m_CapturedAt = now;
 
 				m_LastPublish = now;
-				m_Published.store(std::move(snapshot), std::memory_order_release);
+				{ std::lock_guard l(m_PublishedMtx); m_Published = std::move(snapshot); }
 			}
 
 			void Clear(SessionToken token)
@@ -786,12 +787,12 @@ namespace YimMenu::Features::AutoDriveInternal
 				if (!SameToken(m_ActiveToken, token))
 					return;
 				ResetForToken({});
-				m_Published.store(std::make_shared<const AutoDriveHudSnapshot>(), std::memory_order_release);
+				{ std::lock_guard l(m_PublishedMtx); m_Published = std::make_shared<const AutoDriveHudSnapshot>(); }
 			}
 
 			std::shared_ptr<const AutoDriveHudSnapshot> GetSnapshot() const
 			{
-				return m_Published.load(std::memory_order_acquire);
+				{ std::lock_guard l(m_PublishedMtx); return m_Published; }
 			}
 		};
 

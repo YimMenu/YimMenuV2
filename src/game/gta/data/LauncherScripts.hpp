@@ -230,6 +230,11 @@ namespace YimMenu
 	    "fm_content_survival_grouping"_J,
 	    "fm_content_valentine_cheater"_J,
 	    "fm_content_survival"_J,
+	    "fm_content_kortz_scoping"_J,
+	    "fm_content_kortz_entry"_J,
+	    "fm_content_kortz_equipment"_J,
+	    "fm_content_kortz_disruption"_J,
+	    "fm_content_kortz_task"_J,
 	    "AM_BOAT_TAXI"_J,
 	    "AM_HELI_TAXI"_J,
 	    "fm_hold_up_tut"_J,
@@ -258,7 +263,7 @@ namespace YimMenu
 	    "fm_Bj_race_controler"_J,
 	    "fm_deathmatch_controler"_J,
 	    "fm_hideout_controler"_J,
-	    "fm_mission_controller_2020"_J, // Public_Mission_Controller, fm_mission_controller
+	    "fm_mission_controller_v3"_J, // Public_Mission_Controller/fm_mission_controller/fm_mission_controller_2020
 	    "FM_Race_Controler"_J,
 	    "FM_Horde_Controler"_J, // FM_Survival_Controller
 	    "dont_cross_the_line"_J,

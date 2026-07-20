@@ -70,8 +70,9 @@ struct FreemodeGeneral
 	STREET_DEALERS StreetDealers; // 5635
 	uint64_t PAD_5659[107];
 	DAILY_RESET_DATA DailyReset; // 5766
-	FREEMODE_DELIVERY_DATA DeliveryData; // 5770
+	uint64_t PAD_5670[4];
+	FREEMODE_DELIVERY_DATA DeliveryData; // 5774
 
 	static FreemodeGeneral* Get();
 };
-//static_assert(sizeof(FreemodeGeneral) == 6073 * 8);
+//static_assert(sizeof(FreemodeGeneral) == 6077 * 8);

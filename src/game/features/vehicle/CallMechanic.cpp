@@ -24,8 +24,8 @@ namespace YimMenu::Features
 
 			if (auto freemode = Scripts::FindScriptThread("freemode"_J))
 			{
-				auto data = ScriptLocal(freemode, 8819);
-				*data.At(3).As<int*>() = 230;
+				auto data = ScriptLocal(freemode, 8854);
+				*data.At(3).As<int*>() = 235;
 				*data.At(3).At(16).As<int*>() = Self::GetPlayer().GetId();
 				*data.At(3).At(1).As<int*>() = 89;
 				*data.At(2).As<int*>() = "AM_CONTACT_REQUESTS"_J;
@@ -35,8 +35,8 @@ namespace YimMenu::Features
 				{
 					if (auto thread = Scripts::FindScriptThreadByID(id))
 					{
-						*ScriptLocal(thread, 528).As<int*>() = 1;
-						ScriptGlobal(2686095).At(4357).At(260).At(7, 2).As<TIMER*>()->Destroy();
+						*ScriptLocal(thread, 535).As<int*>() = 1;
+						ScriptGlobal(2686124).At(4373).At(260).At(7, 2).As<TIMER*>()->Destroy();
 					}
 				}
 				else

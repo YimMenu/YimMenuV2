@@ -4,6 +4,9 @@
 #include "core/commands/IntCommand.hpp"
 #include "game/gta/Stats.hpp"
 #include "game/gta/ScriptGlobal.hpp"
+#include "game/gta/ScriptLocal.hpp"
+#include "game/gta/Scripts.hpp"
+#include "core/commands/FloatCommand.hpp"
 #include "game/backend/Self.hpp"
 
 namespace YimMenu::Features
@@ -73,6 +76,90 @@ namespace YimMenu::Features
 		// --- Scoping ---
 		static BoolCommand _KortzCenterScopeSecondary{"kortzcenterheistscopesecondary", "Secondary Targets", "Scope secondary targets", true};
 		static BoolCommand _KortzCenterScopePOI{"kortzcenterheistscopepoi", "Points of Interest", "Scope points of interest", true};
+
+		// --- In-Heist Shortcuts ---
+		class SkipFingerprint : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+					*ScriptLocal(thread, 26866).As<int*>() = 5;
+			}
+		};
+
+		class SkipSignalNodes : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+					*ScriptLocal(thread, 27914).As<int*>() = 5;
+			}
+		};
+
+		class SkipDataCrack : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+				{
+					for (int i = 0; i <= 7; i++)
+						*ScriptLocal(thread, 1388).At(i * 4).As<int*>() = 1;
+				}
+			}
+		};
+
+		class CutGlass : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+					*ScriptLocal(thread, 32855).At(4 * 13).At(3).As<float*>() = 100.0f;
+			}
+		};
+
+		class DisableLaserGrid : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+				{
+					*ScriptLocal(thread, 70416).As<int*>() = 4294784;
+					*ScriptGlobal(1935711).As<int*>() |= 1;
+				}
+			}
+		};
+
+		class TakePrimaryTarget : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+					*ScriptLocal(thread, 29355).At(11).As<int*>() = 10;
+			}
+		};
+
+		class TakeSecondaryTarget : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+					*ScriptLocal(thread, 29355).At(11).As<int*>() = 3;
+			}
+		};
 
 		// --- Cooldown Resets ---
 		class ResetCooldown : public Command
@@ -262,5 +349,13 @@ namespace YimMenu::Features
 		static SetKeyLoc _KortzCenterSetKeyLoc{"kortzcenterheistsetkeyloc", "Set Key Location", "Sets the manhole key location"};
 		static SetSeed _KortzCenterSetSeed{"kortzcenterheistsetseed", "Set Loot Seed", "Sets the secondary loot seed value"};
 		static MaxSecondaryLoot _KortzCenterMaxLoot{"kortzcenterheistmaxloot", "Max Secondary Loot", "Forces all Exhibit 2 slots to premium loot (gold/paintings)"};
+
+		static SkipFingerprint _KortzCenterSkipFingerprint{"kortzcenterheistskipfingerprint", "Skip Fingerprint Hack", "Skips fingerprint hacking minigame in computer room"};
+		static SkipSignalNodes _KortzCenterSkipSignalNodes{"kortzcenterheistskipsignalnodes", "Skip Signal Nodes", "Skips signal nodes hacking at vault keypad"};
+		static SkipDataCrack _KortzCenterSkipDataCrack{"kortzcenterheistskipdatacrack", "Skip Data Crack", "Skips data crack minigame"};
+		static CutGlass _KortzCenterCutGlass{"kortzcenterheistcutglass", "Cut Glass", "Cuts display case glass instantly"};
+		static DisableLaserGrid _KortzCenterDisableLaser{"kortzcenterheistdisablelaser", "Disable Laser Grid", "Disables laser security grid"};
+		static TakePrimaryTarget _KortzCenterTakePrimary{"kortzcenterheisttakeprimary", "Take Primary Target", "Takes primary target painting (stand near it)"};
+		static TakeSecondaryTarget _KortzCenterTakeSecondary{"kortzcenterheisttakesecondary", "Take Secondary Target", "Takes secondary loot (stand near it)"};
 	}
 }

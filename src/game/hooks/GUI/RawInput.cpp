@@ -10,7 +10,7 @@ namespace YimMenu::Hooks
 	{
 		auto result = BaseHook::Get<RawInput::GetRawInputData, DetourHook<decltype(&RawInput::GetRawInputData)>>()->Original()(hRawInput, uiCommand, pData, pcbSize, cbSizeHeader);
 
-		if (result > 0 && pData && uiCommand == RID_INPUT && GUI::IsOpen() && ImGui::GetIO().WantCaptureMouse)
+		if (result > 0 && pData && uiCommand == RID_INPUT && ImGui::GetIO().WantCaptureMouse)
 		{
 			auto& raw = *(RAWINPUT*)pData;
 			if (raw.header.dwType == RIM_TYPEMOUSE && raw.data.mouse.usButtonFlags)

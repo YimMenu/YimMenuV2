@@ -2,13 +2,15 @@
 #include "game/frontend/GUI.hpp"
 #include "game/hooks/Hooks.hpp"
 
+#include <imgui.h>
+
 namespace YimMenu::Hooks
 {
 	UINT RawInput::GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, LPVOID pData, PUINT pcbSize, UINT cbSizeHeader)
 	{
 		auto result = BaseHook::Get<RawInput::GetRawInputData, DetourHook<decltype(&RawInput::GetRawInputData)>>()->Original()(hRawInput, uiCommand, pData, pcbSize, cbSizeHeader);
 
-		if (result > 0 && pData && uiCommand == RID_INPUT && GUI::IsOpen())
+		if (result > 0 && pData && uiCommand == RID_INPUT && GUI::IsOpen() && ImGui::GetIO().WantCaptureMouse)
 		{
 			auto& raw = *(RAWINPUT*)pData;
 			if (raw.header.dwType == RIM_TYPEMOUSE && raw.data.mouse.usButtonFlags)

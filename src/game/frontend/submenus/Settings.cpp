@@ -56,6 +56,7 @@ namespace YimMenu::Submenus
 		auto objectEsp = std::make_shared<Group>("Object ESP");
 		auto overlay = std::make_shared<Group>("Overlay");
 		auto chat = std::make_shared<Group>("Chat");
+		auto hud = std::make_shared<Group>("HUD");
 
 		hotkeys->AddItem(std::make_shared<ImGuiItem>(Hotkeys));
 
@@ -99,7 +100,10 @@ namespace YimMenu::Submenus
 		overlay->AddItem(std::make_shared<BoolCommandItem>("overlay"_J));
 		overlay->AddItem(std::make_shared<ConditionalItem>("overlay"_J, std::make_shared<BoolCommandItem>("overlayfps"_J)));
 
-		chat->AddItem(std::make_shared<CommandItem>("clearchat"_J));
+		chat->AddItem(std::make_shared<BoolCommandItem>("clearchat"_J));
+
+		hud->AddItem(std::make_shared<BoolCommandItem>("hidehud"_J));
+		hud->AddItem(std::make_shared<BoolCommandItem>("disabletextsounds"_J));
 
 		game->AddItem(playerEsp);
 		game->AddItem(pedEsp);
@@ -108,6 +112,7 @@ namespace YimMenu::Submenus
 		gui->AddItem(uiStyle);
 		gui->AddItem(overlay);
 		gui->AddItem(chat);
+		gui->AddItem(hud);
 
 		AddCategory(std::move(hotkeys));
 		AddCategory(std::move(gui));

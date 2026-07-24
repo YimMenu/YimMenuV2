@@ -36,7 +36,11 @@ namespace YimMenu::Submenus
 
 		nightclubGroup->AddItem(std::make_shared<CommandItem>("maxnightclubpopularity"_J));
 		nightclubGroup->AddItem(std::make_shared<BoolCommandItem>("keepnightclubpopularity"_J));
-		nightclubGroup->AddItem(std::make_shared<IntCommandItem>("nightclubloopinterval"_J));
+		nightclubGroup->AddItem(std::make_shared<IntCommandItem>("nightclubpopularityinterval"_J));
+		nightclubGroup->AddItem(std::make_shared<BoolCommandItem>("autocollectnightclubsafe"_J));
+		nightclubGroup->AddItem(std::make_shared<IntCommandItem>("nightclubsafeinterval"_J));
+		nightclubGroup->AddItem(std::make_shared<BoolCommandItem>("autoresetnightclubpaytime"_J));
+		nightclubGroup->AddItem(std::make_shared<IntCommandItem>("nightclubpaytimeinterval"_J));
 
 		casinoSlots->AddItem(std::make_shared<BoolCommandItem>("casinomanipulaterigslotmachines"_J));
 		

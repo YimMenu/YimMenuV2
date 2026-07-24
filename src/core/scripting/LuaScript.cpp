@@ -104,7 +104,7 @@ namespace YimMenu
 		for (int i = 0; i < m_Resources.size(); i++)
 		{
 			if (!m_Resources[i].size())
-				return;
+				continue;
 
 			auto type = LuaManager::GetResourceType(i);
 			type->Lock();
@@ -121,7 +121,7 @@ namespace YimMenu
 		for (int i = 0; i < m_Resources.size(); i++)
 		{
 			if (!m_Resources[i].size())
-				return;
+				continue;
 
 			auto type = LuaManager::GetResourceType(i);
 			type->Lock();
@@ -158,8 +158,8 @@ namespace YimMenu
 		}
 
 		// we should have a function in the top of stack
-		CallFunction(0, 0);
-		m_LoadState = LoadState::RUNNING;
+		if (CallFunction(0, 0))
+			m_LoadState = LoadState::RUNNING;
 	}
 
 	LuaScript::~LuaScript()

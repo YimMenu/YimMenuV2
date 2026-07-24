@@ -3,6 +3,7 @@
 #include "StackTrace.hpp"
 
 #include <hde64.h>
+#include <mutex>
 #include <unordered_set>
 
 
@@ -37,18 +38,27 @@ namespace YimMenu
 			return EXCEPTION_CONTINUE_SEARCH;
 
 		static std::unordered_set<std::size_t> logged_exceptions;
+		static std::mutex logged_exceptions_mutex;
 
 		trace.NewStackTrace(exception_info);
 		const auto trace_hash = HashStackTrace(trace.GetFramePointers());
-		if (const auto it = logged_exceptions.find(trace_hash); it == logged_exceptions.end())
 		{
-			LOG(FATAL) << trace;
-			Logger::FlushQueue();
+			std::lock_guard lock(logged_exceptions_mutex);
+			if (const auto it = logged_exceptions.find(trace_hash); it == logged_exceptions.end())
+			{
+				LOG(FATAL) << trace;
+				Logger::FlushQueue();
 
-			logged_exceptions.insert(trace_hash);
+				logged_exceptions.insert(trace_hash);
+			}
 		}
 
-		if (exception_info->ExceptionRecord->ExceptionInformation[0] == EXCEPTION_EXECUTE_FAULT)
+		const bool is_execute_fault =
+			exception_code == EXCEPTION_ACCESS_VIOLATION
+			&& exception_info->ExceptionRecord->NumberParameters >= 1
+			&& exception_info->ExceptionRecord->ExceptionInformation[0] == EXCEPTION_EXECUTE_FAULT;
+
+		if (is_execute_fault)
 		{
 			auto return_address_ptr = (uint64_t*)exception_info->ContextRecord->Rsp;
 			if (IsBadReadPtr(reinterpret_cast<void*>(return_address_ptr), 8))

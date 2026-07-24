@@ -91,7 +91,7 @@ namespace YimMenu
 		while (g_Running)
 		{
 			Settings::Tick();
-			std::this_thread::yield();
+			std::this_thread::sleep_for(10ms);
 		}
 
 		LOG(INFO) << "Unloading";

@@ -9,8 +9,7 @@ bool CScriptedGameEvent::Deserialize(rage::datBitBuffer& buffer)
 	if (m_ArgsSize > sizeof(m_Args))
 		return false;
 
-	buffer.ReadArrayBytes(m_Args, m_ArgsSize);
-	return true;
+	return buffer.ReadArrayBytes(m_Args, m_ArgsSize);
 }
 
 void CNetworkIncrementStatEvent::Deserialize(rage::datBitBuffer& buffer)

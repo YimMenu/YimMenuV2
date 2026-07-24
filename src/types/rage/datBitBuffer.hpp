@@ -2,6 +2,7 @@
 #include "vector.hpp"
 
 #include <cstdint>
+#include <limits>
 
 namespace rage
 {
@@ -285,6 +286,16 @@ namespace rage
 			return m_FlagBits & 2;
 		}
 
+		[[nodiscard]] bool CanRead(std::uint32_t bits) const
+		{
+			return IsReadBuffer() && bits <= m_MaxBit && m_BitsRead <= m_MaxBit - bits;
+		}
+
+		[[nodiscard]] bool CanWrite(std::uint32_t bits) const
+		{
+			return !IsReadBuffer() && bits <= m_MaxBit && m_BitsRead <= m_MaxBit - bits;
+		}
+
 		void Seek(int bits)
 		{
 			m_BitsRead += bits;
@@ -330,10 +341,14 @@ namespace rage
 
 		inline bool ReadQword(uint64_t* out, int size)
 		{
+			if (!out || size < 0 || size > 64)
+				return false;
+
+			*out = 0;
 			if (size <= 32)
 				return ReadDword(reinterpret_cast<int*>(out), size);
 
-			return ReadDword(reinterpret_cast<int*>(out), 32) && !ReadDword(reinterpret_cast<int*>(out) + 1, size - 32);
+			return ReadDword(reinterpret_cast<int*>(out), 32) && ReadDword(reinterpret_cast<int*>(out) + 1, size - 32);
 		}
 
 		inline bool WriteQword(uint64_t value, int size)
@@ -349,20 +364,26 @@ namespace rage
 
 		inline bool ReadInt64(int64_t* value, int size)
 		{
-			unsigned int last_bit{};
-			uint64_t rest{};
-
-			if (!ReadQword((uint64_t*)&last_bit, 1) || ReadQword(&rest, size - 1))
+			if (!value || size < 1 || size > 64)
 				return false;
 
-			*value = ((uint64_t)last_bit << 63) | rest ^ -(int64_t)last_bit;
+			uint64_t last_bit{};
+			uint64_t rest{};
+
+			if (!ReadQword(&last_bit, 1) || !ReadQword(&rest, size - 1))
+				return false;
+
+			*value = static_cast<int64_t>(rest ^ -static_cast<int64_t>(last_bit));
 			return true;
 		}
 
 		inline bool WriteInt64(int64_t value, int size)
 		{
-			auto last_bit = value >> 63;
-			if (!WriteQword(last_bit, 1) || !WriteQword((uint64_t)value ^ -(__int64)(unsigned int)last_bit, size - 1))
+			if (size < 1 || size > 64)
+				return false;
+
+			const uint64_t last_bit = value < 0 ? 1 : 0;
+			if (!WriteQword(last_bit, 1) || !WriteQword(static_cast<uint64_t>(value) ^ -last_bit, size - 1))
 				return false;
 
 			return true;
@@ -401,34 +422,40 @@ namespace rage
 				WriteQword(uint64_t(data), size);
 		}
 
-		void WriteArray(const void* array, int bits)
+		bool WriteArray(const void* array, int bits)
 		{
-			if (!IsReadBuffer())
-			{
-				if (!IsSizeCalculator())
-					CopyBits(reinterpret_cast<void*>(reinterpret_cast<std::uint64_t>(m_Data) + (m_BitOffset >> 3)), array, bits, m_BitsRead + (m_BitOffset & 7), 0);
-				Seek(bits);
-			}
+			if (!array || bits < 0 || !CanWrite(static_cast<std::uint32_t>(bits)))
+				return false;
+
+			if (!IsSizeCalculator())
+				CopyBits(reinterpret_cast<void*>(reinterpret_cast<std::uint64_t>(m_Data) + (m_BitOffset >> 3)), array, bits, m_BitsRead + (m_BitOffset & 7), 0);
+			Seek(bits);
+			return true;
 		}
 
-		void WriteArrayBytes(const void* array, int bytes)
+		bool WriteArrayBytes(const void* array, int bytes)
 		{
-			WriteArray(array, bytes * 8);
+			if (bytes < 0 || bytes > (std::numeric_limits<int>::max)() / 8)
+				return false;
+			return WriteArray(array, bytes * 8);
 		}
 
-		void ReadArray(void* array, int bits)
+		bool ReadArray(void* array, int bits)
 		{
-			if (!IsReadBuffer())
-				return;
+			if (!array || bits < 0 || !CanRead(static_cast<std::uint32_t>(bits)))
+				return false;
 
 			if (!IsSizeCalculator())
 				CopyBits(array, reinterpret_cast<void*>(reinterpret_cast<std::uint64_t>(m_Data) + (m_BitOffset >> 3)), bits, 0, m_BitsRead + (m_BitOffset & 7));
 			Seek(bits);
+			return true;
 		}
 
-		void ReadArrayBytes(void* array, int bytes)
+		bool ReadArrayBytes(void* array, int bytes)
 		{
-			ReadArray(array, bytes * 8);
+			if (bytes < 0 || bytes > (std::numeric_limits<int>::max)() / 8)
+				return false;
+			return ReadArray(array, bytes * 8);
 		}
 
 		void WriteString(const char* string, int max_len)
@@ -443,12 +470,18 @@ namespace rage
 
 		void ReadString(char* string, int max_len)
 		{
+			if (!string || max_len <= 0)
+				return;
+
 			auto extended = Read<bool>(1);
 			auto len = Read<int>(extended ? 15 : 7);
-			if (len <= max_len)
+			if (len > 0 && len <= max_len && ReadArrayBytes(string, len))
 			{
-				ReadArrayBytes(string, len);
 				string[len - 1] = 0;
+			}
+			else
+			{
+				string[0] = 0;
 			}
 		}
 
@@ -522,7 +555,7 @@ namespace rage
 
 		void AlignToByteBoundary()
 		{
-			Seek(((m_BitsRead + 7) >> 3) - m_BitsRead);
+			Seek((8 - (m_BitsRead & 7)) & 7);
 		}
 
 	public:

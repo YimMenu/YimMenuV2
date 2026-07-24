@@ -23,6 +23,11 @@ jobs:
       - name: Build 64bit RelWithDebInfo DLL
         run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
 
+      - name: Build and run unit tests
+        run: |
+          cmake --build ./build --config RelWithDebInfo --target dat_bit_buffer_tests --
+          ctest --test-dir ./build --build-config RelWithDebInfo --output-on-failure
+
       - name: Check if DLL got built
         run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
 

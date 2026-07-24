@@ -31,6 +31,9 @@ namespace YimMenu::Hooks
 
 	bool Network::HandleScriptedGameEvent(Player player, CScriptedGameEvent& event)
 	{
+		if (event.m_ArgsSize < sizeof(std::int64_t) || event.m_ArgsSize > sizeof(event.m_Args) || event.m_ArgsSize % sizeof(std::int64_t) != 0)
+			return false;
+
 		if (!CheckLuaScripts(player, event))
 			return false;
 
@@ -62,7 +65,11 @@ namespace YimMenu::Hooks
 		}
 		case ScriptEventIndex::CeoKick:
 		{
-			if (player.GetId() != GPBD_FM_3::Get()->Entries[Self::GetPlayer().GetId()].BossGoon.Boss)
+			const auto local_id = Self::GetPlayer().GetId();
+			if (local_id < 0 || local_id >= 32 || player.GetId() < 0 || player.GetId() >= 32)
+				return false;
+
+			if (player.GetId() != GPBD_FM_3::Get()->Entries[local_id].BossGoon.Boss)
 			{
 				return false;
 			}

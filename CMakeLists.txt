@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20.x)
 include(cmake/cross-compile.cmake)
 
 project(YimMenuV2 VERSION 0.0.1 DESCRIPTION "A new base using new C++ features optimised for speed and ease of use")
+include(CTest)
 
 # libs
 include(cmake/async-logger.cmake)
@@ -61,3 +62,10 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-date-time>
     $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wno-date-time>
 )
+
+if(BUILD_TESTING)
+    add_executable(dat_bit_buffer_tests tests/datBitBufferTests.cpp)
+    target_compile_features(dat_bit_buffer_tests PRIVATE cxx_std_23)
+    target_include_directories(dat_bit_buffer_tests PRIVATE "${SRC_DIR}")
+    add_test(NAME dat_bit_buffer_tests COMMAND dat_bit_buffer_tests)
+endif()

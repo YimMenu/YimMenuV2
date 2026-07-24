@@ -15,7 +15,7 @@ namespace YimMenu
 	class HotkeySystem :
 	    public IStateSerializer
 	{
-		std::chrono::system_clock::time_point m_LastHotkeyTriggerTime;
+		std::unordered_map<std::uint32_t, bool> m_WasPressed;
 		bool m_BeingModified = false;
 
 	public:
@@ -23,7 +23,7 @@ namespace YimMenu
 
 		std::map<uint32_t, CommandLink> m_CommandHotkeys;
 		void RegisterCommands();
-		bool ListenAndApply(int& Hotkey, std::vector<int> blacklist = {0});
+		bool ListenAndApply(int& Hotkey, const std::vector<int>& blacklist = {0});
 		std::string GetHotkeyLabel(int hotkey_modifiers);
 		void CreateHotkey(std::vector<int>& Hotkey);
 

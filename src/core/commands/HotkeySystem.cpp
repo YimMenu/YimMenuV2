@@ -32,20 +32,12 @@ namespace YimMenu
 		m_CommandHotkeys.at("chathelper"_J).m_Chain.push_back(0x54);
 	}
 
-	bool HotkeySystem::ListenAndApply(int& Hotkey, std::vector<int> Blacklist)
+	bool HotkeySystem::ListenAndApply(int& Hotkey, const std::vector<int>& Blacklist)
 	{
-		static auto IsKeyBlacklisted = [Blacklist](int Key) -> bool {
-			for (auto Key_ : Blacklist)
-				if (Key_ == Key)
-					return true;
-
-			return false;
-		};
-
 		// VK_OEM_CLEAR Is about the limit in terms of virtual key codes
 		for (int i = 0; i < VK_OEM_CLEAR; i++)
 		{
-			if ((GetKeyState(i) & 0x8000) && i != 1 && !IsKeyBlacklisted(i))
+			if ((GetKeyState(i) & 0x8000) && i != 1 && std::ranges::find(Blacklist, i) == Blacklist.end())
 			{
 				Hotkey = i;
 
@@ -59,11 +51,11 @@ namespace YimMenu
 	// Will return the keycode if there are no labels
 	std::string HotkeySystem::GetHotkeyLabel(int HotkeyModifier)
 	{
-		char KeyName[32];
-		GetKeyNameTextA(MapVirtualKey(HotkeyModifier, MAPVK_VK_TO_VSC) << 16, KeyName, 32);
+		char KeyName[32]{};
+		GetKeyNameTextA(MapVirtualKey(HotkeyModifier, MAPVK_VK_TO_VSC) << 16, KeyName, static_cast<int>(std::size(KeyName)));
 
-		if (std::string(KeyName).empty())
-			strcpy(KeyName, std::to_string(HotkeyModifier).data());
+		if (KeyName[0] == '\0')
+			return std::to_string(HotkeyModifier);
 
 		return KeyName;
 	}
@@ -112,7 +104,9 @@ namespace YimMenu
 						}
 					}
 
-					if (all_keys_pressed && std::chrono::system_clock::now() - m_LastHotkeyTriggerTime > 100ms)
+					const bool was_pressed = m_WasPressed[hash];
+					m_WasPressed[hash] = all_keys_pressed;
+					if (all_keys_pressed && !was_pressed)
 					{
 						auto command = Commands::GetCommand(hash);
 						if (command)
@@ -127,7 +121,6 @@ namespace YimMenu
 								});
 							}
 						}
-						m_LastHotkeyTriggerTime = std::chrono::system_clock::now();
 					}
 				}
 			}

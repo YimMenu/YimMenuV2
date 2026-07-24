@@ -67,8 +67,8 @@ namespace YimMenu::Hooks
 			uint32_t count = buffer.Read<uint32_t>(5);
 			uint32_t buffer_size = buffer.Read<uint32_t>(15);
 
-			if (buffer_size > 7296)
-				buffer_size = 7296;
+			if (buffer_size > 7296 || !buffer.CanRead(buffer_size))
+				break;
 
 			int remaining = buffer_size;
 
@@ -85,9 +85,13 @@ namespace YimMenu::Hooks
 					buffer.Read<uint32_t>(16);
 
 				char event_data[4096 + 1];
+				if (event_data_size > sizeof(event_data) * 8 || !buffer.CanRead(event_data_size))
+					break;
+
 				if (event_data_size)
 				{
-					buffer.ReadArray(event_data, event_data_size);
+					if (!buffer.ReadArray(event_data, event_data_size))
+						break;
 				}
 
 				rage::datBitBuffer event_buffer(event_data, sizeof(event_data), true);
@@ -171,7 +175,8 @@ namespace YimMenu::Hooks
 				int size = buffer.Read<int>(11);
 				bool from_client = buffer.Read<bool>(1);
 				buffer.Seek(4); // normalize before we read
-				buffer.ReadArrayBytes(&data, size);
+				if (size <= 0 || size > static_cast<int>(sizeof(data)) || !buffer.ReadArrayBytes(data, size))
+					return;
 
 				if (from_client)
 					break;

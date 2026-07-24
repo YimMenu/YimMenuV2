@@ -6,6 +6,38 @@
 
 namespace YimMenu
 {
+	namespace
+	{
+		bool WriteAtomically(const std::filesystem::path& destination, std::string_view contents)
+		{
+			auto temporary = destination;
+			temporary += ".tmp";
+			auto backup = destination;
+			backup += ".bak";
+
+			{
+				std::ofstream file(temporary, std::ios::binary | std::ios::trunc);
+				if (!file)
+					return false;
+				file.write(contents.data(), static_cast<std::streamsize>(contents.size()));
+				file.flush();
+				if (!file)
+					return false;
+			}
+
+			const bool replaced = std::filesystem::exists(destination)
+				? ReplaceFileW(destination.c_str(), temporary.c_str(), backup.c_str(), REPLACEFILE_WRITE_THROUGH, nullptr, nullptr)
+				: MoveFileExW(temporary.c_str(), destination.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
+
+			if (!replaced)
+			{
+				std::error_code ec;
+				std::filesystem::remove(temporary, ec);
+			}
+			return replaced;
+		}
+	}
+
 	Settings::Settings() :
 	    m_SettingsFile(),
 	    m_StateSerializers(),
@@ -63,9 +95,8 @@ namespace YimMenu
 				if (serializer->IsStateDirty())
 					SaveComponentImpl(serializer);
 
-			std::ofstream file(m_SettingsFile, std::ios::out | std::ios::trunc);
-			file << m_Json.dump(4);
-			file.close();
+			if (!WriteAtomically(m_SettingsFile, m_Json.dump(4)))
+				LOGF(FATAL, "Failed to save settings atomically: error {}", GetLastError());
 		}
 	}
 
@@ -106,9 +137,8 @@ namespace YimMenu
 
 	void Settings::Reset()
 	{
-		std::ofstream file(m_SettingsFile, std::ios::out | std::ios::trunc);
-		file << "{}" << std::endl;
-		file.close();
+		if (!WriteAtomically(m_SettingsFile, "{}\n"))
+			LOGF(FATAL, "Failed to reset settings atomically: error {}", GetLastError());
 		m_Json.clear();
 		m_InitialLoadDone = true;
 	}

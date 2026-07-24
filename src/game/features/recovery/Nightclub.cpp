@@ -43,7 +43,8 @@ namespace YimMenu::Features
 
 			if (std::chrono::duration_cast<std::chrono::minutes>(now - last_run).count() >= _NightclubPopularityInterval.GetState())
 			{
-				Stats::SetInt("mpx_club_popularity", 1000);
+				Stats::SetInt("mp0_club_popularity", 1000);
+				Stats::SetInt("mp1_club_popularity", 1000);
 				last_run = now;
 			}
 		}
@@ -86,7 +87,8 @@ namespace YimMenu::Features
 
 			if (std::chrono::duration_cast<std::chrono::minutes>(now - last_run).count() >= _NightclubPayTimeInterval.GetState())
 			{
-				Stats::SetInt("mpx_club_pay_time_left", -1);
+				Stats::SetInt("mp0_club_pay_time_left", -1);
+				Stats::SetInt("mp1_club_pay_time_left", -1);
 				last_run = now;
 			}
 		}

@@ -25,7 +25,7 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-          cmake --build ./build --config RelWithDebInfo --target dat_bit_buffer_tests --
+          cmake --build ./build --config RelWithDebInfo --target dat_bit_buffer_tests protection_telemetry_tests --
           ctest --test-dir ./build --build-config RelWithDebInfo --output-on-failure
 
       - name: Check if DLL got built

@@ -1,4 +1,5 @@
 #include "game/backend/Self.hpp"
+#include "game/backend/ProtectionTelemetry.hpp"
 #include "game/hooks/Hooks.hpp"
 #include "game/pointers/Pointers.hpp"
 #include "types/network/netGameEvent.hpp"
@@ -32,7 +33,10 @@ namespace YimMenu::Hooks
 	bool Network::HandleScriptedGameEvent(Player player, CScriptedGameEvent& event)
 	{
 		if (event.m_ArgsSize < sizeof(std::int64_t) || event.m_ArgsSize > sizeof(event.m_Args) || event.m_ArgsSize % sizeof(std::int64_t) != 0)
+		{
+			ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedScriptEvent);
 			return false;
+		}
 
 		if (!CheckLuaScripts(player, event))
 			return false;
@@ -47,12 +51,13 @@ namespace YimMenu::Hooks
 
 			if (event.m_ArgsSize != SCRIPT_EVENT_BOUNTY::GetSize())
 			{
-				//player.AddDetection();
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedScriptEvent);
 				return false;
 			}
 
 			if (bounty->Target == Self::GetPlayer().GetId())
 			{
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::BlockedBounty);
 				return false;
 			}
 
@@ -60,17 +65,21 @@ namespace YimMenu::Hooks
 		}
 		case ScriptEventIndex::SendTextLabelSMS:
 		{
-			//player.AddDetection();
+			ProtectionTelemetry::Increment(ProtectionTelemetry::Event::BlockedTextLabelSms);
 			return false;
 		}
 		case ScriptEventIndex::CeoKick:
 		{
 			const auto local_id = Self::GetPlayer().GetId();
 			if (local_id < 0 || local_id >= 32 || player.GetId() < 0 || player.GetId() >= 32)
+			{
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedScriptEvent);
 				return false;
+			}
 
 			if (player.GetId() != GPBD_FM_3::Get()->Entries[local_id].BossGoon.Boss)
 			{
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::BlockedCeoKick);
 				return false;
 			}
 
@@ -82,13 +91,13 @@ namespace YimMenu::Hooks
 
 			if (interior_control->Interior < 0 || interior_control->Interior >= static_cast<int>(eSimpleInteriorIndex::SIMPLE_INTERIOR_MAX)) // the upper bound will change after an update
 			{
-				// null function kick
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::BlockedInteriorControl);
 				return false;
 			}
 
 			if (!interior_control->GoonsOnly)
 			{
-				// send to interior
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::BlockedInteriorControl);
 				return false;
 			}
 

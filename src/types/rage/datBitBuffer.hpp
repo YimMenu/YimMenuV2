@@ -296,8 +296,15 @@ namespace rage
 			return !IsReadBuffer() && bits <= m_MaxBit && m_BitsRead <= m_MaxBit - bits;
 		}
 
-		void Seek(int bits)
+		bool Seek(int bits)
 		{
+			if (bits < 0)
+				return false;
+
+			const auto amount = static_cast<std::uint32_t>(bits);
+			if (amount > m_MaxBit || m_BitsRead > m_MaxBit - amount)
+				return false;
+
 			m_BitsRead += bits;
 
 			if (IsReadBuffer())
@@ -310,12 +317,18 @@ namespace rage
 				if (m_BitsRead > m_CurBit)
 					m_CurBit = m_BitsRead;
 			}
+			return true;
 		}
 
 		inline bool ReadDword(int* out, int size)
 		{
-			if (IsSizeCalculator())
+			if (!out || size < 0 || size > 32 || IsSizeCalculator())
 				return false;
+			if (size == 0)
+			{
+				*out = 0;
+				return true;
+			}
 
 			if (m_BitsRead + size > (IsReadBuffer() ? m_MaxBit : m_CurBit))
 				return false;
@@ -327,8 +340,10 @@ namespace rage
 
 		inline bool WriteDword(int val, int size)
 		{
-			if (IsReadBuffer())
+			if (size < 0 || size > 32 || IsReadBuffer())
 				return false;
+			if (size == 0)
+				return true;
 
 			if (m_BitsRead + size > m_MaxBit)
 				return false;
@@ -353,6 +368,9 @@ namespace rage
 
 		inline bool WriteQword(uint64_t value, int size)
 		{
+			if (size < 0 || size > 64)
+				return false;
+
 			if (size <= 32)
 				return WriteDword(static_cast<uint32_t>(value), size);
 
@@ -426,6 +444,8 @@ namespace rage
 		{
 			if (!array || bits < 0 || !CanWrite(static_cast<std::uint32_t>(bits)))
 				return false;
+			if (bits == 0)
+				return true;
 
 			if (!IsSizeCalculator())
 				CopyBits(reinterpret_cast<void*>(reinterpret_cast<std::uint64_t>(m_Data) + (m_BitOffset >> 3)), array, bits, m_BitsRead + (m_BitOffset & 7), 0);
@@ -444,6 +464,8 @@ namespace rage
 		{
 			if (!array || bits < 0 || !CanRead(static_cast<std::uint32_t>(bits)))
 				return false;
+			if (bits == 0)
+				return true;
 
 			if (!IsSizeCalculator())
 				CopyBits(array, reinterpret_cast<void*>(reinterpret_cast<std::uint64_t>(m_Data) + (m_BitOffset >> 3)), bits, 0, m_BitsRead + (m_BitOffset & 7));
@@ -487,6 +509,9 @@ namespace rage
 
 		float ReadFloat(int size, float divisor)
 		{
+			if (size < 1 || size > 31)
+				return 0.0f;
+
 			int integer = Read<int>(size);
 
 			float max = (1 << size) - 1;
@@ -495,6 +520,9 @@ namespace rage
 
 		void WriteFloat(int size, float divisor, float value)
 		{
+			if (size < 1 || size > 31 || divisor == 0.0f)
+				return;
+
 			float max = (1 << size) - 1;
 			int integer = (int)((value / divisor) * max);
 
@@ -503,6 +531,9 @@ namespace rage
 
 		float ReadSignedFloat(int size, float divisor)
 		{
+			if (size < 2 || size > 32)
+				return 0.0f;
+
 			int integer = Read<int>(size, true);
 
 			float max = (1 << (size - 1)) - 1;
@@ -511,6 +542,9 @@ namespace rage
 
 		void WriteSignedFloat(int size, float divisor, float value)
 		{
+			if (size < 2 || size > 32 || divisor == 0.0f)
+				return;
+
 			float max = (1 << (size - 1)) - 1;
 			int integer = (int)((value / divisor) * max);
 

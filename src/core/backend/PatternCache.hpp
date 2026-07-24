@@ -5,7 +5,7 @@ namespace YimMenu
 {
 	class PatternCache
 	{
-		bool m_Initialized;
+		std::atomic_bool m_Initialized;
 		std::unordered_map<std::uint64_t, int> m_Data;
 		std::mutex m_Mutex;
 
@@ -37,7 +37,12 @@ namespace YimMenu
 
 		static bool IsInitialized()
 		{
-			return GetInstance().m_Initialized;
+			return GetInstance().m_Initialized.load(std::memory_order_acquire);
+		}
+
+		static std::size_t GetEntryCount()
+		{
+			return GetInstance().GetEntryCountImpl();
 		}
 
 	private:
@@ -49,6 +54,7 @@ namespace YimMenu
 
 		void InitImpl();
 		void UpdateImpl();
+		std::size_t GetEntryCountImpl();
 		std::optional<int> GetCachedOffsetImpl(PatternHash hash);
 		void UpdateCachedOffsetImpl(PatternHash hash, int offset);
 	};

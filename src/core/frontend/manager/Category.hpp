@@ -32,11 +32,11 @@ namespace YimMenu
 		}
 
 		void Draw();
-		int GetLength();
+		float GetLength();
 
 	private:
 		std::vector<std::shared_ptr<UIItem>> m_Items;
-		std::optional<int> m_Length;
+		std::optional<float> m_Length;
 
 	public:
 		std::string m_Name;

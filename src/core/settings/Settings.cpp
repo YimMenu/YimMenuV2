@@ -8,6 +8,23 @@ namespace YimMenu
 {
 	namespace
 	{
+		bool ReadJson(const std::filesystem::path& path, nlohmann::json& output)
+		{
+			std::ifstream file(path);
+			if (!file)
+				return false;
+
+			try
+			{
+				file >> output;
+				return output.is_object();
+			}
+			catch (const std::exception&)
+			{
+				return false;
+			}
+		}
+
 		bool WriteAtomically(const std::filesystem::path& destination, std::string_view contents)
 		{
 			auto temporary = destination;
@@ -55,18 +72,24 @@ namespace YimMenu
 			return;
 		}
 
-		std::ifstream file(m_SettingsFile);
-
-		try
+		if (!ReadJson(m_SettingsFile, m_Json))
 		{
-			file >> m_Json;
-			file.close();
-		}
-		catch (std::exception&)
-		{
-			LOG(WARNING) << "Detected corrupt settings, resetting settings...";
-			Reset();
-			return;
+			auto backup = m_SettingsFile;
+			backup += ".bak";
+			if (ReadJson(backup, m_Json))
+			{
+				LOG(WARNING) << "Detected corrupt settings, recovered the previous backup";
+				std::error_code ec;
+				std::filesystem::copy_file(backup, m_SettingsFile, std::filesystem::copy_options::overwrite_existing, ec);
+				if (ec)
+					LOGF(FATAL, "Recovered settings in memory but could not restore the file: {}", ec.message());
+			}
+			else
+			{
+				LOG(WARNING) << "Detected corrupt settings without a valid backup, resetting settings...";
+				Reset();
+				return;
+			}
 		}
 
 		for (auto& serializer : m_StateSerializers)

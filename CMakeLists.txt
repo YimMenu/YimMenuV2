@@ -15,6 +15,7 @@ include(cmake/luajit.cmake)
 # source
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 file(GLOB_RECURSE SRC_FILES
+    CONFIGURE_DEPENDS
     "${SRC_DIR}/**.hpp"
     "${SRC_DIR}/**.cpp"    
 )
@@ -68,4 +69,12 @@ if(BUILD_TESTING)
     target_compile_features(dat_bit_buffer_tests PRIVATE cxx_std_23)
     target_include_directories(dat_bit_buffer_tests PRIVATE "${SRC_DIR}")
     add_test(NAME dat_bit_buffer_tests COMMAND dat_bit_buffer_tests)
+
+    add_executable(protection_telemetry_tests
+        tests/protectionTelemetryTests.cpp
+        src/game/backend/ProtectionTelemetry.cpp
+    )
+    target_compile_features(protection_telemetry_tests PRIVATE cxx_std_23)
+    target_include_directories(protection_telemetry_tests PRIVATE "${SRC_DIR}")
+    add_test(NAME protection_telemetry_tests COMMAND protection_telemetry_tests)
 endif()

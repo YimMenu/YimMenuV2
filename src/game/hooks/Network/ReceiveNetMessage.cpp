@@ -2,6 +2,7 @@
 #include "core/scripting/LuaManager.hpp"
 #include "game/backend/AnticheatBypass.hpp"
 #include "game/backend/Players.hpp"
+#include "game/backend/ProtectionTelemetry.hpp"
 #include "game/frontend/ChatDisplay.hpp"
 #include "game/hooks/Hooks.hpp"
 #include "game/gta/Packet.hpp"
@@ -68,7 +69,10 @@ namespace YimMenu::Hooks
 			uint32_t buffer_size = buffer.Read<uint32_t>(15);
 
 			if (buffer_size > 7296 || !buffer.CanRead(buffer_size))
+			{
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedPackedEvents);
 				break;
+			}
 
 			int remaining = buffer_size;
 
@@ -84,14 +88,24 @@ namespace YimMenu::Hooks
 				if (buffer.Read<bool>(1))
 					buffer.Read<uint32_t>(16);
 
+				const auto header_size = buffer.m_BitsRead - bits_read;
 				char event_data[4096 + 1];
-				if (event_data_size > sizeof(event_data) * 8 || !buffer.CanRead(event_data_size))
+				if (header_size > static_cast<std::uint32_t>(remaining)
+					|| event_data_size > static_cast<std::uint32_t>(remaining) - header_size
+					|| event_data_size > sizeof(event_data) * 8
+					|| !buffer.CanRead(event_data_size))
+				{
+					ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedPackedEvent);
 					break;
+				}
 
 				if (event_data_size)
 				{
 					if (!buffer.ReadArray(event_data, event_data_size))
+					{
+						ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedPackedEvent);
 						break;
+					}
 				}
 
 				rage::datBitBuffer event_buffer(event_data, sizeof(event_data), true);
@@ -114,13 +128,27 @@ namespace YimMenu::Hooks
 			{
 				auto timestamp = buffer.Read<std::uint32_t>(32);
 				if (auto num_msgs = buffer.Read<int>(5))
-					buffer.Seek(buffer.Read<std::uint32_t>(13));
+				{
+					const auto size = buffer.Read<std::uint32_t>(13);
+					if (!buffer.Seek(size))
+					{
+						ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedPackedReliables);
+						return;
+					}
+				}
 			}
 
 			if ((flags & 2) != 0)
 			{
 				if (auto num_msgs = buffer.Read<int>(5))
-					buffer.Seek(buffer.Read<std::uint32_t>(13));
+				{
+					const auto size = buffer.Read<std::uint32_t>(13);
+					if (!buffer.Seek(size))
+					{
+						ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedPackedReliables);
+						return;
+					}
+				}
 			}
 
 			if ((flags & 4) != 0)
@@ -129,7 +157,14 @@ namespace YimMenu::Hooks
 				{
 					auto sz = buffer.Read<std::uint32_t>(13);
 					auto pos_now = buffer.m_BitsRead;
-					while (pos_now + sz > buffer.m_BitsRead)
+					if (!buffer.CanRead(sz) || sz % 18 != 0)
+					{
+						ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedPackedReliables);
+						return;
+					}
+
+					const auto end = pos_now + sz;
+					while (buffer.m_BitsRead < end)
 					{
 						auto id = buffer.Read<std::uint16_t>(13);
 						auto token = buffer.Read<int>(5);
@@ -164,7 +199,10 @@ namespace YimMenu::Hooks
 		case rage::netMessage::Type::KickPlayer:
 		{
 			if (!AnticheatBypass::IsFSLProvidingBattlEyeBypass())
+			{
+				ProtectionTelemetry::Increment(ProtectionTelemetry::Event::BlockedKickMessage);
 				return;
+			}
 			break;
 		}
 		case rage::netMessage::Type::BattlEyeCmd:
@@ -176,7 +214,10 @@ namespace YimMenu::Hooks
 				bool from_client = buffer.Read<bool>(1);
 				buffer.Seek(4); // normalize before we read
 				if (size <= 0 || size > static_cast<int>(sizeof(data)) || !buffer.ReadArrayBytes(data, size))
+				{
+					ProtectionTelemetry::Increment(ProtectionTelemetry::Event::MalformedBattlEyeCommand);
 					return;
+				}
 
 				if (from_client)
 					break;

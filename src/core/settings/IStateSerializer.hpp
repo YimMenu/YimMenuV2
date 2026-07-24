@@ -5,7 +5,7 @@ namespace YimMenu
 	class IStateSerializer
 	{
 		std::string m_SerComponentName;
-		bool m_IsDirty;
+		std::atomic_bool m_IsDirty;
 
 	public:
 		IStateSerializer(const std::string& name);
@@ -15,23 +15,23 @@ namespace YimMenu
 		inline void SaveState(nlohmann::json& state)
 		{
 			SaveStateImpl(state);
-			m_IsDirty = false;
+			m_IsDirty.store(false, std::memory_order_release);
 		}
 
 		inline void LoadState(nlohmann::json& state)
 		{
 			LoadStateImpl(state);
-			m_IsDirty = false;
+			m_IsDirty.store(false, std::memory_order_release);
 		}
 
 		inline bool IsStateDirty()
 		{
-			return m_IsDirty;
+			return m_IsDirty.load(std::memory_order_acquire);
 		}
 
 		inline void MarkStateDirty()
 		{
-			m_IsDirty = true;
+			m_IsDirty.store(true, std::memory_order_release);
 		}
 
 		inline const std::string& GetSerializerComponentName()

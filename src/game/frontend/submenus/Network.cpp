@@ -1,10 +1,14 @@
 #include "Network.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/backend/PatternCache.hpp"
 #include "core/frontend/Notifications.hpp"
+#include "game/backend/AnticheatBypass.hpp"
+#include "game/backend/ProtectionTelemetry.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "game/frontend/submenus/Network/SavedPlayers.hpp"
 #include "game/frontend/submenus/Network/RandomEvents.hpp"
 #include "game/gta/Network.hpp"
+#include "game/pointers/Pointers.hpp"
 
 namespace YimMenu::Submenus
 {
@@ -133,8 +137,107 @@ namespace YimMenu::Submenus
 		matchmakingSrvGroup->AddItem(std::move(srvMultiplex));
 		spoofing->AddItem(matchmakingSrvGroup);
 
+		auto diagnostics = std::make_shared<Category>("Diagnostics");
+		diagnostics->AddItem(std::make_shared<ImGuiItem>([] {
+			const auto game_version = Pointers.GameVersion ? Pointers.GameVersion : "Unavailable";
+			const auto online_version = Pointers.OnlineVersion ? Pointers.OnlineVersion : "Unavailable";
+			const bool session_started = Pointers.IsSessionStarted && *Pointers.IsSessionStarted;
+			const auto uptime = ProtectionTelemetry::Uptime();
+			const auto hours = std::chrono::duration_cast<std::chrono::hours>(uptime);
+			const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(uptime - hours);
+			const auto seconds = uptime - hours - minutes;
+
+			ImGui::Text("Game version: %s", game_version);
+			ImGui::Text("Online version: %s", online_version);
+			ImGui::Text("Pattern cache: %s (%zu entries)", PatternCache::IsInitialized() ? "Ready" : "Unavailable", PatternCache::GetEntryCount());
+			ImGui::Text("Session: %s", session_started ? "Online" : "Offline");
+			ImGui::Text("BattlEye: %s", AnticheatBypass::IsBattlEyeRunning() ? "Running" : "Not running");
+			ImGui::Text("FSL: %s", AnticheatBypass::IsFSLLoaded() ? "Loaded" : "Not loaded");
+			if (AnticheatBypass::IsFSLLoaded())
+			{
+				ImGui::Text("FSL version: %d", AnticheatBypass::GetFSLVersion());
+				ImGui::Text("FSL local saves: %s", AnticheatBypass::IsFSLProvidingLocalSaves() ? "Available" : "Unavailable");
+				ImGui::Text("FSL BattlEye bypass: %s", AnticheatBypass::IsFSLProvidingBattlEyeBypass() ? "Available" : "Unavailable");
+			}
+			ImGui::Text("Runtime: %lldh %lldm %llds", hours.count(), minutes.count(), seconds.count());
+
+			if (!Pointers.GameVersion || !Pointers.OnlineVersion)
+				ImGui::TextColored(ImVec4(1.0f, 0.65f, 0.2f, 1.0f), "Compatibility warning: version pointers are unavailable.");
+			if (AnticheatBypass::IsBattlEyeRunning() && !AnticheatBypass::IsFSLProvidingBattlEyeBypass())
+				ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Safety warning: BattlEye is running without an FSL bypass.");
+
+			ImGui::SeparatorText("Protection telemetry");
+			ImGui::TextDisabled("Aggregate counts only; no player identifiers are retained.");
+			const auto snapshot = ProtectionTelemetry::GetSnapshot();
+			std::uint64_t total_events{};
+			for (const auto& entry : snapshot)
+				total_events += entry.m_Count;
+			ImGui::Text("Total protection events: %llu", static_cast<unsigned long long>(total_events));
+
+			if (ImGui::BeginTable("protection_telemetry", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+			{
+				ImGui::TableSetupColumn("Event");
+				ImGui::TableSetupColumn("Count", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+				ImGui::TableSetupColumn("Last seen", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+				ImGui::TableHeadersRow();
+
+				for (const auto& entry : snapshot)
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::TextUnformatted(entry.m_Name.data(), entry.m_Name.data() + entry.m_Name.size());
+					ImGui::TableSetColumnIndex(1);
+					ImGui::Text("%llu", static_cast<unsigned long long>(entry.m_Count));
+					ImGui::TableSetColumnIndex(2);
+					if (entry.m_LastSeenAgo)
+						ImGui::Text("%llds ago", entry.m_LastSeenAgo->count());
+					else
+						ImGui::TextUnformatted("Never");
+				}
+				ImGui::EndTable();
+			}
+
+			if (ImGui::Button("Reset telemetry"))
+				ProtectionTelemetry::Reset();
+			ImGui::SameLine();
+			if (ImGui::Button("Copy diagnostics"))
+			{
+				std::string report = std::format(
+					"YimMenuV2 diagnostics\n"
+					"Game version: {}\n"
+					"Online version: {}\n"
+					"Pattern cache: {} ({} entries)\n"
+					"Session: {}\n"
+					"BattlEye: {}\n"
+					"FSL: {}\n"
+					"Runtime: {}h {}m {}s\n"
+					"Protection telemetry:\n",
+					game_version,
+					online_version,
+					PatternCache::IsInitialized() ? "Ready" : "Unavailable",
+					PatternCache::GetEntryCount(),
+					session_started ? "Online" : "Offline",
+					AnticheatBypass::IsBattlEyeRunning() ? "Running" : "Not running",
+					AnticheatBypass::IsFSLLoaded() ? "Loaded" : "Not loaded",
+					hours.count(),
+					minutes.count(),
+					seconds.count());
+
+				for (const auto& entry : ProtectionTelemetry::GetSnapshot())
+					report += std::format(
+						"- {}: {} (last seen: {})\n",
+						entry.m_Name,
+						entry.m_Count,
+						entry.m_LastSeenAgo ? std::format("{}s ago", entry.m_LastSeenAgo->count()) : "never");
+
+				ImGui::SetClipboardText(report.c_str());
+				Notifications::Show("Diagnostics", "Copied privacy-safe diagnostics to the clipboard", NotificationType::Success);
+			}
+		}));
+
 		AddCategory(std::move(session));
 		AddCategory(std::move(spoofing));
+		AddCategory(std::move(diagnostics));
 		AddCategory(std::move(BuildSavedPlayersMenu()));
 		AddCategory(BuildRandomEventsMenu());
 	}

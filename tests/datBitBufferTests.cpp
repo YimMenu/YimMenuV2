@@ -59,8 +59,20 @@ int main()
 	{
 		std::array<std::uint8_t, 2> storage{};
 		rage::datBitBuffer reader(storage.data(), static_cast<std::uint32_t>(storage.size()), true);
-		reader.Seek(3);
+		CHECK(reader.Seek(3));
 		reader.AlignToByteBoundary();
 		CHECK(reader.m_BitsRead == 8);
+		CHECK(!reader.Seek(-1));
+		CHECK(!reader.Seek(9));
+		CHECK(reader.m_BitsRead == 8);
+	}
+
+	{
+		std::array<std::uint8_t, 1> storage{};
+		rage::datBitBuffer reader(storage.data(), static_cast<std::uint32_t>(storage.size()), true);
+		std::uint64_t value{};
+		CHECK(!reader.ReadQword(&value, 65));
+		CHECK(!reader.ReadQword(nullptr, 8));
+		CHECK(reader.m_BitsRead == 0);
 	}
 }

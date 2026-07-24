@@ -8,7 +8,7 @@ namespace YimMenu
 			item->Draw();
 	}
 
-	int Category::GetLength()
+	float Category::GetLength()
 	{
 		if (m_Length.has_value())
 			return m_Length.value();

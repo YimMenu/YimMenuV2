@@ -171,7 +171,7 @@ namespace YimMenu::Features
 				{
 					for (int i = 0; i <= 2; i++)
 					{
-						*ScriptLocal(thread, 32820).At(i, 2).As<int*>() = 0;
+						*ScriptLocal(thread, 32818).At(1).At(i, 2).At(1).As<int*>() = 0;
 						ScriptMgr::Yield(100ms);
 						PAD::SET_CONTROL_VALUE_NEXT_FRAME(0, 237, 1.0);
 					}

@@ -8,7 +8,7 @@ namespace YimMenu::Features
 	    {0, "Infinite"},
 	    {1, "Instant recharge"}};
 
-	static ListCommand _BoostBehavior{"boostbehavior", "Boost behavior", "Desired rocket boost behavior", g_BoostBehavior, 0};
+	static ListCommand _BoostBehavior{"boostbehavior", "Boost Behavior", "Desired rocket boost behavior", g_BoostBehavior, 0};
 
 	class ModifyRocketBoost : public LoopedCommand
 	{
@@ -35,5 +35,5 @@ namespace YimMenu::Features
 		}
 	};
 
-	static ModifyRocketBoost _ModifyRocketBoost{"modifyboostbehavior", "Modify boost behavior", "Modify rocket boost behavior for vehicles that support it"};
+	static ModifyRocketBoost _ModifyRocketBoost{"modifyboostbehavior", "Modify Boost Behavior", "Modify rocket boost behavior for vehicles that support it"};
 };

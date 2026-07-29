@@ -29,7 +29,6 @@ namespace YimMenu::Submenus
 		generalGroup->AddItem(std::make_shared<BoolCommandItem>("freechangeappearance"_J));
 		generalGroup->AddItem(std::make_shared<BoolCommandItem>("nochangeappearancecooldown"_J));
 		generalGroup->AddItem(std::make_shared<BoolCommandItem>("allowgenderchange"_J));
-		generalGroup->AddItem(std::make_shared<BoolCommandItem>("casinosolo"_J));
 
 		businessGroup->AddItem(std::make_shared<ListCommandItem>("businesssafe"_J));
 		businessGroup->AddItem(std::make_shared<CommandItem>("claimsafeearnings"_J));

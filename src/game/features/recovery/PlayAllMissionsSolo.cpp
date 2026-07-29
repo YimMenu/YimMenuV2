@@ -161,8 +161,6 @@ namespace YimMenu::Features
 			// By this patch, you can use the finale board of casino heist, and can change outfits or teams in missions like Lowriders
 		}
 
-		}
-
 		virtual void OnTick() override
 		{
 			if (m_ProcessPhoneHackingPatch)

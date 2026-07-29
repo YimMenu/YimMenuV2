@@ -1,10 +1,12 @@
 name: Nightly Build
 
 on:
-  schedule:
-    # cronjob that triggers every day at 2PM UTC
-    - cron: "0 14 * * *"
+  push:
+    branches: [enhanced]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 concurrency:
   group: nightly

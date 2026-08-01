@@ -255,6 +255,9 @@ namespace YimMenu::Features
 				Stats::SetInt("MPX_K26_HEIST_TARGET", _KortzCenterPrimaryTarget.GetState());
 				Stats::SetInt("MPX_K26_SCOPING_BS", scopingBS);
 				Stats::SetInt("MPX_K26_POI_BS", poiBS);
+
+				if (auto thread = Scripts::FindScriptThread("kortz_planning "_J))
+					*ScriptLocal(thread, 599).As<int*>() = 2;
 			}
 		};
 

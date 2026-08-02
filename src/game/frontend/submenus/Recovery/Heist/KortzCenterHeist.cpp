@@ -7,11 +7,11 @@ namespace YimMenu::Submenus
 		auto tab   = std::make_shared<TabItem>("Kortz Center Heist");
 
 		auto target    = std::make_shared<Group>("Primary Target", 1);
-		auto intel   = std::make_shared<Group>("Intel");
+		auto intel   = std::make_shared<Group>("Intel", 2);
 
-		auto vehicles  = std::make_shared<CollapsingHeaderItem>("Vehicles");
-		auto equipment = std::make_shared<CollapsingHeaderItem>("Equipment");
-		auto optinalPrep     = std::make_shared<CollapsingHeaderItem>("Optinal Prep Work");
+		auto vehicles  = std::make_shared<CollapsingHeaderItem>("Vehicles", 2);
+		auto equipment = std::make_shared<CollapsingHeaderItem>("Equipment", 4);
+		auto optinalPrep     = std::make_shared<CollapsingHeaderItem>("Optinal Prep Work", 3);
 
 		auto action    = std::make_shared<Group>("", 1);
 

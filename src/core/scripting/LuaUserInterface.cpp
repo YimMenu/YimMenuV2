@@ -60,6 +60,10 @@ namespace YimMenu
 				luaL_unref(m_Script->GetState(), LUA_REGISTRYINDEX, ref);
 		}
 		m_RenderCallbacks.clear();
+		m_ImGuiCallbacks.clear();
+		m_AlwaysDrawImGuiCallbacks.clear();
+		m_HasImGuiCallbacks = false;
+		m_HasAlwaysDrawImGuiCallbacks = false;
 
 		for (auto* ptr : m_ScriptAllocations)
 			std::free(ptr);
@@ -95,6 +99,59 @@ namespace YimMenu
 	void LuaUserInterface::TrackRenderCallback(int func_ref)
 	{
 		m_RenderCallbacks.push_back(func_ref);
+	}
+
+	void LuaUserInterface::AddImGuiCallback(int func_ref)
+	{
+		if (func_ref == LUA_NOREF || !m_Script)
+			return;
+
+		std::lock_guard lock(m_Script->GetExecutionLock());
+		m_ImGuiCallbacks.push_back(func_ref);
+		m_RenderCallbacks.push_back(func_ref);
+		m_HasImGuiCallbacks = true;
+	}
+
+	void LuaUserInterface::AddAlwaysDrawImGuiCallback(int func_ref)
+	{
+		if (func_ref == LUA_NOREF || !m_Script)
+			return;
+
+		std::lock_guard lock(m_Script->GetExecutionLock());
+		m_AlwaysDrawImGuiCallbacks.push_back(func_ref);
+		m_RenderCallbacks.push_back(func_ref);
+		m_HasAlwaysDrawImGuiCallbacks = true;
+	}
+
+	void LuaUserInterface::RunImGuiCallbacks(const std::vector<int>& callbacks)
+	{
+		if (!m_Script)
+			return;
+			
+		std::vector<int> refs;
+		{
+			std::lock_guard lock(m_Script->GetExecutionLock());
+			if (callbacks.empty())
+				return;
+			refs = callbacks;
+		}
+
+		for (auto ref : refs)
+			m_Script->RunRenderCallback(ref);
+	}
+
+	void LuaUserInterface::DrawImGuiCallbacks()
+	{
+		if (!m_HasImGuiCallbacks)
+			return;
+		RunImGuiCallbacks(m_ImGuiCallbacks);
+	}
+
+	void LuaUserInterface::DrawAlwaysDrawImGuiCallbacks()
+	{
+		if (!m_HasAlwaysDrawImGuiCallbacks)
+			return;
+		RunImGuiCallbacks(m_AlwaysDrawImGuiCallbacks);
 	}
 
 	void LuaUserInterface::TrackScriptAllocation(void* ptr)

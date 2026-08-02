@@ -121,6 +121,8 @@ Build menu UI: submenus, categories, and groups. Most builders return a handle y
 | `menu.create_group(name, [per_row]) -> Group` | Creates a standalone group (drawn manually via `group:draw()`). `per_row` default 7. |
 | `menu.is_open() -> boolean` | Returns true if the menu is open. |
 | `menu.toggle()` | Toggles the menu open/closed. |
+| `menu.add_imgui(fn)` | Registers a raw ImGui draw callback rendered every frame while the menu is open. |
+| `menu.add_always_draw_imgui(fn)` | Registers a raw ImGui draw callback rendered every frame regardless of whether the menu is open. |
 
 #### Submenu
 | Method | Description |

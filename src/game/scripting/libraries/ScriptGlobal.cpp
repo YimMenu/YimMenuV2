@@ -1,3 +1,4 @@
+#include "core/memory/PointerCalculator.hpp"
 #include "core/scripting/LuaLibrary.hpp"
 #include "core/scripting/LuaScript.hpp"
 #include "core/scripting/LuaUtils.hpp"
@@ -77,6 +78,16 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
+		static int GetPointer(lua_State* state)
+		{
+			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
+			void* value = nullptr;
+			if (global.CanAccess())
+				value = global.As<void*>();
+			PushObject<PointerCalculator>(state, PointerCalculator(value));
+			return 1;
+		}
+
 		static int SetInt(lua_State* state)
 		{
 			auto& global = GetObject<YimMenu::ScriptGlobal>(state, 1);
@@ -134,6 +145,7 @@ namespace YimMenu::Lua
 					SetFunction(state, GetFloat, "get_float");
 					SetFunction(state, GetString, "get_string");
 					SetFunction(state, GetVector3, "get_vector3");
+					SetFunction(state, GetPointer, "get_pointer");
 					SetFunction(state, SetInt, "set_int");
 					SetFunction(state, SetFloat, "set_float");
 					SetFunction(state, SetString, "set_string");

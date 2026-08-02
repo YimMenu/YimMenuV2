@@ -9,9 +9,9 @@ namespace YimMenu::Submenus
 		auto target    = std::make_shared<Group>("Primary Target", 1);
 		auto intel   = std::make_shared<Group>("Intel", 2);
 
-		auto vehicles  = std::make_shared<CollapsingHeaderItem>("Vehicles", 2);
-		auto equipment = std::make_shared<CollapsingHeaderItem>("Equipment", 4);
-		auto optinalPrep     = std::make_shared<CollapsingHeaderItem>("Optinal Prep Work", 3);
+		auto vehicles  = std::make_shared<CollapsingHeaderItem>("Vehicles");
+		auto equipment = std::make_shared<CollapsingHeaderItem>("Equipment");
+		auto optinalPrep     = std::make_shared<CollapsingHeaderItem>("Optinal Prep Work");
 
 		auto action    = std::make_shared<Group>("", 1);
 

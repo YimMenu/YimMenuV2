@@ -240,9 +240,11 @@ namespace YimMenu::Submenus
 			STATS::STAT_SET_STRING(hash, value.data(), true);
 			return;
 		case sStatData::Type::PACKED:
+		{
 			auto uint64_ = std::strtoull(value.data(), nullptr, 10);
 			Stats::SetMaskedAll(hash, uint64_);
 			return;
+		}
 		default:
 			return; // data type not supported
 		}

@@ -1,4 +1,4 @@
-#include "Stats.hpp"
+﻿#include "Stats.hpp"
 #include "game/gta/Natives.hpp"
 
 namespace YimMenu::Stats
@@ -132,4 +132,60 @@ namespace YimMenu::Stats
 		STATS::STAT_GET_MASKED_INT(Joaat(statName), &value, bitIndex, bitSize, -1);
 		return value;
 	}
+
+
+	void Stats::SetMaskedAll(Hash hash, uint64_t value)
+	{
+		uint64_t uint64_value = value;
+		int part0 = uint64_value & 0xFFFFu;
+		int part1 = (uint64_value >> 16) & 0xFFFFu;
+		int part2 = (uint64_value >> 32) & 0xFFFFu;
+		int part3 = (uint64_value >> 48) & 0xFFFFu;
+		// The second input parameter is of type int. Using -1 will cause the entire data to overflow
+		//so you have to split the 64-bit data into 4 parts to write it.
+		STATS::STAT_SET_MASKED_INT(hash, part0, 0, 16, true);  //bit0-bit15
+		STATS::STAT_SET_MASKED_INT(hash, part1, 16, 16, true); //bit16-bit31
+		STATS::STAT_SET_MASKED_INT(hash, part2, 32, 16, true); //bit32-bit47
+		STATS::STAT_SET_MASKED_INT(hash, part3, 48, 16, true); //bit48-bit63
+	}
+
+	void Stats::SetMaskedAll(std::string statName, uint64_t value)
+	{
+		ConvertMPX(statName);
+		uint64_t uint64_value = value;
+		int part0 = uint64_value & 0xFFFFu;
+		int part1 = (uint64_value >> 16) & 0xFFFFu;
+		int part2 = (uint64_value >> 32) & 0xFFFFu;
+		int part3 = (uint64_value >> 48) & 0xFFFFu;
+		
+		auto hash = Joaat(statName);
+		STATS::STAT_SET_MASKED_INT(hash, part0, 0, 16, true);  //bit0-bit15
+		STATS::STAT_SET_MASKED_INT(hash, part1, 16, 16, true); //bit16-bit31
+		STATS::STAT_SET_MASKED_INT(hash, part2, 32, 16, true); //bit32-bit47
+		STATS::STAT_SET_MASKED_INT(hash, part3, 48, 16, true); //bit48-bit63
+	}
+
+	uint64_t GetMaskedAll(Hash hash, int playerindex)
+	{
+		int part0 = 0, part1 = 0, part2 = 0, part3 = 0;
+		STATS::STAT_GET_MASKED_INT(hash, &part0, 0, 16, playerindex);
+		STATS::STAT_GET_MASKED_INT(hash, &part1, 16, 16, playerindex);
+		STATS::STAT_GET_MASKED_INT(hash, &part2, 32, 16, playerindex);
+		STATS::STAT_GET_MASKED_INT(hash, &part3, 48, 16, playerindex);
+		uint64_t value = (static_cast<uint64_t>(part3) << 48) | (static_cast<uint64_t>(part2) << 32) | (static_cast<uint64_t>(part1) << 16) | part0;
+		return value;
+	}
+
+	uint64_t GetMaskedAll(std::string statName, int playerindex)
+	{
+		Hash hash = Joaat(statName);
+		int part0 = 0, part1 = 0, part2 = 0, part3 = 0;
+		STATS::STAT_GET_MASKED_INT(hash, &part0, 0, 16, playerindex);
+		STATS::STAT_GET_MASKED_INT(hash, &part1, 16, 16, playerindex);
+		STATS::STAT_GET_MASKED_INT(hash, &part2, 32, 16, playerindex);
+		STATS::STAT_GET_MASKED_INT(hash, &part3, 48, 16, playerindex);
+		uint64_t value = (static_cast<uint64_t>(part3) << 48) | (static_cast<uint64_t>(part2) << 32) | (static_cast<uint64_t>(part1) << 16) | part0;
+		return value;
+	}
+
 }

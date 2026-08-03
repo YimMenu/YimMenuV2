@@ -1,8 +1,10 @@
-#include "StatEditor.hpp"
-#include "core/backend/FiberPool.hpp"
+﻿#include "core/backend/FiberPool.hpp"
+#include "core/frontend/widgets/imgui_bitfield.hpp"
 #include "game/backend/AnticheatBypass.hpp"
-#include "game/pointers/Pointers.hpp"
 #include "game/gta/Natives.hpp"
+#include "game/gta/Stats.hpp"
+#include "game/pointers/Pointers.hpp"
+#include "StatEditor.hpp"
 #include "types/stats/CStatsMgr.hpp"
 
 namespace YimMenu::Submenus
@@ -10,11 +12,11 @@ namespace YimMenu::Submenus
 	struct StatInfo
 	{
 		std::string m_Name;
-		std::uint32_t m_NameHash;
+		std::uint32_t m_NameHash = 0;
 		bool m_Normalized = false;
 		sStatData* m_Data = nullptr;
 
-		bool IsValid()
+		bool IsValid() const
 		{
 			return m_Data != nullptr;
 		}
@@ -26,7 +28,7 @@ namespace YimMenu::Submenus
 		bool m_IsBoolStat;
 		bool m_IsValid;
 
-		bool IsValid()
+		bool IsValid() const
 		{
 			return m_IsValid;
 		}
@@ -128,6 +130,7 @@ namespace YimMenu::Submenus
 			value.m_AsU64 = data->GetInt64();
 			return;
 		case sStatData::Type::UINT64:
+		case sStatData::Type::PACKED:
 			value.m_AsU64 = data->GetUInt64();
 			return;
 		case sStatData::Type::STRING:
@@ -154,16 +157,30 @@ namespace YimMenu::Submenus
 		case sStatData::Type::UINT8:
 			STATS::STAT_SET_INT(hash, value.m_AsInt, true);
 			return;
-		case sStatData::Type::INT64:
-			data->SetInt64(value.m_AsU64); // TODO this isn't a good idea! natives can't set this
+		case sStatData::Type::INT64:			
+			data->SetInt64(value.m_AsU64 - 1);
+			STATS::STAT_INCREMENT(hash, static_cast<float>(1));
 			return;
 		case sStatData::Type::UINT64:
-			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)value.m_AsU64, 0, 32, true);
-			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)(value.m_AsU64 >> 32), 32, 32, true);
+			//Stats::SetMaskedAll(hash, value.m_AsU64);
+			//This code is simpler
+			//After writing, restarting will restore the data
+			data->SetUInt64(value.m_AsU64 - 1);
+			//You need to use STATS::STAT_INCREMENT to save the data on the server.
+			STATS::STAT_INCREMENT(hash, static_cast<float>(1));
 			return;
 		case sStatData::Type::STRING:
 			STATS::STAT_SET_STRING(hash, value.m_AsString, true);
 			return;
+		case sStatData::Type::PACKED:
+			/*data->SetUInt64(value.m_AsU64 - 1);
+			Packed data can't be written using STATS::STAT_INCREMENT
+			STATS::STAT_INCREMENT(hash, static_cast<float>(1));*/
+			Stats::SetMaskedAll(hash, value.m_AsU64);
+			return;
+		case sStatData::Type::POS:
+		case sStatData::Type::DATE:
+		case sStatData::Type::PROFILE_SETTING:
 		default:
 			return; // data type not supported
 		}
@@ -208,19 +225,23 @@ namespace YimMenu::Submenus
 		case sStatData::Type::INT64:
 		{
 			auto int64_ = std::strtoll(value.data(), nullptr, 10);
-			data->SetInt64(int64_); // TODO this isn't a good idea! natives can't set this
+			data->SetInt64(int64_-1);
+			STATS::STAT_INCREMENT(hash, static_cast<float>(1));
 			return;
 		}
 		case sStatData::Type::UINT64:
 		{
 			auto uint64_ = std::strtoull(value.data(), nullptr, 10);
-
-			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)uint64_, 0, 32, true);
-			STATS::STAT_SET_MASKED_INT(hash, (std::uint32_t)(uint64_ >> 32), 32, 32, true);
+			data->SetUInt64(uint64_ - 1);
+			STATS::STAT_INCREMENT(hash, static_cast<float>(1));
 			return;
 		}
 		case sStatData::Type::STRING:
 			STATS::STAT_SET_STRING(hash, value.data(), true);
+			return;
+		case sStatData::Type::PACKED:
+			auto uint64_ = std::strtoull(value.data(), nullptr, 10);
+			Stats::SetMaskedAll(hash, uint64_);
 			return;
 		default:
 			return; // data type not supported
@@ -245,11 +266,13 @@ namespace YimMenu::Submenus
 		case sStatData::Type::UINT8:
 			return ImGui::InputScalar("Value", ImGuiDataType_U8, &value.m_AsInt);
 		case sStatData::Type::INT64:
-			return ImGui::InputScalar("Value", ImGuiDataType_S64, &value.m_AsInt);
+			return ImGui::InputScalar("Value", ImGuiDataType_S64, &value.m_AsU64);
 		case sStatData::Type::UINT64:
-			return ImGui::InputScalar("Value", ImGuiDataType_U64, &value.m_AsInt);
+			return ImGui::InputScalar("Value", ImGuiDataType_U64, &value.m_AsU64);
 		case sStatData::Type::STRING:
 			return ImGui::InputText("Value", value.m_AsString, sizeof(value.m_AsString));
+		case sStatData::Type::PACKED:
+			return ImGui::Bitfield("Value", &value.m_AsU64);
 		default:
 			ImGui::BeginDisabled();
 			ImGui::Text("Data type not supported");

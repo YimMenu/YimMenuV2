@@ -27,6 +27,7 @@ namespace YimMenu::Features
 		ScriptPatch m_ProcessPhoneHackingPatch{};
 		ScriptPatch m_QuickRestartPatch1{};
 		ScriptPatch m_QuickRestartPatch2{};
+		ScriptPatch m_CasinoBoardPatch{};
 
 		virtual void OnEnable() override
 		{
@@ -151,6 +152,13 @@ namespace YimMenu::Features
 				m_QuickRestartPatch2 = ScriptPatches::AddPatch("fm_mission_controller"_J, ScriptPointer("QuickRestartPatch2", "5A 47 00 5D ? ? ? 5D ? ? ? 75"), {0x2B, 0x00, 0x00});
 			}
 			m_QuickRestartPatch2->Enable();
+
+			if (!m_CasinoBoardPatch)
+			{
+				m_CasinoBoardPatch = ScriptPatches::AddPatch("fmmc_launcher"_J, ScriptPointer("casinosolo", "2D 01 03 00 00 5D ? ? ? 2A 06 56 05 00 5D ? ? ? 20 2A 06 56 05 00 5D").Add(5), {0x71, 0x2E, 0x01, 0x01});
+			}
+			m_CasinoBoardPatch->Enable();
+			// By this patch, you can use the finale board of casino heist, and can change outfits or teams in missions like Lowriders
 		}
 
 		virtual void OnTick() override
@@ -258,6 +266,10 @@ namespace YimMenu::Features
 			if (m_QuickRestartPatch2)
 			{
 				m_QuickRestartPatch2->Disable();
+			}
+			if (m_CasinoBoardPatch)
+			{
+				m_CasinoBoardPatch->Disable();
 			}
 		}
 	};

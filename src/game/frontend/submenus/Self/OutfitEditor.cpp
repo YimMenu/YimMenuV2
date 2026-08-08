@@ -1,235 +1,274 @@
 #include "OutfitEditor.hpp"
-
-#include "core/frontend/manager/UIManager.hpp"
-#include "game/backend/Self.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "core/backend/FiberPool.hpp"
+#include "game/backend/Outfit.hpp"
+#include "core/frontend/Notifications.hpp"
+#include "game/backend/Self.hpp"
 #include "game/gta/Natives.hpp"
-
-#include <random>
-
-// TODO: clean up more AI generated junk from this file
+#include "core/util/Strings.hpp"
+#include "misc/cpp/imgui_stdlib.h"
 
 namespace YimMenu
 {
-	int GetMaxDrawable(int slot)
+	class OutfitEditorMenu
 	{
-		auto ped = Self::GetPed();
-		return PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(static_cast<int>(ped.GetHandle()), slot);
-	}
+		Outfit::OutfitComponents components{};
+		Outfit::OutfitProps props{};
+		std::vector<std::string> folders{}, files{};
+		std::string folder{}, file{};
+		char outfitName[64]{}, newFolder[50]{};
 
-	int GetMaxTexture(int slot, int drawable)
-	{
-		auto ped = Self::GetPed();
-		return PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(static_cast<int>(ped.GetHandle()), slot, drawable);
-	}
-
-	int GetMaxPropDrawable(int slot)
-	{
-		auto ped = Self::GetPed();
-		return PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(static_cast<int>(ped.GetHandle()), slot);
-	}
-
-	int GetMaxPropTexture(int slot, int drawable)
-	{
-		auto ped = Self::GetPed();
-		return PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(static_cast<int>(ped.GetHandle()), slot, drawable);
-	}
-
-	void GetOutfitSlot(int slot, int& drawable, int& texture)
-	{
-		auto ped = Self::GetPed();
-		drawable = PED::GET_PED_DRAWABLE_VARIATION(static_cast<int>(ped.GetHandle()), slot);
-		texture = PED::GET_PED_TEXTURE_VARIATION(static_cast<int>(ped.GetHandle()), slot);
-	}
-
-	void GetPropSlot(int slot, int& drawable, int& texture)
-	{
-		auto ped = Self::GetPed();
-		drawable = PED::GET_PED_PROP_INDEX(static_cast<int>(ped.GetHandle()), slot, 0);
-		if (drawable == -1)
+	public:
+		// refreshes the outfit editor data to current ped outfit
+		void RefreshStats()
 		{
-			drawable = 0;
-			texture = 0;
-			return;
+			auto ped = Self::GetPed().GetHandle();
+			for (auto& t : components.items)
+			{
+				auto& item = t.second;
+				item.drawable_id = PED::GET_PED_DRAWABLE_VARIATION(ped, t.first);
+				item.drawable_id_max = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(ped, t.first) - 1;
+				item.texture_id = PED::GET_PED_TEXTURE_VARIATION(ped, t.first);
+				item.texture_id_max = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(ped, t.first, item.drawable_id) - 1;
+			}
+
+			for (auto& t : props.items)
+			{
+				auto& item = t.second;
+				item.drawable_id = PED::GET_PED_PROP_INDEX(ped, t.first, 0);
+				item.drawable_id_max = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(ped, t.first) - 1;
+				item.texture_id = PED::GET_PED_PROP_TEXTURE_INDEX(ped, t.first);
+				item.texture_id_max = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(ped, t.first, item.drawable_id) - 1;
+			}
 		}
-		texture = PED::GET_PED_PROP_TEXTURE_INDEX(static_cast<int>(ped.GetHandle()), slot);
-	}
 
-	void SetOutfitSlot(int slot, int drawable, int texture)
-	{
-		auto ped = Self::GetPed();
-		PED::SET_PED_COMPONENT_VARIATION(static_cast<int>(ped.GetHandle()), slot, drawable, texture, 0);
-	}
+		void RenderComponents()
+		{
+			ImGui::BeginGroup();
+			for (auto& t : components.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} [0,{}]##1", item.label, item.drawable_id_max).c_str(), &item.drawable_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsDrawable(item, 0);
+					FiberPool::Push([id = t.first, item, this] {
+						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), id, item.drawable_id, 0, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), id));
+						RefreshStats();
+					});
+				}
+			}
+			ImGui::EndGroup();
+		}
 
-	void SetPropSlot(int slot, int drawable, int texture)
-	{
-		auto ped = Self::GetPed();
-		PED::SET_PED_PROP_INDEX(static_cast<int>(ped.GetHandle()), slot, drawable, texture, true, 0);
-	}
+		void RenderComponentsTextures()
+		{
+			ImGui::BeginGroup();
+			for (auto& t : components.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} TEX [0,{}]##2", item.label, item.texture_id_max).c_str(), &item.texture_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsTexture(item, 0);
+					FiberPool::Push([id = t.first, item, this] {
+						PED::SET_PED_COMPONENT_VARIATION(Self::GetPed().GetHandle(), id, item.drawable_id, item.texture_id, PED::GET_PED_PALETTE_VARIATION(Self::GetPed().GetHandle(), id));
+						RefreshStats();
+					});
+				}
+			}
+			ImGui::EndGroup();
+		}
 
-	// Helper function for underlined text
-	static void TextUnderlined(const char* text)
-	{
-		ImGui::Text("%s", text);
-		ImVec2 min = ImGui::GetItemRectMin();
-		ImVec2 max = ImGui::GetItemRectMax();
-		min.y = max.y;
-		ImGui::GetWindowDrawList()->AddLine(min, max, ImGui::GetColorU32(ImGui::GetStyle().Colors[ImGuiCol_Text]));
-	}
+		void RenderProps()
+		{
+			for (auto& t : props.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} [0,{}]##3", item.label, item.drawable_id_max).c_str(), &item.drawable_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsDrawable(item, -1);
+					FiberPool::Push([id = t.first, item, this] {
+						if (item.drawable_id == -1)
+							PED::CLEAR_PED_PROP(Self::GetPed().GetHandle(), id, 1);
+						else
+							PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), id, item.drawable_id, 0, TRUE, 0);
+						RefreshStats();
+					});
+				}
+			}
+		}
 
-	static void TextUnderlinedAt(const char* text, float y)
-	{
-		auto old_cursor = ImGui::GetCursorPos();
-		ImGui::SetCursorPosY(y);
-		TextUnderlined(text);
-		ImGui::SetCursorPos(old_cursor);
-	}
+		void RenderPropsTextures()
+		{
+			for (auto& t : props.items)
+			{
+				auto& item = t.second;
+				ImGui::SetNextItemWidth(120);
+				if (ImGui::InputInt(std::format("{} TEX [0,{}]##4", item.label, item.texture_id_max).c_str(), &item.texture_id))
+				{
+					Outfit::OutfitEditor::CheckBoundsTexture(item, -1);
+					FiberPool::Push([id = t.first, item, this] {
+						PED::SET_PED_PROP_INDEX(Self::GetPed().GetHandle(), id, item.drawable_id, item.texture_id, TRUE, 0);
+						RefreshStats();
+					});
+				}
+			}
+		}
+
+		void RenderOutfitList()
+		{
+			ImGui::BeginGroup();
+			{
+				// folders
+				ImGui::SetNextItemWidth(300.f);
+				if (ImGui::BeginCombo("", folder.empty() ? "Root" : folder.c_str()))
+				{
+					if (ImGui::Selectable("Root", folder == ""))
+					{
+						folder.clear();
+						FiberPool::Push([this] {
+							Outfit::OutfitEditor::RefreshList(folder, folders, files);
+						});
+					}
+
+					for (std::string folderName : folders)
+						if (ImGui::Selectable(folderName.c_str(), folder == folderName))
+						{
+							folder = folderName;
+							FiberPool::Push([this] {
+								Outfit::OutfitEditor::RefreshList(folder, folders, files);
+							});
+						}
+
+					ImGui::EndCombo();
+				}
+
+				// files
+				static std::string search;
+				ImGui::SetNextItemWidth(300);
+				if (ImGui::InputTextWithHint("###outfitname", "Search", &search))
+					std::transform(search.begin(), search.end(), search.begin(), tolower);
+				if (ImGui::BeginListBox("##saved_outfits", ImVec2(300, 300)))
+				{
+					for (const auto& pair : files)
+					{
+						std::string pair_lower = pair;
+						std::transform(pair_lower.begin(), pair_lower.end(), pair_lower.begin(), tolower);
+						if (pair_lower.contains(search))
+						{
+							auto fileName = pair.c_str();
+							if (ImGui::Selectable(fileName, file == pair, ImGuiSelectableFlags_AllowItemOverlap))
+								file = pair;
+						}
+					}
+					ImGui::EndListBox();
+				}
+			}
+			ImGui::EndGroup();
+		}
+
+		void RenderSaveButton(bool saveToNewFolder)
+		{
+			if (ImGui::Button("Save Outfit"))
+				FiberPool::Push([saveToNewFolder, this] {
+					std::string fileName = TrimString(outfitName);
+					strcpy(outfitName, "");
+
+					if (!fileName.size())
+					{
+						Notifications::Show("Outfit", "Filename empty!", NotificationType::Warning);
+						return;
+					}
+
+					Outfit::OutfitEditor::SaveOutfit(fileName, folder);
+
+					if (saveToNewFolder)
+					{
+						folder = newFolder; // set current folder to newly created folder
+						strcpy(newFolder, "");
+					}
+
+					Outfit::OutfitEditor::RefreshList(folder, folders, files);
+				});
+		};
+
+		void RenderOutfitListControls()
+		{
+			ImGui::BeginGroup();
+			{
+				if (ImGui::Button("Refresh list"))
+					FiberPool::Push([this] {
+						Outfit::OutfitEditor::RefreshList(folder, folders, files);
+					});
+				ImGui::Spacing();
+				static bool applyHair = false;
+				ImGui::Checkbox("Apply hair", &applyHair);
+				ImGui::Spacing();
+				if (ImGui::Button("Apply Selected Outfit"))
+					FiberPool::Push([this] {
+						Outfit::OutfitEditor::ApplyOutfitFromJson(folder, file, applyHair);
+						applyHair = false; // reset everytime
+						RefreshStats();
+					});
+
+				ImGui::Spacing();
+
+				// save outfit
+				ImGui::Text("Outfit Name");
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(250);
+				ImGui::InputText("##filename", outfitName, IM_ARRAYSIZE(outfitName));
+
+				if (folder.empty())
+				{
+					ImGui::Text("Folder Name");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(250);
+					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
+					RenderSaveButton(true);
+				}
+				else
+					RenderSaveButton(false);
+			}
+			ImGui::EndGroup();
+		}
+	};
 
 	std::shared_ptr<Category> CreateOutfitsMenu()
 	{
+		static OutfitEditorMenu editor{};
 		auto category = std::make_shared<Category>("Outfit Editor");
 
 		category->AddItem(std::make_shared<ImGuiItem>([] {
-			if (!NativeInvoker::AreHandlersCached())
-				return ImGui::TextDisabled("Natives not cached yet");
-
-			auto ped = Self::GetPed();
-
-			if (!ped)
-				return ImGui::TextDisabled("Player ped not found");
-
-			// Create two columns layout
-			const float windowWidth = ImGui::GetContentRegionAvail().x;
-			const float columnWidth = windowWidth * 0.5f;
-			const float inputWidth = 120.0f; // Minimal width for number input
-
-			ImGui::Columns(2, "OutfitColumns", false);
-			ImGui::SetColumnWidth(0, columnWidth);
-
-			// Components section (Left column)
-
-			float header_y = ImGui::GetCursorPosY();
-
-			TextUnderlined("Components");
-			const struct
-			{
-				const char* name;
-				int slot;
-			} componentSlots[] = {{"Top", 11}, {"Undershirt", 8}, {"Legs", 4}, {"Feet", 6}, {"Accessories", 7}, {"Bags", 5}, {"Mask", 1}, {"Gloves", 3}, {"Decals", 10}, {"Armor", 9}};
-
-			bool first_iter = true;
-			for (const auto& component : componentSlots)
-			{
-				ImGui::PushID(component.slot);
-
-				int drawable, texture;
-				GetOutfitSlot(component.slot, drawable, texture);
-
-				ImGui::Text("%s", component.name);
-				ImGui::SameLine();
-
-				ImGui::SetCursorPosX(columnWidth - inputWidth * 2 - 10);
-
-				ImGui::PushItemWidth(inputWidth);
-				if (first_iter)
-					TextUnderlinedAt("Drawable", header_y);
-				if (ImGui::InputInt("##{}drawable", &drawable))
-				{
-					drawable = std::clamp(drawable, 0, GetMaxDrawable(component.slot) - 1);
-					SetOutfitSlot(component.slot, drawable, texture);
-				}
-				ImGui::SameLine();
-				if (first_iter)
-					TextUnderlinedAt("Texture", header_y); // TODO: this heading is slightly misaligned and I'm not sure why (caused by the above SameLine?)
-				if (ImGui::InputInt("##{}texture", &texture))
-				{
-					texture = std::clamp(texture, 0, GetMaxTexture(component.slot, drawable) - 1);
-					SetOutfitSlot(component.slot, drawable, texture);
-				}
-				ImGui::PopItemWidth();
-				ImGui::PopID();
-
-				first_iter = false;
-			}
-
-			// Props section (Right column)
-			ImGui::NextColumn();
-			TextUnderlined("Props");
-
-			const struct
-			{
-				const char* name;
-				int slot;
-			} propSlots[] = {{"Hats", 0}, {"Glasses", 1}, {"Ears", 2}, {"Watches", 6}};
-
-			first_iter = true;
-			for (const auto& prop : propSlots)
-			{
-				ImGui::PushID(prop.slot);
-
-				int drawable, texture;
-				GetPropSlot(prop.slot, drawable, texture);
-
-				ImGui::Text("%s", prop.name);
-				ImGui::SameLine();
-
-				ImGui::SetCursorPosX(columnWidth + (columnWidth - inputWidth * 2 - 10));
-
-				ImGui::PushItemWidth(inputWidth);
-				if (first_iter)
-					TextUnderlinedAt("Drawable", header_y);
-				if (ImGui::InputInt("##pdrawable", &drawable))
-				{
-					drawable = std::clamp(drawable, 0, GetMaxPropDrawable(prop.slot) - 1);
-					SetPropSlot(prop.slot, drawable, texture);
-				}
-				ImGui::SameLine();
-				if (first_iter)
-					TextUnderlinedAt("Texture", header_y);
-				if (ImGui::InputInt("##ptexture", &texture))
-				{
-					texture = std::clamp(texture, 0, GetMaxPropTexture(prop.slot, drawable) - 1);
-					SetPropSlot(prop.slot, drawable, texture);
-				}
-				ImGui::PopItemWidth();
-				ImGui::PopID();
-
-				first_iter = false;
-			}
-
-			ImGui::Columns(1);
-
+			if (ImGui::Button("Refresh Stats"))
+				FiberPool::Push([] {
+					editor.RefreshStats();
+				});
+			ImGui::SameLine();
 			if (ImGui::Button("Randomize Outfit"))
+				FiberPool::Push([] {
+					Self::GetPed().RandomizeOutfit2();
+				});
+
+			editor.RenderComponents();
+			ImGui::SameLine();
+			editor.RenderComponentsTextures();
+			ImGui::SameLine();
+			ImGui::BeginGroup();
 			{
-				std::random_device rd;
-				std::mt19937 gen(rd());
-
-				// Randomize components
-				for (int i = 0; i < 12; ++i)
-				{
-					int maxDrawable = GetMaxDrawable(i);
-					if (maxDrawable > 0)
-					{
-						int drawable = std::uniform_int_distribution<>(0, maxDrawable - 1)(gen);
-						int maxTexture = GetMaxTexture(i, drawable);
-						int texture = maxTexture > 0 ? std::uniform_int_distribution<>(0, maxTexture - 1)(gen) : 0;
-						SetOutfitSlot(i, drawable, texture);
-					}
-				}
-
-				// Randomize props
-				for (int i : {0, 1, 2, 6, 7})
-				{
-					int maxDrawable = GetMaxPropDrawable(i);
-					if (maxDrawable > 0)
-					{
-						int drawable = std::uniform_int_distribution<>(0, maxDrawable - 1)(gen);
-						int maxTexture = GetMaxPropTexture(i, drawable);
-						int texture = maxTexture > 0 ? std::uniform_int_distribution<>(0, maxTexture - 1)(gen) : 0;
-						SetPropSlot(i, drawable, texture);
-					}
-				}
+				editor.RenderProps();
+				ImGui::Spacing();
+				editor.RenderPropsTextures();
 			}
+			ImGui::EndGroup();
+
+			ImGui::Spacing();
+
+			editor.RenderOutfitList();
+			ImGui::SameLine();
+			editor.RenderOutfitListControls();
 		}));
 
 		return category;

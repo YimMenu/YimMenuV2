@@ -11,49 +11,45 @@
 #include "game/frontend/ChatDisplay.hpp"
 #include "game/gta/Natives.hpp"
 #include "types/pad/ControllerInputs.hpp"
-#include "core/frontend/manager/styles/Themes.hpp"
 
 namespace YimMenu
 {
-	GUI::GUI() :
-	    m_IsOpen(false)
+	void GUI::InitImpl()
 	{
-		Menu::SetupFonts();
-		SetupStyle();
 		Menu::Init();
 
 		Renderer::AddWindowProcedureCallback([this](HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 			GUI::WndProc(hwnd, msg, wparam, lparam);
 		});
 
-		Renderer::AddRendererCallBack(
+		Renderer::AddRendererCallback(
 		    [&] {
 			    Notifications::Draw();
 		    },
 		    -2);
-		Renderer::AddRendererCallBack(
+		Renderer::AddRendererCallback(
 		    [&] {
 			    ESP::Draw();
 		    },
 		    -3);
-		Renderer::AddRendererCallBack(
+		Renderer::AddRendererCallback(
 		    [&] {
 			    ChatDisplay::Draw();
 		    },
 		    -5);
-		Renderer::AddRendererCallBack(
+		Renderer::AddRendererCallback(
 		    [&] {
 			    Overlay::Draw();
 		    },
 		    -6);
-		Renderer::AddRendererCallBack(
+		Renderer::AddRendererCallback(
 		    [] {
 			    LuaManager::ForAllLoadedScripts([](std::shared_ptr<LuaScript>& script) {
 				    script->GetUserInterface().DrawAlwaysDrawImGuiCallbacks();
 			    });
 		    },
 		    -7);
-		Renderer::AddRendererCallBack(
+		Renderer::AddRendererCallback(
 		    [] {
 			    if (!GUI::IsOpen())
 				    return;
@@ -64,10 +60,6 @@ namespace YimMenu
 		    -4);
 		
 		Renderer::SetSafeToRender();
-	}
-
-	GUI::~GUI()
-	{
 	}
 
 	void GUI::ToggleMouse()
@@ -110,7 +102,7 @@ namespace YimMenu
 	{
 		while (g_Running)
 		{
-			if (GUI::IsOpen())
+			if (Renderer::IsInitialized() && GUI::IsOpen())
 			{
 				if (UIManager::ShowingContentWindow())
 				{

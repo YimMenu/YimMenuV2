@@ -1,8 +1,6 @@
 #include "core/hooking/DetourHook.hpp"
-#include "game/frontend/GUI.hpp"
+#include "core/renderer/Renderer.hpp"
 #include "game/hooks/Hooks.hpp"
-
-#include <imgui.h>
 
 namespace YimMenu::Hooks
 {
@@ -10,13 +8,16 @@ namespace YimMenu::Hooks
 	{
 		auto result = BaseHook::Get<RawInput::GetRawInputData, DetourHook<decltype(&RawInput::GetRawInputData)>>()->Original()(hRawInput, uiCommand, pData, pcbSize, cbSizeHeader);
 
-		if (result > 0 && pData && uiCommand == RID_INPUT && ImGui::GetIO().WantCaptureMouse)
+		if (result > 0 && pData && uiCommand == RID_INPUT)
 		{
-			auto& raw = *(RAWINPUT*)pData;
-			if (raw.header.dwType == RIM_TYPEMOUSE && raw.data.mouse.usButtonFlags)
+			if (Renderer::IsInitialized() && ImGui::GetIO().WantCaptureMouse)
 			{
-				// Zero out button flags to prevent game from seeing clicks while menu is open
-				raw.data.mouse.usButtonFlags = 0;
+				auto& raw = *(RAWINPUT*)pData;
+				if (raw.header.dwType == RIM_TYPEMOUSE && raw.data.mouse.usButtonFlags)
+				{
+					// Zero out button flags to prevent game from seeing clicks while menu is open
+					raw.data.mouse.usButtonFlags = 0;
+				}
 			}
 		}
 

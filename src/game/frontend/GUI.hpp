@@ -1,24 +1,13 @@
 #pragma once
-#include <windows.h>
 
 namespace YimMenu
 {
 	class GUI final
 	{
-	private:
-		GUI();
-
 	public:
-		~GUI();
-
-		GUI(const GUI&) = delete;
-		GUI(GUI&&) noexcept = delete;
-		GUI& operator=(const GUI&) = delete;
-		GUI& operator=(GUI&&) noexcept = delete;
-
 		static void Init()
 		{
-			GetInstance().m_IsOpen = false;
+			GetInstance().InitImpl();
 		}
 
 		static bool IsOpen()
@@ -51,13 +40,15 @@ namespace YimMenu
 			return GetInstance().m_Onboarding;
 		}
 
+		static void ToggleMouse();
+
 	private:
 		void WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
+		void InitImpl();
 		void SetOnboardingImpl(bool state);
 		void RunScriptImpl();
 
-		static void ToggleMouse();
 		static GUI& GetInstance()
 		{
 			static GUI i{};
@@ -65,7 +56,6 @@ namespace YimMenu
 			return i;
 		}
 
-	private:
 		bool m_IsOpen;
 		bool m_Onboarding;
 	};

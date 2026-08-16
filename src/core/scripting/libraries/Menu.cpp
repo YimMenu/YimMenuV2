@@ -165,6 +165,22 @@ namespace YimMenu::Lua
 		return 0;
 	}
 
+	static int MenuAddImGui(lua_State* state)
+	{
+		auto& iface = LuaScript::GetScript(state).GetUserInterface();
+		int   fn    = CaptureFunction(state, 1, true);
+		iface.AddImGuiCallback(fn);
+		return 0;
+	}
+
+	static int MenuAddAlwaysDrawImGui(lua_State* state)
+	{
+		auto& iface = LuaScript::GetScript(state).GetUserInterface();
+		int   fn    = CaptureFunction(state, 1, true);
+		iface.AddAlwaysDrawImGuiCallback(fn);
+		return 0;
+	}
+
 	static int MenuCreateGroup(lua_State* state)
 	{
 		auto& iface = LuaScript::GetScript(state).GetUserInterface();
@@ -408,6 +424,8 @@ namespace YimMenu::Lua
 			SetFunction(state, MenuCreateGroup, "create_group");
 			SetFunction(state, IsOpen, "is_open");
 			SetFunction(state, Toggle, "toggle");
+			SetFunction(state, MenuAddImGui, "add_imgui");
+			SetFunction(state, MenuAddAlwaysDrawImGui, "add_always_draw_imgui");
 			lua_setglobal(state, "menu");
 		}
 	};

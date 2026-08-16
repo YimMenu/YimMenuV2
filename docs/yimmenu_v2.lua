@@ -172,6 +172,12 @@ function menu.create_group(name, per_row) end
 ---@return boolean
 function menu.is_open() end
 function menu.toggle() end
+---Register a raw ImGui draw callback rendered every frame while the menu is open.
+---@param fn fun()
+function menu.add_imgui(fn) end
+---Register a raw ImGui draw callback rendered every frame regardless of whether the menu is open.
+---@param fn fun()
+function menu.add_always_draw_imgui(fn) end
 
 ---@param name string
 ---@return Category

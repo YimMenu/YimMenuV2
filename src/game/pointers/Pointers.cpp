@@ -28,11 +28,6 @@ namespace YimMenu
 
 		auto scanner = PatternScanner(gta5);
 
-		constexpr auto hWndPtrn = Pattern<"E8 ? ? ? ? 84 C0 74 25 48 8B 0D">("HWND");
-		scanner.Add(hWndPtrn, [this](PointerCalculator ptr) {
-			Hwnd = ptr.Add(9).Add(3).Rip().As<HWND*>();
-		});
-
 		constexpr auto screenResPtrn = Pattern<"75 39 0F 57 C0 F3 0F 2A 05">("ScreenRes");
 		scanner.Add(screenResPtrn, [this](PointerCalculator ptr) {
 			ScreenResX = ptr.Add(0x5).Add(4).Rip().As<std::uint32_t*>();

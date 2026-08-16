@@ -106,6 +106,7 @@ namespace YimMenu
 
 	EARLY_UNLOAD:
 		g_Running = false;
+		D3D12Hook::Destroy(true);
 		Renderer::Destroy();
 		LogHelper::Destroy();
 

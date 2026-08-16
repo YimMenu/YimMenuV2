@@ -17,9 +17,9 @@ namespace YimMenu
             return GetInstance().InitImpl();
         }
 
-        static bool Destroy()
+        static bool Destroy(bool unloading = false)
         {
-            return GetInstance().DestroyImpl();
+            return GetInstance().DestroyImpl(unloading);
         }
 
         static void OnPresent(std::function<void()> fn)
@@ -84,7 +84,7 @@ namespace YimMenu
         }
 
         bool InitImpl();
-        bool DestroyImpl();
+        bool DestroyImpl(bool unloading);
         void InstallHooks();
 
         static HRESULT Present(IDXGISwapChain3* swapChain, UINT syncInterval, UINT flags, void* r9);
@@ -97,8 +97,6 @@ namespace YimMenu
         ID3D12Device4* m_Device = nullptr;
         ID3D12CommandQueue* m_CommandQueue = nullptr;
         IDXGISwapChain3* m_SwapChain = nullptr;
-        IDXGISwapChain3* m_Swapchain0 = nullptr;
-        IDXGISwapChain3* m_Swapchain1 = nullptr;
         HWND m_Window = nullptr;
         bool m_Hooked = false;
         bool m_IsPhase1 = true;

@@ -71,7 +71,6 @@ namespace YimMenu
 
 	struct PointerData
 	{
-		HWND* Hwnd;
 		std::uint32_t* ScreenResX;
 		std::uint32_t* ScreenResY;
 		const char* GameVersion;

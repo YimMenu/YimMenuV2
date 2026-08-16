@@ -43,6 +43,8 @@ namespace YimMenu
 
     bool D3D12Hook::InitImpl()
     {
+		std::scoped_lock hookLock{m_HookMutex};
+
         g_InsideD3d12Hook = true;
         struct Restore
         {
@@ -302,7 +304,7 @@ namespace YimMenu
         return true;
     }
 
-    bool D3D12Hook::DestroyImpl()
+    bool D3D12Hook::DestroyImpl(bool unloading)
     {
         std::scoped_lock hookLock{m_HookMutex};
 
@@ -311,6 +313,9 @@ namespace YimMenu
 
         m_PresentPatch.Uninstall();
         m_SwapchainVmt.reset();
+
+		if (unloading)
+			m_CreateSwapchainPatch.Uninstall();
 
         m_Hooked = false;
         m_IsPhase1 = true;
@@ -381,11 +386,6 @@ namespace YimMenu
 
         GetInstance().m_CommandQueue = *reinterpret_cast<ID3D12CommandQueue**>(reinterpret_cast<uintptr_t>(swapChain) + GetInstance().m_CommandQueueOffset);
 
-        if (!GetInstance().m_Swapchain0)
-            GetInstance().m_Swapchain0 = swapChain;
-        else if (!GetInstance().m_Swapchain1 && swapChain != GetInstance().m_Swapchain0)
-            GetInstance().m_Swapchain1 = swapChain;
-
         if (GetInstance().m_OnPresent)
             GetInstance().m_OnPresent();
 
@@ -398,17 +398,8 @@ namespace YimMenu
 
         auto resizeBuffersFn = GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::ResizeBuffers)>(13);
 
-        HWND swapchainWnd = nullptr;
-        {
-            DXGI_SWAP_CHAIN_DESC swapchainDesc{};
-            if (SUCCEEDED(swapChain->GetDesc(&swapchainDesc)))
-                swapchainWnd = swapchainDesc.OutputWindow;
-        }
-
         if (GetInstance().m_OnResizeBuffers)
-        {
             GetInstance().m_OnResizeBuffers();
-        }
 
         return resizeBuffersFn(swapChain, bufferCount, width, height, newFormat, swapChainFlags);
     }

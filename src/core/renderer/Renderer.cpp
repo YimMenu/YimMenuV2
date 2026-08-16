@@ -83,8 +83,18 @@ namespace YimMenu
 
         if (!ImGui_ImplDX12_Init(&initInfo))
         {
-            LOGF(FATAL, "ImGui_ImplDX12_Init failed.");
-            return false;
+			LOGF(FATAL, "ImGui_ImplDX12_Init failed.");
+
+			ImGui_ImplWin32_Shutdown();
+			ImGui::DestroyContext();
+
+			if (m_Window && m_OriginalWndProc)
+				SetWindowLongPtrA(m_Window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(m_OriginalWndProc));
+
+			m_Window = nullptr;
+			m_OriginalWndProc = nullptr;
+
+			return false;
         }
 
         Menu::SetupFonts();
@@ -168,20 +178,20 @@ namespace YimMenu
         frame.Allocator->Reset();
         m_CommandList->Reset(frame.Allocator.Get(), nullptr);
 
-        D3D12_RESOURCE_BARRIER toRt{};
-        toRt.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        toRt.Transition.pResource = m_BackBuffers[index].Get();
-        toRt.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-        toRt.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        toRt.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        m_CommandList->ResourceBarrier(1, &toRt);
-
-        m_CommandList->OMSetRenderTargets(1, &m_RtvHandles[index], FALSE, nullptr);
-        ID3D12DescriptorHeap* heaps[] = {m_SrvHeap.Get()};
-        m_CommandList->SetDescriptorHeaps(1, heaps);
-
         if (m_SafeToRender)
         {
+			D3D12_RESOURCE_BARRIER toRt{};
+			toRt.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			toRt.Transition.pResource = m_BackBuffers[index].Get();
+			toRt.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			toRt.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			toRt.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			m_CommandList->ResourceBarrier(1, &toRt);
+
+			m_CommandList->OMSetRenderTargets(1, &m_RtvHandles[index], FALSE, nullptr);
+			ID3D12DescriptorHeap* heaps[] = {m_SrvHeap.Get()};
+			m_CommandList->SetDescriptorHeaps(1, heaps);
+
             if (m_FontsUpdated)
             {
 				InvalidateDeviceObjects();
@@ -220,6 +230,10 @@ namespace YimMenu
 			D3D12Hook::GetCommandQueue()->Signal(m_Fence.Get(), m_FenceValue);
 			frame.FenceValue = m_FenceValue;
         }
+		else
+		{
+			m_CommandList->Close();
+		}
     }
 
     void Renderer::Resize()

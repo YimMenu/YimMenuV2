@@ -39,7 +39,7 @@ namespace YimMenu::Submenus
 		int m_AsInt;
 		bool m_AsBool;
 		std::uint64_t m_AsU64;
-		char m_AsString[64];
+		char m_AsString[21];
 		Date m_Date;
 	};
 
@@ -144,10 +144,12 @@ namespace YimMenu::Submenus
 			STATS::STAT_GET_DATE(hash, &value.m_Date, sizeof(Date) / 8, true);
 			return;
 		case sStatData::Type::USERID:
-			char user_id[64]{};
+		{
+			char user_id[21]{};
 			data->GetUserID(user_id, sizeof(user_id));
 			value.m_AsU64 = std::strtoull(user_id, nullptr, 10);
 			return;
+		}
 		case sStatData::Type::PROFILE_SETTING:
 		case sStatData::Type::TEXTLABEL:
 		default:
@@ -198,8 +200,10 @@ namespace YimMenu::Submenus
 			return;
 		case sStatData::Type::POS:
 			STATS::STAT_SET_POS(hash, value.m_AsFloat[0], value.m_AsFloat[1], value.m_AsFloat[2], true);
+			return;
 		case sStatData::Type::DATE:
 			STATS::STAT_SET_DATE(hash, &value.m_Date, sizeof(Date) / 8, true);
+			return;
 		case sStatData::Type::PROFILE_SETTING:
 		case sStatData::Type::TEXTLABEL:
 		default:
@@ -283,7 +287,6 @@ namespace YimMenu::Submenus
 		case sStatData::Type::USERID:
 			if (value.find_first_not_of("0123456789") == std::string::npos && !value.empty())
 				STATS::STAT_SET_USER_ID(hash, value.data(), true);
-			//data->SetUserID(value.data());
 			return;
 		case sStatData::Type::DATE:
 		{

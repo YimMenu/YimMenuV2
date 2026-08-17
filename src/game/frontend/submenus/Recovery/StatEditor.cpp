@@ -189,9 +189,12 @@ namespace YimMenu::Submenus
 			STATS::STAT_SET_STRING(hash, value.m_AsString, true);
 			return;
 		case sStatData::Type::USERID:
-			STATS::STAT_SET_USER_ID(hash, std::string(value.m_AsString).c_str(), true);
+		{
+			std::string user_id = std::to_string(value.m_AsU64);
+			STATS::STAT_SET_USER_ID(hash, user_id.c_str(), true);
 			//data->SetUserID(value.m_AsString);
 			return;
+		}
 		case sStatData::Type::PACKED:
 			/*data->SetUInt64(value.m_AsU64 - 1);
 			Packed data can't be written using STATS::STAT_INCREMENT

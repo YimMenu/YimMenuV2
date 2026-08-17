@@ -281,12 +281,10 @@ namespace YimMenu::Submenus
 			return;
 		}
 		case sStatData::Type::USERID:
-		{
-			auto uint64_ = std::strtoull(value.data(), nullptr, 10);
-			std::string user_id = std::to_string(uint64_);
-			STATS::STAT_SET_USER_ID(hash, user_id.c_str(), true);
+			if (value.find_first_not_of("0123456789") == std::string::npos && !value.empty())
+				STATS::STAT_SET_USER_ID(hash, value.data(), true);
+			//data->SetUserID(value.data());
 			return;
-		}
 		case sStatData::Type::DATE:
 		{
 			std::stringstream ss(value.data());
@@ -296,14 +294,12 @@ namespace YimMenu::Submenus
 
 			while (std::getline(ss, token, ','))
 			{
-				try
-				{
-					date.emplace_back(std::stoi(token));
-				}
-				catch (...)
-				{
-					date.emplace_back(0);
-				}
+				uint32_t date_token = 0;
+				auto [ptr, ec] = std::from_chars(token.c_str(), token.c_str() + token.size(), date_token);
+				if (ec != std::errc())
+					return;
+
+				date.emplace_back(date_token);
 			}
 
 			if (date.size() == 7)
@@ -333,14 +329,12 @@ namespace YimMenu::Submenus
 
 			while (std::getline(ss, token, ','))
 			{
-				try
-				{
-					pos.emplace_back(std::stof(token));
-				}
-				catch (...)
-				{
-					pos.emplace_back(0.0f);
-				}
+				float pos_token = 0.0f;
+				auto [ptr, ec] = std::from_chars(token.c_str(), token.c_str() + token.size(), pos_token);
+				if (ec != std::errc())
+					return;
+
+				pos.emplace_back(pos_token);
 			}
 			if (pos.size() == 3)
 			{

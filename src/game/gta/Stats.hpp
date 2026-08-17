@@ -28,7 +28,6 @@ namespace YimMenu::Stats
 	extern int GetMaskedInt(std::string statName, int bitIndex, int bitSize);
 
 	//You can directly write/read all packed int/bool and uint64 statistics.
-	//pos/date seems to work too,but the data structure is still unclear for now.
 	extern void SetMaskedAll(std::string statName, uint64_t value);
 	extern void SetMaskedAll(Hash hash, uint64_t value);
 	uint64_t GetMaskedAll(Hash hash, int playerindex=-1);

@@ -83,12 +83,13 @@ namespace YimMenu
 	static ImVec4 Blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
 	static ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// We want to worldToScreen to return a bool since it will write {0.f, 0.f} to the screen vector if the entity is off-screen, messing up our draws
+	// We want worldToScreen to return a bool since it will write {0.f, 0.f} to the screen vector if the entity is off-screen, messing up our draws
 	static auto worldToScreen = [](rage::fvector3 coords) -> std::optional<ImVec2> {
 		float screen_x{}, screen_y{};
 		if (!GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(coords.x, coords.y, coords.z, &screen_x, &screen_y))
 			return std::nullopt;
 
+		// Instead of returning a zero vector if the bool is false, we will return a nullopt
 		return ImVec2{screen_x * (*Pointers.ScreenResX), screen_y * (*Pointers.ScreenResY)};
 	};
 
@@ -109,7 +110,6 @@ namespace YimMenu
 		};
 
 		// What's the point of drawing a skeleton if we don't draw the most important bone?
-
 		auto headScreen = worldToScreen(ped.GetBonePosition(headBone));
 		auto neckScreen = worldToScreen(ped.GetBonePosition(neckBone));
 

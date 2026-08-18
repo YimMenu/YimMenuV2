@@ -6,6 +6,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "StatEditor.hpp"
 #include "types/stats/CStatsMgr.hpp"
+#include <charconv>
 
 namespace YimMenu::Submenus
 {

@@ -34,7 +34,7 @@ namespace YimMenu::Lua
 	};
 
 	// Tries to get the userdata or errors out
-	template <typename T>
+	template<typename T>
 	inline T& GetObject(lua_State* state, int idx)
 	{
 		auto data = lua_touserdata(state, idx);
@@ -82,6 +82,36 @@ namespace YimMenu::Lua
 		lua_setfield(state, -2, name);
 	}
 
+	static int CaptureFunction(lua_State* state, int idx, bool required)
+	{
+		if (lua_isnoneornil(state, idx))
+		{
+			if (required)
+				luaL_argerror(state, idx, "expected a function");
+			return LUA_NOREF;
+		}
+		luaL_checktype(state, idx, LUA_TFUNCTION);
+		lua_pushvalue(state, idx);
+		return luaL_ref(state, LUA_REGISTRYINDEX);
+	}
+
+	struct EnumEntry
+	{
+		const char* name;
+		int value;
+	};
+
+	inline void RegisterEnum(lua_State* state, const char* table_name, const EnumEntry* entries, size_t count)
+	{
+		lua_newtable(state);
+		for (size_t i = 0; i < count; i++)
+		{
+			lua_pushinteger(state, entries[i].value);
+			lua_setfield(state, -2, entries[i].name);
+		}
+		lua_setglobal(state, table_name);
+	}
+
 	// This is a terrible hack
 	template<lua_CFunction actual_func>
 	inline int DropSelf(lua_State* state)
@@ -104,7 +134,7 @@ namespace YimMenu::Lua
 
 	// Creates an object and pushes it on the stack
 	template<typename T, class... Args>
-	inline T* CreateObject(lua_State* state, Args&& ...args)
+	inline T* CreateObject(lua_State* state, Args&&... args)
 	{
 		void* data = lua_newuserdata(state, sizeof(T));
 		new (data) T(std::forward<Args>(args)...); // construct in-place
@@ -120,6 +150,16 @@ namespace YimMenu::Lua
 	{
 		void* data = lua_newuserdata(state, sizeof(T));
 		*reinterpret_cast<T*>(data) = existing;
+		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
+		lua_setmetatable(state, -2);
+		return reinterpret_cast<T*>(data);
+	}
+
+	template<typename T, typename U>
+	static T* PushObject(lua_State* state, U&& source)
+	{
+		void* data = lua_newuserdata(state, sizeof(T));
+		new (data) T(std::forward<U>(source));
 		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
 		lua_setmetatable(state, -2);
 		return reinterpret_cast<T*>(data);

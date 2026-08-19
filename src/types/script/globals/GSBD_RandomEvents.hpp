@@ -57,8 +57,9 @@ struct RANDOM_EVENTS_TARGET_DATA
 {
 	PLAYER_INDEX PhantomCarTarget; // 0
 	PLAYER_INDEX XMASMuggerTarget; // 1
+	PLAYER_INDEX CommunityOutreachTarget; // 2
 };
-static_assert(sizeof(RANDOM_EVENTS_TARGET_DATA) == 2 * 8);
+static_assert(sizeof(RANDOM_EVENTS_TARGET_DATA) == 3 * 8);
 
 struct GSBD_RandomEvents
 {
@@ -69,4 +70,4 @@ struct GSBD_RandomEvents
 
 	static GSBD_RandomEvents* Get();
 };
-static_assert(sizeof(GSBD_RandomEvents) == 366 * 8);
+static_assert(sizeof(GSBD_RandomEvents) == 367 * 8);

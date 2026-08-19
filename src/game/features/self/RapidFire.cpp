@@ -39,8 +39,8 @@ namespace YimMenu::Features
 					const auto weapon_position =
 					    ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(weapon_entity, dimensions.x, 0, dimensions.z * 0.3f);
 
-					auto camera_direction = Math::RotationToDirection(CAM::GET_GAMEPLAY_CAM_ROT(0));
-					auto camera_position = CAM::GET_GAMEPLAY_CAM_COORD() + camera_direction;
+					auto camera_direction = Math::RotationToDirection(CAMERA::GET_GAMEPLAY_CAM_ROT(0));
+					auto camera_position = CAMERA::GET_GAMEPLAY_CAM_COORD() + camera_direction;
 
 					Vector3 end = camera_position + camera_direction * 2000.0;
 

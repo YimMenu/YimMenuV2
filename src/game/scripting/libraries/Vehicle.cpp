@@ -90,7 +90,7 @@ namespace YimMenu::Lua
 
 		static int SetBoostCharge(lua_State* state)
 		{
-			GetObject<YimMenu::Vehicle>(state, 1).SetBoostCharge(lua_gettop(state) >= 2 ? luaL_checkinteger(state, 3) : 100);
+			GetObject<YimMenu::Vehicle>(state, 1).SetBoostCharge(lua_gettop(state) >= 2 ? luaL_checkinteger(state, 2) : 100);
 			return 0;
 		}
 

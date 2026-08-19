@@ -1,5 +1,4 @@
 #pragma once
-#include <d3d11.h>
 
 class CNetworkPlayerMgr;
 class CNetGamePlayer;
@@ -34,19 +33,11 @@ namespace YimMenu
 
 namespace YimMenu::Hooks
 {
-	namespace SwapChain
-	{
-		constexpr auto VMTPresentIdx = 8;
-		constexpr auto VMTResizeBuffersIdx = 13;
-		extern HRESULT Present(IDXGISwapChain* that, UINT syncInterval, UINT flags);
-		extern HRESULT ResizeBuffers(IDXGISwapChain* that, UINT bufferCount, UINT width, UINT height, DXGI_FORMAT newFormat, UINT swapChainFlags);
-	}
-
 	namespace Anticheat
 	{
 		extern void QueueDependency(__int64 a1);
 		extern void GameSkeletonUpdate(rage::gameSkeleton* skeleton, int type);
-		extern bool PrepareMetricForSending(rage::JsonSerializer* ser, void* a2, void* a3, rage::rlMetric* metric);
+		extern bool PrepareMetricForSending(rage::JsonSerializer* ser, bool* failed, char* a3, uint64_t time, rage::rlMetric* metric);
 		extern BOOL GetThreadContext(HANDLE hThread, LPCONTEXT lpContext);
 		extern void HttpStartRequest(void* request);
 		extern bool BattlEyeServerProcessPlayerJoin(CBattlEyePlayerModifyInterface* server_iface, CBattlEyePlayerModifyContext* context);
@@ -96,6 +87,11 @@ namespace YimMenu::Hooks
 	namespace Window
 	{
 		extern LRESULT WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
+	}
+
+	namespace RawInput
+	{
+		extern UINT GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, LPVOID pData, PUINT pcbSize, UINT cbSizeHeader);
 	}
 
 	namespace Misc

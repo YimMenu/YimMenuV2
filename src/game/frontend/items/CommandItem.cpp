@@ -23,8 +23,11 @@ namespace YimMenu
 
 		if (ImGui::Button(m_LabelOverride.has_value() ? m_LabelOverride.value().data() : m_Command->GetLabel().data()))
 		{
-			FiberPool::Push([this] {
-				m_Command->Call();
+			// Capture the command by value, not 'this'. This item may be drawn from a 
+			// Lua command handle's :draw()) and gets destroyed before the FiberPool task runs.
+			auto command = m_Command;
+			FiberPool::Push([command] {
+				command->Call();
 			});
 		}
 

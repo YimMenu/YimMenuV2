@@ -1,6 +1,8 @@
 #include "core/commands/LoopedCommand.hpp"
 #include "game/backend/Self.hpp"
 #include "game/gta/Scripts.hpp"
+#include "game/gta/ScriptGlobal.hpp"
+#include "game/pointers/Pointers.hpp"
 #include "types/script/globals/GlobalPlayerBD.hpp"
 
 namespace YimMenu::Features
@@ -12,7 +14,10 @@ namespace YimMenu::Features
 		virtual void OnTick() override
 		{
 			if (auto gpbd = GlobalPlayerBD::Get(); gpbd && Scripts::SafeToModifyFreemodeBroadcastGlobals())
+			{
+				*ScriptGlobal(2673276).At(58).As<int*>() = *Pointers.NetworkTime;
 				gpbd->Entries[Self::GetPlayer().GetId()].OffRadarActive = true;
+			}
 		}
 
 		virtual void OnDisable() override

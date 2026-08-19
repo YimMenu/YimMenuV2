@@ -71,12 +71,11 @@ namespace YimMenu
 	bool Entity::IsValid()
 	{
 		if (m_Handle)
-		{
 			return ENTITY::DOES_ENTITY_EXIST(m_Handle);
-		}
-		else if (m_Pointer)
+
+		if (m_Pointer)
 		{
-			return true; // TODO: potential use after free
+			return Pointers.PtrToHandle(m_Pointer) != 0;
 		}
 
 		return false;

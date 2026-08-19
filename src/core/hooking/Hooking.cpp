@@ -10,11 +10,7 @@ namespace YimMenu
 {
 	Hooking::Hooking()
 	{
-		BaseHook::Add<Hooks::Window::WndProc>(new DetourHook("WndProc", Pointers.WndProc, Hooks::Window::WndProc));
-
-		auto swapchain_vft = *reinterpret_cast<void***>(*Pointers.SwapChain);
-		BaseHook::Add<Hooks::SwapChain::Present>(new DetourHook("Present", swapchain_vft[Hooks::SwapChain::VMTPresentIdx], Hooks::SwapChain::Present));
-		BaseHook::Add<Hooks::SwapChain::ResizeBuffers>(new DetourHook("ResizeBuffers", swapchain_vft[Hooks::SwapChain::VMTResizeBuffersIdx], Hooks::SwapChain::ResizeBuffers));
+		BaseHook::Add<Hooks::RawInput::GetRawInputData>(new DetourHook("GetRawInputData", reinterpret_cast<void*>(GetProcAddress(LoadLibraryA("user32.dll"), "GetRawInputData")), Hooks::RawInput::GetRawInputData));
 
 		// BaseHook::Add<Hooks::Anticheat::QueueDependency>(new DetourHook("QueueDependency", Pointers.QueueDependency, Hooks::Anticheat::QueueDependency));
 		BaseHook::Add<Hooks::Anticheat::GameSkeletonUpdate>(new DetourHook("GameSkeletonUpdate", Pointers.GameSkeletonUpdate, Hooks::Anticheat::GameSkeletonUpdate));

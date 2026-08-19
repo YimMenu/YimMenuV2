@@ -24,8 +24,8 @@ namespace YimMenu
 
 	bool RayCast::Cast()
 	{
-		Vector3 camCoords = CAM::GET_GAMEPLAY_CAM_COORD();
-		Vector3 rot = CAM::GET_GAMEPLAY_CAM_ROT(2);
+		Vector3 camCoords = CAMERA::GET_GAMEPLAY_CAM_COORD();
+		Vector3 rot = CAMERA::GET_GAMEPLAY_CAM_ROT(2);
 		Vector3 dir = Math::RotationToDirection(rot);
 		Vector3 farCoords;
 

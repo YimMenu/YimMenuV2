@@ -1,7 +1,4 @@
 #pragma once
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <windows.h>
 #include "types/script/scrNativeHandler.hpp"
 #include "types/rage/ObfVar.hpp"
 #include "core/memory/BytePatches.hpp"
@@ -74,10 +71,6 @@ namespace YimMenu
 
 	struct PointerData
 	{
-		IDXGISwapChain1** SwapChain;
-		ID3D12CommandQueue** CommandQueue;
-		HWND* Hwnd;
-		PVOID WndProc;
 		std::uint32_t* ScreenResX;
 		std::uint32_t* ScreenResY;
 		const char* GameVersion;

@@ -25,6 +25,12 @@ namespace YimMenu
 		return std::string(start, end);
 	}
 
+	inline std::string TrimString(char* str)
+	{
+		std::string t = str;
+		return TrimString(t);
+	}
+
 	inline void StrCpySafe(char* dest, const char* src, int dest_size)
 	{
 		auto len = dest_size - 1;

@@ -93,8 +93,8 @@ namespace YimMenu
 
 				if (opcode.opcode == 0x8B && opcode.modrm_mod != 3)
 				{
-					uint8_t regId = opcode.rex_r | opcode.modrm_reg;
-					switch (regId)
+					uint8_t regIdx = opcode.rex_r << 3 | opcode.modrm_reg;
+					switch (regIdx)
 					{
 					case 0: exception_info->ContextRecord->Rax = 0; break;
 					case 1: exception_info->ContextRecord->Rcx = 0; break;

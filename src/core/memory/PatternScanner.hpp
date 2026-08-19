@@ -21,6 +21,13 @@ namespace YimMenu
 
 		template<Signature S>
 		void Add(const Pattern<S>& pattern, const PatternFunc& func);
+
+		// Runtime-pattern overload for lua scripts
+		inline void Add(const IPattern& pattern, const PatternFunc& func)
+		{
+			m_Patterns.push_back(std::make_pair(&pattern, func));
+		}
+
 		bool Scan();
 
 	private:

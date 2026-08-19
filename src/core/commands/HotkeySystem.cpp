@@ -1,6 +1,8 @@
 #include "HotkeySystem.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
+#include "core/renderer/D3D12Hook.hpp"
+#include "core/renderer/Renderer.hpp"
 #include "Commands.hpp"
 #include "LoopedCommand.hpp"
 #include "core/util/Joaat.hpp"
@@ -95,7 +97,7 @@ namespace YimMenu
 	{
 		while (g_Running)
 		{
-			if (GetForegroundWindow() == *Pointers.Hwnd && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified && !GUI::IsUsingKeyboard())
+			if (GetForegroundWindow() == D3D12Hook::GetWindow() && !HUD::IS_PAUSE_MENU_ACTIVE() && !HUD::IS_SOCIAL_CLUB_ACTIVE() && !m_BeingModified && (Renderer::IsInitialized() && !GUI::IsUsingKeyboard()))
 			{
 				for (auto& [hash, link] : m_CommandHotkeys)
 				{

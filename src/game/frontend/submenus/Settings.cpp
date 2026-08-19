@@ -99,7 +99,7 @@ namespace YimMenu::Submenus
 		overlay->AddItem(std::make_shared<BoolCommandItem>("overlay"_J));
 		overlay->AddItem(std::make_shared<ConditionalItem>("overlay"_J, std::make_shared<BoolCommandItem>("overlayfps"_J)));
 
-		chat->AddItem(std::make_shared<BoolCommandItem>("clearchat"_J));
+		chat->AddItem(std::make_shared<CommandItem>("clearchat"_J));
 
 		gui->AddItem(std::make_shared<CommandItem>("unloadmenu"_J));
 		game->AddItem(playerEsp);

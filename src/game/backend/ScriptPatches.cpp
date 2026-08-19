@@ -123,6 +123,15 @@ namespace YimMenu
 		return scr_patch;
 	}
 
+	void ScriptPatches::RemovePatchImpl(const std::shared_ptr<Patch>& patch)
+	{
+		if (!patch)
+			return;
+			
+		patch->Disable();
+		std::erase(m_Patches, patch);
+	}
+
 	void ScriptPatches::RegisterProgramImpl(rage::scrProgram* program)
 	{
 		if (auto it = m_Datas.find(program->m_NameHash); it != m_Datas.end())

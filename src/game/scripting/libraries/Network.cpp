@@ -3,6 +3,7 @@
 #include "core/scripting/LuaUtils.hpp"
 #include "game/gta/Natives.hpp"
 #include "game/backend/Self.hpp"
+#include "game/gta/Scripts.hpp"
 
 namespace YimMenu::Lua
 {
@@ -64,10 +65,42 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
+		static int ForceScriptHost(lua_State* state)
+        {
+            auto script_hash = GetHashArgument(state, 1);
+
+            auto thread = YimMenu::Scripts::FindScriptThread(script_hash);
+            if (!thread)
+                return 0;
+
+            YimMenu::Scripts::ForceScriptHost(thread);
+
+			return 0;
+        }
+
+		static int ForceScriptOnPlayer(lua_State* state)
+		{
+			auto script_hash = GetHashArgument(state, 1);
+			auto bits = luaL_checkinteger(state, 2);
+
+			YimMenu::Scripts::ForceScriptOnPlayer(script_hash, bits);
+
+			return 0;
+		}
+
+		static int IsSessionStarted(lua_State* state)
+		{
+			lua_pushboolean(state, *Pointers.IsSessionStarted);
+			return 1;
+		}
+
 		virtual void Register(lua_State* state) override
 		{
 			lua_newtable(state);
 			SetFunction(state, TriggerScriptEvent, "trigger_script_event");
+			SetFunction(state, ForceScriptHost, "force_script_host");
+			SetFunction(state, ForceScriptOnPlayer, "force_script_on_player");
+			SetFunction(state, IsSessionStarted, "is_session_started");
 			lua_setglobal(state, "network");
 		}
 	};

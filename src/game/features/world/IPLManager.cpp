@@ -25,7 +25,7 @@ namespace YimMenu::Features
 	};
 
 	static IPLSelectorHelper g_IPLSelectorHelper{};
-	static ListCommand _IPLSelector{"iplselector", "IPL set to load", "IPL set to load", g_IPLSelectorHelper.availableIplNames, 0};
+	static ListCommand _IPLSelector{"iplselector", "IPL", "The IPL to load", g_IPLSelectorHelper.availableIplNames, 0};
 
 	class IPLLoader : public Command
 	{

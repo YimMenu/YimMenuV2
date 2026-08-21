@@ -10,6 +10,6 @@ namespace YimMenu
 
 	bool ScriptGlobal::CanAccess() const
 	{
-		return Pointers.ScriptGlobals && (m_Index >> 0x12 & 0x3F) < 0x40 && Pointers.ScriptGlobals[m_Index >> 0x12 & 0x3F];
+		return Pointers.ScriptGlobals && Pointers.ScriptGlobals[m_Index >> 0x12 & 0x3F];
 	}
 }

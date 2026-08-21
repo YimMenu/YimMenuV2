@@ -22,5 +22,9 @@ struct CAnticheatContext
 	bool m_IsDebugMode;
 	volatile __int32 m_CurrentScanIndex;
 	std::uint64_t qwordA98;
+	std::uint64_t m_Timer;
+	char byteAA8[24];
+	char byteAC0[24];
+	char gapAD8[8];
 };
-static_assert(sizeof(CAnticheatContext) == 0xAA0);
+static_assert(sizeof(CAnticheatContext) == 0xAE0);

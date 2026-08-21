@@ -9,65 +9,67 @@
 #include "game/gta/Vehicle.hpp"
 #include "misc/cpp/imgui_stdlib.h"
 
+#include <algorithm>
+#include <cctype>
+#include <cfloat>
+#include <string>
+#include <string_view>
+#include <vector>
+
 namespace YimMenu::Submenus
 {
 	static BoolCommand spawnInsideSavedVehicle{"spawninsidesavedveh", "Spawn Inside", "Spawn inside the vehicle."};
+
+	namespace
+	{
+		// Get rid of the ".json" file extension so keep the saved car list a little cleaner
+		std::string GetDisplayName(const std::string& fileName)
+		{
+			constexpr std::string_view extension = ".json";
+			if (fileName.size() > extension.size() && std::string_view(fileName).ends_with(extension))
+				return fileName.substr(0, fileName.size() - extension.size());
+
+			return fileName;
+		}
+
+		std::string ToLower(std::string value)
+		{
+			std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
+				return static_cast<char>(std::tolower(c));
+			});
+			return value;
+		}
+	}
 
 	std::shared_ptr<Category> BuildSavedVehiclesMenu()
 	{
 		static std::string folder{}, file{};
 		static std::vector<std::string> folders{}, files{};
-		static char vehicle_file_name_input[64]{};
-		static char newFolder[50]{};
+		static std::string vehicleFileNameInput{}, newFolder{}, search{};
 
 		auto persistCar = std::make_shared<Category>("Saved Vehicles");
 
 		persistCar->AddItem(std::make_shared<BoolCommandItem>("spawninsidesavedveh"_J));
 
 		persistCar->AddItem(std::make_unique<ImGuiItem>([] {
-			static auto drawSaveVehicleButton = [](bool saveToNewFolder) {
-				if (!Self::GetVehicle() || !Self::GetVehicle().IsValid())
-					return;
+			// Remove the need to refresh the list manually when the tab is opened
+			static int lastDrawnFrame = -1;
+			const int currentFrame = ImGui::GetFrameCount();
+			const bool justOpened = (currentFrame != lastDrawnFrame + 1);
+			lastDrawnFrame = currentFrame;
 
-				if (ImGui::Button("Save"))
-					FiberPool::Push([saveToNewFolder] {
-						std::string fileName = TrimString(vehicle_file_name_input);
-						strcpy(vehicle_file_name_input, "");
-
-						if (!fileName.size())
-						{
-							Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
-							return;
-						}
-
-						SavedVehicles::Save(saveToNewFolder ? newFolder : folder, fileName);
-
-						if (saveToNewFolder)
-						{
-							folder = newFolder; // set current folder to newly created folder
-							strcpy(newFolder, "");
-						}
-
-						SavedVehicles::RefreshList(folder, folders, files);
-					});
-				ImGui::SameLine();
-				if (ImGui::Button("Populate Name"))
-					FiberPool::Push([] {
-						std::string name = Self::GetVehicle().GetFullName();
-						strcpy(vehicle_file_name_input, name.c_str());
-					});
-			};
-
-			if (ImGui::Button("Refresh List"))
+			if (justOpened)
 				FiberPool::Push([] {
 					SavedVehicles::RefreshList(folder, folders, files);
 				});
 
-			ImGui::SetNextItemWidth(300.f);
-			auto folder_display = folder.empty() ? "Root" : folder.c_str();
-			if (ImGui::BeginCombo("Folder", folder_display))
+			auto vehicle = Self::GetVehicle();
+			const bool inVehicle = vehicle.IsValid();
+
+			ImGui::SetNextItemWidth(240.f);
+			if (ImGui::BeginCombo("Folder", folder.empty() ? "Root" : folder.c_str()))
 			{
-				if (ImGui::Selectable("Root", folder == ""))
+				if (ImGui::Selectable("Root", folder.empty()))
 				{
 					folder.clear();
 					FiberPool::Push([] {
@@ -75,89 +77,151 @@ namespace YimMenu::Submenus
 					});
 				}
 
-				for (std::string folder_name : folders)
-					if (ImGui::Selectable(folder_name.c_str(), folder == folder_name))
+				for (const auto& folderName : folders)
+				{
+					if (ImGui::Selectable(folderName.c_str(), folder == folderName))
 					{
-						folder = folder_name;
+						folder = folderName;
 						FiberPool::Push([] {
 							SavedVehicles::RefreshList(folder, folders, files);
 						});
 					}
+				}
 
 				ImGui::EndCombo();
 			}
 
-			static bool open_modal = false;
-			static std::string search;
-
-			ImGui::SetNextItemWidth(300);
-			if (ImGui::InputTextWithHint("###veh_name", "Search", &search))
-				std::transform(search.begin(), search.end(), search.begin(), tolower);
-
-			ImGui::Text("Saved Vehicles");
-
-			static const auto over_30 = (30 * ImGui::GetTextLineHeightWithSpacing() + 2);
-			const auto box_height = files.size() <= 30 ? (files.size() * ImGui::GetTextLineHeightWithSpacing() + 2) : over_30;
-			ImGui::SetNextItemWidth(250);
-			if (ImGui::BeginListBox("##saved_vehs", ImVec2(300, box_height)))
-			{
-				for (const auto& pair : files)
-				{
-					std::string pair_lower = pair;
-					std::transform(pair_lower.begin(), pair_lower.end(), pair_lower.begin(), tolower);
-					if (pair_lower.contains(search))
-					{
-						auto file_name = pair.c_str();
-						if (ImGui::Selectable(file_name, file == pair, ImGuiSelectableFlags_AllowItemOverlap))
-						{
-							file = pair;
-							open_modal = true;
-						}
-					}
-				}
-				ImGui::EndListBox();
-			}
 			ImGui::SameLine();
-			ImGui::BeginGroup();
-			{
-				ImGui::Text("File Name");
-				ImGui::SetNextItemWidth(250);
-				ImGui::InputText("##vehiclefilename", vehicle_file_name_input, IM_ARRAYSIZE(vehicle_file_name_input));
+			if (ImGui::Button("Refresh List"))
+				FiberPool::Push([] {
+					SavedVehicles::RefreshList(folder, folders, files);
+				});
 
-				if (folder.empty())
+			ImGui::SameLine();
+			ImGui::TextDisabled("%d saved", static_cast<int>(files.size()));
+
+			ImGui::Spacing();
+
+			const float rowHeight = ImGui::GetTextLineHeightWithSpacing();
+			const float minPaneHeight = 8.f * rowHeight + ImGui::GetFrameHeightWithSpacing() * 2.5f;
+			const float paneHeight = std::max(ImGui::GetContentRegionAvail().y, minPaneHeight);
+			constexpr float listWidth = 340.f;
+
+			// Browser frame
+			if (ImGui::BeginChild("##saved_vehicles_list_pane", ImVec2(listWidth, paneHeight)))
+			{
+				ImGui::SeparatorText("Saved Vehicles");
+
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputTextWithHint("##veh_search", "Search", &search);
+
+				const std::string searchLower = ToLower(search);
+
+				if (ImGui::BeginListBox("##saved_vehs", ImVec2(-FLT_MIN, -FLT_MIN)))
 				{
-					ImGui::Text("Folder Name");
-					ImGui::SetNextItemWidth(250);
-					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
-					drawSaveVehicleButton(true);
+					bool anyVisible = false;
+
+					for (const auto& fileName : files)
+					{
+						const std::string displayName = GetDisplayName(fileName);
+
+						if (!searchLower.empty() && !ToLower(displayName).contains(searchLower))
+							continue;
+
+						anyVisible = true;
+
+						ImGui::PushID(fileName.c_str());
+						if (ImGui::Selectable(displayName.c_str(), file == fileName))
+						{
+							file = fileName;
+
+							// Spawn immediately - no confirmation modal.
+							FiberPool::Push([selectedFolder = folder, selectedFile = fileName] {
+								SavedVehicles::Load(selectedFolder, selectedFile, spawnInsideSavedVehicle.GetState());
+							});
+						}
+						if (ImGui::IsItemHovered())
+							ImGui::SetTooltip("Click to spawn %s", displayName.c_str());
+						ImGui::PopID();
+					}
+
+					if (!anyVisible)
+						ImGui::TextDisabled(files.empty() ? "  No saved vehicles in this folder." : "  No matches.");
+
+					ImGui::EndListBox();
+				}
+			}
+			ImGui::EndChild();
+
+			ImGui::SameLine();
+
+			if (ImGui::BeginChild("##saved_vehicles_save_pane", ImVec2(0.f, paneHeight)))
+			{
+				ImGui::SeparatorText("Save Current Vehicle");
+
+				if (!inVehicle)
+				{
+					ImGui::TextDisabled("Get into a vehicle to save it.");
 				}
 				else
-					drawSaveVehicleButton(false);
-			}
-			ImGui::EndGroup();
+				{
+					const bool savingToNewFolder = folder.empty();
 
-			if (open_modal)
-				ImGui::OpenPopup("##spawncarmodel2");
-			if (ImGui::BeginPopupModal("##spawncarmodel2", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove))
-			{
-				ImGui::Text("Are you sure you want to spawn %s", file.c_str());
-				ImGui::Spacing();
-				if (ImGui::Button("Yes"))
-				{
-					FiberPool::Push([] {
-						SavedVehicles::Load(folder, file, spawnInsideSavedVehicle.GetState());
-					});
-					open_modal = false;
-					ImGui::CloseCurrentPopup();
+					ImGui::Text("File Name");
+					ImGui::SetNextItemWidth(250.f);
+					ImGui::InputTextWithHint("##vehiclefilename", "Name this vehicle", &vehicleFileNameInput);
+
+					if (savingToNewFolder)
+					{
+						ImGui::Text("Folder Name");
+						ImGui::SetNextItemWidth(250.f);
+						ImGui::InputTextWithHint("##foldername", "Leave empty for Root", &newFolder);
+					}
+
+					ImGui::Spacing();
+
+					if (ImGui::Button("Save"))
+					{
+						const std::string fileName = TrimString(vehicleFileNameInput);
+
+						if (fileName.empty())
+						{
+							Notifications::Show("Saved Vehicles", "Filename empty!", NotificationType::Warning);
+						}
+						else
+						{
+							const std::string targetFolder = savingToNewFolder ? newFolder : folder;
+
+							vehicleFileNameInput.clear();
+
+							if (savingToNewFolder)
+							{
+								folder = newFolder; // jump to the folder we just saved into
+								newFolder.clear();
+							}
+
+							FiberPool::Push([targetFolder, fileName] {
+								SavedVehicles::Save(targetFolder, fileName);
+								SavedVehicles::RefreshList(folder, folders, files);
+							});
+						}
+					}
+
+					ImGui::SameLine();
+					if (ImGui::Button("Populate Name"))
+						FiberPool::Push([] {
+							vehicleFileNameInput = Self::GetVehicle().GetFullName();
+						});
 				}
-				ImGui::SameLine();
-				if (ImGui::Button("No"))
+
+				if (!file.empty())
 				{
-					open_modal = false;
-					ImGui::CloseCurrentPopup();
+					ImGui::Spacing();
+					ImGui::SeparatorText("Last Spawned");
+					ImGui::TextWrapped("%s", GetDisplayName(file).c_str());
 				}
-				ImGui::EndPopup();
 			}
+			ImGui::EndChild();
 		}));
 
 		return persistCar;

@@ -50,10 +50,7 @@ namespace YimMenu
 	template<typename T>
 	inline DetourHook<T>::~DetourHook()
 	{
-		if (m_OriginalFunc)
-		{
-			MH_RemoveHook(m_TargetFunc);
-		}
+		DisableNow();
 	}
 
 	template<typename T>

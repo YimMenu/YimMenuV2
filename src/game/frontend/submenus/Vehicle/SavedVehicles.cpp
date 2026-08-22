@@ -9,13 +9,6 @@
 #include "game/gta/Vehicle.hpp"
 #include "misc/cpp/imgui_stdlib.h"
 
-#include <algorithm>
-#include <cctype>
-#include <cfloat>
-#include <string>
-#include <string_view>
-#include <vector>
-
 namespace YimMenu::Submenus
 {
 	static BoolCommand spawnInsideSavedVehicle{"spawninsidesavedveh", "Spawn Inside", "Spawn inside the vehicle."};
@@ -104,7 +97,7 @@ namespace YimMenu::Submenus
 
 			const float rowHeight = ImGui::GetTextLineHeightWithSpacing();
 			const float minPaneHeight = 8.f * rowHeight + ImGui::GetFrameHeightWithSpacing() * 2.5f;
-			const float paneHeight = std::max(ImGui::GetContentRegionAvail().y, minPaneHeight);
+			const float paneHeight = std::max(ImGui::GetContentRegionAvail().y, minPaneHeight); // Since we can resize the YimMenu window, it's best to scale the panel height to the available Y-space
 			constexpr float listWidth = 340.f;
 
 			// Browser frame
@@ -135,7 +128,7 @@ namespace YimMenu::Submenus
 						{
 							file = fileName;
 
-							// Spawn immediately - no confirmation modal.
+							// With this change we're going to spawn immediately without asking for a yes/no confirmation
 							FiberPool::Push([selectedFolder = folder, selectedFile = fileName] {
 								SavedVehicles::Load(selectedFolder, selectedFile, spawnInsideSavedVehicle.GetState());
 							});
@@ -146,7 +139,7 @@ namespace YimMenu::Submenus
 					}
 
 					if (!anyVisible)
-						ImGui::TextDisabled(files.empty() ? "  No saved vehicles in this folder." : "  No matches.");
+						ImGui::TextDisabled(files.empty() ? "  No saved vehicles in this folder." : "  No matches."); // Provide some feedback to the user so they're not just seeing an empty panel without explanation
 
 					ImGui::EndListBox();
 				}

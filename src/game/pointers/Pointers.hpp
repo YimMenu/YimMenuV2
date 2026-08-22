@@ -2,7 +2,6 @@
 #include "types/script/scrNativeHandler.hpp"
 #include "types/rage/ObfVar.hpp"
 #include "core/memory/BytePatches.hpp"
-#include "types/rage/gameViewport.hpp"
 
 namespace rage
 {
@@ -165,7 +164,6 @@ namespace YimMenu
 		PVOID MatchmakingUnadvertise;
 		PVOID MatchmakingSessionDetailSendResponse;
 		PVOID GameSkeletonUpdate;
-		rage::gameViewport* GameViewport;
 	};
 
 	struct Pointers : PointerData

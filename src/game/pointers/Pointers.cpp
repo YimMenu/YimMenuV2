@@ -432,11 +432,6 @@ namespace YimMenu
 			GameSkeletonUpdate = addr.As<PVOID>();
 		});
 
-		constexpr auto viewportPtrn = Pattern<"48 8D 35 ? ? ? ? 48 01 C6 F3 0F 10 5B 08 F3 0F 10 0B">("GameViewport");
-		scanner.Add(viewportPtrn, [this](PointerCalculator ptr) {
-			GameViewport = ptr.Add(3).Rip().Add(0x460).As<rage::gameViewport*>();
-		});
-
 		if (!scanner.Scan())
 		{
 			LOG(FATAL) << "Some patterns could not be found, unloading.";

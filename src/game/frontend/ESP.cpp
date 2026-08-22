@@ -11,7 +11,6 @@
 #include "game/gta/Scripts.hpp"
 #include "game/gta/invoker/Invoker.hpp"
 #include "game/gta/Natives.hpp"
-#include "game/graphics/World2Screen.hpp"
 
 namespace
 {
@@ -84,14 +83,14 @@ namespace YimMenu
 	static ImVec4 Blue = ImVec4(0.36f, 0.71f, 0.89f, 1.f);
 	static ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	// We want worldToScreen to return a bool since it will write {0.f, 0.f} to the screen vector if the entity is off-screen, messing up our draws
 	static auto worldToScreen = [](rage::fvector3 coords) -> std::optional<ImVec2> {
-		rage::vector2 screen{0.f, 0.f};
-
-		if (!World2Screen::W2S(coords, screen))
+		float screen_x{}, screen_y{};
+		if (!GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(coords.x, coords.y, coords.z, &screen_x, &screen_y))
 			return std::nullopt;
 
-		// Return vector is already normalized inside our W2S function.
-		return ImVec2{screen.x, screen.y};
+		// Instead of returning a zero vector if the bool is false, we will return a nullopt
+		return ImVec2{screen_x * (*Pointers.ScreenResX), screen_y * (*Pointers.ScreenResY)};
 	};
 
 	void DrawSkeleton(Ped ped, ImDrawList* drawList, ImColor color)

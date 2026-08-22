@@ -199,12 +199,12 @@ namespace YimMenu
 	bool Tunable::IsReady()
 	{
 		if (m_Global)
-			return true;
+			return m_Global->CanAccess();
 
 		m_Global = Tunables::GetTunable(m_Hash);
 
 		if (m_Global)
-			return true;
+			return m_Global->CanAccess();
 
 		return false;
 	}

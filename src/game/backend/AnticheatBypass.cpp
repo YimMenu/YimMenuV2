@@ -333,7 +333,8 @@ namespace YimMenu
 
 		if (!m_FSLProvidesBEBypass && !m_BattlEyeRunning)
 		{
-			Pointers.BattlEyeStatusUpdatePatch->Apply();
+			// this is integrity checked now
+			//Pointers.BattlEyeStatusUpdatePatch->Apply();
 
 #if RESTORE_DESTROYED_FUNCTIONS
 			uintptr_t base = ModuleMgr.Get("GTA5_Enhanced.exe"_J)->Base();

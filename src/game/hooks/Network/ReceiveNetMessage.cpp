@@ -119,6 +119,8 @@ namespace YimMenu::Hooks
 					buffer.Seek(buffer.Read<std::uint32_t>(13));
 			}
 
+			bool dropPackedReliables = false;
+
 			if ((flags & 4) != 0)
 			{
 				if (auto num_msgs = buffer.Read<int>(5))
@@ -127,18 +129,25 @@ namespace YimMenu::Hooks
 					auto pos_now = buffer.m_BitsRead;
 					while (pos_now + sz > buffer.m_BitsRead)
 					{
+						if (buffer.m_BitsRead + 18 > buffer.m_MaxBit)
+							break;
+
 						auto id = buffer.Read<std::uint16_t>(13);
 						auto token = buffer.Read<int>(5);
+						(void)token;
 						bool reject = false;
 
-						if (Self::GetPed().GetPointer<void*>() && Self::GetPed().GetNetworkObjectId() == id)
+						auto ped = Self::GetPed();
+						if (ped && ped.GetPointer<void*>() && ped.IsNetworked() && ped.GetNetworkObjectId() == id)
 						{
 							if (player)
 								LOGF(WARNING, "Blocked player deletion crash from {}", player.GetName());
 							reject = true;
+							dropPackedReliables = true;
 						}
 
-						if (Self::GetVehicle() && Self::GetVehicle().HasControl() && Self::GetVehicle().GetNetworkObjectId() == id)
+						auto veh = Self::GetVehicle();
+						if (veh && veh.HasControl() && veh.IsNetworked() && veh.GetNetworkObjectId() == id)
 						{
 							if (player)
 								LOGF(WARNING, "Blocked vehicle deletion from {}", player.GetName());
@@ -148,12 +157,16 @@ namespace YimMenu::Hooks
 						if (reject)
 						{
 							rage::datBitBuffer write_buf(fr_evt->m_Data, fr_evt->m_Length);
-							write_buf.Seek(buffer.m_BitsRead - 5 - 13);
-							write_buf.Write<std::uint16_t>(0xFFFF, 16);
+							write_buf.Seek(static_cast<int>(buffer.m_BitsRead - 5 - 13));
+							write_buf.Write<std::uint16_t>(0xFFFF, 13); //Writing a 16 - bit ID into a 13 - bit field corrupted the packet and crashed in the original handler after a blocked player deletion.
+
 						}
 					}
 				}
 			}
+
+			if (dropPackedReliables)
+				return;
 
 			break;
 		}

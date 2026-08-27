@@ -20,7 +20,7 @@ namespace YimMenu::Submenus
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
-		
+
 		// this assumes we can't add new commands in runtime, but a lot of other subsystems assume that too
 		static std::map<std::string, CommandLink*> sortedCommands;
 		static bool commandsSorted = []() {
@@ -101,6 +101,7 @@ namespace YimMenu::Submenus
 
 		chat->AddItem(std::make_shared<CommandItem>("clearchat"_J));
 
+		gui->AddItem(std::make_shared<CommandItem>("unloadmenu"_J));
 		game->AddItem(playerEsp);
 		game->AddItem(pedEsp);
 		game->AddItem(objectEsp);

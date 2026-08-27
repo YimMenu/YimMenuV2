@@ -98,7 +98,11 @@ namespace YimMenu::Submenus
 
 
 				auto ip = Players::GetSelected().GetExternalAddress();
-
+				auto& playerData = Players::GetSelected().GetData();
+				if (playerData.m_HasAddresses)
+				{
+					ip = playerData.m_ExternalAddress;
+				}
 				auto addr2 = BuildIPStr(ip.m_IpAddress.m_Field1, ip.m_IpAddress.m_Field2, ip.m_IpAddress.m_Field3, ip.m_IpAddress.m_Field4);
 
 				ImGui::Text("IP Address:");

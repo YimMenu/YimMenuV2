@@ -34,6 +34,19 @@ namespace YimMenu::Hooks
 		auto fr_evt = reinterpret_cast<rage::netEventFrameReceived*>(event);
 		rage::datBitBuffer buffer(fr_evt->m_Data, fr_evt->m_Length, true);
 
+		// Capture real IP address from network event
+		auto player = Players::GetByMessageId(fr_evt->m_MsgId);
+		if (player && player.IsValid())
+		{
+			auto& playerData = Players::GetPlayerData(player.GetId());
+			if (!playerData.m_HasAddresses)
+			{
+				playerData.m_ExternalAddress = fr_evt->m_Address.m_ExternalIp;
+				playerData.m_InternalAddress = fr_evt->m_Address.m_InternalIp;
+				playerData.m_HasAddresses = true;
+			}
+		}
+
 		rage::netMessage::Type type = ReadType(buffer).value_or(rage::netMessage::Type::Invalid);
 
 		switch (type)

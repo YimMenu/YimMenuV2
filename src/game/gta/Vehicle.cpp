@@ -108,12 +108,69 @@ namespace YimMenu
 
 		VEHICLE::SET_VEHICLE_MOD_KIT(veh, 0);
 
-		for (int t = (int)VehicleModType::MOD_SPOILERS; t < (int)VehicleModType::MOD_LIGHTBAR; t++)
+		for (int t = static_cast<int>(VehicleModType::MOD_SPOILERS); t < static_cast<int>(VehicleModType::MOD_LIGHTBAR); t++)
 		{
-			VEHICLE::SET_VEHICLE_MOD(veh, t, VEHICLE::GET_NUM_VEHICLE_MODS(veh, t) - 1, false);
+			switch (t)
+			{
+			// Handle edge cases for special mod slike horns and turbo
+			case static_cast<int>(VehicleModType::MOD_HORNS):
+				VEHICLE::SET_VEHICLE_MOD(veh, t, static_cast<int>(VehicleModHorns::HORN_SANANDREAS_LOOP), false);
+				continue;
+			case static_cast<int>(VehicleModType::MOD_TURBO):
+				VEHICLE::TOGGLE_VEHICLE_MOD(veh, t, true);
+				continue;
+			case static_cast<int>(VehicleModType::MOD_TYRE_SMOKE):
+				VEHICLE::SET_VEHICLE_TYRE_SMOKE_COLOR(veh, 0, 0, 0);
+				VEHICLE::TOGGLE_VEHICLE_MOD(veh, t, 1);
+				continue;
+			case static_cast<int>(VehicleModType::MOD_XENON_LIGHTS):
+				VEHICLE::TOGGLE_VEHICLE_MOD(veh, t, true);
+				continue;
+			default:
+				VEHICLE::SET_VEHICLE_MOD(veh, t, VEHICLE::GET_NUM_VEHICLE_MODS(veh, t) - 1, false);
+			}
 		}
 
+		VEHICLE::SET_VEHICLE_WINDOW_TINT(veh, 1); // Pure black
+
+		for (int i = 0; i < 4; i++)
+		{
+			VEHICLE::SET_VEHICLE_NEON_ENABLED(veh, i, true);
+		}
+
+		
+		VEHICLE::SET_VEHICLE_NEON_COLOUR(veh, 255, 255, 255);
+
+		// Extras?
+		/*
+		for (int a = 0; a < 16; a++)
+		{
+			if (VEHICLE::DOES_EXTRA_EXIST(veh, a))
+			{
+				VEHICLE::SET_VEHICLE_EXTRA(veh, a, false);
+			}
+		}
+		*/
+
 		VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(veh, false);
+
+		// Fix any vehicle damage at the same time
+		VEHICLE::SET_VEHICLE_FIXED(veh);
+		VEHICLE::SET_VEHICLE_DEFORMATION_FIXED(veh);
+		VEHICLE::SET_VEHICLE_NEEDS_TO_BE_HOTWIRED(veh, false);
+
+		if (FIRE::IS_ENTITY_ON_FIRE(veh))
+			FIRE::STOP_ENTITY_FIRE(veh);
+
+		VEHICLE::SET_VEHICLE_ENGINE_HEALTH(veh, 1000.0f);
+		VEHICLE::SET_VEHICLE_PETROL_TANK_HEALTH(veh, 1000.0f);
+		VEHICLE::SET_VEHICLE_BODY_HEALTH(veh, 1000.f);
+		VEHICLE::SET_VEHICLE_UNDRIVEABLE(veh, false);
+		VEHICLE::SET_VEHICLE_ENGINE_CAN_DEGRADE(veh, false);
+		VEHICLE::SET_VEHICLE_ENGINE_ON(veh, true, true, false);
+
+		VEHICLE::SET_VEHICLE_INDICATOR_LIGHTS(veh, 1, false);
+		VEHICLE::SET_VEHICLE_INDICATOR_LIGHTS(veh, 0, false);	
 	}
 
 	std::string Vehicle::GetPlateText()

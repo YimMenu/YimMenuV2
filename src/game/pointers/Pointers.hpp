@@ -42,6 +42,7 @@ class CNetworkSession;
 class CGameDataHash;
 class CStatsMpCharacterMappingData;
 class CAnticheatContext;
+class NetworkGameFilterMatchmakingComponent;
 
 namespace YimMenu
 {
@@ -67,6 +68,8 @@ namespace YimMenu
 		using GetPresenceAttributes = bool (*)(int profile_index, rage::rlScGamerHandle* handles, int num_handles, rage::rlQueryPresenceAttributesContext** contexts, int count, rage::rlScTaskStatus* state);
 		using GetAvatars = bool (*)(rage::rlGetAvatarsContext* context, rage::rlGetAvatarsPlayerList* players);
 		using AssistedAimFindNewTarget = bool (*)(__int64 a1);
+		using MatchmakingFindSessions = bool (*)(int profile_index, int available_slots, NetworkGameFilterMatchmakingComponent* m_filter, unsigned int max_sessions, rage::rlSessionInfo* result_sessions, int* result_session_count, rage::rlTaskStatus* state);
+		using EncodeSessionInfo = bool (*)(rage::rlSessionInfo* info, char* buffer, int buffer_size, int* bytes_written);
 	}
 
 	struct PointerData
@@ -163,6 +166,9 @@ namespace YimMenu
 		PVOID MatchmakingUpdate;
 		PVOID MatchmakingUnadvertise;
 		PVOID MatchmakingSessionDetailSendResponse;
+		PVOID MatchmakingFindSessions;
+		PVOID MatchmakingFindSessionsResponse;
+		Functions::EncodeSessionInfo EncodeSessionInfo;
 		PVOID GameSkeletonUpdate;
 	};
 

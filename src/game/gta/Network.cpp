@@ -25,7 +25,7 @@ namespace YimMenu::Network
 		*join_type_global.As<JoinType*>() = to_launch;
 	}
 
-	void JoinSessionInfo(rage::rlSessionInfo* info)
+	void JoinSessionInfo(const rage::rlSessionInfo* info)
 	{
 		static std::optional<rage::rlSessionInfo> session_to_join;
 		static bool ensure_native_hook_initialized = ([] {

@@ -43,6 +43,8 @@ namespace YimMenu
 		BaseHook::Add<Hooks::Matchmaking::MatchmakingSessionDetailSendResponse>(new DetourHook("MatchmakingSessionDetailSendResponse", Pointers.MatchmakingSessionDetailSendResponse, Hooks::Matchmaking::MatchmakingSessionDetailSendResponse));
 		BaseHook::Add<Hooks::Matchmaking::MatchmakingUnadvertise>(new DetourHook("MatchmakingUnadvertise", Pointers.MatchmakingUnadvertise, Hooks::Matchmaking::MatchmakingUnadvertise));
 		BaseHook::Add<Hooks::Matchmaking::MatchmakingUpdate>(new DetourHook("MatchmakingUpdate", Pointers.MatchmakingUpdate, Hooks::Matchmaking::MatchmakingUpdate));
+		BaseHook::Add<Hooks::Matchmaking::MatchmakingFindSessions>(new DetourHook("MatchmakingFindSessions", Pointers.MatchmakingFindSessions, Hooks::Matchmaking::MatchmakingFindSessions));
+		BaseHook::Add<Hooks::Matchmaking::MatchmakingFindSessionsResponse>(new DetourHook("MatchmakingFindSessionsResponse", Pointers.MatchmakingFindSessionsResponse, Hooks::Matchmaking::MatchmakingFindSessionsResponse));
 
 		BaseHook::Add<Hooks::Misc::AssistedAimShouldReleaseEntity>(new DetourHook("AssistedAimShouldReleaseEntity", Pointers.AssistedAimShouldReleaseEntity, Hooks::Misc::AssistedAimShouldReleaseEntity));
 	}

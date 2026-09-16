@@ -2,6 +2,7 @@
 #include "core/util/Joaat.hpp"
 #include "types/network/MatchmakingId.hpp"
 #include "types/network/rlSessionDetail.hpp"
+#include "types/network/NetworkGameFilterMatchmakingComponent.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/IntCommand.hpp"
 #include "core/commands/ListCommand.hpp"
@@ -12,32 +13,13 @@
 
 namespace YimMenu::Features
 {
-	static std::vector<std::pair<int, const char*>> g_RegionCodes = {
-	    {0, "CIS"},
-	    {1, "South America"},
-	    {2, "US East"},
-	    {3, "Europe"},
-	    {4, "China"},
-	    {5, "Australia"},
-	    {6, "US West"},
-	    {7, "Japan"},
-	    {8, "Unknown"},
+	static std::vector<std::pair<int, const char*>> g_SortMethods = {
+	    {0, "Off"},
+	    {1, "Player Count"},
 	};
-
-	static std::vector<std::pair<int, const char*>> g_LanguageTypes = {
-	    {0, "English"},
-	    {1, "French"},
-	    {2, "German"},
-	    {3, "Italian"},
-	    {4, "Spanish (Spain)"},
-	    {5, "Portuguese (Brazil)"},
-	    {6, "Polish"},
-	    {7, "Russian"},
-	    {8, "Korean"},
-	    {9, "Chinese (Traditional)"},
-	    {10, "Japanese"},
-	    {11, "Spanish (Mexico)"},
-	    {12, "Chinese (Simplified)"},
+	static std::vector<std::pair<int, const char*>> g_SortDirections = {
+	    {0, "Ascending"},
+	    {1, "Descending"},
 	};
 
 	BoolCommand _SpoofRegionType{
@@ -48,7 +30,7 @@ namespace YimMenu::Features
 	    "mmregiontype",
 	    "Region Type",
 	    "The region to spoof the session to",
-		g_RegionCodes};
+	    g_RegionCodes};
 
 	BoolCommand _SpoofLanguage{
 	    "mmspooflanguage",
@@ -83,6 +65,50 @@ namespace YimMenu::Features
 	    2,
 	    7,
 	    5};
+
+	BoolCommand _LanguageFilterEnabled{
+	    "mmlanguagefilterenabled",
+	    "Filter By Language",
+	    "Filter sessions by language"};
+	ListCommand _LanguageFilter{
+	    "mmlanguagefilter",
+	    "Language",
+	    "The language to filter",
+	    g_LanguageTypes};
+	BoolCommand _FilterMultiplexedSessions{
+	    "mmfiltermultiplexedsessions",
+	    "Filter Multiplexed Sessions",
+	    "Filter out multiplexed sessions"};
+
+	BoolCommand _PlayerCountFilterEnabled{
+	    "mmplayercountfilterenabled",
+	    "Filter By Player Count",
+	    "Filter by player count"};
+	IntCommand _PlayerCountFilterMin{
+	    "mmplayercountfiltermin",
+	    "Player Count Minimum",
+	    "Minimum players filter",
+	    1,
+	    32,
+	    25};
+	IntCommand _PlayerCountFilterMax{
+	    "mmplayercountfiltermax",
+	    "Player Count Maximum",
+	    "Maximum players filter",
+	    1,
+	    32,
+	    25};
+
+	ListCommand _SortMethod{
+	    "mmsortmethod",
+	    "Sort By",
+	    "",
+	    g_SortMethods};
+	ListCommand _SortDirection{
+	    "mmsortdirection",
+	    "Sort Direction",
+	    "",
+	    g_SortDirections};
 }
 
 namespace YimMenu
@@ -112,7 +138,114 @@ namespace YimMenu
 
 	CustomMatchmaking::CustomMatchmaking()
 	{
+	}
 
+	bool CustomMatchmaking::MatchmakeImpl(std::optional<int> constraint, std::optional<bool> enforce_player_limit)
+	{
+		for (auto& session : m_FoundSessions)
+		{
+			session.m_IsValid = true;
+		}
+
+		NetworkGameFilterMatchmakingComponent component{};
+		strcpy(component.m_FilterName, "Group");
+		component.m_FilterType = 1;
+		component.m_GameMode = 0;
+		component.m_NumParameters = 0;
+		component.m_SessionType = 25600;
+
+		if (constraint)
+		{
+			component.SetParameter("MMATTR_DISCRIMINATOR", 0, constraint.value());
+		}
+
+		component.SetParameter("MMATTR_MM_GROUP_2", 2, 30);
+
+		rage::rlTaskStatus state{};
+		static rage::rlSessionInfo result_sessions[MAX_SESSIONS_TO_FIND];
+
+		m_Active = true;
+		m_NumValidSessions = 0;
+
+		if (BaseHook::Get<Hooks::Matchmaking::MatchmakingFindSessions, DetourHook<decltype(&Hooks::Matchmaking::MatchmakingFindSessions)>>()->Original()(0, 1, &component, MAX_SESSIONS_TO_FIND, result_sessions, &m_NumSessionsFound, &state))
+		{
+			while (state.m_Status == 1)
+				ScriptMgr::Yield();
+
+			if (state.m_Status == 3)
+			{
+				std::unordered_map<std::uint64_t, Session*> stok_map = {};
+
+				for (int i = 0; i < m_NumSessionsFound; i++)
+				{
+					m_FoundSessions[i].m_Info = result_sessions[i];
+
+					if (auto it = stok_map.find(m_FoundSessions[i].m_Info.m_SessionToken); it != stok_map.end())
+					{
+						if (Features::_FilterMultiplexedSessions.GetState())
+						{
+							it->second->m_IsValid = false;
+						}
+
+						it->second->m_Attributes.m_MultiplexCount++;
+						m_FoundSessions[i].m_IsValid = false;
+						continue;
+					}
+
+					if (enforce_player_limit.has_value() && enforce_player_limit.value()
+					    && m_FoundSessions[i].m_Attributes.m_PlayerCount >= 30)
+						m_FoundSessions[i].m_IsValid = false;
+
+					if (Features::_LanguageFilterEnabled.GetState()
+					    && m_FoundSessions[i].m_Attributes.m_Language != Features::_LanguageFilter.GetState())
+						m_FoundSessions[i].m_IsValid = false;
+
+					if (Features::_PlayerCountFilterEnabled.GetState()
+					    && (m_FoundSessions[i].m_Attributes.m_PlayerCount < Features::_PlayerCountFilterMin.GetState()
+					        || m_FoundSessions[i].m_Attributes.m_PlayerCount > Features::_PlayerCountFilterMax.GetState()))
+					{
+						m_FoundSessions[i].m_IsValid = false;
+					}
+
+					stok_map.emplace(m_FoundSessions[i].m_Info.m_SessionToken, &m_FoundSessions[i]);
+				}
+
+				if (Features::_SortMethod.GetState() != 0)
+				{
+					std::qsort(m_FoundSessions, m_NumSessionsFound, sizeof(Session), [](const void* a1, const void* a2) -> int {
+						std::strong_ordering result = std::strong_ordering::equal;
+
+						if (Features::_SortMethod.GetState() == 1)
+						{
+							result = (((Session*)(a1))->m_Attributes.m_PlayerCount <=> ((Session*)(a2))->m_Attributes.m_PlayerCount);
+						}
+
+						if (result == 0)
+							return 0;
+
+						if (result > 0)
+							return Features::_SortDirection.GetState() ? -1 : 1;
+
+						if (result < 0)
+							return Features::_SortDirection.GetState() ? 1 : -1;
+
+
+						std::unreachable();
+					});
+				}
+
+				m_Active = false;
+				return true;
+			}
+		}
+		else
+		{
+			m_Active = false;
+			return false;
+		}
+
+		m_Active = false;
+		return false;
 	}
 
 	bool CustomMatchmaking::OnAdvertiseImpl(int& num_slots, int& available_slots, rage::rlSessionInfo* info, MatchmakingAttributes* attrs, MatchmakingId* id, rage::rlTaskStatus* status)
@@ -151,7 +284,7 @@ namespace YimMenu
 			auto id_hash = GetIdHash(id);
 
 			m_MultiplexedSessions.emplace(id_hash, std::vector<MatchmakingId>{});
-			
+
 			// create the multiplexed sessions
 			for (int i = 0; i < Features::_MultiplexCount.GetState() - 1; i++)
 			{
@@ -198,7 +331,7 @@ namespace YimMenu
 				auto num_slots_copy = num_slots;
 				auto available_slots_copy = available_slots;
 				FiberPool::Push([session, num_slots_copy, available_slots_copy, info, attrs]() {
-					auto session_copy = session; // the compiler doesn't like it if I use session directly
+					auto session_copy = session;                                                                                                                                                                                    // the compiler doesn't like it if I use session directly
 					BaseHook::Get<Hooks::Matchmaking::MatchmakingUpdate, DetourHook<decltype(&Hooks::Matchmaking::MatchmakingUpdate)>>()->Original()(0, &session_copy, num_slots_copy, available_slots_copy, info, attrs, nullptr); // life's too short to check the task result
 				});
 			}
@@ -235,7 +368,7 @@ namespace YimMenu
 			}
 		}
 
-		return true; 
+		return true;
 	}
 
 	void CustomMatchmaking::OnSendSessionDetailResponseImpl(rage::rlSessionDetailMsg* message)

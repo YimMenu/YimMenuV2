@@ -8,6 +8,36 @@
 --- See docs/lua-api.md for prose descriptions. Natives loaded via
 --- `natives.load_natives()` are listed in docs/natives.lua.
 
+---Load a Lua source module beneath <MenuRoot>/scripts, sharing this script's state.
+---Accepts dotted names or relative paths, with optional .lua extension.
+---Searches package.path; truthy results are cached by requested name in package.loaded.
+---Raises an error for invalid paths, loading failures, or circular imports.
+---@param module_name string
+---@return any
+function require(module_name) end
+
+---@class LuaPackage
+---@field path string # Lua search patterns initialized from scripts and eligible subfolders.
+---@field cpath string # Initially empty; native module searchers are disabled.
+---@field loaded table<string, any> # Per-script cache, indexed by requested module name.
+---@field preload table<string, function> # Preload searcher is disabled.
+---@field loaders function[] # Contains only the checked Lua file searcher.
+---@field searchers function[] # Alias of loaders in this LuaJIT build.
+package = {}
+
+---Locate a file using Lua search patterns; require validates containment before loading it.
+---@param name string
+---@param path string
+---@param sep? string # default "."
+---@param rep? string # default platform directory separator
+---@return string? filename, string? error_message
+function package.searchpath(name, path, sep, rep) end
+
+---Disabled: raises an unsupported-function error.
+---@param filename string
+---@param symbol string
+function package.loadlib(filename, symbol) end
+
 ------------------------------------------------------------------------------
 -- Vector3
 ------------------------------------------------------------------------------
@@ -104,6 +134,10 @@ function util.joaat(str) end
 ---@return integer
 function util.time() end
 
+---Return the current online version, followed by the game build, as strings.
+---@return string online_version, string game_build
+function util.get_game_version() end
+
 ------------------------------------------------------------------------------
 -- script
 ------------------------------------------------------------------------------
@@ -119,6 +153,12 @@ function script.yield(ms) end
 
 ---@return boolean
 function script.is_inside_callback() end
+
+---Require exact version string matches; raises a Lua error on a mismatch.
+---Omit game_build or pass nil to check only the online version.
+---@param online_version string
+---@param game_build? string
+function script.require_game_build(online_version, game_build) end
 
 ------------------------------------------------------------------------------
 -- event
@@ -151,6 +191,15 @@ local Category = {}
 ---@class Group
 local Group = {}
 
+---@class TabBarItem
+local TabBarItem = {}
+
+---@class TabItem
+local TabItem = {}
+
+---@class CollapsingHeaderItem
+local CollapsingHeaderItem = {}
+
 menu = {}
 
 ---@param name string
@@ -171,6 +220,7 @@ function menu.find_submenu(name) end
 function menu.create_group(name, per_row) end
 ---@return boolean
 function menu.is_open() end
+---Toggle the menu open/closed and update mouse input and cursor visibility.
 function menu.toggle() end
 ---Register a raw ImGui draw callback rendered every frame while the menu is open.
 ---@param fn fun()
@@ -193,10 +243,56 @@ function Category:add_group(name, per_row) end
 ---@param name string
 ---@return Group?
 function Category:find_group(name) end
+---@param id string
+---@return TabBarItem
+function Category:add_tab_bar(id) end
+---@param name string
+---@return CollapsingHeaderItem
+function Category:add_collapsing_header(name) end
+---@param name string
+function Category:add_command(name) end
+---@param name string
+function Category:add_bool_command(name) end
+---@param name string
+---@param slider? boolean # default true
+function Category:add_int_command(name, slider) end
+---@param name string
+---@param slider? boolean # default true
+function Category:add_float_command(name, slider) end
+---@param name string
+function Category:add_list_command(name) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param fn fun()
+---@return CommandHandle
+function Category:add_button(name, label, desc, fn) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param default? boolean
+---@param on_enable? fun()
+---@param on_disable? fun()
+---@return CommandHandle
+function Category:add_checkbox(name, label, desc, default, on_enable, on_disable) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param tick fun()
+---@param on_enable? fun()
+---@param on_disable? fun()
+---@return CommandHandle
+function Category:add_looped_checkbox(name, label, desc, tick, on_enable, on_disable) end
 ---Register a raw ImGui draw callback rendered every frame.
 ---@param fn fun()
 function Category:imgui(fn) end
 
+---@param id string
+---@return TabBarItem
+function Group:add_tab_bar(id) end
+---@param name string
+---@return CollapsingHeaderItem
+function Group:add_collapsing_header(name) end
 ---@param name string
 function Group:add_command(name) end
 ---@param name string
@@ -237,6 +333,103 @@ function Group:imgui(fn) end
 ---Manually render the group (for standalone groups inside an `imgui` callback).
 function Group:draw() end
 
+-- TabBarItem
+
+---@param name string
+---@return TabItem
+function TabBarItem:add_tab(name) end
+
+-- TabItem
+
+---@param name string
+---@param per_row? integer # default 7
+---@return Group
+function TabItem:add_group(name, per_row) end
+---@param name string
+---@return CollapsingHeaderItem
+function TabItem:add_collapsing_header(name) end
+---@param name string
+function TabItem:add_command(name) end
+---@param name string
+function TabItem:add_bool_command(name) end
+---@param name string
+---@param slider? boolean # default true
+function TabItem:add_int_command(name, slider) end
+---@param name string
+---@param slider? boolean # default true
+function TabItem:add_float_command(name, slider) end
+---@param name string
+function TabItem:add_list_command(name) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param fn fun()
+---@return CommandHandle
+function TabItem:add_button(name, label, desc, fn) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param default? boolean
+---@param on_enable? fun()
+---@param on_disable? fun()
+---@return CommandHandle
+function TabItem:add_checkbox(name, label, desc, default, on_enable, on_disable) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param tick fun()
+---@param on_enable? fun()
+---@param on_disable? fun()
+---@return CommandHandle
+function TabItem:add_looped_checkbox(name, label, desc, tick, on_enable, on_disable) end
+---Draw only while this tab is selected. This callback must not yield.
+---@param fn fun()
+function TabItem:imgui(fn) end
+
+-- CollapsingHeaderItem
+
+---@param name string
+---@param per_row? integer # default 7
+---@return Group
+function CollapsingHeaderItem:add_group(name, per_row) end
+---@param name string
+function CollapsingHeaderItem:add_command(name) end
+---@param name string
+function CollapsingHeaderItem:add_bool_command(name) end
+---@param name string
+---@param slider? boolean # default true
+function CollapsingHeaderItem:add_int_command(name, slider) end
+---@param name string
+---@param slider? boolean # default true
+function CollapsingHeaderItem:add_float_command(name, slider) end
+---@param name string
+function CollapsingHeaderItem:add_list_command(name) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param fn fun()
+---@return CommandHandle
+function CollapsingHeaderItem:add_button(name, label, desc, fn) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param default? boolean
+---@param on_enable? fun()
+---@param on_disable? fun()
+---@return CommandHandle
+function CollapsingHeaderItem:add_checkbox(name, label, desc, default, on_enable, on_disable) end
+---@param name string
+---@param label string
+---@param desc? string
+---@param tick fun()
+---@param on_enable? fun()
+---@param on_disable? fun()
+---@return CommandHandle
+function CollapsingHeaderItem:add_looped_checkbox(name, label, desc, tick, on_enable, on_disable) end
+---Draw only while this section is expanded. This callback must not yield.
+---@param fn fun()
+function CollapsingHeaderItem:imgui(fn) end
+
 ------------------------------------------------------------------------------
 -- commandmgr
 ------------------------------------------------------------------------------
@@ -248,6 +441,7 @@ local CommandHandle = {}
 function CommandHandle:get_value() end
 ---@param value boolean|integer|number
 function CommandHandle:set_value(value) end
+---Return the registered command name/ID.
 ---@return string
 function CommandHandle:get_name() end
 ---@return string
@@ -895,6 +1089,20 @@ function natives.are_natives_loaded() end
 
 network = {}
 
+---@enum session_types
+session_types = {
+    public = 0,
+    solo_public = 1,
+    sctv = 13,
+    crew = 3,
+    join_crew = 12,
+    closed_crew = 2,
+    closed_friend = 6,
+    find_friend = 9,
+    invite_only = 11,
+    solo = 10,
+}
+
 ---@param hash integer|string
 ---@param bits integer # target player bitset
 ---@param format string # chars: i/f/l/h (max 36 args)
@@ -907,6 +1115,9 @@ function network.force_script_host(script_hash) end
 function network.force_script_on_player(script_hash, bits) end
 ---@return boolean
 function network.is_session_started() end
+---Request a session transition from a script callback; returns no completion status.
+---@param session_type session_types
+function network.join_session(session_type) end
 
 ------------------------------------------------------------------------------
 -- tunables
@@ -1031,7 +1242,7 @@ function transactions.run_service(category, action, item, value) end
 function transactions.can_use_transactions() end
 
 ------------------------------------------------------------------------------
--- FileMgr (sandboxed to Documents/YimMenuV2/scripts)
+-- FileMgr (sandboxed to %appdata%/YimMenuV2/scripts)
 ------------------------------------------------------------------------------
 
 FileMgr = {}
@@ -1332,30 +1543,31 @@ function ImGui.CalcTextSize(text) end
 function ImGui.GetFrameRate() end
 
 -- Enum tables (name -> integer). Values mirror the entries registered in
--- src/core/scripting/libraries/ImGui.cpp for the bundled ImGui (1.92.x).
+-- src/core/scripting/libraries/ImGui.cpp using the bundled ImGui header.
+-- Existing legacy aliases are retained for script compatibility.
 
 ---@enum ImGuiWindowFlags
 ImGuiWindowFlags = {
-    None = 0, NoTitleBar = 1, NoResize = 2, NoMove = 4, NoScrollbar = 8,
-    NoScrollWithMouse = 16, NoCollapse = 32, AlwaysAutoResize = 64,
-    NoBackground = 128, NoSavedSettings = 256, NoMouseInputs = 512, MenuBar = 1024,
-    HorizontalScrollbar = 2048, NoFocusOnAppearing = 4096, NoBringToFrontOnFocus = 8192,
-    AlwaysVerticalScrollbar = 16384, AlwaysHorizontalScrollbar = 32768,
-    NoNavInputs = 65536, NoNavFocus = 131072, UnsavedDocument = 262144,
-    NoNav = 196608, NoDecoration = 43, NoInputs = 197120, ChildWindow = 16777216,
-    Tooltip = 33554432, Popup = 67108864, Modal = 134217728, ChildMenu = 268435456,
-    NavFlattened = 536870912,
+    None = 0, NoTitleBar = 1, NoResize = 2, NoMove = 4, NoScrollbar = 8, NoScrollWithMouse = 16,
+    NoCollapse = 32, AlwaysAutoResize = 64, NoBackground = 128, NoSavedSettings = 256,
+    NoMouseInputs = 512, MenuBar = 1024, HorizontalScrollbar = 2048, NoFocusOnAppearing = 4096,
+    NoBringToFrontOnFocus = 8192, AlwaysVerticalScrollbar = 16384,
+    AlwaysHorizontalScrollbar = 32768, NoNavInputs = 65536, NoNavFocus = 131072,
+    UnsavedDocument = 262144, NoNav = 196608, NoDecoration = 43, NoInputs = 197120,
+    ChildWindow = 16777216, Tooltip = 33554432, Popup = 67108864, Modal = 134217728,
+    ChildMenu = 268435456, NavFlattened = 536870912, AlwaysUseWindowPadding = 1073741824,
 }
 
 ---@enum ImGuiChildFlags
 ImGuiChildFlags = {
-    None = 0, Borders = 1, Border = 1, AlwaysUseWindowPadding = 2, ResizeX = 4,
-    ResizeY = 8, AutoResizeX = 16, AutoResizeY = 32, AlwaysAutoResize = 64,
-    FrameStyle = 128, NavFlattened = 256,
+    None = 0, Borders = 1, AlwaysUseWindowPadding = 2, ResizeX = 4, ResizeY = 8, AutoResizeX = 16,
+    AutoResizeY = 32, AlwaysAutoResize = 64, FrameStyle = 128, NavFlattened = 256, Border = 1,
 }
 
 ---@enum ImGuiCond
-ImGuiCond = { None = 0, Always = 1, Once = 2, FirstUseEver = 4, Appearing = 8 }
+ImGuiCond = {
+    None = 0, Always = 1, Once = 2, FirstUseEver = 4, Appearing = 8,
+}
 
 ---@enum ImGuiCol
 ImGuiCol = {
@@ -1372,7 +1584,6 @@ ImGuiCol = {
     TableBorderStrong = 46, TableBorderLight = 47, TableRowBg = 48, TableRowBgAlt = 49,
     TextLink = 50, TextSelectedBg = 51, TreeLines = 52, DragDropTarget = 53, NavCursor = 54,
     NavWindowingHighlight = 55, NavWindowingDimBg = 56, ModalWindowDimBg = 57, COUNT = 58,
-    -- renamed aliases
     TabActive = 36, TabUnfocused = 38, TabUnfocusedActive = 39, NavHighlight = 54,
     ModalWindowDarkening = 57,
 }
@@ -1392,27 +1603,55 @@ ImGuiStyleVar = {
 }
 
 ---@enum ImGuiDir
-ImGuiDir = { None = -1, Left = 0, Right = 1, Up = 2, Down = 3, COUNT = 4 }
+ImGuiDir = {
+    None = -1, Left = 0, Right = 1, Up = 2, Down = 3, COUNT = 4,
+}
 
 ---@enum ImGuiKey
 ImGuiKey = {
-    Tab = 512, LeftArrow = 513, RightArrow = 514, UpArrow = 515, DownArrow = 516,
-    PageUp = 517, PageDown = 518, Home = 519, End = 520, Insert = 521, Delete = 522,
-    Backspace = 523, Space = 524, Enter = 525, Escape = 526,
-    A = 546, C = 548, V = 567, X = 569, Y = 570, Z = 571, KeyPadEnter = 615, COUNT = 645,
+    None = 0, NamedKey_BEGIN = 512, Tab = 512, LeftArrow = 513, RightArrow = 514, UpArrow = 515,
+    DownArrow = 516, PageUp = 517, PageDown = 518, Home = 519, End = 520, Insert = 521,
+    Delete = 522, Backspace = 523, Space = 524, Enter = 525, Escape = 526, LeftCtrl = 527,
+    LeftShift = 528, LeftAlt = 529, LeftSuper = 530, RightCtrl = 531, RightShift = 532,
+    RightAlt = 533, RightSuper = 534, Menu = 535, ["0"] = 536, ["1"] = 537, ["2"] = 538,
+    ["3"] = 539, ["4"] = 540, ["5"] = 541, ["6"] = 542, ["7"] = 543, ["8"] = 544, ["9"] = 545,
+    A = 546, B = 547, C = 548, D = 549, E = 550, F = 551, G = 552, H = 553, I = 554, J = 555,
+    K = 556, L = 557, M = 558, N = 559, O = 560, P = 561, Q = 562, R = 563, S = 564, T = 565,
+    U = 566, V = 567, W = 568, X = 569, Y = 570, Z = 571, F1 = 572, F2 = 573, F3 = 574, F4 = 575,
+    F5 = 576, F6 = 577, F7 = 578, F8 = 579, F9 = 580, F10 = 581, F11 = 582, F12 = 583, F13 = 584,
+    F14 = 585, F15 = 586, F16 = 587, F17 = 588, F18 = 589, F19 = 590, F20 = 591, F21 = 592,
+    F22 = 593, F23 = 594, F24 = 595, Apostrophe = 596, Comma = 597, Minus = 598, Period = 599,
+    Slash = 600, Semicolon = 601, Equal = 602, LeftBracket = 603, Backslash = 604,
+    RightBracket = 605, GraveAccent = 606, CapsLock = 607, ScrollLock = 608, NumLock = 609,
+    PrintScreen = 610, Pause = 611, Keypad0 = 612, Keypad1 = 613, Keypad2 = 614, Keypad3 = 615,
+    Keypad4 = 616, Keypad5 = 617, Keypad6 = 618, Keypad7 = 619, Keypad8 = 620, Keypad9 = 621,
+    KeypadDecimal = 622, KeypadDivide = 623, KeypadMultiply = 624, KeypadSubtract = 625,
+    KeypadAdd = 626, KeypadEnter = 627, KeypadEqual = 628, AppBack = 629, AppForward = 630,
+    Oem102 = 631, GamepadStart = 632, GamepadBack = 633, GamepadFaceLeft = 634,
+    GamepadFaceRight = 635, GamepadFaceUp = 636, GamepadFaceDown = 637, GamepadDpadLeft = 638,
+    GamepadDpadRight = 639, GamepadDpadUp = 640, GamepadDpadDown = 641, GamepadL1 = 642,
+    GamepadR1 = 643, GamepadL2 = 644, GamepadR2 = 645, GamepadL3 = 646, GamepadR3 = 647,
+    GamepadLStickLeft = 648, GamepadLStickRight = 649, GamepadLStickUp = 650,
+    GamepadLStickDown = 651, GamepadRStickLeft = 652, GamepadRStickRight = 653,
+    GamepadRStickUp = 654, GamepadRStickDown = 655, MouseLeft = 656, MouseRight = 657,
+    MouseMiddle = 658, MouseX1 = 659, MouseX2 = 660, MouseWheelX = 661, MouseWheelY = 662,
+    ReservedForModCtrl = 663, ReservedForModShift = 664, ReservedForModAlt = 665,
+    ReservedForModSuper = 666, NamedKey_END = 667, Mod_None = 0, Mod_Ctrl = 4096, Mod_Shift = 8192,
+    Mod_Alt = 16384, Mod_Super = 32768, Mod_Mask_ = 61440, NamedKey_COUNT = 155, COUNT = 667,
+    Mod_Shortcut = 4096, ModCtrl = 4096, ModShift = 8192, ModAlt = 16384, ModSuper = 32768,
+    KeyPadEnter = 627,
 }
 
 ---@enum ImGuiMouseButton
--- Keys are registered with the full ImGuiMouseButton_ prefix.
 ImGuiMouseButton = {
-    ImGuiMouseButton_Left = 0, ImGuiMouseButton_Right = 1,
-    ImGuiMouseButton_Middle = 2, ImGuiMouseButton_COUNT = 5,
+    Left = 0, Right = 1, Middle = 2, COUNT = 5, ImGuiMouseButton_COUNT = 5,
+    ImGuiMouseButton_Left = 0, ImGuiMouseButton_Middle = 2, ImGuiMouseButton_Right = 1,
 }
 
 ---@enum ImGuiMouseCursor
 ImGuiMouseCursor = {
-    None = -1, Arrow = 0, TextInput = 1, ResizeAll = 2, ResizeNS = 3, ResizeEW = 4,
-    ResizeNESW = 5, ResizeNWSE = 6, Hand = 7, Wait = 8, Progress = 9, NotAllowed = 10, COUNT = 11,
+    None = -1, Arrow = 0, TextInput = 1, ResizeAll = 2, ResizeNS = 3, ResizeEW = 4, ResizeNESW = 5,
+    ResizeNWSE = 6, Hand = 7, Wait = 8, Progress = 9, NotAllowed = 10, COUNT = 11,
 }
 
 ---@enum ImGuiHoveredFlags
@@ -1427,13 +1666,15 @@ ImGuiHoveredFlags = {
 
 ---@enum ImGuiFocusedFlags
 ImGuiFocusedFlags = {
-    None = 0, ChildWindows = 1, RootWindow = 2, AnyWindow = 4, RootAndChildWindows = 3,
+    None = 0, ChildWindows = 1, RootWindow = 2, AnyWindow = 4, NoPopupHierarchy = 8,
+    RootAndChildWindows = 3,
 }
 
 ---@enum ImGuiComboFlags
 ImGuiComboFlags = {
     None = 0, PopupAlignLeft = 1, HeightSmall = 2, HeightRegular = 4, HeightLarge = 8,
-    HeightLargest = 16, NoArrowButton = 32, NoPreview = 64, HeightMask = 30,
+    HeightLargest = 16, NoArrowButton = 32, NoPreview = 64, WidthFitPreview = 128,
+    HeightMask_ = 30, HeightMask = 30,
 }
 
 ---@enum ImGuiInputTextFlags
@@ -1451,37 +1692,35 @@ ImGuiInputTextFlags = {
 ImGuiColorEditFlags = {
     None = 0, NoAlpha = 2, NoPicker = 4, NoOptions = 8, NoSmallPreview = 16, NoInputs = 32,
     NoTooltip = 64, NoLabel = 128, NoSidePreview = 256, NoDragDrop = 512, NoBorder = 1024,
-    AlphaOpaque = 2048, AlphaNoBg = 4096, AlphaPreviewHalf = 8192, AlphaBar = 65536,
-    HDR = 524288, DisplayRGB = 1048576, DisplayHSV = 2097152, DisplayHex = 4194304,
-    Uint8 = 8388608, Float = 16777216, PickerHueBar = 33554432, PickerHueWheel = 67108864,
-    InputRGB = 134217728, InputHSV = 268435456, DefaultOptions_ = 177209344,
-    DisplayMask_ = 7340032, DataTypeMask_ = 25165824, PickerMask_ = 100663296,
-    InputMask_ = 402653184,
+    AlphaOpaque = 2048, AlphaNoBg = 4096, AlphaPreviewHalf = 8192, AlphaBar = 65536, HDR = 524288,
+    DisplayRGB = 1048576, DisplayHSV = 2097152, DisplayHex = 4194304, Uint8 = 8388608,
+    Float = 16777216, PickerHueBar = 33554432, PickerHueWheel = 67108864, InputRGB = 134217728,
+    InputHSV = 268435456, DefaultOptions_ = 177209344, AlphaMask_ = 14338, DisplayMask_ = 7340032,
+    DataTypeMask_ = 25165824, PickerMask_ = 100663296, InputMask_ = 402653184, AlphaPreview = 0,
 }
 
 ---@enum ImGuiTreeNodeFlags
 ImGuiTreeNodeFlags = {
     None = 0, Selected = 1, Framed = 2, AllowOverlap = 4, NoTreePushOnOpen = 8,
-    NoAutoOpenOnLog = 16, DefaultOpen = 32, OpenOnDoubleClick = 64, OpenOnArrow = 128,
-    Leaf = 256, Bullet = 512, FramePadding = 1024, SpanAvailWidth = 2048, SpanFullWidth = 4096,
+    NoAutoOpenOnLog = 16, DefaultOpen = 32, OpenOnDoubleClick = 64, OpenOnArrow = 128, Leaf = 256,
+    Bullet = 512, FramePadding = 1024, SpanAvailWidth = 2048, SpanFullWidth = 4096,
     SpanLabelWidth = 8192, SpanAllColumns = 16384, LabelSpanAllColumns = 32768,
-    NavLeftJumpsToParent = 131072, CollapsingHeader = 26,
-    -- renamed aliases
-    AllowItemOverlap = 4, NavLeftJumpsBackHere = 131072,
+    NavLeftJumpsToParent = 131072, CollapsingHeader = 26, DrawLinesNone = 262144,
+    DrawLinesFull = 524288, DrawLinesToNodes = 1048576, NavLeftJumpsBackHere = 131072,
+    SpanTextWidth = 8192, AllowItemOverlap = 4,
 }
 
 ---@enum ImGuiSelectableFlags
 ImGuiSelectableFlags = {
-    None = 0, DontClosePopups = 1, SpanAllColumns = 2, AllowDoubleClick = 4,
-    Disabled = 8, AllowItemOverlap = 16,
+    None = 0, NoAutoClosePopups = 1, SpanAllColumns = 2, AllowDoubleClick = 4, Disabled = 8,
+    AllowOverlap = 16, Highlight = 32, DontClosePopups = 1, AllowItemOverlap = 16,
 }
 
 ---@enum ImGuiPopupFlags
 ImGuiPopupFlags = {
     None = 0, MouseButtonLeft = 0, MouseButtonRight = 1, MouseButtonMiddle = 2,
-    MouseButtonMask_ = 31, MouseButtonDefault_ = 1, NoReopen = 32,
-    NoOpenOverExistingPopup = 128, NoOpenOverItems = 256, AnyPopupId = 1024,
-    AnyPopupLevel = 2048, AnyPopup = 3072,
+    MouseButtonMask_ = 31, MouseButtonDefault_ = 1, NoReopen = 32, NoOpenOverExistingPopup = 128,
+    NoOpenOverItems = 256, AnyPopupId = 1024, AnyPopupLevel = 2048, AnyPopup = 3072,
 }
 
 ---@enum ImGuiTabBarFlags
@@ -1494,31 +1733,31 @@ ImGuiTabBarFlags = {
 
 ---@enum ImGuiTabItemFlags
 ImGuiTabItemFlags = {
-    None = 0, UnsavedDocument = 1, SetSelected = 2, NoCloseWithMiddleMouseButton = 4,
-    NoPushId = 8, NoTooltip = 16,
+    None = 0, UnsavedDocument = 1, SetSelected = 2, NoCloseWithMiddleMouseButton = 4, NoPushId = 8,
+    NoTooltip = 16, NoReorder = 32, Leading = 64, Trailing = 128, NoAssumedClosure = 256,
 }
 
 ---@enum ImGuiTableFlags
 ImGuiTableFlags = {
     None = 0, Resizable = 1, Reorderable = 2, Hideable = 4, Sortable = 8, NoSavedSettings = 16,
     ContextMenuInBody = 32, RowBg = 64, BordersInnerH = 128, BordersOuterH = 256,
-    BordersInnerV = 512, BordersOuterV = 1024, BordersH = 384, BordersV = 1536,
-    BordersInner = 640, BordersOuter = 1280, Borders = 1920, NoBordersInBody = 2048,
-    NoBordersInBodyUntilResize = 4096, SizingFixedFit = 8192, SizingFixedSame = 16384,
-    SizingStretchProp = 24576, SizingStretchSame = 32768, SizingMask_ = 57344,
-    NoHostExtendX = 65536, NoHostExtendY = 131072, NoKeepColumnsVisible = 262144,
-    PreciseWidths = 524288, NoClip = 1048576, PadOuterX = 2097152, NoPadOuterX = 4194304,
-    NoPadInnerX = 8388608, ScrollX = 16777216, ScrollY = 33554432, SortMulti = 67108864,
-    SortTristate = 134217728,
+    BordersInnerV = 512, BordersOuterV = 1024, BordersH = 384, BordersV = 1536, BordersInner = 640,
+    BordersOuter = 1280, Borders = 1920, NoBordersInBody = 2048, NoBordersInBodyUntilResize = 4096,
+    SizingFixedFit = 8192, SizingFixedSame = 16384, SizingStretchProp = 24576,
+    SizingStretchSame = 32768, NoHostExtendX = 65536, NoHostExtendY = 131072,
+    NoKeepColumnsVisible = 262144, PreciseWidths = 524288, NoClip = 1048576, PadOuterX = 2097152,
+    NoPadOuterX = 4194304, NoPadInnerX = 8388608, ScrollX = 16777216, ScrollY = 33554432,
+    SortMulti = 67108864, SortTristate = 134217728, HighlightHoveredColumn = 268435456,
+    SizingMask_ = 57344,
 }
 
 ---@enum ImGuiTableColumnFlags
 ImGuiTableColumnFlags = {
-    None = 0, Disabled = 1, DefaultSort = 4, WidthStretch = 8, WidthFixed = 16, NoResize = 32,
-    NoReorder = 64, NoHide = 128, NoClip = 256, NoSort = 512, NoSortAscending = 1024,
-    NoSortDescending = 2048, NoHeaderLabel = 4096, NoHeaderWidth = 8192,
+    None = 0, Disabled = 1, DefaultHide = 2, DefaultSort = 4, WidthStretch = 8, WidthFixed = 16,
+    NoResize = 32, NoReorder = 64, NoHide = 128, NoClip = 256, NoSort = 512,
+    NoSortAscending = 1024, NoSortDescending = 2048, NoHeaderLabel = 4096, NoHeaderWidth = 8192,
     PreferSortAscending = 16384, PreferSortDescending = 32768, IndentEnable = 65536,
-    IndentDisabled = 131072, IsEnabled = 16777216, IsVisible = 33554432, IsSorted = 67108864,
-    IsHovered = 134217728, WidthMask_ = 24, IndentMask_ = 196608, StatusMask_ = 251658240,
-    NoDirectResize_ = 1073741824,
+    IndentDisable = 131072, AngledHeader = 262144, IsEnabled = 16777216, IsVisible = 33554432,
+    IsSorted = 67108864, IsHovered = 134217728, WidthMask_ = 24, IndentMask_ = 196608,
+    StatusMask_ = 251658240, NoDirectResize_ = 1073741824, IndentDisabled = 131072,
 }

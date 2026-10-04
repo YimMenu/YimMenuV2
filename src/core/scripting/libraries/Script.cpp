@@ -3,6 +3,8 @@
 #include "core/scripting/LuaUtils.hpp"
 #include "core/util/Joaat.hpp"
 
+#include "game/pointers/Pointers.hpp"
+
 namespace YimMenu::Lua
 {
 	static bool IsCoroutine(lua_State* state)
@@ -49,12 +51,27 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
+		static int RequireGameBuild(lua_State* state)
+		{
+			auto online_ver = CheckStringSafe(state, 1);
+			auto game_ver = lua_isnoneornil(state, 2) ? Pointers.GameVersion : CheckStringSafe(state, 2);
+
+			if (strcmp(online_ver, Pointers.OnlineVersion) != 0)
+				luaL_error(state, "Incompatible online version! Target version is %s, current version is %s", online_ver, Pointers.OnlineVersion);
+
+			if (strcmp(game_ver, Pointers.GameVersion) != 0)
+				luaL_error(state, "Incompatible game build! Target build is %s, current build is %s", game_ver, Pointers.GameVersion);
+
+			return 0;
+		}
+
 		virtual void Register(lua_State* state) override
 		{
 			lua_newtable(state);
 			SetFunction(state, RunInCallback, "run_in_callback");
 			SetFunction(state, Yield, "yield");
 			SetFunction(state, IsInsideCallback, "is_inside_callback");
+			SetFunction(state, RequireGameBuild, "require_game_build");
 			lua_setglobal(state, "script");
 		}
 	};

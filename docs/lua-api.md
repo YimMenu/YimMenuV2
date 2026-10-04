@@ -4,10 +4,19 @@ This document lists every global table, class, and function exposed to Lua scrip
 
 Scripts live in `%appdata%/YimMenuV2/scripts`. Each script runs in its own sandboxed Lua (LuaJIT) state with the globals below already available.
 
+In **Settings > Lua Scripts**, click **Open Lua Scripts Folder** to open this directory in Windows Explorer.
+
+At startup, the menu recursively loads `.lua` files beneath the scripts directory. A script is skipped when its immediate parent folder's name contains the case-sensitive substring `include`; it is also hidden from the Lua Scripts menu. Use these folders for modules loaded through `require`.
+
+Scripts in directory paths containing the case-sensitive substring `disabled` are discovered but not automatically loaded. They appear in the Disabled list; clicking an entry loads it. Files under `scripts/disabled` are restored to the same relative path under `scripts`. Files in other folders whose names contain `disabled` are moved to the scripts root when enabled. The leading `disabled/` folder is omitted from displayed names.
+
+The Lua Scripts menu shows loaded scripts in the **Enabled** listbox and unloaded or never-loaded scripts in a **Disabled** listbox beside it. Paused scripts remain Enabled and are marked **(Paused)**; use **Pause/Resume** to control execution. **Disable** unloads a running script and preserves its directory structure: `scripts/foldera/folderb/test.lua` becomes `scripts/disabled/foldera/folderb/test.lua`, so it stays disabled after restarting. Enabling restores its original path. **Reload** preserves its current path. File moves refuse to overwrite existing destination files; equal filenames in different folders remain independent. Newly added scripts appear in the Disabled list after the periodic directory refresh.
+
 ## Contents
 
 - [Conventions](#conventions)
 - [Standard libraries](#standard-libraries)
+- [require](#require)
 - **Core / UI**: [notify](#notify) · [log](#log) · [util](#util) · [script](#script) · [event](#event) · [menu](#menu) · [commandmgr](#commandmgr) · [ImGui](#imgui)
 - **Memory**: [memory](#memory) · [pointer](#pointer)
 - **Math**: [Vector3](#vector3)
@@ -35,7 +44,37 @@ Scripts live in `%appdata%/YimMenuV2/scripts`. Each script runs in its own sandb
 
 Scripts get a whitelisted subset of LuaJIT's standard library: `base`, `table`, `string`, `math`, `debug`, `bit`, `jit`.
 
-`package`, `io`, `os`, and `ffi` are intentionally **not** available. Use [FileMgr](#filemgr) for file access and [util.time](#util) for time.
+The `package` library supports sandboxed module loading. Direct loaders (`load`, `loadstring`, `loadfile`, `dofile`) and `package.loadlib` raise an unsupported-function error. `io`, `os`, and `ffi` are unavailable. Use [FileMgr](#filemgr) for file access and [util.time](#util) for time.
+
+## require
+
+`require(module_name) -> any` uses Lua's standard module loading and caching in the calling script's state. Files must be descendants of `<MenuRoot>/scripts` (`%appdata%/YimMenuV2/scripts`).
+
+- At script load, `package.path` is populated with `?.lua` and `?/init.lua` patterns for the scripts directory and its existing subfolders. The root is searched first, followed by subfolders in sorted order. Directory paths containing the case-sensitive substring `disabled` are excluded; loading through those directories is also rejected.
+- `require("helpers.math")` searches for `helpers/math.lua` or `helpers/math/init.lua`. A bare name such as `require("math_helpers")` can also find `helpers/math_helpers.lua`. Reload the script after adding a new module directory to refresh its search path.
+- Relative paths such as `require("helpers/math")` or `require("helpers/math.lua")` are also supported. The optional `.lua` suffix is removed before searching.
+- Absolute paths, drive paths, `.` or `..` path components, and embedded NUL characters are rejected. Symbolic links and directory junctions must resolve to Lua files inside the scripts directory.
+- Only Lua source files are loaded; bytecode and native modules are rejected. `package.cpath` starts empty, and the searcher list contains only the checked Lua file loader. Preload and DLL searchers are disabled. Changing `package.path` cannot enable loading files outside the scripts directory or inside disabled folders.
+- The module receives its requested name as `...` and shares the caller's globals and menu APIs. Its first return value is returned by `require`; without a return value, it uses an explicitly assigned `package.loaded[name]` value or defaults to `true`.
+- Truthy module results are cached in `package.loaded` by requested name for each script. Different names or path aliases have separate cache entries. Returning `false` causes the module to run again on the next call. Reloading the script clears its cache.
+- Circular imports and loading errors raise Lua errors. As in standard LuaJIT, a module that fails during execution remains marked in `package.loaded`; clear its entry before retrying, or reload the script. Module initialization must not yield.
+
+For example, create `scripts/include/greeting.lua`:
+
+```lua
+local greeting = {}
+function greeting.say_hello()
+    notify.info("Greeting", "Hello from a module")
+end
+return greeting
+```
+
+Then use it from a script:
+
+```lua
+local greeting = require("include.greeting")
+greeting.say_hello()
+```
 
 ---
 
@@ -72,6 +111,12 @@ Writes to the menu log file (`cout.log`), prefixed with the script name.
 | --- | --- |
 | `util.joaat(string) -> integer` | Returns the Joaat hash of a string. |
 | `util.time() -> integer` | Returns the current Unix time in milliseconds. |
+| `util.get_game_version() -> string, string` | Returns the current online version, then the game build, as strings. |
+
+```lua
+local online_version, game_build = util.get_game_version()
+log.info("Online version: " .. online_version .. ", game build: " .. game_build)
+```
 
 ---
 
@@ -84,6 +129,9 @@ Controls script execution and coroutines.
 | `script.run_in_callback(fn)` | Registers `fn` to run as a script callback (its own coroutine). |
 | `script.yield([ms])` | Yields the current callback for at least `ms` milliseconds (default 0 = one frame). Must be called from inside a callback. |
 | `script.is_inside_callback() -> boolean` | Returns true if called from inside a script callback coroutine. |
+| `script.require_game_build(online_version, [game_build])` | Requires an exact online version string match and, if supplied, an exact game build string match. Raises a Lua error on a mismatch; returns no value on success. |
+
+Call `script.require_game_build` at the top of scripts that depend on a specific version's globals, offsets, or bytecode. Both arguments are strings; omitting `game_build` or passing `nil` checks only the online version. Use `util.get_game_version()` to inspect the current versions when choosing the versions your script supports.
 
 ---
 
@@ -108,7 +156,7 @@ The `menu_event` enum table holds the event ids:
 
 ## menu
 
-Build menu UI: submenus, categories, and groups. Most builders return a handle you keep calling methods on.
+Build menu UI with submenus, categories, groups, tab bars, tabs, and collapsing headers. Most builders return a handle you keep calling methods on.
 
 #### Top-level
 | Function | Description |
@@ -120,7 +168,7 @@ Build menu UI: submenus, categories, and groups. Most builders return a handle y
 | `menu.find_submenu(name) -> Submenu \| nil` | Finds an existing submenu by name. |
 | `menu.create_group(name, [per_row]) -> Group` | Creates a standalone group (drawn manually via `group:draw()`). `per_row` default 7. |
 | `menu.is_open() -> boolean` | Returns true if the menu is open. |
-| `menu.toggle()` | Toggles the menu open/closed. |
+| `menu.toggle()` | Toggles the menu open/closed and updates mouse input and cursor visibility. |
 | `menu.add_imgui(fn)` | Registers a raw ImGui draw callback rendered every frame while the menu is open. |
 | `menu.add_always_draw_imgui(fn)` | Registers a raw ImGui draw callback rendered every frame regardless of whether the menu is open. |
 
@@ -135,11 +183,17 @@ Build menu UI: submenus, categories, and groups. Most builders return a handle y
 | --- | --- |
 | `category:add_group(name, [per_row]) -> Group` | Adds a group. `per_row` default 7. |
 | `category:find_group(name) -> Group \| nil` | Finds a group by name. |
+| `category:add_tab_bar(id) -> TabBarItem` | Adds a tab bar. Add tabs with `tab_bar:add_tab(name)`. |
+| `category:add_collapsing_header(name) -> CollapsingHeaderItem` | Adds a collapsible section. |
 | `category:imgui(fn)` | Registers a raw ImGui draw callback rendered every frame. |
+
+Categories also support the `add_command`, `add_bool_command`, `add_int_command`, `add_float_command`, `add_list_command`, `add_button`, `add_checkbox`, and `add_looped_checkbox` methods below, with the same arguments and return values as groups.
 
 #### Group
 | Method | Description |
 | --- | --- |
+| `group:add_tab_bar(id) -> TabBarItem` | Adds a tab bar. |
+| `group:add_collapsing_header(name) -> CollapsingHeaderItem` | Adds a collapsible section. |
 | `group:add_command(name)` | Adds an existing command by name. |
 | `group:add_bool_command(name)` | Adds an existing bool command by name. |
 | `group:add_int_command(name, [slider])` | Adds an existing int command (slider default true). |
@@ -150,6 +204,66 @@ Build menu UI: submenus, categories, and groups. Most builders return a handle y
 | `group:add_looped_checkbox(name, label, [desc], tick, [on_enable], [on_disable]) -> CommandHandle` | Creates and adds a looped checkbox (runs `tick` every frame while enabled). |
 | `group:imgui(fn)` | Registers a raw ImGui draw callback inside the group. |
 | `group:draw()` | Manually renders the group (for standalone groups inside an `imgui` callback). |
+
+The command methods shared by categories, groups, tabs, and headers use the same defaults: `slider` is true and checkbox `default` is false. Pass `nil` for an optional positional argument when supplying later arguments, e.g. `add_button(name, label, nil, fn)`. Names for newly created commands must be unique across the menu.
+
+#### TabBarItem
+
+Add a tab bar with `category:add_tab_bar(id)` or `group:add_tab_bar(id)`.
+
+| Method | Description |
+| --- | --- |
+| `tab_bar:add_tab(name) -> TabItem` | Adds a tab to the bar. |
+
+#### TabItem
+
+Create tabs through a `TabBarItem`.
+
+| Method | Description |
+| --- | --- |
+| `tab:add_group(name, [per_row]) -> Group` | Adds a group inside a tab. `per_row` default 7. |
+| `tab:add_collapsing_header(name) -> CollapsingHeaderItem` | Adds a collapsible section inside a tab. |
+| `tab:add_command(name)` | Adds an existing command by name. |
+| `tab:add_bool_command(name)` | Adds an existing bool command by name. |
+| `tab:add_int_command(name, [slider])` | Adds an existing int command (slider default true). |
+| `tab:add_float_command(name, [slider])` | Adds an existing float command (slider default true). |
+| `tab:add_list_command(name)` | Adds an existing list command by name. |
+| `tab:add_button(name, label, [desc], fn) -> CommandHandle` | Creates and adds a button command. |
+| `tab:add_checkbox(name, label, [desc], [default], [on_enable], [on_disable]) -> CommandHandle` | Creates and adds a checkbox command. |
+| `tab:add_looped_checkbox(name, label, [desc], tick, [on_enable], [on_disable]) -> CommandHandle` | Creates and adds a looped checkbox (runs `tick` every frame while enabled). |
+| `tab:imgui(fn)` | Adds a raw ImGui draw callback inside the tab. |
+
+Tab contents, including `imgui` callbacks, are drawn only while the tab is selected. Do not call `script.yield` from an `imgui` callback.
+
+#### CollapsingHeaderItem
+
+Add a collapsing header to a category, group, or tab.
+
+| Method | Description |
+| --- | --- |
+| `header:add_group(name, [per_row]) -> Group` | Adds a group inside a collapsible section. `per_row` default 7. |
+| `header:add_command(name)` | Adds an existing command by name. |
+| `header:add_bool_command(name)` | Adds an existing bool command by name. |
+| `header:add_int_command(name, [slider])` | Adds an existing int command (slider default true). |
+| `header:add_float_command(name, [slider])` | Adds an existing float command (slider default true). |
+| `header:add_list_command(name)` | Adds an existing list command by name. |
+| `header:add_button(name, label, [desc], fn) -> CommandHandle` | Creates and adds a button command. |
+| `header:add_checkbox(name, label, [desc], [default], [on_enable], [on_disable]) -> CommandHandle` | Creates and adds a checkbox command. |
+| `header:add_looped_checkbox(name, label, [desc], tick, [on_enable], [on_disable]) -> CommandHandle` | Creates and adds a looped checkbox (runs `tick` every frame while enabled). |
+| `header:imgui(fn)` | Adds a raw ImGui draw callback inside the section. |
+
+Header contents, including `imgui` callbacks, are drawn only while the section is expanded. Commands created inside a tab or header still run when activated, and enabled looped commands keep ticking while their UI is hidden.
+
+For example:
+
+```lua
+local category = menu.get_submenu():add_category("Options")
+local tab = category:add_tab_bar("OptionsTabs"):add_tab("General")
+local advanced = tab:add_collapsing_header("Advanced")
+advanced:add_button("example_hello", "Say hello", nil, function()
+    notify.info("Example", "Hello from the Advanced section")
+end)
+```
 
 ---
 
@@ -172,7 +286,7 @@ Create commands directly (without placing them in a group). Each returns a **Com
 | --- | --- |
 | `cmd:get_value() -> value` | Returns the command's current value (bool/int/float/list index; nil for one-shot). |
 | `cmd:set_value(value)` | Sets the command's value, firing its callbacks. |
-| `cmd:get_name() -> string` | Returns the command's label. |
+| `cmd:get_name() -> string` | Returns the registered command name/ID. |
 | `cmd:get_desc() -> string` | Returns the command's description. |
 | `cmd:draw()` | Draws the command (call from inside an ImGui callback). |
 
@@ -247,6 +361,8 @@ Colors are passed as separate `r, g, b, a` numbers or as a Lua table depending o
 #### Enum tables
 Use these global tables for `flags`/`cond`/`col`/`idx` arguments (each maps a name to an integer):
 `ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`.
+
+Members match the bundled ImGui definitions. `ImGuiKey` includes keyboard, gamepad, mouse, and modifier values such as `Mod_Ctrl`; digit keys use string indexing, e.g. `ImGuiKey["0"]`. Existing names such as `KeyPadEnter`, `IndentDisabled`, `HeightMask`, and the prefixed mouse-button names remain compatibility aliases of the current names.
 
 ---
 
@@ -590,6 +706,32 @@ After loading, call natives as `NAMESPACE.NATIVE_NAME(args)`, e.g. `PLAYER.PLAYE
 | `network.force_script_host(script_hash)` | Forces the local player to host a script. |
 | `network.force_script_on_player(script_hash, bits)` | Forces a script to run on the players in `bits`. |
 | `network.is_session_started() -> boolean` | True if in a multiplayer session. |
+| `network.join_session(session_type)` | Requests a session transition using a value from the global `session_types` table. Returns no value or completion status. |
+
+#### session_types
+
+This global enum table contains the session types accepted by `network.join_session`:
+
+| Constant | Value | Session type |
+| --- | --- | --- |
+| `session_types.public` | 0 | Public |
+| `session_types.solo_public` | 1 | Solo public |
+| `session_types.sctv` | 13 | SCTV |
+| `session_types.crew` | 3 | Crew |
+| `session_types.join_crew` | 12 | Join crew |
+| `session_types.closed_crew` | 2 | Closed crew |
+| `session_types.closed_friend` | 6 | Closed friend |
+| `session_types.find_friend` | 9 | Find friend |
+| `session_types.invite_only` | 11 | Invite only |
+| `session_types.solo` | 10 | Solo |
+
+Call from a script callback to run the game work on the script thread:
+
+```lua
+script.run_in_callback(function()
+    network.join_session(session_types.invite_only)
+end)
+```
 
 ---
 
@@ -644,7 +786,7 @@ GTA Online network-shop (money) transactions.
 
 ## FileMgr
 
-Sandboxed file access, rooted at `Documents/YimMenuV2/scripts`. Paths outside the sandbox raise an error.
+Sandboxed file access, rooted at `%appdata%/YimMenuV2/scripts`. Paths outside the sandbox raise an error.
 
 | Function | Description |
 | --- | --- |

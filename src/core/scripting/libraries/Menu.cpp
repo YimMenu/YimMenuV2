@@ -29,6 +29,21 @@ namespace YimMenu::Lua
 		std::weak_ptr<Group> ptr;
 	};
 
+	struct TabBarHandle
+	{
+		std::weak_ptr<TabBarItem> ptr;
+	};
+
+	struct TabItemHandle
+	{
+		std::weak_ptr<TabItem> ptr;
+	};
+
+	struct CollapsingHeaderHandle
+	{
+		std::weak_ptr<CollapsingHeaderItem> ptr;
+	};
+
 	static std::shared_ptr<Submenu> GetSubmenu(lua_State* state, int idx)
 	{
 		auto& h = GetObject<SubmenuHandle>(state, idx);
@@ -53,6 +68,33 @@ namespace YimMenu::Lua
 		auto ptr = h.ptr.lock();
 		if (!ptr)
 			luaL_argerror(state, idx, "group no longer exists");
+		return ptr;
+	}
+
+	static std::shared_ptr<TabBarItem> GetTabBar(lua_State* state, int idx)
+	{
+		auto& h = GetObject<TabBarHandle>(state, idx);
+		auto ptr = h.ptr.lock();
+		if (!ptr)
+			luaL_argerror(state, idx, "tab bar no longer exists");
+		return ptr;
+	}
+
+	static std::shared_ptr<TabItem> GetTabItem(lua_State* state, int idx)
+	{
+		auto& h = GetObject<TabItemHandle>(state, idx);
+		auto ptr = h.ptr.lock();
+		if (!ptr)
+			luaL_argerror(state, idx, "tab item no longer exists");
+		return ptr;
+	}
+
+	static std::shared_ptr<CollapsingHeaderItem> GetCollapsingHeader(lua_State* state, int idx)
+	{
+		auto& h = GetObject<CollapsingHeaderHandle>(state, idx);
+		auto ptr = h.ptr.lock();
+		if (!ptr)
+			luaL_argerror(state, idx, "collapsing header no longer exists");
 		return ptr;
 	}
 
@@ -162,6 +204,7 @@ namespace YimMenu::Lua
 	static int Toggle(lua_State*)
 	{
 		GUI::Toggle();
+		GUI::ToggleMouse();
 		return 0;
 	}
 
@@ -373,9 +416,225 @@ namespace YimMenu::Lua
 		return PushCommandHandle(state, Joaat(name), LuaCommandHandle::Kind::Bool);
 	}
 
+	template<typename Parent>
+	static std::shared_ptr<Parent> GetContainer(lua_State* state);
+
+	template<>
+	std::shared_ptr<Category> GetContainer<Category>(lua_State* state)
+	{
+		return GetCategory(state, 1);
+	}
+
+	template<>
+	std::shared_ptr<Group> GetContainer<Group>(lua_State* state)
+	{
+		return GetGroup(state, 1);
+	}
+
+	template<>
+	std::shared_ptr<TabItem> GetContainer<TabItem>(lua_State* state)
+	{
+		return GetTabItem(state, 1);
+	}
+
+	template<>
+	std::shared_ptr<CollapsingHeaderItem> GetContainer<CollapsingHeaderItem>(lua_State* state)
+	{
+		return GetCollapsingHeader(state, 1);
+	}
+
+	static void ContainerAttach(lua_State* state, const std::shared_ptr<Category>& cat, std::shared_ptr<UIItem> item)
+	{
+		cat->AddItem(std::shared_ptr<UIItem>(item));
+		LuaScript::GetScript(state).GetUserInterface().TrackAttachedCategoryItem(cat, std::move(item));
+	}
+
+	static void ContainerAttach(lua_State* state, const std::shared_ptr<Group>& grp, std::shared_ptr<UIItem> item)
+	{
+		GroupAttach(state, grp, std::move(item));
+	}
+
+	static void ContainerAttach(lua_State*, const std::shared_ptr<TabItem>& tab, std::shared_ptr<UIItem> item)
+	{
+		tab->AddItem(std::move(item));
+	}
+
+	static void ContainerAttach(lua_State*, const std::shared_ptr<CollapsingHeaderItem>& header, std::shared_ptr<UIItem> item)
+	{
+		header->AddItem(std::move(item));
+	}
+
+	template<typename Parent>
+	static int ContainerAddGroup(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		int  per    = lua_isnoneornil(state, 3) ? 7 : static_cast<int>(luaL_checkinteger(state, 3));
+
+		auto grp = std::make_shared<Group>(std::string(name), per);
+		ContainerAttach(state, parent, grp);
+		PushHandle<GroupHandle>(state, grp);
+		return 1;
+	}
+
+	template<typename Parent>
+	static int ContainerAddTabBar(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto id     = CheckStringSafe(state, 2);
+
+		auto bar = std::make_shared<TabBarItem>(std::string(id));
+		ContainerAttach(state, parent, bar);
+		PushHandle<TabBarHandle>(state, bar);
+		return 1;
+	}
+
+	static int TabBarAddTab(lua_State* state)
+	{
+		auto bar  = GetTabBar(state, 1);
+		auto name = CheckStringSafe(state, 2);
+
+		auto tab = std::make_shared<TabItem>(std::string(name));
+		bar->AddItem(std::shared_ptr<TabItem>(tab));
+		PushHandle<TabItemHandle>(state, tab);
+		return 1;
+	}
+
+	template<typename Parent>
+	static int ContainerAddCollapsingHeader(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+
+		auto header = std::make_shared<CollapsingHeaderItem>(std::string(name));
+		ContainerAttach(state, parent, header);
+		PushHandle<CollapsingHeaderHandle>(state, header);
+		return 1;
+	}
+
+	template<typename Parent>
+	static int ContainerImGui(lua_State* state)
+	{
+		auto* script = &LuaScript::GetScript(state);
+		auto parent = GetContainer<Parent>(state);
+		int  fn     = CaptureFunction(state, 2, true);
+
+		auto item = std::make_shared<ImGuiItem>([script, fn] {
+			script->RunRenderCallback(fn);
+		});
+		ContainerAttach(state, parent, item);
+		script->GetUserInterface().TrackRenderCallback(fn);
+		return 0;
+	}
+
+	template<typename Parent>
+	static int ContainerAddCommand(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		ContainerAttach(state, parent, std::make_shared<CommandItem>(Joaat(name)));
+		return 0;
+	}
+
+	template<typename Parent>
+	static int ContainerAddBoolCommand(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		ContainerAttach(state, parent, std::make_shared<BoolCommandItem>(Joaat(name)));
+		return 0;
+	}
+
+	template<typename Parent>
+	static int ContainerAddIntCommand(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		bool slider = lua_isnoneornil(state, 3) ? true : CheckBooleanSafe(state, 3);
+		ContainerAttach(state, parent, std::make_shared<IntCommandItem>(Joaat(name), std::nullopt, slider));
+		return 0;
+	}
+
+	template<typename Parent>
+	static int ContainerAddFloatCommand(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		bool slider = lua_isnoneornil(state, 3) ? true : CheckBooleanSafe(state, 3);
+		ContainerAttach(state, parent, std::make_shared<FloatCommandItem>(Joaat(name), std::nullopt, slider));
+		return 0;
+	}
+
+	template<typename Parent>
+	static int ContainerAddListCommand(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		ContainerAttach(state, parent, std::make_shared<ListCommandItem>(Joaat(name)));
+		return 0;
+	}
+
+	template<typename Parent>
+	static int ContainerAddButton(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		auto label  = CheckStringSafe(state, 3);
+		auto desc   = lua_isnoneornil(state, 4) ? std::string{} : std::string(CheckStringSafe(state, 4));
+		int  fn     = CaptureFunction(state, 5, true);
+		InlineCreateCommand<LuaCommand>(state, name, std::string(label), desc, fn);
+		ContainerAttach(state, parent, std::make_shared<CommandItem>(Joaat(name)));
+		return PushCommandHandle(state, Joaat(name), LuaCommandHandle::Kind::OneShot);
+	}
+
+	template<typename Parent>
+	static int ContainerAddLoopedCheckbox(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		auto label  = CheckStringSafe(state, 3);
+		auto desc   = lua_isnoneornil(state, 4) ? std::string{} : std::string(CheckStringSafe(state, 4));
+		int  tick   = CaptureFunction(state, 5, true);
+		int  on_en  = CaptureFunction(state, 6, false);
+		int  on_di  = CaptureFunction(state, 7, false);
+
+		InlineCreateCommand<LuaLoopedCommand>(state, name, std::string(label), desc, tick, on_en, on_di);
+		ContainerAttach(state, parent, std::make_shared<BoolCommandItem>(Joaat(name)));
+		return PushCommandHandle(state, Joaat(name), LuaCommandHandle::Kind::Bool);
+	}
+
+	template<typename Parent>
+	static int ContainerAddCheckbox(lua_State* state)
+	{
+		auto parent = GetContainer<Parent>(state);
+		auto name   = CheckStringSafe(state, 2);
+		auto label  = CheckStringSafe(state, 3);
+		auto desc   = lua_isnoneornil(state, 4) ? std::string{} : std::string(CheckStringSafe(state, 4));
+		bool def    = lua_isnoneornil(state, 5) ? false : CheckBooleanSafe(state, 5);
+		int  on_en  = CaptureFunction(state, 6, false);
+		int  on_di  = CaptureFunction(state, 7, false);
+
+		InlineCreateCommand<LuaBoolCommand>(state, name, std::string(label), desc, def, on_en, on_di);
+		ContainerAttach(state, parent, std::make_shared<BoolCommandItem>(Joaat(name)));
+		return PushCommandHandle(state, Joaat(name), LuaCommandHandle::Kind::Bool);
+	}
+
 	class Menu : LuaLibrary
 	{
 		using LuaLibrary::LuaLibrary;
+
+		template<typename Parent>
+		static void RegisterContainerCommandMethods(lua_State* state)
+		{
+			SetFunction(state, ContainerAddCommand<Parent>, "add_command");
+			SetFunction(state, ContainerAddBoolCommand<Parent>, "add_bool_command");
+			SetFunction(state, ContainerAddIntCommand<Parent>, "add_int_command");
+			SetFunction(state, ContainerAddFloatCommand<Parent>, "add_float_command");
+			SetFunction(state, ContainerAddListCommand<Parent>, "add_list_command");
+			SetFunction(state, ContainerAddButton<Parent>, "add_button");
+			SetFunction(state, ContainerAddCheckbox<Parent>, "add_checkbox");
+			SetFunction(state, ContainerAddLoopedCheckbox<Parent>, "add_looped_checkbox");
+		}
 
 		template<typename Handle, typename Setup>
 		static void RegisterMethodMetatable(lua_State* state, Setup populate_methods)
@@ -400,9 +659,14 @@ namespace YimMenu::Lua
 			RegisterMethodMetatable<CategoryHandle>(state, [](lua_State* s) {
 				SetFunction(s, CategoryAddGroup, "add_group");
 				SetFunction(s, CategoryFindGroup, "find_group");
+				SetFunction(s, ContainerAddTabBar<Category>, "add_tab_bar");
+				SetFunction(s, ContainerAddCollapsingHeader<Category>, "add_collapsing_header");
+				RegisterContainerCommandMethods<Category>(s);
 				SetFunction(s, CategoryImGui, "imgui");
 			});
 			RegisterMethodMetatable<GroupHandle>(state, [](lua_State* s) {
+				SetFunction(s, ContainerAddTabBar<Group>, "add_tab_bar");
+				SetFunction(s, ContainerAddCollapsingHeader<Group>, "add_collapsing_header");
 				SetFunction(s, GroupAddCommand, "add_command");
 				SetFunction(s, GroupAddBoolCommand, "add_bool_command");
 				SetFunction(s, GroupAddIntCommand, "add_int_command");
@@ -413,6 +677,20 @@ namespace YimMenu::Lua
 				SetFunction(s, GroupAddLoopedCheckbox, "add_looped_checkbox");
 				SetFunction(s, GroupImGui, "imgui");
 				SetFunction(s, GroupDraw, "draw");
+			});
+			RegisterMethodMetatable<TabBarHandle>(state, [](lua_State* s) {
+				SetFunction(s, TabBarAddTab, "add_tab");
+			});
+			RegisterMethodMetatable<TabItemHandle>(state, [](lua_State* s) {
+				SetFunction(s, ContainerAddGroup<TabItem>, "add_group");
+				SetFunction(s, ContainerAddCollapsingHeader<TabItem>, "add_collapsing_header");
+				RegisterContainerCommandMethods<TabItem>(s);
+				SetFunction(s, ContainerImGui<TabItem>, "imgui");
+			});
+			RegisterMethodMetatable<CollapsingHeaderHandle>(state, [](lua_State* s) {
+				SetFunction(s, ContainerAddGroup<CollapsingHeaderItem>, "add_group");
+				RegisterContainerCommandMethods<CollapsingHeaderItem>(s);
+				SetFunction(s, ContainerImGui<CollapsingHeaderItem>, "imgui");
 			});
 
 			lua_newtable(state);

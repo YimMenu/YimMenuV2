@@ -9,6 +9,8 @@ namespace YimMenu
 {
 	void LuaManager::AddUnloadedScript(std::string_view name, std::string_view path)
 	{
+		if (IsIncludeScript(std::filesystem::path(path)))
+			return;
 		m_UnloadedScripts.push_back({std::string(name), std::string(path)});
 	}
 
@@ -41,8 +43,17 @@ namespace YimMenu
 
 	void LuaManager::LoadScriptImpl(std::string path)
 	{
+		if (std::filesystem::path(path).extension() != ".lua" || IsIncludeScript(std::filesystem::path(path)))
+			return;
 		std::lock_guard lock(m_LoadMutex);
-		m_ScriptsToLoad.push(path);
+		m_ScriptsToLoad.push({std::move(path), true});
+	}
+
+	void LuaManager::DisableScriptImpl(std::string path)
+	{
+		std::lock_guard lock(m_LoadMutex);
+		if (std::find(m_ScriptsToDisable.begin(), m_ScriptsToDisable.end(), path) == m_ScriptsToDisable.end())
+			m_ScriptsToDisable.push_back(std::move(path));
 	}
 
 	void LuaManager::RunScriptImpl()
@@ -50,13 +61,8 @@ namespace YimMenu
 		m_MainThreadId = GetCurrentThreadId();
 
 		auto scripts_dir = FileMgr::GetProjectFolder("./scripts");
-		for (const auto& entry : std::filesystem::directory_iterator(scripts_dir.Path()))
-		{
-			if (entry.path().extension() != ".lua")
-				continue;
-
-			m_ScriptsToLoad.push(entry.path().string());
-		}
+		for (const auto& script : DiscoverScripts(scripts_dir.Path(), false))
+			m_ScriptsToLoad.push({script.string(), false});
 
 		while (g_Running)
 		{
@@ -65,13 +71,58 @@ namespace YimMenu
 				std::lock_guard lock(m_LoadMutex);
 				while (!m_ScriptsToLoad.empty())
 				{
-					std::erase_if(m_UnloadedScripts, [this](auto& script) {
-						std::error_code ec;
-						return std::filesystem::equivalent(m_ScriptsToLoad.front(), script.m_Path, ec);
-					});
-					m_LoadedScripts.push_back(std::make_shared<LuaScript>(m_ScriptsToLoad.front()));
+					auto request = std::move(m_ScriptsToLoad.front());
 					m_ScriptsToLoad.pop();
+					auto path = request.m_Path;
+					if (IsIncludeScript(std::filesystem::path(path)))
+						continue;
+					if (std::ranges::any_of(m_LoadedScripts, [&path](const auto& script) {
+						    std::error_code ec;
+						    return std::filesystem::equivalent(path, script->GetPath(), ec);
+					    }))
+						continue;
+					if (request.m_Enable)
+					{
+						try
+						{
+							path = MoveScriptFile(path, scripts_dir.Path(), true).string();
+						}
+						catch (const std::filesystem::filesystem_error& error)
+						{
+							Notifications::Show("Lua Scripts", error.what(), NotificationType::Error);
+							continue;
+						}
+					}
+					std::erase_if(m_UnloadedScripts, [&path, &request](auto& script) {
+						std::error_code ec;
+						return script.m_Path == request.m_Path || std::filesystem::equivalent(path, script.m_Path, ec);
+					});
+					m_LoadedScripts.push_back(std::make_shared<LuaScript>(path));
 				}
+
+				std::erase_if(m_ScriptsToDisable, [this, &scripts_dir](const std::string& path) {
+					auto found = std::ranges::find_if(m_LoadedScripts, [&path](const auto& script) {
+						return script->GetPath() == path;
+					});
+					if (found == m_LoadedScripts.end())
+						return true;
+					auto& script = *found;
+					if (!script->IsRunning())
+						return true;
+					if (!script->SafeToUnload())
+						return false;
+					try
+					{
+						auto destination = MoveScriptFile(std::filesystem::path(path), scripts_dir.Path(), false);
+						script->SetPath(destination.string());
+						script->Unload();
+					}
+					catch (const std::filesystem::filesystem_error& error)
+					{
+						Notifications::Show("Lua Scripts", error.what(), NotificationType::Error);
+					}
+					return true;
+				});
 
 				// 2) remove scripts if needed
 				std::erase_if(m_LoadedScripts, [this](auto& script) {
@@ -91,7 +142,7 @@ namespace YimMenu
 					}
 					else if (script->GetLoadState() == LuaScript::LoadState::WANT_RELOAD)
 					{
-						m_ScriptsToLoad.push(std::string(script->GetPath())); // will be reloaded next tick
+						m_ScriptsToLoad.push({std::string(script->GetPath()), false}); // will be reloaded next tick
 						unload = true;
 					}
 
@@ -108,24 +159,14 @@ namespace YimMenu
 				if (m_LastRefreshedUnloadedScripts + 10s < std::chrono::system_clock::now())
 				{
 					m_UnloadedScripts.clear();
-					for (const auto& entry : std::filesystem::directory_iterator(scripts_dir.Path()))
+					for (const auto& path : DiscoverScripts(scripts_dir.Path()))
 					{
-						if (entry.path().extension() != ".lua")
+						if (std::ranges::any_of(m_LoadedScripts, [&path](const auto& script) {
+							    std::error_code ec;
+							    return std::filesystem::equivalent(script->GetPath(), path, ec);
+						    }))
 							continue;
-
-						for (auto& script : m_LoadedScripts)
-						{
-							std::error_code ec;
-							if (std::filesystem::equivalent(script->GetPath(), entry.path().string(), ec))
-							{
-								// continue;
-								goto next;
-							}
-						}
-
-						AddUnloadedScript(entry.path().filename().string(), entry.path().string());
-					next:
-						continue;
+						AddUnloadedScript(path.filename().string(), path.string());
 					}
 					m_LastRefreshedUnloadedScripts = std::chrono::system_clock::now();
 				}

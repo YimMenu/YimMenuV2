@@ -79,7 +79,7 @@ namespace YimMenu::Lua
 			item.m_SecondaryItem = GetSecondaryItem(state, 3);
 			item.m_Value = luaL_checkinteger(state, 4);
 			item.m_StatValue = luaL_checkinteger(state, 5);
-			item.m_Quantity = luaL_checkinteger(state, 5);
+			item.m_Quantity = luaL_checkinteger(state, 6);
 
 			transaction.m_NumItems++;
 
@@ -103,8 +103,10 @@ namespace YimMenu::Lua
 					return;
 				}
 
-				for (auto& item : basket.m_Items)
+				for (int i = 0; i < basket.m_NumItems; i++)
 				{
+					auto item = basket.m_Items[i];
+
 					struct NETSHOPPING_BASKET_ITEM
 					{
 						SCR_HASH PrimaryHash;

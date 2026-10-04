@@ -11,7 +11,7 @@ namespace YimMenu
 		FileMgr() = default;
 
 	public:
-		virtual ~FileMgr() = default;
+		~FileMgr() = default;
 
 		FileMgr(const FileMgr&) = delete;
 		FileMgr(FileMgr&&) noexcept = delete;

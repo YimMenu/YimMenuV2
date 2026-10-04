@@ -1,13 +1,15 @@
 #include "core/scripting/LuaLibrary.hpp"
 #include "core/scripting/LuaScript.hpp"
 #include "core/scripting/LuaUtils.hpp"
-#include "game/gta/Natives.hpp"
+#include "core/backend/FiberPool.hpp"
 #include "game/backend/Self.hpp"
+#include "game/gta/Natives.hpp"
+#include "game/gta/Network.hpp"
 #include "game/gta/Scripts.hpp"
 
 namespace YimMenu::Lua
 {
-	class Network : LuaLibrary
+	class LuaNetwork : LuaLibrary
 	{
 		using LuaLibrary::LuaLibrary;
 
@@ -94,6 +96,15 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
+		static int JoinSession(lua_State* state)
+		{
+			auto session_type = (Network::JoinType)luaL_checkinteger(state, 1);
+
+			Network::LaunchJoinType(session_type);
+			
+			return 0;
+		}
+
 		virtual void Register(lua_State* state) override
 		{
 			lua_newtable(state);
@@ -101,9 +112,24 @@ namespace YimMenu::Lua
 			SetFunction(state, ForceScriptHost, "force_script_host");
 			SetFunction(state, ForceScriptOnPlayer, "force_script_on_player");
 			SetFunction(state, IsSessionStarted, "is_session_started");
+			SetFunction(state, JoinSession, "join_session");
 			lua_setglobal(state, "network");
+
+			static constexpr auto session_types = std::to_array<EnumEntry>({
+				{"public", static_cast<int>(Network::JoinType::JOIN_PUBLIC)},
+				{"solo_public", static_cast<int>(Network::JoinType::NEW_PUBLIC)},
+				{"sctv", static_cast<int>(Network::JoinType::SC_TV)},
+				{"crew", static_cast<int>(Network::JoinType::CREW)},
+				{"join_crew", static_cast<int>(Network::JoinType::JOIN_CREW)},
+				{"closed_crew", static_cast<int>(Network::JoinType::CLOSED_CREW)},
+				{"closed_friend", static_cast<int>(Network::JoinType::CLOSED_FRIENDS)},
+				{"find_friend", static_cast<int>(Network::JoinType::FIND_FRIEND)},
+				{"invite_only", static_cast<int>(Network::JoinType::INVITE_ONLY)},
+				{"solo", static_cast<int>(Network::JoinType::SOLO)},
+			});
+			RegisterEnum(state, "session_types", session_types.data(), session_types.size());
 		}
 	};
 
-	Network _Network;
+	LuaNetwork _Network;
 }

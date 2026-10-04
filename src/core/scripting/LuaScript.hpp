@@ -111,6 +111,11 @@ namespace YimMenu
 			return m_FileName;
 		}
 
+		void SetPath(std::string path)
+		{
+			m_FileName = std::move(path);
+		}
+
 		// we're guaranteed to have a LuaScript for each lua_State, so we can return it as a reference
 		static LuaScript& GetScript(lua_State* state);
 

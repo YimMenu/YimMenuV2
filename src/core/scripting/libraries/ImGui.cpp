@@ -2627,242 +2627,663 @@ namespace YimMenu::Lua
 
 			lua_setglobal(state, "ImGui");
 
-			static const EnumEntry windowFlags[] = {
-				{"None", 0}, {"NoTitleBar", 1}, {"NoResize", 2}, {"NoMove", 4},
-				{"NoScrollbar", 8}, {"NoScrollWithMouse", 16}, {"NoCollapse", 32},
-				{"AlwaysAutoResize", 64}, {"NoBackground", 128}, {"NoSavedSettings", 256},
-				{"NoMouseInputs", 512}, {"MenuBar", 1024}, {"HorizontalScrollbar", 2048},
-				{"NoFocusOnAppearing", 4096}, {"NoBringToFrontOnFocus", 8192},
-				{"AlwaysVerticalScrollbar", 16384}, {"AlwaysHorizontalScrollbar", 32768},
-				{"NoNavInputs", 65536}, {"NoNavFocus", 131072}, {"UnsavedDocument", 262144},
-				{"NoNav", 196608}, {"NoDecoration", 43}, {"NoInputs", 197120},
-				{"ChildWindow", 16777216}, {"Tooltip", 33554432}, {"Popup", 67108864},
-				{"Modal", 134217728}, {"ChildMenu", 268435456}, {"NavFlattened", 536870912}
-			};
-			RegisterEnum(state, "ImGuiWindowFlags", windowFlags, std::size(windowFlags));
+			static constexpr auto windowFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiWindowFlags_None},
+			    {"NoTitleBar", ImGuiWindowFlags_NoTitleBar},
+			    {"NoResize", ImGuiWindowFlags_NoResize},
+			    {"NoMove", ImGuiWindowFlags_NoMove},
+			    {"NoScrollbar", ImGuiWindowFlags_NoScrollbar},
+			    {"NoScrollWithMouse", ImGuiWindowFlags_NoScrollWithMouse},
+			    {"NoCollapse", ImGuiWindowFlags_NoCollapse},
+			    {"AlwaysAutoResize", ImGuiWindowFlags_AlwaysAutoResize},
+			    {"NoBackground", ImGuiWindowFlags_NoBackground},
+			    {"NoSavedSettings", ImGuiWindowFlags_NoSavedSettings},
+			    {"NoMouseInputs", ImGuiWindowFlags_NoMouseInputs},
+			    {"MenuBar", ImGuiWindowFlags_MenuBar},
+			    {"HorizontalScrollbar", ImGuiWindowFlags_HorizontalScrollbar},
+			    {"NoFocusOnAppearing", ImGuiWindowFlags_NoFocusOnAppearing},
+			    {"NoBringToFrontOnFocus", ImGuiWindowFlags_NoBringToFrontOnFocus},
+			    {"AlwaysVerticalScrollbar", ImGuiWindowFlags_AlwaysVerticalScrollbar},
+			    {"AlwaysHorizontalScrollbar", ImGuiWindowFlags_AlwaysHorizontalScrollbar},
+			    {"NoNavInputs", ImGuiWindowFlags_NoNavInputs},
+			    {"NoNavFocus", ImGuiWindowFlags_NoNavFocus},
+			    {"UnsavedDocument", ImGuiWindowFlags_UnsavedDocument},
+			    {"NoNav", ImGuiWindowFlags_NoNav},
+			    {"NoDecoration", ImGuiWindowFlags_NoDecoration},
+			    {"NoInputs", ImGuiWindowFlags_NoInputs},
+			    {"ChildWindow", ImGuiWindowFlags_ChildWindow},
+			    {"Tooltip", ImGuiWindowFlags_Tooltip},
+			    {"Popup", ImGuiWindowFlags_Popup},
+			    {"Modal", ImGuiWindowFlags_Modal},
+			    {"ChildMenu", ImGuiWindowFlags_ChildMenu},
+			    {"NavFlattened", ImGuiWindowFlags_NavFlattened},
+			    {"AlwaysUseWindowPadding", ImGuiWindowFlags_AlwaysUseWindowPadding},
+			});
+			RegisterEnum(state, "ImGuiWindowFlags", windowFlags.data(), windowFlags.size());
 
-			static const EnumEntry childFlags[] = {
-				{"None", 0}, {"Borders", 1}, {"Border", 1},
-				{"AlwaysUseWindowPadding", 2}, {"ResizeX", 4},
-				{"ResizeY", 8}, {"AutoResizeX", 16},
-				{"AutoResizeY", 32}, {"AlwaysAutoResize", 64},
-				{"FrameStyle", 128}, {"NavFlattened", 256}
-			};
-			RegisterEnum(state, "ImGuiChildFlags", childFlags, std::size(childFlags));
+			static constexpr auto childFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiChildFlags_None},
+			    {"Borders", ImGuiChildFlags_Borders},
+			    {"AlwaysUseWindowPadding", ImGuiChildFlags_AlwaysUseWindowPadding},
+			    {"ResizeX", ImGuiChildFlags_ResizeX},
+			    {"ResizeY", ImGuiChildFlags_ResizeY},
+			    {"AutoResizeX", ImGuiChildFlags_AutoResizeX},
+			    {"AutoResizeY", ImGuiChildFlags_AutoResizeY},
+			    {"AlwaysAutoResize", ImGuiChildFlags_AlwaysAutoResize},
+			    {"FrameStyle", ImGuiChildFlags_FrameStyle},
+			    {"NavFlattened", ImGuiChildFlags_NavFlattened},
+			    {"Border", ImGuiChildFlags_Border},
+			});
+			RegisterEnum(state, "ImGuiChildFlags", childFlags.data(), childFlags.size());
 
-			static const EnumEntry mouseCursor[] = {
-				{"None", -1}, {"Arrow", 0}, {"TextInput", 1}, {"ResizeAll", 2},
-				{"ResizeNS", 3}, {"ResizeEW", 4}, {"ResizeNESW", 5}, {"ResizeNWSE", 6},
-				{"Hand", 7}, {"Wait", 8}, {"Progress", 9}, {"NotAllowed", 10}, {"COUNT", 11}
-			};
-			RegisterEnum(state, "ImGuiMouseCursor", mouseCursor, std::size(mouseCursor));
+			static constexpr auto mouseCursor = std::to_array<EnumEntry>({
+			    {"None", ImGuiMouseCursor_None},
+			    {"Arrow", ImGuiMouseCursor_Arrow},
+			    {"TextInput", ImGuiMouseCursor_TextInput},
+			    {"ResizeAll", ImGuiMouseCursor_ResizeAll},
+			    {"ResizeNS", ImGuiMouseCursor_ResizeNS},
+			    {"ResizeEW", ImGuiMouseCursor_ResizeEW},
+			    {"ResizeNESW", ImGuiMouseCursor_ResizeNESW},
+			    {"ResizeNWSE", ImGuiMouseCursor_ResizeNWSE},
+			    {"Hand", ImGuiMouseCursor_Hand},
+			    {"Wait", ImGuiMouseCursor_Wait},
+			    {"Progress", ImGuiMouseCursor_Progress},
+			    {"NotAllowed", ImGuiMouseCursor_NotAllowed},
+			    {"COUNT", ImGuiMouseCursor_COUNT},
+			});
+			RegisterEnum(state, "ImGuiMouseCursor", mouseCursor.data(), mouseCursor.size());
 
-			static const EnumEntry mouseButton[] = {
-				{"ImGuiMouseButton_COUNT", 5}, {"ImGuiMouseButton_Left", 0},
-				{"ImGuiMouseButton_Middle", 2}, {"ImGuiMouseButton_Right", 1}
-			};
-			RegisterEnum(state, "ImGuiMouseButton", mouseButton, std::size(mouseButton));
+			static constexpr auto mouseButton = std::to_array<EnumEntry>({
+			    {"Left", ImGuiMouseButton_Left},
+			    {"Right", ImGuiMouseButton_Right},
+			    {"Middle", ImGuiMouseButton_Middle},
+			    {"COUNT", ImGuiMouseButton_COUNT},
+			    {"ImGuiMouseButton_COUNT", ImGuiMouseButton_COUNT},
+			    {"ImGuiMouseButton_Left", ImGuiMouseButton_Left},
+			    {"ImGuiMouseButton_Middle", ImGuiMouseButton_Middle},
+			    {"ImGuiMouseButton_Right", ImGuiMouseButton_Right},
+			});
+			RegisterEnum(state, "ImGuiMouseButton", mouseButton.data(), mouseButton.size());
 
-			static const EnumEntry imKey[] = {
-				{"A", 546}, {"Backspace", 523}, {"C", 548}, {"COUNT", 645},
-				{"Delete", 522}, {"DownArrow", 516}, {"End", 520}, {"Enter", 525},
-				{"Escape", 526}, {"Home", 519}, {"Insert", 521}, {"KeyPadEnter", 615},
-				{"LeftArrow", 513}, {"PageDown", 518}, {"PageUp", 517}, {"RightArrow", 514},
-				{"Space", 524}, {"Tab", 512}, {"UpArrow", 515}, {"V", 567},
-				{"X", 569}, {"Y", 570}, {"Z", 571}
-			};
-			RegisterEnum(state, "ImGuiKey", imKey, std::size(imKey));
+			static constexpr auto imKey = std::to_array<EnumEntry>({
+			    {"None", ImGuiKey_None},
+			    {"NamedKey_BEGIN", ImGuiKey_NamedKey_BEGIN},
+			    {"Tab", ImGuiKey_Tab},
+			    {"LeftArrow", ImGuiKey_LeftArrow},
+			    {"RightArrow", ImGuiKey_RightArrow},
+			    {"UpArrow", ImGuiKey_UpArrow},
+			    {"DownArrow", ImGuiKey_DownArrow},
+			    {"PageUp", ImGuiKey_PageUp},
+			    {"PageDown", ImGuiKey_PageDown},
+			    {"Home", ImGuiKey_Home},
+			    {"End", ImGuiKey_End},
+			    {"Insert", ImGuiKey_Insert},
+			    {"Delete", ImGuiKey_Delete},
+			    {"Backspace", ImGuiKey_Backspace},
+			    {"Space", ImGuiKey_Space},
+			    {"Enter", ImGuiKey_Enter},
+			    {"Escape", ImGuiKey_Escape},
+			    {"LeftCtrl", ImGuiKey_LeftCtrl},
+			    {"LeftShift", ImGuiKey_LeftShift},
+			    {"LeftAlt", ImGuiKey_LeftAlt},
+			    {"LeftSuper", ImGuiKey_LeftSuper},
+			    {"RightCtrl", ImGuiKey_RightCtrl},
+			    {"RightShift", ImGuiKey_RightShift},
+			    {"RightAlt", ImGuiKey_RightAlt},
+			    {"RightSuper", ImGuiKey_RightSuper},
+			    {"Menu", ImGuiKey_Menu},
+			    {"0", ImGuiKey_0},
+			    {"1", ImGuiKey_1},
+			    {"2", ImGuiKey_2},
+			    {"3", ImGuiKey_3},
+			    {"4", ImGuiKey_4},
+			    {"5", ImGuiKey_5},
+			    {"6", ImGuiKey_6},
+			    {"7", ImGuiKey_7},
+			    {"8", ImGuiKey_8},
+			    {"9", ImGuiKey_9},
+			    {"A", ImGuiKey_A},
+			    {"B", ImGuiKey_B},
+			    {"C", ImGuiKey_C},
+			    {"D", ImGuiKey_D},
+			    {"E", ImGuiKey_E},
+			    {"F", ImGuiKey_F},
+			    {"G", ImGuiKey_G},
+			    {"H", ImGuiKey_H},
+			    {"I", ImGuiKey_I},
+			    {"J", ImGuiKey_J},
+			    {"K", ImGuiKey_K},
+			    {"L", ImGuiKey_L},
+			    {"M", ImGuiKey_M},
+			    {"N", ImGuiKey_N},
+			    {"O", ImGuiKey_O},
+			    {"P", ImGuiKey_P},
+			    {"Q", ImGuiKey_Q},
+			    {"R", ImGuiKey_R},
+			    {"S", ImGuiKey_S},
+			    {"T", ImGuiKey_T},
+			    {"U", ImGuiKey_U},
+			    {"V", ImGuiKey_V},
+			    {"W", ImGuiKey_W},
+			    {"X", ImGuiKey_X},
+			    {"Y", ImGuiKey_Y},
+			    {"Z", ImGuiKey_Z},
+			    {"F1", ImGuiKey_F1},
+			    {"F2", ImGuiKey_F2},
+			    {"F3", ImGuiKey_F3},
+			    {"F4", ImGuiKey_F4},
+			    {"F5", ImGuiKey_F5},
+			    {"F6", ImGuiKey_F6},
+			    {"F7", ImGuiKey_F7},
+			    {"F8", ImGuiKey_F8},
+			    {"F9", ImGuiKey_F9},
+			    {"F10", ImGuiKey_F10},
+			    {"F11", ImGuiKey_F11},
+			    {"F12", ImGuiKey_F12},
+			    {"F13", ImGuiKey_F13},
+			    {"F14", ImGuiKey_F14},
+			    {"F15", ImGuiKey_F15},
+			    {"F16", ImGuiKey_F16},
+			    {"F17", ImGuiKey_F17},
+			    {"F18", ImGuiKey_F18},
+			    {"F19", ImGuiKey_F19},
+			    {"F20", ImGuiKey_F20},
+			    {"F21", ImGuiKey_F21},
+			    {"F22", ImGuiKey_F22},
+			    {"F23", ImGuiKey_F23},
+			    {"F24", ImGuiKey_F24},
+			    {"Apostrophe", ImGuiKey_Apostrophe},
+			    {"Comma", ImGuiKey_Comma},
+			    {"Minus", ImGuiKey_Minus},
+			    {"Period", ImGuiKey_Period},
+			    {"Slash", ImGuiKey_Slash},
+			    {"Semicolon", ImGuiKey_Semicolon},
+			    {"Equal", ImGuiKey_Equal},
+			    {"LeftBracket", ImGuiKey_LeftBracket},
+			    {"Backslash", ImGuiKey_Backslash},
+			    {"RightBracket", ImGuiKey_RightBracket},
+			    {"GraveAccent", ImGuiKey_GraveAccent},
+			    {"CapsLock", ImGuiKey_CapsLock},
+			    {"ScrollLock", ImGuiKey_ScrollLock},
+			    {"NumLock", ImGuiKey_NumLock},
+			    {"PrintScreen", ImGuiKey_PrintScreen},
+			    {"Pause", ImGuiKey_Pause},
+			    {"Keypad0", ImGuiKey_Keypad0},
+			    {"Keypad1", ImGuiKey_Keypad1},
+			    {"Keypad2", ImGuiKey_Keypad2},
+			    {"Keypad3", ImGuiKey_Keypad3},
+			    {"Keypad4", ImGuiKey_Keypad4},
+			    {"Keypad5", ImGuiKey_Keypad5},
+			    {"Keypad6", ImGuiKey_Keypad6},
+			    {"Keypad7", ImGuiKey_Keypad7},
+			    {"Keypad8", ImGuiKey_Keypad8},
+			    {"Keypad9", ImGuiKey_Keypad9},
+			    {"KeypadDecimal", ImGuiKey_KeypadDecimal},
+			    {"KeypadDivide", ImGuiKey_KeypadDivide},
+			    {"KeypadMultiply", ImGuiKey_KeypadMultiply},
+			    {"KeypadSubtract", ImGuiKey_KeypadSubtract},
+			    {"KeypadAdd", ImGuiKey_KeypadAdd},
+			    {"KeypadEnter", ImGuiKey_KeypadEnter},
+			    {"KeypadEqual", ImGuiKey_KeypadEqual},
+			    {"AppBack", ImGuiKey_AppBack},
+			    {"AppForward", ImGuiKey_AppForward},
+			    {"Oem102", ImGuiKey_Oem102},
+			    {"GamepadStart", ImGuiKey_GamepadStart},
+			    {"GamepadBack", ImGuiKey_GamepadBack},
+			    {"GamepadFaceLeft", ImGuiKey_GamepadFaceLeft},
+			    {"GamepadFaceRight", ImGuiKey_GamepadFaceRight},
+			    {"GamepadFaceUp", ImGuiKey_GamepadFaceUp},
+			    {"GamepadFaceDown", ImGuiKey_GamepadFaceDown},
+			    {"GamepadDpadLeft", ImGuiKey_GamepadDpadLeft},
+			    {"GamepadDpadRight", ImGuiKey_GamepadDpadRight},
+			    {"GamepadDpadUp", ImGuiKey_GamepadDpadUp},
+			    {"GamepadDpadDown", ImGuiKey_GamepadDpadDown},
+			    {"GamepadL1", ImGuiKey_GamepadL1},
+			    {"GamepadR1", ImGuiKey_GamepadR1},
+			    {"GamepadL2", ImGuiKey_GamepadL2},
+			    {"GamepadR2", ImGuiKey_GamepadR2},
+			    {"GamepadL3", ImGuiKey_GamepadL3},
+			    {"GamepadR3", ImGuiKey_GamepadR3},
+			    {"GamepadLStickLeft", ImGuiKey_GamepadLStickLeft},
+			    {"GamepadLStickRight", ImGuiKey_GamepadLStickRight},
+			    {"GamepadLStickUp", ImGuiKey_GamepadLStickUp},
+			    {"GamepadLStickDown", ImGuiKey_GamepadLStickDown},
+			    {"GamepadRStickLeft", ImGuiKey_GamepadRStickLeft},
+			    {"GamepadRStickRight", ImGuiKey_GamepadRStickRight},
+			    {"GamepadRStickUp", ImGuiKey_GamepadRStickUp},
+			    {"GamepadRStickDown", ImGuiKey_GamepadRStickDown},
+			    {"MouseLeft", ImGuiKey_MouseLeft},
+			    {"MouseRight", ImGuiKey_MouseRight},
+			    {"MouseMiddle", ImGuiKey_MouseMiddle},
+			    {"MouseX1", ImGuiKey_MouseX1},
+			    {"MouseX2", ImGuiKey_MouseX2},
+			    {"MouseWheelX", ImGuiKey_MouseWheelX},
+			    {"MouseWheelY", ImGuiKey_MouseWheelY},
+			    {"ReservedForModCtrl", ImGuiKey_ReservedForModCtrl},
+			    {"ReservedForModShift", ImGuiKey_ReservedForModShift},
+			    {"ReservedForModAlt", ImGuiKey_ReservedForModAlt},
+			    {"ReservedForModSuper", ImGuiKey_ReservedForModSuper},
+			    {"NamedKey_END", ImGuiKey_NamedKey_END},
+			    {"Mod_None", ImGuiMod_None},
+			    {"Mod_Ctrl", ImGuiMod_Ctrl},
+			    {"Mod_Shift", ImGuiMod_Shift},
+			    {"Mod_Alt", ImGuiMod_Alt},
+			    {"Mod_Super", ImGuiMod_Super},
+			    {"Mod_Mask_", ImGuiMod_Mask_},
+			    {"NamedKey_COUNT", ImGuiKey_NamedKey_COUNT},
+			    {"COUNT", ImGuiKey_COUNT},
+			    {"Mod_Shortcut", ImGuiMod_Shortcut},
+			    {"ModCtrl", ImGuiKey_ModCtrl},
+			    {"ModShift", ImGuiKey_ModShift},
+			    {"ModAlt", ImGuiKey_ModAlt},
+			    {"ModSuper", ImGuiKey_ModSuper},
+			    {"KeyPadEnter", ImGuiKey_KeypadEnter},
+			});
+			RegisterEnum(state, "ImGuiKey", imKey.data(), imKey.size());
 
-			static const EnumEntry hoveredFlags[] = {
-				{"None", 0}, {"ChildWindows", 1}, {"RootWindow", 2}, {"AnyWindow", 4},
-				{"NoPopupHierarchy", 8}, {"AllowWhenBlockedByPopup", 32},
-				{"AllowWhenBlockedByActiveItem", 128}, {"AllowWhenOverlappedByItem", 256},
-				{"AllowWhenOverlappedByWindow", 512}, {"AllowWhenDisabled", 1024},
-				{"NoNavOverride", 2048}, {"AllowWhenOverlapped", 768}, {"RectOnly", 928},
-				{"RootAndChildWindows", 3}, {"ForTooltip", 4096}, {"Stationary", 8192},
-				{"DelayNone", 16384}, {"DelayShort", 32768}, {"DelayNormal", 65536},
-				{"NoSharedDelay", 131072}
-			};
-			RegisterEnum(state, "ImGuiHoveredFlags", hoveredFlags, std::size(hoveredFlags));
+			static constexpr auto hoveredFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiHoveredFlags_None},
+			    {"ChildWindows", ImGuiHoveredFlags_ChildWindows},
+			    {"RootWindow", ImGuiHoveredFlags_RootWindow},
+			    {"AnyWindow", ImGuiHoveredFlags_AnyWindow},
+			    {"NoPopupHierarchy", ImGuiHoveredFlags_NoPopupHierarchy},
+			    {"AllowWhenBlockedByPopup", ImGuiHoveredFlags_AllowWhenBlockedByPopup},
+			    {"AllowWhenBlockedByActiveItem", ImGuiHoveredFlags_AllowWhenBlockedByActiveItem},
+			    {"AllowWhenOverlappedByItem", ImGuiHoveredFlags_AllowWhenOverlappedByItem},
+			    {"AllowWhenOverlappedByWindow", ImGuiHoveredFlags_AllowWhenOverlappedByWindow},
+			    {"AllowWhenDisabled", ImGuiHoveredFlags_AllowWhenDisabled},
+			    {"NoNavOverride", ImGuiHoveredFlags_NoNavOverride},
+			    {"AllowWhenOverlapped", ImGuiHoveredFlags_AllowWhenOverlapped},
+			    {"RectOnly", ImGuiHoveredFlags_RectOnly},
+			    {"RootAndChildWindows", ImGuiHoveredFlags_RootAndChildWindows},
+			    {"ForTooltip", ImGuiHoveredFlags_ForTooltip},
+			    {"Stationary", ImGuiHoveredFlags_Stationary},
+			    {"DelayNone", ImGuiHoveredFlags_DelayNone},
+			    {"DelayShort", ImGuiHoveredFlags_DelayShort},
+			    {"DelayNormal", ImGuiHoveredFlags_DelayNormal},
+			    {"NoSharedDelay", ImGuiHoveredFlags_NoSharedDelay},
+			});
+			RegisterEnum(state, "ImGuiHoveredFlags", hoveredFlags.data(), hoveredFlags.size());
 
-			static const EnumEntry focusedFlags[] = {
-				{"AnyWindow", 4}, {"ChildWindows", 1}, {"None", 0},
-				{"RootAndChildWindows", 3}, {"RootWindow", 2}
-			};
-			RegisterEnum(state, "ImGuiFocusedFlags", focusedFlags, std::size(focusedFlags));
+			static constexpr auto focusedFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiFocusedFlags_None},
+			    {"ChildWindows", ImGuiFocusedFlags_ChildWindows},
+			    {"RootWindow", ImGuiFocusedFlags_RootWindow},
+			    {"AnyWindow", ImGuiFocusedFlags_AnyWindow},
+			    {"NoPopupHierarchy", ImGuiFocusedFlags_NoPopupHierarchy},
+			    {"RootAndChildWindows", ImGuiFocusedFlags_RootAndChildWindows},
+			});
+			RegisterEnum(state, "ImGuiFocusedFlags", focusedFlags.data(), focusedFlags.size());
 
-			static const EnumEntry cond[] = {
-				{"Always", 1}, {"Appearing", 8}, {"FirstUseEver", 4},
-				{"None", 0}, {"Once", 2}
-			};
-			RegisterEnum(state, "ImGuiCond", cond, std::size(cond));
+			static constexpr auto cond = std::to_array<EnumEntry>({
+			    {"None", ImGuiCond_None},
+			    {"Always", ImGuiCond_Always},
+			    {"Once", ImGuiCond_Once},
+			    {"FirstUseEver", ImGuiCond_FirstUseEver},
+			    {"Appearing", ImGuiCond_Appearing},
+			});
+			RegisterEnum(state, "ImGuiCond", cond.data(), cond.size());
 
-			static const EnumEntry col[] = {
-				{"Text", 0}, {"TextDisabled", 1}, {"WindowBg", 2}, {"ChildBg", 3},
-				{"PopupBg", 4}, {"Border", 5}, {"BorderShadow", 6}, {"FrameBg", 7},
-				{"FrameBgHovered", 8}, {"FrameBgActive", 9}, {"TitleBg", 10},
-				{"TitleBgActive", 11}, {"TitleBgCollapsed", 12}, {"MenuBarBg", 13},
-				{"ScrollbarBg", 14}, {"ScrollbarGrab", 15}, {"ScrollbarGrabHovered", 16},
-				{"ScrollbarGrabActive", 17}, {"CheckMark", 18}, {"SliderGrab", 19},
-				{"SliderGrabActive", 20}, {"Button", 21}, {"ButtonHovered", 22},
-				{"ButtonActive", 23}, {"Header", 24}, {"HeaderHovered", 25},
-				{"HeaderActive", 26}, {"Separator", 27}, {"SeparatorHovered", 28},
-				{"SeparatorActive", 29}, {"ResizeGrip", 30}, {"ResizeGripHovered", 31},
-				{"ResizeGripActive", 32}, {"InputTextCursor", 33}, {"TabHovered", 34},
-				{"Tab", 35}, {"TabSelected", 36}, {"TabSelectedOverline", 37},
-				{"TabDimmed", 38}, {"TabDimmedSelected", 39}, {"TabDimmedSelectedOverline", 40},
-				{"PlotLines", 41}, {"PlotLinesHovered", 42}, {"PlotHistogram", 43},
-				{"PlotHistogramHovered", 44}, {"TableHeaderBg", 45}, {"TableBorderStrong", 46},
-				{"TableBorderLight", 47}, {"TableRowBg", 48}, {"TableRowBgAlt", 49},
-				{"TextLink", 50}, {"TextSelectedBg", 51}, {"TreeLines", 52},
-				{"DragDropTarget", 53}, {"NavCursor", 54}, {"NavWindowingHighlight", 55},
-				{"NavWindowingDimBg", 56}, {"ModalWindowDimBg", 57}, {"COUNT", 58},
-				// renamed aliases kept for script compatibility
-				{"TabActive", 36}, {"TabUnfocused", 38}, {"TabUnfocusedActive", 39},
-				{"NavHighlight", 54}, {"ModalWindowDarkening", 57}
-			};
-			RegisterEnum(state, "ImGuiCol", col, std::size(col));
+			static constexpr auto col = std::to_array<EnumEntry>({
+			    {"Text", ImGuiCol_Text},
+			    {"TextDisabled", ImGuiCol_TextDisabled},
+			    {"WindowBg", ImGuiCol_WindowBg},
+			    {"ChildBg", ImGuiCol_ChildBg},
+			    {"PopupBg", ImGuiCol_PopupBg},
+			    {"Border", ImGuiCol_Border},
+			    {"BorderShadow", ImGuiCol_BorderShadow},
+			    {"FrameBg", ImGuiCol_FrameBg},
+			    {"FrameBgHovered", ImGuiCol_FrameBgHovered},
+			    {"FrameBgActive", ImGuiCol_FrameBgActive},
+			    {"TitleBg", ImGuiCol_TitleBg},
+			    {"TitleBgActive", ImGuiCol_TitleBgActive},
+			    {"TitleBgCollapsed", ImGuiCol_TitleBgCollapsed},
+			    {"MenuBarBg", ImGuiCol_MenuBarBg},
+			    {"ScrollbarBg", ImGuiCol_ScrollbarBg},
+			    {"ScrollbarGrab", ImGuiCol_ScrollbarGrab},
+			    {"ScrollbarGrabHovered", ImGuiCol_ScrollbarGrabHovered},
+			    {"ScrollbarGrabActive", ImGuiCol_ScrollbarGrabActive},
+			    {"CheckMark", ImGuiCol_CheckMark},
+			    {"SliderGrab", ImGuiCol_SliderGrab},
+			    {"SliderGrabActive", ImGuiCol_SliderGrabActive},
+			    {"Button", ImGuiCol_Button},
+			    {"ButtonHovered", ImGuiCol_ButtonHovered},
+			    {"ButtonActive", ImGuiCol_ButtonActive},
+			    {"Header", ImGuiCol_Header},
+			    {"HeaderHovered", ImGuiCol_HeaderHovered},
+			    {"HeaderActive", ImGuiCol_HeaderActive},
+			    {"Separator", ImGuiCol_Separator},
+			    {"SeparatorHovered", ImGuiCol_SeparatorHovered},
+			    {"SeparatorActive", ImGuiCol_SeparatorActive},
+			    {"ResizeGrip", ImGuiCol_ResizeGrip},
+			    {"ResizeGripHovered", ImGuiCol_ResizeGripHovered},
+			    {"ResizeGripActive", ImGuiCol_ResizeGripActive},
+			    {"InputTextCursor", ImGuiCol_InputTextCursor},
+			    {"TabHovered", ImGuiCol_TabHovered},
+			    {"Tab", ImGuiCol_Tab},
+			    {"TabSelected", ImGuiCol_TabSelected},
+			    {"TabSelectedOverline", ImGuiCol_TabSelectedOverline},
+			    {"TabDimmed", ImGuiCol_TabDimmed},
+			    {"TabDimmedSelected", ImGuiCol_TabDimmedSelected},
+			    {"TabDimmedSelectedOverline", ImGuiCol_TabDimmedSelectedOverline},
+			    {"PlotLines", ImGuiCol_PlotLines},
+			    {"PlotLinesHovered", ImGuiCol_PlotLinesHovered},
+			    {"PlotHistogram", ImGuiCol_PlotHistogram},
+			    {"PlotHistogramHovered", ImGuiCol_PlotHistogramHovered},
+			    {"TableHeaderBg", ImGuiCol_TableHeaderBg},
+			    {"TableBorderStrong", ImGuiCol_TableBorderStrong},
+			    {"TableBorderLight", ImGuiCol_TableBorderLight},
+			    {"TableRowBg", ImGuiCol_TableRowBg},
+			    {"TableRowBgAlt", ImGuiCol_TableRowBgAlt},
+			    {"TextLink", ImGuiCol_TextLink},
+			    {"TextSelectedBg", ImGuiCol_TextSelectedBg},
+			    {"TreeLines", ImGuiCol_TreeLines},
+			    {"DragDropTarget", ImGuiCol_DragDropTarget},
+			    {"NavCursor", ImGuiCol_NavCursor},
+			    {"NavWindowingHighlight", ImGuiCol_NavWindowingHighlight},
+			    {"NavWindowingDimBg", ImGuiCol_NavWindowingDimBg},
+			    {"ModalWindowDimBg", ImGuiCol_ModalWindowDimBg},
+			    {"COUNT", ImGuiCol_COUNT},
+			    {"TabActive", ImGuiCol_TabActive},
+			    {"TabUnfocused", ImGuiCol_TabUnfocused},
+			    {"TabUnfocusedActive", ImGuiCol_TabUnfocusedActive},
+			    {"NavHighlight", ImGuiCol_NavHighlight},
+			    {"ModalWindowDarkening", ImGuiCol_ModalWindowDimBg},
+			});
+			RegisterEnum(state, "ImGuiCol", col.data(), col.size());
 
-			static const EnumEntry dir[] = {
-				{"COUNT", 4}, {"Down", 3}, {"Left", 0},
-				{"None", -1}, {"Right", 1}, {"Up", 2}
-			};
-			RegisterEnum(state, "ImGuiDir", dir, std::size(dir));
+			static constexpr auto dir = std::to_array<EnumEntry>({
+			    {"None", ImGuiDir_None},
+			    {"Left", ImGuiDir_Left},
+			    {"Right", ImGuiDir_Right},
+			    {"Up", ImGuiDir_Up},
+			    {"Down", ImGuiDir_Down},
+			    {"COUNT", ImGuiDir_COUNT},
+			});
+			RegisterEnum(state, "ImGuiDir", dir.data(), dir.size());
 
-			static const EnumEntry comboFlags[] = {
-				{"HeightLarge", 8}, {"HeightLargest", 16}, {"HeightMask", 30},
-				{"HeightRegular", 4}, {"HeightSmall", 2}, {"NoArrowButton", 32},
-				{"NoPreview", 64}, {"None", 0}, {"PopupAlignLeft", 1}
-			};
-			RegisterEnum(state, "ImGuiComboFlags", comboFlags, std::size(comboFlags));
+			static constexpr auto comboFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiComboFlags_None},
+			    {"PopupAlignLeft", ImGuiComboFlags_PopupAlignLeft},
+			    {"HeightSmall", ImGuiComboFlags_HeightSmall},
+			    {"HeightRegular", ImGuiComboFlags_HeightRegular},
+			    {"HeightLarge", ImGuiComboFlags_HeightLarge},
+			    {"HeightLargest", ImGuiComboFlags_HeightLargest},
+			    {"NoArrowButton", ImGuiComboFlags_NoArrowButton},
+			    {"NoPreview", ImGuiComboFlags_NoPreview},
+			    {"WidthFitPreview", ImGuiComboFlags_WidthFitPreview},
+			    {"HeightMask_", ImGuiComboFlags_HeightMask_},
+			    {"HeightMask", ImGuiComboFlags_HeightMask_},
+			});
+			RegisterEnum(state, "ImGuiComboFlags", comboFlags.data(), comboFlags.size());
 
-			static const EnumEntry inputFlags[] = {
-				{"None", 0}, {"CharsDecimal", 1}, {"CharsHexadecimal", 2},
-				{"CharsScientific", 4}, {"CharsUppercase", 8}, {"CharsNoBlank", 16},
-				{"AllowTabInput", 32}, {"EnterReturnsTrue", 64}, {"EscapeClearsAll", 128},
-				{"CtrlEnterForNewLine", 256}, {"ReadOnly", 512}, {"Password", 1024},
-				{"AlwaysOverwrite", 2048}, {"AutoSelectAll", 4096}, {"ParseEmptyRefVal", 8192},
-				{"DisplayEmptyRefVal", 16384}, {"NoHorizontalScroll", 32768},
-				{"NoUndoRedo", 65536}, {"ElideLeft", 131072}, {"CallbackCompletion", 262144},
-				{"CallbackHistory", 524288}, {"CallbackAlways", 1048576},
-				{"CallbackCharFilter", 2097152}, {"CallbackResize", 4194304},
-				{"CallbackEdit", 8388608}
-			};
-			RegisterEnum(state, "ImGuiInputTextFlags", inputFlags, std::size(inputFlags));
+			static constexpr auto inputFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiInputTextFlags_None},
+			    {"CharsDecimal", ImGuiInputTextFlags_CharsDecimal},
+			    {"CharsHexadecimal", ImGuiInputTextFlags_CharsHexadecimal},
+			    {"CharsScientific", ImGuiInputTextFlags_CharsScientific},
+			    {"CharsUppercase", ImGuiInputTextFlags_CharsUppercase},
+			    {"CharsNoBlank", ImGuiInputTextFlags_CharsNoBlank},
+			    {"AllowTabInput", ImGuiInputTextFlags_AllowTabInput},
+			    {"EnterReturnsTrue", ImGuiInputTextFlags_EnterReturnsTrue},
+			    {"EscapeClearsAll", ImGuiInputTextFlags_EscapeClearsAll},
+			    {"CtrlEnterForNewLine", ImGuiInputTextFlags_CtrlEnterForNewLine},
+			    {"ReadOnly", ImGuiInputTextFlags_ReadOnly},
+			    {"Password", ImGuiInputTextFlags_Password},
+			    {"AlwaysOverwrite", ImGuiInputTextFlags_AlwaysOverwrite},
+			    {"AutoSelectAll", ImGuiInputTextFlags_AutoSelectAll},
+			    {"ParseEmptyRefVal", ImGuiInputTextFlags_ParseEmptyRefVal},
+			    {"DisplayEmptyRefVal", ImGuiInputTextFlags_DisplayEmptyRefVal},
+			    {"NoHorizontalScroll", ImGuiInputTextFlags_NoHorizontalScroll},
+			    {"NoUndoRedo", ImGuiInputTextFlags_NoUndoRedo},
+			    {"ElideLeft", ImGuiInputTextFlags_ElideLeft},
+			    {"CallbackCompletion", ImGuiInputTextFlags_CallbackCompletion},
+			    {"CallbackHistory", ImGuiInputTextFlags_CallbackHistory},
+			    {"CallbackAlways", ImGuiInputTextFlags_CallbackAlways},
+			    {"CallbackCharFilter", ImGuiInputTextFlags_CallbackCharFilter},
+			    {"CallbackResize", ImGuiInputTextFlags_CallbackResize},
+			    {"CallbackEdit", ImGuiInputTextFlags_CallbackEdit},
+			});
+			RegisterEnum(state, "ImGuiInputTextFlags", inputFlags.data(), inputFlags.size());
 
-			static const EnumEntry colorEdit[] = {
-				{"None", 0}, {"NoAlpha", 2}, {"NoPicker", 4}, {"NoOptions", 8},
-				{"NoSmallPreview", 16}, {"NoInputs", 32}, {"NoTooltip", 64}, {"NoLabel", 128},
-				{"NoSidePreview", 256}, {"NoDragDrop", 512}, {"NoBorder", 1024},
-				{"AlphaOpaque", 2048}, {"AlphaNoBg", 4096}, {"AlphaPreviewHalf", 8192},
-				{"AlphaBar", 65536}, {"HDR", 524288}, {"DisplayRGB", 1048576},
-				{"DisplayHSV", 2097152}, {"DisplayHex", 4194304}, {"Uint8", 8388608},
-				{"Float", 16777216}, {"PickerHueBar", 33554432}, {"PickerHueWheel", 67108864},
-				{"InputRGB", 134217728}, {"InputHSV", 268435456}, {"DefaultOptions_", 177209344},
-				{"DisplayMask_", 7340032}, {"DataTypeMask_", 25165824}, {"PickerMask_", 100663296},
-				{"InputMask_", 402653184}
-			};
-			RegisterEnum(state, "ImGuiColorEditFlags", colorEdit, std::size(colorEdit));
+			static constexpr auto colorEdit = std::to_array<EnumEntry>({
+			    {"None", ImGuiColorEditFlags_None},
+			    {"NoAlpha", ImGuiColorEditFlags_NoAlpha},
+			    {"NoPicker", ImGuiColorEditFlags_NoPicker},
+			    {"NoOptions", ImGuiColorEditFlags_NoOptions},
+			    {"NoSmallPreview", ImGuiColorEditFlags_NoSmallPreview},
+			    {"NoInputs", ImGuiColorEditFlags_NoInputs},
+			    {"NoTooltip", ImGuiColorEditFlags_NoTooltip},
+			    {"NoLabel", ImGuiColorEditFlags_NoLabel},
+			    {"NoSidePreview", ImGuiColorEditFlags_NoSidePreview},
+			    {"NoDragDrop", ImGuiColorEditFlags_NoDragDrop},
+			    {"NoBorder", ImGuiColorEditFlags_NoBorder},
+			    {"AlphaOpaque", ImGuiColorEditFlags_AlphaOpaque},
+			    {"AlphaNoBg", ImGuiColorEditFlags_AlphaNoBg},
+			    {"AlphaPreviewHalf", ImGuiColorEditFlags_AlphaPreviewHalf},
+			    {"AlphaBar", ImGuiColorEditFlags_AlphaBar},
+			    {"HDR", ImGuiColorEditFlags_HDR},
+			    {"DisplayRGB", ImGuiColorEditFlags_DisplayRGB},
+			    {"DisplayHSV", ImGuiColorEditFlags_DisplayHSV},
+			    {"DisplayHex", ImGuiColorEditFlags_DisplayHex},
+			    {"Uint8", ImGuiColorEditFlags_Uint8},
+			    {"Float", ImGuiColorEditFlags_Float},
+			    {"PickerHueBar", ImGuiColorEditFlags_PickerHueBar},
+			    {"PickerHueWheel", ImGuiColorEditFlags_PickerHueWheel},
+			    {"InputRGB", ImGuiColorEditFlags_InputRGB},
+			    {"InputHSV", ImGuiColorEditFlags_InputHSV},
+			    {"DefaultOptions_", ImGuiColorEditFlags_DefaultOptions_},
+			    {"AlphaMask_", ImGuiColorEditFlags_AlphaMask_},
+			    {"DisplayMask_", ImGuiColorEditFlags_DisplayMask_},
+			    {"DataTypeMask_", ImGuiColorEditFlags_DataTypeMask_},
+			    {"PickerMask_", ImGuiColorEditFlags_PickerMask_},
+			    {"InputMask_", ImGuiColorEditFlags_InputMask_},
+			    {"AlphaPreview", ImGuiColorEditFlags_AlphaPreview},
+			});
+			RegisterEnum(state, "ImGuiColorEditFlags", colorEdit.data(), colorEdit.size());
 
-			static const EnumEntry treeFlags[] = {
-				{"None", 0}, {"Selected", 1}, {"Framed", 2}, {"AllowOverlap", 4},
-				{"NoTreePushOnOpen", 8}, {"NoAutoOpenOnLog", 16}, {"DefaultOpen", 32},
-				{"OpenOnDoubleClick", 64}, {"OpenOnArrow", 128}, {"Leaf", 256},
-				{"Bullet", 512}, {"FramePadding", 1024}, {"SpanAvailWidth", 2048},
-				{"SpanFullWidth", 4096}, {"SpanLabelWidth", 8192}, {"SpanAllColumns", 16384},
-				{"LabelSpanAllColumns", 32768}, {"NavLeftJumpsToParent", 131072},
-				{"CollapsingHeader", 26},
-				// renamed aliases kept for script compatibility
-				{"AllowItemOverlap", 4}, {"NavLeftJumpsBackHere", 131072}
-			};
-			RegisterEnum(state, "ImGuiTreeNodeFlags", treeFlags, std::size(treeFlags));
+			static constexpr auto treeFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiTreeNodeFlags_None},
+			    {"Selected", ImGuiTreeNodeFlags_Selected},
+			    {"Framed", ImGuiTreeNodeFlags_Framed},
+			    {"AllowOverlap", ImGuiTreeNodeFlags_AllowOverlap},
+			    {"NoTreePushOnOpen", ImGuiTreeNodeFlags_NoTreePushOnOpen},
+			    {"NoAutoOpenOnLog", ImGuiTreeNodeFlags_NoAutoOpenOnLog},
+			    {"DefaultOpen", ImGuiTreeNodeFlags_DefaultOpen},
+			    {"OpenOnDoubleClick", ImGuiTreeNodeFlags_OpenOnDoubleClick},
+			    {"OpenOnArrow", ImGuiTreeNodeFlags_OpenOnArrow},
+			    {"Leaf", ImGuiTreeNodeFlags_Leaf},
+			    {"Bullet", ImGuiTreeNodeFlags_Bullet},
+			    {"FramePadding", ImGuiTreeNodeFlags_FramePadding},
+			    {"SpanAvailWidth", ImGuiTreeNodeFlags_SpanAvailWidth},
+			    {"SpanFullWidth", ImGuiTreeNodeFlags_SpanFullWidth},
+			    {"SpanLabelWidth", ImGuiTreeNodeFlags_SpanLabelWidth},
+			    {"SpanAllColumns", ImGuiTreeNodeFlags_SpanAllColumns},
+			    {"LabelSpanAllColumns", ImGuiTreeNodeFlags_LabelSpanAllColumns},
+			    {"NavLeftJumpsToParent", ImGuiTreeNodeFlags_NavLeftJumpsToParent},
+			    {"CollapsingHeader", ImGuiTreeNodeFlags_CollapsingHeader},
+			    {"DrawLinesNone", ImGuiTreeNodeFlags_DrawLinesNone},
+			    {"DrawLinesFull", ImGuiTreeNodeFlags_DrawLinesFull},
+			    {"DrawLinesToNodes", ImGuiTreeNodeFlags_DrawLinesToNodes},
+			    {"NavLeftJumpsBackHere", ImGuiTreeNodeFlags_NavLeftJumpsBackHere},
+			    {"SpanTextWidth", ImGuiTreeNodeFlags_SpanTextWidth},
+			    {"AllowItemOverlap", ImGuiTreeNodeFlags_AllowItemOverlap},
+			});
+			RegisterEnum(state, "ImGuiTreeNodeFlags", treeFlags.data(), treeFlags.size());
 
-			static const EnumEntry selectFlags[] = {
-				{"AllowDoubleClick", 4}, {"AllowItemOverlap", 16},
-				{"Disabled", 8}, {"DontClosePopups", 1},
-				{"None", 0}, {"SpanAllColumns", 2}
-			};
-			RegisterEnum(state, "ImGuiSelectableFlags", selectFlags, std::size(selectFlags));
+			static constexpr auto selectFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiSelectableFlags_None},
+			    {"NoAutoClosePopups", ImGuiSelectableFlags_NoAutoClosePopups},
+			    {"SpanAllColumns", ImGuiSelectableFlags_SpanAllColumns},
+			    {"AllowDoubleClick", ImGuiSelectableFlags_AllowDoubleClick},
+			    {"Disabled", ImGuiSelectableFlags_Disabled},
+			    {"AllowOverlap", ImGuiSelectableFlags_AllowOverlap},
+			    {"Highlight", ImGuiSelectableFlags_Highlight},
+			    {"DontClosePopups", ImGuiSelectableFlags_DontClosePopups},
+			    {"AllowItemOverlap", ImGuiSelectableFlags_AllowItemOverlap},
+			});
+			RegisterEnum(state, "ImGuiSelectableFlags", selectFlags.data(), selectFlags.size());
 
-			static const EnumEntry popupFlags[] = {
-				{"None", 0}, {"MouseButtonLeft", 0}, {"MouseButtonRight", 1},
-				{"MouseButtonMiddle", 2}, {"MouseButtonMask_", 31}, {"MouseButtonDefault_", 1},
-				{"NoReopen", 32}, {"NoOpenOverExistingPopup", 128}, {"NoOpenOverItems", 256},
-				{"AnyPopupId", 1024}, {"AnyPopupLevel", 2048}, {"AnyPopup", 3072}
-			};
-			RegisterEnum(state, "ImGuiPopupFlags", popupFlags, std::size(popupFlags));
+			static constexpr auto popupFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiPopupFlags_None},
+			    {"MouseButtonLeft", ImGuiPopupFlags_MouseButtonLeft},
+			    {"MouseButtonRight", ImGuiPopupFlags_MouseButtonRight},
+			    {"MouseButtonMiddle", ImGuiPopupFlags_MouseButtonMiddle},
+			    {"MouseButtonMask_", ImGuiPopupFlags_MouseButtonMask_},
+			    {"MouseButtonDefault_", ImGuiPopupFlags_MouseButtonDefault_},
+			    {"NoReopen", ImGuiPopupFlags_NoReopen},
+			    {"NoOpenOverExistingPopup", ImGuiPopupFlags_NoOpenOverExistingPopup},
+			    {"NoOpenOverItems", ImGuiPopupFlags_NoOpenOverItems},
+			    {"AnyPopupId", ImGuiPopupFlags_AnyPopupId},
+			    {"AnyPopupLevel", ImGuiPopupFlags_AnyPopupLevel},
+			    {"AnyPopup", ImGuiPopupFlags_AnyPopup},
+			});
+			RegisterEnum(state, "ImGuiPopupFlags", popupFlags.data(), popupFlags.size());
 
-			static const EnumEntry tabBar[] = {
-				{"None", 0}, {"Reorderable", 1}, {"AutoSelectNewTabs", 2},
-				{"TabListPopupButton", 4}, {"NoCloseWithMiddleMouseButton", 8},
-				{"NoTabListScrollingButtons", 16}, {"NoTooltip", 32},
-				{"DrawSelectedOverline", 64}, {"FittingPolicyResizeDown", 128},
-				{"FittingPolicyScroll", 256}, {"FittingPolicyMask_", 384},
-				{"FittingPolicyDefault_", 128}
-			};
-			RegisterEnum(state, "ImGuiTabBarFlags", tabBar, std::size(tabBar));
+			static constexpr auto tabBar = std::to_array<EnumEntry>({
+			    {"None", ImGuiTabBarFlags_None},
+			    {"Reorderable", ImGuiTabBarFlags_Reorderable},
+			    {"AutoSelectNewTabs", ImGuiTabBarFlags_AutoSelectNewTabs},
+			    {"TabListPopupButton", ImGuiTabBarFlags_TabListPopupButton},
+			    {"NoCloseWithMiddleMouseButton", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton},
+			    {"NoTabListScrollingButtons", ImGuiTabBarFlags_NoTabListScrollingButtons},
+			    {"NoTooltip", ImGuiTabBarFlags_NoTooltip},
+			    {"DrawSelectedOverline", ImGuiTabBarFlags_DrawSelectedOverline},
+			    {"FittingPolicyResizeDown", ImGuiTabBarFlags_FittingPolicyResizeDown},
+			    {"FittingPolicyScroll", ImGuiTabBarFlags_FittingPolicyScroll},
+			    {"FittingPolicyMask_", ImGuiTabBarFlags_FittingPolicyMask_},
+			    {"FittingPolicyDefault_", ImGuiTabBarFlags_FittingPolicyDefault_},
+			});
+			RegisterEnum(state, "ImGuiTabBarFlags", tabBar.data(), tabBar.size());
 
-			static const EnumEntry tableColumn[] = {
-				{"DefaultSort", 4}, {"Disabled", 1},
-				{"IndentDisabled", 131072}, {"IndentEnable", 65536},
-				{"IndentMask_", 196608}, {"IsEnabled", 16777216},
-				{"IsHovered", 134217728}, {"IsSorted", 67108864},
-				{"IsVisible", 33554432}, {"NoClip", 256},
-				{"NoDirectResize_", 1073741824}, {"NoHeaderLabel", 4096},
-				{"NoHeaderWidth", 8192}, {"NoHide", 128},
-				{"NoReorder", 64}, {"NoResize", 32},
-				{"NoSort", 512}, {"NoSortAscending", 1024},
-				{"NoSortDescending", 2048}, {"None", 0},
-				{"PreferSortAscending", 16384}, {"PreferSortDescending", 32768},
-				{"StatusMask_", 251658240}, {"WidthFixed", 16},
-				{"WidthMask_", 24}, {"WidthStretch", 8}
-			};
-			RegisterEnum(state, "ImGuiTableColumnFlags", tableColumn, std::size(tableColumn));
+			static constexpr auto tableColumn = std::to_array<EnumEntry>({
+			    {"None", ImGuiTableColumnFlags_None},
+			    {"Disabled", ImGuiTableColumnFlags_Disabled},
+			    {"DefaultHide", ImGuiTableColumnFlags_DefaultHide},
+			    {"DefaultSort", ImGuiTableColumnFlags_DefaultSort},
+			    {"WidthStretch", ImGuiTableColumnFlags_WidthStretch},
+			    {"WidthFixed", ImGuiTableColumnFlags_WidthFixed},
+			    {"NoResize", ImGuiTableColumnFlags_NoResize},
+			    {"NoReorder", ImGuiTableColumnFlags_NoReorder},
+			    {"NoHide", ImGuiTableColumnFlags_NoHide},
+			    {"NoClip", ImGuiTableColumnFlags_NoClip},
+			    {"NoSort", ImGuiTableColumnFlags_NoSort},
+			    {"NoSortAscending", ImGuiTableColumnFlags_NoSortAscending},
+			    {"NoSortDescending", ImGuiTableColumnFlags_NoSortDescending},
+			    {"NoHeaderLabel", ImGuiTableColumnFlags_NoHeaderLabel},
+			    {"NoHeaderWidth", ImGuiTableColumnFlags_NoHeaderWidth},
+			    {"PreferSortAscending", ImGuiTableColumnFlags_PreferSortAscending},
+			    {"PreferSortDescending", ImGuiTableColumnFlags_PreferSortDescending},
+			    {"IndentEnable", ImGuiTableColumnFlags_IndentEnable},
+			    {"IndentDisable", ImGuiTableColumnFlags_IndentDisable},
+			    {"AngledHeader", ImGuiTableColumnFlags_AngledHeader},
+			    {"IsEnabled", ImGuiTableColumnFlags_IsEnabled},
+			    {"IsVisible", ImGuiTableColumnFlags_IsVisible},
+			    {"IsSorted", ImGuiTableColumnFlags_IsSorted},
+			    {"IsHovered", ImGuiTableColumnFlags_IsHovered},
+			    {"WidthMask_", ImGuiTableColumnFlags_WidthMask_},
+			    {"IndentMask_", ImGuiTableColumnFlags_IndentMask_},
+			    {"StatusMask_", ImGuiTableColumnFlags_StatusMask_},
+			    {"NoDirectResize_", ImGuiTableColumnFlags_NoDirectResize_},
+			    {"IndentDisabled", ImGuiTableColumnFlags_IndentDisable},
+			});
+			RegisterEnum(state, "ImGuiTableColumnFlags", tableColumn.data(), tableColumn.size());
 
-			static const EnumEntry tableFlags[] = {
-				{"Borders", 1920}, {"BordersH", 384},
-				{"BordersInner", 640}, {"BordersInnerH", 128},
-				{"BordersInnerV", 512}, {"BordersOuter", 1280},
-				{"BordersOuterH", 256}, {"BordersOuterV", 1024},
-				{"BordersV", 1536}, {"ContextMenuInBody", 32},
-				{"Hideable", 4}, {"NoBordersInBody", 2048},
-				{"NoBordersInBodyUntilResize", 4096}, {"NoClip", 1048576},
-				{"NoHostExtendX", 65536}, {"NoHostExtendY", 131072},
-				{"NoKeepColumnsVisible", 262144}, {"NoPadInnerX", 8388608},
-				{"NoPadOuterX", 4194304}, {"NoSavedSettings", 16},
-				{"None", 0}, {"PadOuterX", 2097152},
-				{"PreciseWidths", 524288}, {"Reorderable", 2},
-				{"Resizable", 1}, {"RowBg", 64},
-				{"ScrollX", 16777216}, {"ScrollY", 33554432},
-				{"SizingFixedFit", 8192}, {"SizingFixedSame", 16384},
-				{"SizingMask_", 57344}, {"SizingStretchProp", 24576},
-				{"SizingStretchSame", 32768}, {"SortMulti", 67108864},
-				{"SortTristate", 134217728}, {"Sortable", 8}
-			};
-			RegisterEnum(state, "ImGuiTableFlags", tableFlags, std::size(tableFlags));
+			static constexpr auto tableFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiTableFlags_None},
+			    {"Resizable", ImGuiTableFlags_Resizable},
+			    {"Reorderable", ImGuiTableFlags_Reorderable},
+			    {"Hideable", ImGuiTableFlags_Hideable},
+			    {"Sortable", ImGuiTableFlags_Sortable},
+			    {"NoSavedSettings", ImGuiTableFlags_NoSavedSettings},
+			    {"ContextMenuInBody", ImGuiTableFlags_ContextMenuInBody},
+			    {"RowBg", ImGuiTableFlags_RowBg},
+			    {"BordersInnerH", ImGuiTableFlags_BordersInnerH},
+			    {"BordersOuterH", ImGuiTableFlags_BordersOuterH},
+			    {"BordersInnerV", ImGuiTableFlags_BordersInnerV},
+			    {"BordersOuterV", ImGuiTableFlags_BordersOuterV},
+			    {"BordersH", ImGuiTableFlags_BordersH},
+			    {"BordersV", ImGuiTableFlags_BordersV},
+			    {"BordersInner", ImGuiTableFlags_BordersInner},
+			    {"BordersOuter", ImGuiTableFlags_BordersOuter},
+			    {"Borders", ImGuiTableFlags_Borders},
+			    {"NoBordersInBody", ImGuiTableFlags_NoBordersInBody},
+			    {"NoBordersInBodyUntilResize", ImGuiTableFlags_NoBordersInBodyUntilResize},
+			    {"SizingFixedFit", ImGuiTableFlags_SizingFixedFit},
+			    {"SizingFixedSame", ImGuiTableFlags_SizingFixedSame},
+			    {"SizingStretchProp", ImGuiTableFlags_SizingStretchProp},
+			    {"SizingStretchSame", ImGuiTableFlags_SizingStretchSame},
+			    {"NoHostExtendX", ImGuiTableFlags_NoHostExtendX},
+			    {"NoHostExtendY", ImGuiTableFlags_NoHostExtendY},
+			    {"NoKeepColumnsVisible", ImGuiTableFlags_NoKeepColumnsVisible},
+			    {"PreciseWidths", ImGuiTableFlags_PreciseWidths},
+			    {"NoClip", ImGuiTableFlags_NoClip},
+			    {"PadOuterX", ImGuiTableFlags_PadOuterX},
+			    {"NoPadOuterX", ImGuiTableFlags_NoPadOuterX},
+			    {"NoPadInnerX", ImGuiTableFlags_NoPadInnerX},
+			    {"ScrollX", ImGuiTableFlags_ScrollX},
+			    {"ScrollY", ImGuiTableFlags_ScrollY},
+			    {"SortMulti", ImGuiTableFlags_SortMulti},
+			    {"SortTristate", ImGuiTableFlags_SortTristate},
+			    {"HighlightHoveredColumn", ImGuiTableFlags_HighlightHoveredColumn},
+			    {"SizingMask_", ImGuiTableFlags_SizingMask_},
+			});
+			RegisterEnum(state, "ImGuiTableFlags", tableFlags.data(), tableFlags.size());
 
-			static const EnumEntry styleVar[] = {
-				{"Alpha", 0}, {"DisabledAlpha", 1}, {"WindowPadding", 2}, {"WindowRounding", 3},
-				{"WindowBorderSize", 4}, {"WindowMinSize", 5}, {"WindowTitleAlign", 6},
-				{"ChildRounding", 7}, {"ChildBorderSize", 8}, {"PopupRounding", 9},
-				{"PopupBorderSize", 10}, {"FramePadding", 11}, {"FrameRounding", 12},
-				{"FrameBorderSize", 13}, {"ItemSpacing", 14}, {"ItemInnerSpacing", 15},
-				{"IndentSpacing", 16}, {"CellPadding", 17}, {"ScrollbarSize", 18},
-				{"ScrollbarRounding", 19}, {"GrabMinSize", 20}, {"GrabRounding", 21},
-				{"ImageBorderSize", 22}, {"TabRounding", 23}, {"TabBorderSize", 24},
-				{"TabBarBorderSize", 25}, {"TabBarOverlineSize", 26}, {"TableAngledHeadersAngle", 27},
-				{"TableAngledHeadersTextAlign", 28}, {"TreeLinesSize", 29}, {"TreeLinesRounding", 30},
-				{"ButtonTextAlign", 31}, {"SelectableTextAlign", 32}, {"SeparatorTextBorderSize", 33},
-				{"SeparatorTextAlign", 34}, {"SeparatorTextPadding", 35}, {"COUNT", 36}
-			};
-			RegisterEnum(state, "ImGuiStyleVar", styleVar, std::size(styleVar));
+			static constexpr auto styleVar = std::to_array<EnumEntry>({
+			    {"Alpha", ImGuiStyleVar_Alpha},
+			    {"DisabledAlpha", ImGuiStyleVar_DisabledAlpha},
+			    {"WindowPadding", ImGuiStyleVar_WindowPadding},
+			    {"WindowRounding", ImGuiStyleVar_WindowRounding},
+			    {"WindowBorderSize", ImGuiStyleVar_WindowBorderSize},
+			    {"WindowMinSize", ImGuiStyleVar_WindowMinSize},
+			    {"WindowTitleAlign", ImGuiStyleVar_WindowTitleAlign},
+			    {"ChildRounding", ImGuiStyleVar_ChildRounding},
+			    {"ChildBorderSize", ImGuiStyleVar_ChildBorderSize},
+			    {"PopupRounding", ImGuiStyleVar_PopupRounding},
+			    {"PopupBorderSize", ImGuiStyleVar_PopupBorderSize},
+			    {"FramePadding", ImGuiStyleVar_FramePadding},
+			    {"FrameRounding", ImGuiStyleVar_FrameRounding},
+			    {"FrameBorderSize", ImGuiStyleVar_FrameBorderSize},
+			    {"ItemSpacing", ImGuiStyleVar_ItemSpacing},
+			    {"ItemInnerSpacing", ImGuiStyleVar_ItemInnerSpacing},
+			    {"IndentSpacing", ImGuiStyleVar_IndentSpacing},
+			    {"CellPadding", ImGuiStyleVar_CellPadding},
+			    {"ScrollbarSize", ImGuiStyleVar_ScrollbarSize},
+			    {"ScrollbarRounding", ImGuiStyleVar_ScrollbarRounding},
+			    {"GrabMinSize", ImGuiStyleVar_GrabMinSize},
+			    {"GrabRounding", ImGuiStyleVar_GrabRounding},
+			    {"ImageBorderSize", ImGuiStyleVar_ImageBorderSize},
+			    {"TabRounding", ImGuiStyleVar_TabRounding},
+			    {"TabBorderSize", ImGuiStyleVar_TabBorderSize},
+			    {"TabBarBorderSize", ImGuiStyleVar_TabBarBorderSize},
+			    {"TabBarOverlineSize", ImGuiStyleVar_TabBarOverlineSize},
+			    {"TableAngledHeadersAngle", ImGuiStyleVar_TableAngledHeadersAngle},
+			    {"TableAngledHeadersTextAlign", ImGuiStyleVar_TableAngledHeadersTextAlign},
+			    {"TreeLinesSize", ImGuiStyleVar_TreeLinesSize},
+			    {"TreeLinesRounding", ImGuiStyleVar_TreeLinesRounding},
+			    {"ButtonTextAlign", ImGuiStyleVar_ButtonTextAlign},
+			    {"SelectableTextAlign", ImGuiStyleVar_SelectableTextAlign},
+			    {"SeparatorTextBorderSize", ImGuiStyleVar_SeparatorTextBorderSize},
+			    {"SeparatorTextAlign", ImGuiStyleVar_SeparatorTextAlign},
+			    {"SeparatorTextPadding", ImGuiStyleVar_SeparatorTextPadding},
+			    {"COUNT", ImGuiStyleVar_COUNT},
+			});
+			RegisterEnum(state, "ImGuiStyleVar", styleVar.data(), styleVar.size());
 
-			static const EnumEntry tabItem[] = {
-				{"NoCloseWithMiddleMouseButton", 4}, {"NoPushId", 8},
-				{"NoTooltip", 16}, {"None", 0},
-				{"SetSelected", 2}, {"UnsavedDocument", 1}
-			};
-			RegisterEnum(state, "ImGuiTabItemFlags", tabItem, std::size(tabItem));
+			static constexpr auto tabItem = std::to_array<EnumEntry>({
+			    {"None", ImGuiTabItemFlags_None},
+			    {"UnsavedDocument", ImGuiTabItemFlags_UnsavedDocument},
+			    {"SetSelected", ImGuiTabItemFlags_SetSelected},
+			    {"NoCloseWithMiddleMouseButton", ImGuiTabItemFlags_NoCloseWithMiddleMouseButton},
+			    {"NoPushId", ImGuiTabItemFlags_NoPushId},
+			    {"NoTooltip", ImGuiTabItemFlags_NoTooltip},
+			    {"NoReorder", ImGuiTabItemFlags_NoReorder},
+			    {"Leading", ImGuiTabItemFlags_Leading},
+			    {"Trailing", ImGuiTabItemFlags_Trailing},
+			    {"NoAssumedClosure", ImGuiTabItemFlags_NoAssumedClosure},
+			});
+			RegisterEnum(state, "ImGuiTabItemFlags", tabItem.data(), tabItem.size());
 		}
 	};
 

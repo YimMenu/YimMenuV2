@@ -3,6 +3,8 @@
 #include "core/scripting/LuaUtils.hpp"
 #include "core/util/Joaat.hpp"
 
+#include "game/pointers/Pointers.hpp"
+
 #include <chrono>
 
 namespace YimMenu::Lua
@@ -29,11 +31,19 @@ namespace YimMenu::Lua
 			return 1;
 		}
 
+		static int GetGameVersion(lua_State* state)
+		{
+			lua_pushstring(state, Pointers.OnlineVersion);
+			lua_pushstring(state, Pointers.GameVersion);
+			return 2;
+		}
+
 		virtual void Register(lua_State* state) override	
 		{
 			lua_newtable(state);
 			SetFunction(state, Joaat, "joaat");
 			SetFunction(state, Time, "time");
+			SetFunction(state, GetGameVersion, "get_game_version");
 			lua_setglobal(state, "util");
 		}
 	};

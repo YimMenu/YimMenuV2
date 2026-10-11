@@ -2,11 +2,9 @@
 
 namespace rage
 {
-	class netCatalogBaseItem
+	struct netCatalogBaseItem
 	{
-	public:
-		virtual ~netCatalogBaseItem() = default;
-
+		void* m_Vft;                    // 0x00
 		std::uint32_t m_Hash;           // 0x08
 		std::uint32_t m_CategoryHash;   // 0x0C
 		std::int32_t m_Price;           // 0x10

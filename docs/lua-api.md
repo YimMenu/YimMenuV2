@@ -16,6 +16,7 @@ The Lua Scripts menu shows loaded scripts in the **Enabled** listbox and unloade
 
 - [Conventions](#conventions)
 - [Standard libraries](#standard-libraries)
+- [os](#os)
 - [require](#require)
 - **Core / UI**: [notify](#notify) · [log](#log) · [util](#util) · [script](#script) · [event](#event) · [menu](#menu) · [commandmgr](#commandmgr) · [ImGui](#imgui)
 - **Memory**: [memory](#memory) · [pointer](#pointer)
@@ -56,9 +57,34 @@ For the following optional trailing parameters, omit the argument to select the 
 
 ## Standard libraries
 
-Scripts get LuaJIT's `base`, `coroutine`, `package`, `table`, `string`, `math`, `debug`, `bit`, and `jit` libraries.
+Scripts get LuaJIT's `base`, `coroutine`, `package`, `table`, `string`, `math`, `debug`, `bit`, and `jit` libraries, plus the restricted [os](#os) library.
 
-The `package` library supports sandboxed module loading. Direct loaders (`load`, `loadstring`, `loadfile`, `dofile`) and `package.loadlib` raise an unsupported-function error. `io`, `os`, and `ffi` are unavailable. Use [FileMgr](#filemgr) for file access and [util.time](#util) for time.
+The `package` library supports sandboxed module loading. Direct loaders (`load`, `loadstring`, `loadfile`, `dofile`) and `package.loadlib` raise an unsupported-function error. `io` and `ffi` are unavailable. Use [FileMgr](#filemgr) for file access.
+
+## os
+
+Available as the global `os` table and through `require("os")`. These functions retain their normal LuaJIT behavior:
+
+| Function | Description |
+| --- | --- |
+| `os.clock() -> number` | Approximate CPU time used by the process, in seconds. |
+| `os.date([format], [timestamp]) -> string \| table \| nil` | Formats a Unix timestamp in seconds; defaults to the current time and format `%c`. `*t` returns a date table; prefix the format with `!` for UTC. Unsupported timestamps return nil. |
+| `os.difftime(t2, t1) -> number` | Difference between two timestamps, in seconds. |
+| `os.time([date_table]) -> number \| nil` | Returns Unix seconds for the current time or a local date table; unrepresentable dates return nil. |
+
+Date tables contain `year`, `month`, `day`, `hour`, `min`, `sec`, `wday`, `yday`, and `isdst`. Months are 1–12, weekdays are 1–7 with Sunday = 1, and days of the year are 1–366. For `os.time`, `year`, `month`, and `day` are required; `hour`, `min`, and `sec` default to 12, 0, and 0. Omitted `isdst` lets the platform detect daylight saving time. `wday` and `yday` are ignored, and calendar fields are normalized according to LuaJIT/platform behavior.
+
+`os.execute`, `os.exit`, `os.getenv`, `os.setlocale`, and `os.tmpname` raise a not-supported error. `os.rename` and `os.remove` raise an error directing scripts to [FileMgr](#filemgr); use `FileMgr.RenameFile` and `FileMgr.DeleteFile` instead.
+
+`os` timestamps use **seconds**. `util.time()` continues to return **milliseconds**.
+
+```lua
+local timestamp = os.time()
+local local_date = os.date("*t", timestamp)
+local utc_date = os.date("!*t", timestamp)
+local formatted = os.date("%Y-%m-%d %H:%M:%S", timestamp)
+local noon = os.time({year = local_date.year, month = local_date.month, day = local_date.day})
+```
 
 ## require
 
@@ -442,10 +468,10 @@ These existing `ImGui.Add*` helpers draw into the current window. For explicit t
 
 | DrawList method | Description |
 | --- | --- |
-| `list:AddText(x, y, text, r, g, b, a, [font_size])` | Draws text using the current font. `font_size` is a positive pixel size; omission or `nil` uses the current font size. |
+| `list:AddText(x, y, text, r, g, b, a, [font_size], [wrap_width])` | Draws text using the current font. Omitted/nil `font_size` uses its current size; otherwise pass a positive finite pixel size. `wrap_width` is a non-negative finite pixel width; omitted/nil or 0 disables wrapping. |
 | `list:AddLine(x1, y1, x2, y2, r, g, b, a, [thickness])` | Draws a line; thickness defaults to 1 pixel. |
 | `list:AddRect(x1, y1, x2, y2, r, g, b, a, [rounding], [flags], [thickness])` | Draws a rectangle outline. Defaults: corner rounding 0 pixels, draw flags 0, thickness 1 pixel. |
-| `list:AddRectFilled(x1, y1, x2, y2, r, g, b, a, [rounding])` | Draws a filled rectangle; corner rounding defaults to 0 pixels. |
+| `list:AddRectFilled(x1, y1, x2, y2, r, g, b, a, [rounding], [flags])` | Draws a filled rectangle. Defaults: corner rounding 0 pixels, draw flags 0. With positive rounding, flags select the rounded corners. |
 | `list:AddRectFilledMultiColor(x1, y1, x2, y2, upper_left, upper_right, bottom_right, bottom_left)` | Draws a filled rectangle with four packed U32 corner colors, interpolated across the rectangle. |
 | `list:AddTriangle(x1, y1, x2, y2, x3, y3, r, g, b, a, [thickness])` | Draws a triangle outline; thickness defaults to 1 pixel. |
 | `list:AddTriangleFilled(x1, y1, x2, y2, x3, y3, r, g, b, a)` | Draws a filled triangle; supply vertices in clockwise screen-space order. |
@@ -455,6 +481,10 @@ These existing `ImGui.Add*` helpers draw into the current window. For explicit t
 Coordinates are screen-space pixels. Color components must be integers from 0 to 255, including alpha. Optional draw parameters accept `nil` to select their defaults. Acquire handles inside an ImGui draw callback and obtain new ones each frame; using a handle outside its render frame raises an error. ImGui owns the draw lists; Lua does not delete them.
 
 `AddRectFilledMultiColor` takes one packed integer per corner. Create these colors with `ImGui.ColorConvertRGBAToU32({r, g, b, a})`; the corner order is upper-left, upper-right, bottom-right, bottom-left.
+
+To wrap text using the current font size, pass `nil` before the wrap width: `list:AddText(x, y, text, r, g, b, a, nil, 200)`.
+
+For `AddRect` and `AddRectFilled`, corner flag bits are top-left = 16, top-right = 32, bottom-left = 64, and bottom-right = 128. Combine them with `bit.bor`. With positive rounding, flags 0 round all corners; 256 disables rounding. Omitted/nil flags use 0.
 
 ```lua
 menu.add_always_draw_imgui(function()
@@ -470,6 +500,7 @@ menu.add_always_draw_imgui(function()
     local left = ImGui.ColorConvertRGBAToU32({100, 180, 255, 255})
     local right = ImGui.ColorConvertRGBAToU32({255, 100, 180, 255})
     foreground:AddRectFilledMultiColor(20, 85, 260, 110, left, right, right, left)
+    foreground:AddText(30, 120, "This overlay text wraps to fit its width.", 255, 255, 255, 255, nil, 220)
 end)
 ```
 
@@ -481,7 +512,7 @@ end)
 
 #### Enum tables
 Use these global tables for `flags`/`cond`/`col`/`idx` arguments (each maps a name to an integer):
-`ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`.
+`ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiSliderFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`.
 
 Members match the bundled ImGui definitions. `ImGuiKey` includes keyboard, gamepad, mouse, and modifier values such as `Mod_Ctrl`; digit keys use string indexing, e.g. `ImGuiKey["0"]`. Existing names such as `KeyPadEnter`, `IndentDisabled`, `HeightMask`, and the prefixed mouse-button names remain compatibility aliases of the current names.
 

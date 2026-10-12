@@ -157,7 +157,9 @@ namespace YimMenu::Lua
 			auto color = GetDrawColor(state, 5);
 			const float size = static_cast<float>(luaL_optnumber(state, 9, ImGui::GetFontSize()));
 			luaL_argcheck(state, size > 0 && std::isfinite(size), 9, "font_size must be a positive finite number");
-			list->AddText(ImGui::GetFont(), size, ImVec2(x, y), color, text);
+			const float wrap_width = static_cast<float>(luaL_optnumber(state, 10, 0));
+			luaL_argcheck(state, wrap_width >= 0 && std::isfinite(wrap_width), 10, "wrap_width must be a non-negative finite number");
+			list->AddText(ImGui::GetFont(), size, ImVec2(x, y), color, text, nullptr, wrap_width);
 			return 0;
 		}
 
@@ -198,7 +200,8 @@ namespace YimMenu::Lua
 			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
 			auto color = GetDrawColor(state, 6);
 			const float rounding = static_cast<float>(luaL_optnumber(state, 10, 0));
-			list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), color, rounding);
+			const ImDrawFlags flags = static_cast<ImDrawFlags>(luaL_optinteger(state, 11, 0));
+			list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), color, rounding, flags);
 			return 0;
 		}
 
@@ -448,9 +451,10 @@ namespace YimMenu::Lua
 
 		static int TableSetupColumn(lua_State* state)
 		{
-			const char* str_id = CheckStringSafe(state, 1);
-			int flags          = (int)luaL_checkinteger(state, 2);
-			ImGui::TableSetupColumn(str_id, flags);
+			const char* str_id 			= CheckStringSafe(state, 1);
+			int flags          			= lua_isnoneornil(state, 2) ? 0 : (int)luaL_checkinteger(state, 2);
+			float init_width_or_height 	= lua_isnoneornil(state, 3) ? 0.0f : (float)luaL_checknumber(state, 3);
+			ImGui::TableSetupColumn(str_id, flags, init_width_or_height);
 			return 0;
 		}
 
@@ -1448,7 +1452,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_checknumber(state, 3);
 			float vmax        = (float)luaL_checknumber(state, 4);
 			const char* fmt   = lua_isnoneornil(state, 5) ? "%.3f" : luaL_checkstring(state, 5);
-			bool used         = ImGui::SliderFloat(label, &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
+			bool used         = ImGui::SliderFloat(label, &value, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1496,7 +1501,8 @@ namespace YimMenu::Lua
 			int vmin          = (int)luaL_checkinteger(state, 3);
 			int vmax          = (int)luaL_checkinteger(state, 4);
 			const char* fmt   = lua_isnoneornil(state, 5) ? "%d" : luaL_checkstring(state, 5);
-			bool used         = ImGui::SliderInt(label, &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
+			bool used         = ImGui::SliderInt(label, &value, vmin, vmax, fmt, flags);
 			lua_pushinteger(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -3250,6 +3256,20 @@ namespace YimMenu::Lua
 			    {"CallbackEdit", ImGuiInputTextFlags_CallbackEdit},
 			});
 			RegisterEnum(state, "ImGuiInputTextFlags", inputFlags.data(), inputFlags.size());
+
+			static constexpr auto sliderFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiSliderFlags_None},
+			    {"Logarithmic", ImGuiSliderFlags_Logarithmic},
+			    {"NoRoundToFormat", ImGuiSliderFlags_NoRoundToFormat},
+			    {"NoInput", ImGuiSliderFlags_NoInput},
+			    {"WrapAround", ImGuiSliderFlags_WrapAround},
+			    {"ClampOnInput", ImGuiSliderFlags_ClampOnInput},
+			    {"ClampZeroRange", ImGuiSliderFlags_ClampZeroRange},
+			    {"NoSpeedTweaks", ImGuiSliderFlags_NoSpeedTweaks},
+			    {"AlwaysClamp", ImGuiSliderFlags_AlwaysClamp},
+			    {"InvalidMask_", ImGuiSliderFlags_InvalidMask_},
+			});
+			RegisterEnum(state, "ImGuiSliderFlags", sliderFlags.data(), sliderFlags.size());
 
 			static constexpr auto colorEdit = std::to_array<EnumEntry>({
 			    {"None", ImGuiColorEditFlags_None},

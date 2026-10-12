@@ -55,17 +55,6 @@ namespace YimMenu::Lua
 	{
 		using LuaLibrary::LuaLibrary;
 
-		static std::uint32_t GetSecondaryItem(lua_State* state, int index)
-		{
-			size_t str_size;
-			if (lua_isnoneornil(state, index))
-				return 0;
-			else if (lua_tolstring(state, index, &str_size) && str_size == 0)
-				return 0;
-			else
-				return GetHashArgument(state, index);
-		}
-
 		static int BasketAddItem(lua_State* state)
 		{
 			auto& transaction = GetObject<BasketTransaction>(state, 1);
@@ -75,7 +64,7 @@ namespace YimMenu::Lua
 
 			BasketItem item{};
 			item.m_PrimaryItem = GetHashArgument(state, 2);
-			item.m_SecondaryItem = GetSecondaryItem(state, 3);
+			item.m_SecondaryItem = lua_isnoneornil(state, 3) ? 0 : GetHashArgument(state, 3);
 			item.m_Value = luaL_checkinteger(state, 4);
 			item.m_StatValue = luaL_checkinteger(state, 5);
 			item.m_Quantity = luaL_checkinteger(state, 6);

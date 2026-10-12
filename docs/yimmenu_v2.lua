@@ -39,6 +39,92 @@ function package.searchpath(name, path, sep, rep) end
 function package.loadlib(filename, symbol) end
 
 ------------------------------------------------------------------------------
+-- os (restricted standard LuaJIT library; timestamps use seconds)
+------------------------------------------------------------------------------
+
+---@class OsDateInput
+---@field year integer
+---@field month integer # 1..12
+---@field day integer # day of the month
+---@field hour? integer # default 12
+---@field min? integer # default 0
+---@field sec? integer # default 0
+---@field isdst? boolean # omitted/nil: detect daylight saving time
+---@field wday? integer # ignored by os.time
+---@field yday? integer # ignored by os.time
+
+---@class OsDateTable: OsDateInput
+---@field hour integer
+---@field min integer
+---@field sec integer
+---@field wday integer # 1..7; Sunday=1
+---@field yday integer # 1..366
+---@field isdst? boolean # daylight saving time flag
+
+---Approximate process CPU time in seconds; normal LuaJIT behavior.
+---@return number
+function os.clock() end
+
+---Normal LuaJIT date formatting; defaults to current local time and format "%c".
+---"*t" returns a local date table; "!*t" returns a UTC date table.
+---Unsupported timestamps return nil. Available through require("os") too.
+---@overload fun(format: '"*t"', timestamp?: integer): OsDateTable?
+---@overload fun(format: '"!*t"', timestamp?: integer): OsDateTable?
+---@param format? string
+---@param timestamp? integer # Unix seconds
+---@return string|OsDateTable|nil
+function os.date(format, timestamp) end
+
+---Returns t2-t1 in seconds; normal LuaJIT behavior.
+---@param t2 number
+---@param t1 number
+---@return number
+function os.difftime(t2, t1) end
+
+---Unix seconds; omitted/nil table selects current time. Normal LuaJIT local-time behavior.
+---Calendar fields are normalized; unsupported dates return nil.
+---@param date_table? OsDateInput
+---@return integer?
+function os.time(date_table) end
+
+---Disabled: raises a not-supported error.
+---@param command? string
+---@return never
+function os.execute(command) end
+
+---Disabled: raises a not-supported error.
+---@param code? integer|boolean
+---@param close? boolean
+---@return never
+function os.exit(code, close) end
+
+---Disabled: raises a not-supported error.
+---@param name string
+---@return never
+function os.getenv(name) end
+
+---Disabled: raises a not-supported error.
+---@param locale string|nil
+---@param category? string
+---@return never
+function os.setlocale(locale, category) end
+
+---Disabled: raises a not-supported error.
+---@return never
+function os.tmpname() end
+
+---Disabled: raises an error directing callers to FileMgr.RenameFile.
+---@param source string
+---@param destination string
+---@return never
+function os.rename(source, destination) end
+
+---Disabled: raises an error directing callers to FileMgr.DeleteFile.
+---@param path string
+---@return never
+function os.remove(path) end
+
+------------------------------------------------------------------------------
 -- Vector3
 ------------------------------------------------------------------------------
 
@@ -1388,6 +1474,7 @@ function ImGui.GetWindowDrawList() end
 ---@return DrawList
 function ImGui.GetForegroundDrawList() end
 ---Uses the current font; omitted/nil font_size uses its current size.
+---Omitted/nil wrap_width defaults to 0 (no wrapping); positive widths wrap in pixels.
 ---@param x number
 ---@param y number
 ---@param text string
@@ -1396,7 +1483,8 @@ function ImGui.GetForegroundDrawList() end
 ---@param b integer # 0..255
 ---@param a integer # 0..255
 ---@param font_size? number # positive size in pixels
-function DrawList:AddText(x, y, text, r, g, b, a, font_size) end
+---@param wrap_width? number # non-negative finite pixel width; default 0
+function DrawList:AddText(x, y, text, r, g, b, a, font_size, wrap_width) end
 ---@param x1 number
 ---@param y1 number
 ---@param x2 number
@@ -1430,7 +1518,8 @@ function DrawList:AddRect(x1, y1, x2, y2, r, g, b, a, rounding, flags, thickness
 ---@param b integer # 0..255
 ---@param a integer # 0..255
 ---@param rounding? number # default 0 pixels
-function DrawList:AddRectFilled(x1, y1, x2, y2, r, g, b, a, rounding) end
+---@param flags? integer # ImGui draw flags; default 0 (all corners when rounding > 0)
+function DrawList:AddRectFilled(x1, y1, x2, y2, r, g, b, a, rounding, flags) end
 
 ---Interpolates four packed U32 corner colors across a filled rectangle.
 ---Create colors with ImGui.ColorConvertRGBAToU32({r, g, b, a}).
@@ -1647,9 +1736,12 @@ function ImGui.TableNextRow() end
 ---@return boolean visible
 function ImGui.TableSetColumnIndex(column) end
 
+---Sets a column label, flags and initial width or stretch weight before submitting rows.
+---Omitted/nil flags and initial sizing default to 0; fractional sizing is supported.
 ---@param label string
----@param flags integer
-function ImGui.TableSetupColumn(label, flags) end
+---@param flags? integer # ImGuiTableColumnFlags; default 0
+---@param init_width_or_weight? number # WidthFixed: pixels; WidthStretch: relative weight; default 0
+function ImGui.TableSetupColumn(label, flags, init_width_or_weight) end
 
 function ImGui.TableHeadersRow() end
 
@@ -2185,8 +2277,9 @@ function ImGui.DragInt4(label, value, speed, min, max, format) end
 ---@param min number
 ---@param max number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number value, boolean changed
-function ImGui.SliderFloat(label, value, min, max, format) end
+function ImGui.SliderFloat(label, value, min, max, format, flags) end
 
 ---2 components; returns a new array. Default format: "%.3f".
 ---@param label string
@@ -2230,8 +2323,9 @@ function ImGui.SliderAngle(label, radians, min_degrees, max_degrees, format) end
 ---@param min integer
 ---@param max integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer value, boolean changed
-function ImGui.SliderInt(label, value, min, max, format) end
+function ImGui.SliderInt(label, value, min, max, format, flags) end
 
 ---2 components; returns a new array. Default format: "%d".
 ---@param label string
@@ -3006,6 +3100,20 @@ ImGuiInputTextFlags = {
     NoHorizontalScroll = 32768, NoUndoRedo = 65536, ElideLeft = 131072,
     CallbackCompletion = 262144, CallbackHistory = 524288, CallbackAlways = 1048576,
     CallbackCharFilter = 2097152, CallbackResize = 4194304, CallbackEdit = 8388608,
+}
+
+---@enum ImGuiSliderFlags
+ImGuiSliderFlags = {
+    None = 0,
+    Logarithmic = 32,
+    NoRoundToFormat = 64,
+    NoInput = 128,
+    WrapAround = 256,
+    ClampOnInput = 512,
+    ClampZeroRange = 1024,
+    NoSpeedTweaks = 2048,
+    AlwaysClamp = 1536,
+    InvalidMask_ = 0x7000000F,
 }
 
 ---@enum ImGuiColorEditFlags

@@ -98,15 +98,19 @@ namespace YimMenu
 		}
 
 		LOG(INFO) << "Unloading";
-		NativeHooks::Destroy();
-		FiberPool::Destroy();
+		
 		ScriptMgr::Destroy();
+		
+		NativeHooks::Destroy();
+		
+		FiberPool::Destroy();
+		
 		Hooking::Destroy();
 		CallSiteHook::Destroy();
 
 	EARLY_UNLOAD:
 		g_Running = false;
-		D3D12Hook::Destroy(true);
+		
 		Renderer::Destroy();
 		LogHelper::Destroy();
 

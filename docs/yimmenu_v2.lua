@@ -1691,7 +1691,9 @@ function ImGui.AddRectFilledMultiColor(x1, y1, x2, y2, upper_left, upper_right, 
 ---@param g integer
 ---@param b integer
 ---@param a integer
-function ImGui.AddText(x, y, text, r, g, b, a) end
+---@param font_size? number # positive finite pixels; omitted/nil: current font size
+---@param wrap_width? number # non-negative finite pixels; omitted/nil/0: no wrapping
+function ImGui.AddText(x, y, text, r, g, b, a, font_size, wrap_width) end
 
 ---@param x1 number
 ---@param y1 number
@@ -1722,26 +1724,32 @@ function ImGui.AddTriangleFilled(x1, y1, x2, y2, x3, y3, r, g, b, a) end
 -- Tables
 ---@param id string
 ---@param columns integer
----@param flags? integer
+---@param flags? ImGuiTableFlags # omitted/nil: None
+---@param outer_size_x? number # outer width in pixels; omitted/nil: 0 (available width)
+---@param outer_size_y? number # outer height in pixels; omitted/nil: 0 (ImGui default sizing)
+---@param inner_width? number # content width for horizontal scrolling; omitted/nil: 0
 ---@return boolean visible
-function ImGui.BeginTable(id, columns, flags) end
+function ImGui.BeginTable(id, columns, flags, outer_size_x, outer_size_y, inner_width) end
 
 function ImGui.EndTable() end
 
 function ImGui.TableNextColumn() end
 
-function ImGui.TableNextRow() end
+---@param row_flags? ImGuiTableRowFlags # omitted/nil: None
+---@param min_row_height? number # minimum height in pixels; omitted/nil: 0
+function ImGui.TableNextRow(row_flags, min_row_height) end
 
 ---@param column integer
 ---@return boolean visible
 function ImGui.TableSetColumnIndex(column) end
 
----Sets a column label, flags and initial width or stretch weight before submitting rows.
----Omitted/nil flags and initial sizing default to 0; fractional sizing is supported.
+---Sets a column label, flags, initial width or stretch weight and user ID before submitting rows.
+---Omitted/nil optional arguments default to 0; fractional sizing is supported.
 ---@param label string
----@param flags? integer # ImGuiTableColumnFlags; default 0
+---@param flags? ImGuiTableColumnFlags # default 0
 ---@param init_width_or_weight? number # WidthFixed: pixels; WidthStretch: relative weight; default 0
-function ImGui.TableSetupColumn(label, flags, init_width_or_weight) end
+---@param user_id? integer # application-defined column ID; default 0
+function ImGui.TableSetupColumn(label, flags, init_width_or_weight, user_id) end
 
 function ImGui.TableHeadersRow() end
 
@@ -2138,8 +2146,9 @@ function ImGui.SmallButton(label) end
 ---@param id string
 ---@param size_x number
 ---@param size_y number
+---@param flags? ImGuiButtonFlags # omitted/nil: None (left mouse button)
 ---@return boolean pressed
-function ImGui.InvisibleButton(id, size_x, size_y) end
+function ImGui.InvisibleButton(id, size_x, size_y, flags) end
 
 ---@param id string
 ---@param direction integer
@@ -2196,8 +2205,9 @@ function ImGui.Combo(label, current, items, items_count, popup_max) end
 ---@param min? number
 ---@param max? number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number value, boolean changed
-function ImGui.DragFloat(label, value, speed, min, max, format) end
+function ImGui.DragFloat(label, value, speed, min, max, format, flags) end
 
 ---2 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%.3f".
 ---@param label string
@@ -2206,8 +2216,9 @@ function ImGui.DragFloat(label, value, speed, min, max, format) end
 ---@param min? number
 ---@param max? number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number[] value, boolean changed
-function ImGui.DragFloat2(label, value, speed, min, max, format) end
+function ImGui.DragFloat2(label, value, speed, min, max, format, flags) end
 
 ---3 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%.3f".
 ---@param label string
@@ -2216,8 +2227,9 @@ function ImGui.DragFloat2(label, value, speed, min, max, format) end
 ---@param min? number
 ---@param max? number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number[] value, boolean changed
-function ImGui.DragFloat3(label, value, speed, min, max, format) end
+function ImGui.DragFloat3(label, value, speed, min, max, format, flags) end
 
 ---4 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%.3f".
 ---@param label string
@@ -2226,8 +2238,9 @@ function ImGui.DragFloat3(label, value, speed, min, max, format) end
 ---@param min? number
 ---@param max? number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number[] value, boolean changed
-function ImGui.DragFloat4(label, value, speed, min, max, format) end
+function ImGui.DragFloat4(label, value, speed, min, max, format, flags) end
 
 ---Defaults: speed=1, min=0, max=0, format="%d".
 ---@param label string
@@ -2236,8 +2249,9 @@ function ImGui.DragFloat4(label, value, speed, min, max, format) end
 ---@param min? integer
 ---@param max? integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer value, boolean changed
-function ImGui.DragInt(label, value, speed, min, max, format) end
+function ImGui.DragInt(label, value, speed, min, max, format, flags) end
 
 ---2 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%d".
 ---@param label string
@@ -2246,8 +2260,9 @@ function ImGui.DragInt(label, value, speed, min, max, format) end
 ---@param min? integer
 ---@param max? integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer[] value, boolean changed
-function ImGui.DragInt2(label, value, speed, min, max, format) end
+function ImGui.DragInt2(label, value, speed, min, max, format, flags) end
 
 ---3 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%d".
 ---@param label string
@@ -2256,8 +2271,9 @@ function ImGui.DragInt2(label, value, speed, min, max, format) end
 ---@param min? integer
 ---@param max? integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer[] value, boolean changed
-function ImGui.DragInt3(label, value, speed, min, max, format) end
+function ImGui.DragInt3(label, value, speed, min, max, format, flags) end
 
 ---4 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%d".
 ---@param label string
@@ -2266,8 +2282,9 @@ function ImGui.DragInt3(label, value, speed, min, max, format) end
 ---@param min? integer
 ---@param max? integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer[] value, boolean changed
-function ImGui.DragInt4(label, value, speed, min, max, format) end
+function ImGui.DragInt4(label, value, speed, min, max, format, flags) end
 
 
 -- Sliders
@@ -2287,8 +2304,9 @@ function ImGui.SliderFloat(label, value, min, max, format, flags) end
 ---@param min number
 ---@param max number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number[] value, boolean changed
-function ImGui.SliderFloat2(label, value, min, max, format) end
+function ImGui.SliderFloat2(label, value, min, max, format, flags) end
 
 ---3 components; returns a new array. Default format: "%.3f".
 ---@param label string
@@ -2296,8 +2314,9 @@ function ImGui.SliderFloat2(label, value, min, max, format) end
 ---@param min number
 ---@param max number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number[] value, boolean changed
-function ImGui.SliderFloat3(label, value, min, max, format) end
+function ImGui.SliderFloat3(label, value, min, max, format, flags) end
 
 ---4 components; returns a new array. Default format: "%.3f".
 ---@param label string
@@ -2305,8 +2324,9 @@ function ImGui.SliderFloat3(label, value, min, max, format) end
 ---@param min number
 ---@param max number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number[] value, boolean changed
-function ImGui.SliderFloat4(label, value, min, max, format) end
+function ImGui.SliderFloat4(label, value, min, max, format, flags) end
 
 ---Defaults: min_degrees=-360, max_degrees=360, format="%.0f deg".
 ---@param label string
@@ -2314,8 +2334,9 @@ function ImGui.SliderFloat4(label, value, min, max, format) end
 ---@param min_degrees? number
 ---@param max_degrees? number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number radians, boolean changed
-function ImGui.SliderAngle(label, radians, min_degrees, max_degrees, format) end
+function ImGui.SliderAngle(label, radians, min_degrees, max_degrees, format, flags) end
 
 ---Default format: "%d".
 ---@param label string
@@ -2333,8 +2354,9 @@ function ImGui.SliderInt(label, value, min, max, format, flags) end
 ---@param min integer
 ---@param max integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer[] value, boolean changed
-function ImGui.SliderInt2(label, value, min, max, format) end
+function ImGui.SliderInt2(label, value, min, max, format, flags) end
 
 ---3 components; returns a new array. Default format: "%d".
 ---@param label string
@@ -2342,8 +2364,9 @@ function ImGui.SliderInt2(label, value, min, max, format) end
 ---@param min integer
 ---@param max integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer[] value, boolean changed
-function ImGui.SliderInt3(label, value, min, max, format) end
+function ImGui.SliderInt3(label, value, min, max, format, flags) end
 
 ---4 components; returns a new array. Default format: "%d".
 ---@param label string
@@ -2351,8 +2374,9 @@ function ImGui.SliderInt3(label, value, min, max, format) end
 ---@param min integer
 ---@param max integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer[] value, boolean changed
-function ImGui.SliderInt4(label, value, min, max, format) end
+function ImGui.SliderInt4(label, value, min, max, format, flags) end
 
 ---@param label string
 ---@param size_x number
@@ -2361,8 +2385,9 @@ function ImGui.SliderInt4(label, value, min, max, format) end
 ---@param min number
 ---@param max number
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return number value, boolean changed
-function ImGui.VSliderFloat(label, size_x, size_y, value, min, max, format) end
+function ImGui.VSliderFloat(label, size_x, size_y, value, min, max, format, flags) end
 
 ---@param label string
 ---@param size_x number
@@ -2371,8 +2396,9 @@ function ImGui.VSliderFloat(label, size_x, size_y, value, min, max, format) end
 ---@param min integer
 ---@param max integer
 ---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
 ---@return integer value, boolean changed
-function ImGui.VSliderInt(label, size_x, size_y, value, min, max, format) end
+function ImGui.VSliderInt(label, size_x, size_y, value, min, max, format, flags) end
 
 
 -- Input with keyboard
@@ -2498,8 +2524,9 @@ function ImGui.ColorPicker3(label, color, flags) end
 ---@param label string
 ---@param color number[]
 ---@param flags? integer
+---@param reference_color? number[] # four float components in 0..1 for the original-color preview; omitted/nil: no reference
 ---@return number[] color, boolean changed
-function ImGui.ColorPicker4(label, color, flags) end
+function ImGui.ColorPicker4(label, color, flags, reference_color) end
 
 ---Four float color components in 0..1.
 ---@param id string
@@ -3116,6 +3143,16 @@ ImGuiSliderFlags = {
     InvalidMask_ = 0x7000000F,
 }
 
+---@enum ImGuiButtonFlags
+ImGuiButtonFlags = {
+    None = 0,
+    MouseButtonLeft = 1,
+    MouseButtonRight = 2,
+    MouseButtonMiddle = 4,
+    MouseButtonMask_ = 7,
+    EnableNav = 8,
+}
+
 ---@enum ImGuiColorEditFlags
 ImGuiColorEditFlags = {
     None = 0, NoAlpha = 2, NoPicker = 4, NoOptions = 8, NoSmallPreview = 16, NoInputs = 32,
@@ -3177,6 +3214,12 @@ ImGuiTableFlags = {
     NoPadOuterX = 4194304, NoPadInnerX = 8388608, ScrollX = 16777216, ScrollY = 33554432,
     SortMulti = 67108864, SortTristate = 134217728, HighlightHoveredColumn = 268435456,
     SizingMask_ = 57344,
+}
+
+---@enum ImGuiTableRowFlags
+ImGuiTableRowFlags = {
+    None = 0,
+    Headers = 1,
 }
 
 ---@enum ImGuiTableColumnFlags

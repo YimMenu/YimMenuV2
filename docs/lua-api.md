@@ -512,7 +512,7 @@ end)
 
 #### Enum tables
 Use these global tables for `flags`/`cond`/`col`/`idx` arguments (each maps a name to an integer):
-`ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiSliderFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`.
+`ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiSliderFlags`, `ImGuiButtonFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`, `ImGuiTableRowFlags`.
 
 Members match the bundled ImGui definitions. `ImGuiKey` includes keyboard, gamepad, mouse, and modifier values such as `Mod_Ctrl`; digit keys use string indexing, e.g. `ImGuiKey["0"]`. Existing names such as `KeyPadEnter`, `IndentDisabled`, `HeightMask`, and the prefixed mouse-button names remain compatibility aliases of the current names.
 

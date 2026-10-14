@@ -374,7 +374,11 @@ namespace YimMenu::Lua
 			int g            = (int)luaL_checkinteger(state, 5);
 			int b            = (int)luaL_checkinteger(state, 6);
 			int a            = (int)luaL_checkinteger(state, 7);
-			ImGui::GetWindowDrawList()->AddText(ImVec2(x, y), PackColor(r, g, b, a), text);
+			const float size = static_cast<float>(luaL_optnumber(state, 8, ImGui::GetFontSize()));
+			luaL_argcheck(state, size > 0 && std::isfinite(size), 8, "font_size must be a positive finite number");
+			const float wrap_width = static_cast<float>(luaL_optnumber(state, 9, 0));
+			luaL_argcheck(state, wrap_width >= 0 && std::isfinite(wrap_width), 9, "wrap_width must be a non-negative finite number");
+			ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), size, ImVec2(x, y), PackColor(r, g, b, a), text, nullptr, wrap_width);
 			return 0;
 		}
 
@@ -420,7 +424,10 @@ namespace YimMenu::Lua
 			const char* str_id = CheckStringSafe(state, 1);
 			int columns        = (int)luaL_checkinteger(state, 2);
 			int flags          = (int)luaL_optinteger(state, 3, 0);
-			lua_pushboolean(state, ImGui::BeginTable(str_id, columns, flags));
+			const float outer_size_x = static_cast<float>(luaL_optnumber(state, 4, 0));
+			const float outer_size_y = static_cast<float>(luaL_optnumber(state, 5, 0));
+			const float inner_width = static_cast<float>(luaL_optnumber(state, 6, 0));
+			lua_pushboolean(state, ImGui::BeginTable(str_id, columns, flags, ImVec2(outer_size_x, outer_size_y), inner_width));
 			return 1;
 		}
 
@@ -436,9 +443,11 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
-		static int TableNextRow(lua_State*)
+		static int TableNextRow(lua_State* state)
 		{
-			ImGui::TableNextRow();
+			const ImGuiTableRowFlags flags = static_cast<ImGuiTableRowFlags>(luaL_optinteger(state, 1, ImGuiTableRowFlags_None));
+			const float min_row_height = static_cast<float>(luaL_optnumber(state, 2, 0));
+			ImGui::TableNextRow(flags, min_row_height);
 			return 0;
 		}
 
@@ -451,10 +460,11 @@ namespace YimMenu::Lua
 
 		static int TableSetupColumn(lua_State* state)
 		{
-			const char* str_id 			= CheckStringSafe(state, 1);
-			int flags          			= lua_isnoneornil(state, 2) ? 0 : (int)luaL_checkinteger(state, 2);
-			float init_width_or_height 	= lua_isnoneornil(state, 3) ? 0.0f : (float)luaL_checknumber(state, 3);
-			ImGui::TableSetupColumn(str_id, flags, init_width_or_height);
+			const char* label = CheckStringSafe(state, 1);
+			const ImGuiTableColumnFlags flags = static_cast<ImGuiTableColumnFlags>(luaL_optinteger(state, 2, ImGuiTableColumnFlags_None));
+			const float init_width_or_weight = static_cast<float>(luaL_optnumber(state, 3, 0));
+			const ImGuiID user_id = static_cast<ImGuiID>(luaL_optinteger(state, 4, 0));
+			ImGui::TableSetupColumn(label, flags, init_width_or_weight, user_id);
 			return 0;
 		}
 
@@ -1261,7 +1271,8 @@ namespace YimMenu::Lua
 			const char* label = CheckStringSafe(state, 1);
 			float sx          = (float)luaL_checknumber(state, 2);
 			float sy          = (float)luaL_checknumber(state, 3);
-			lua_pushboolean(state, ImGui::InvisibleButton(label, ImVec2(sx, sy)));
+			const ImGuiButtonFlags flags = static_cast<ImGuiButtonFlags>(luaL_optinteger(state, 4, ImGuiButtonFlags_None));
+			lua_pushboolean(state, ImGui::InvisibleButton(label, ImVec2(sx, sy), flags));
 			return 1;
 		}
 
@@ -1374,8 +1385,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_optnumber(state, 4, 0.0);
 			float vmax        = (float)luaL_optnumber(state, 5, 0.0);
 			const char* fmt   = lua_isnoneornil(state, 6) ? "%.3f" : luaL_checkstring(state, 6);
-			// `power` is deprecated in modern ImGui; flags are used instead. We accept and ignore it.
-			bool used = ImGui::DragFloat(label, &value, speed, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
+			bool used = ImGui::DragFloat(label, &value, speed, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1391,10 +1402,11 @@ namespace YimMenu::Lua
 			float vmin      = (float)luaL_optnumber(state, 4, 0.0);
 			float vmax      = (float)luaL_optnumber(state, 5, 0.0);
 			const char* fmt = lua_isnoneornil(state, 6) ? "%.3f" : luaL_checkstring(state, 6);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::DragFloat2(label, v, speed, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::DragFloat3(label, v, speed, vmin, vmax, fmt, 0);
-			else used = ImGui::DragFloat4(label, v, speed, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::DragFloat2(label, v, speed, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::DragFloat3(label, v, speed, vmin, vmax, fmt, flags);
+			else used = ImGui::DragFloat4(label, v, speed, vmin, vmax, fmt, flags);
 			PushFloatArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1412,7 +1424,8 @@ namespace YimMenu::Lua
 			int vmin          = (int)luaL_optinteger(state, 4, 0);
 			int vmax          = (int)luaL_optinteger(state, 5, 0);
 			const char* fmt   = lua_isnoneornil(state, 6) ? "%d" : luaL_checkstring(state, 6);
-			bool used = ImGui::DragInt(label, &value, speed, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
+			bool used = ImGui::DragInt(label, &value, speed, vmin, vmax, fmt, flags);
 			lua_pushinteger(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1428,10 +1441,11 @@ namespace YimMenu::Lua
 			int vmin        = (int)luaL_optinteger(state, 4, 0);
 			int vmax        = (int)luaL_optinteger(state, 5, 0);
 			const char* fmt = lua_isnoneornil(state, 6) ? "%d" : luaL_checkstring(state, 6);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::DragInt2(label, v, speed, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::DragInt3(label, v, speed, vmin, vmax, fmt, 0);
-			else used = ImGui::DragInt4(label, v, speed, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::DragInt2(label, v, speed, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::DragInt3(label, v, speed, vmin, vmax, fmt, flags);
+			else used = ImGui::DragInt4(label, v, speed, vmin, vmax, fmt, flags);
 			PushIntArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1468,10 +1482,11 @@ namespace YimMenu::Lua
 			float vmin      = (float)luaL_checknumber(state, 3);
 			float vmax      = (float)luaL_checknumber(state, 4);
 			const char* fmt = lua_isnoneornil(state, 5) ? "%.3f" : luaL_checkstring(state, 5);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::SliderFloat2(label, v, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::SliderFloat3(label, v, vmin, vmax, fmt, 0);
-			else used = ImGui::SliderFloat4(label, v, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::SliderFloat2(label, v, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::SliderFloat3(label, v, vmin, vmax, fmt, flags);
+			else used = ImGui::SliderFloat4(label, v, vmin, vmax, fmt, flags);
 			PushFloatArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1488,7 +1503,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_optnumber(state, 3, -360.0);
 			float vmax        = (float)luaL_optnumber(state, 4, 360.0);
 			const char* fmt   = lua_isnoneornil(state, 5) ? "%.0f deg" : luaL_checkstring(state, 5);
-			bool used         = ImGui::SliderAngle(label, &v_rad, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
+			bool used         = ImGui::SliderAngle(label, &v_rad, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, v_rad);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1517,10 +1533,11 @@ namespace YimMenu::Lua
 			int vmin        = (int)luaL_checkinteger(state, 3);
 			int vmax        = (int)luaL_checkinteger(state, 4);
 			const char* fmt = lua_isnoneornil(state, 5) ? "%d" : luaL_checkstring(state, 5);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::SliderInt2(label, v, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::SliderInt3(label, v, vmin, vmax, fmt, 0);
-			else used = ImGui::SliderInt4(label, v, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::SliderInt2(label, v, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::SliderInt3(label, v, vmin, vmax, fmt, flags);
+			else used = ImGui::SliderInt4(label, v, vmin, vmax, fmt, flags);
 			PushIntArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1539,7 +1556,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_checknumber(state, 5);
 			float vmax        = (float)luaL_checknumber(state, 6);
 			const char* fmt   = lua_isnoneornil(state, 7) ? "%.3f" : luaL_checkstring(state, 7);
-			bool used = ImGui::VSliderFloat(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 8, ImGuiSliderFlags_None));
+			bool used = ImGui::VSliderFloat(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1554,7 +1572,8 @@ namespace YimMenu::Lua
 			int vmin          = (int)luaL_checkinteger(state, 5);
 			int vmax          = (int)luaL_checkinteger(state, 6);
 			const char* fmt   = lua_isnoneornil(state, 7) ? "%d" : luaL_checkstring(state, 7);
-			bool used = ImGui::VSliderInt(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 8, ImGuiSliderFlags_None));
+			bool used = ImGui::VSliderInt(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, flags);
 			lua_pushinteger(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1728,7 +1747,14 @@ namespace YimMenu::Lua
 			float c[4];
 			ReadFloatArray(state, 2, c, 4);
 			int flags = (int)luaL_optinteger(state, 3, 0);
-			bool used = ImGui::ColorPicker4(label, c, flags);
+			float reference_color[4];
+			const float* reference = nullptr;
+			if (!lua_isnoneornil(state, 4))
+			{
+				ReadFloatArray(state, 4, reference_color, 4);
+				reference = reference_color;
+			}
+			bool used = ImGui::ColorPicker4(label, c, flags, reference);
 			PushFloatArray(state, c, 4);
 			lua_pushboolean(state, used);
 			return 2;
@@ -3213,6 +3239,16 @@ namespace YimMenu::Lua
 			});
 			RegisterEnum(state, "ImGuiDir", dir.data(), dir.size());
 
+			static constexpr auto buttonFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiButtonFlags_None},
+			    {"MouseButtonLeft", ImGuiButtonFlags_MouseButtonLeft},
+			    {"MouseButtonRight", ImGuiButtonFlags_MouseButtonRight},
+			    {"MouseButtonMiddle", ImGuiButtonFlags_MouseButtonMiddle},
+			    {"MouseButtonMask_", ImGuiButtonFlags_MouseButtonMask_},
+			    {"EnableNav", ImGuiButtonFlags_EnableNav},
+			});
+			RegisterEnum(state, "ImGuiButtonFlags", buttonFlags.data(), buttonFlags.size());
+
 			static constexpr auto comboFlags = std::to_array<EnumEntry>({
 			    {"None", ImGuiComboFlags_None},
 			    {"PopupAlignLeft", ImGuiComboFlags_PopupAlignLeft},
@@ -3454,6 +3490,12 @@ namespace YimMenu::Lua
 			    {"SizingMask_", ImGuiTableFlags_SizingMask_},
 			});
 			RegisterEnum(state, "ImGuiTableFlags", tableFlags.data(), tableFlags.size());
+
+			static constexpr auto tableRowFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiTableRowFlags_None},
+			    {"Headers", ImGuiTableRowFlags_Headers},
+			});
+			RegisterEnum(state, "ImGuiTableRowFlags", tableRowFlags.data(), tableRowFlags.size());
 
 			static constexpr auto styleVar = std::to_array<EnumEntry>({
 			    {"Alpha", ImGuiStyleVar_Alpha},

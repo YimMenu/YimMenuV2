@@ -7,8 +7,16 @@ namespace YimMenu::Lua
 	template<typename T>
 	class Metatable
 	{
+	public:
+		struct Subclass
+		{
+			int m_Index;
+			std::size_t m_Alignment;
+		};
+
+	private:
 		inline static int m_Index;
-		inline static std::vector<int> m_Subclasses;
+		inline static std::vector<Subclass> m_Subclasses;
 
 	public:
 		static inline void Register(lua_State* state)
@@ -21,7 +29,7 @@ namespace YimMenu::Lua
 			return m_Index;
 		}
 
-		static inline const std::vector<int>& GetSubclasses()
+		static inline const std::vector<Subclass>& GetSubclasses()
 		{
 			return m_Subclasses;
 		}
@@ -29,9 +37,18 @@ namespace YimMenu::Lua
 		template<typename T2>
 		static inline void AddSubclass()
 		{
-			m_Subclasses.push_back(Metatable<T2>::Get());
+			m_Subclasses.push_back({Metatable<T2>::Get(), alignof(T2)});
 		}
 	};
+
+	template<typename T>
+	inline T& GetAlignedObject(lua_State* state, int idx, void* data, std::size_t alignment)
+	{
+		auto size = lua_objlen(state, idx);
+		if (!std::align(alignment, sizeof(T), data, size))
+			luaL_argerror(state, idx, "userdata is too small for the object");
+		return *static_cast<T*>(data);
+	}
 
 	// Tries to get the userdata or errors out
 	template<typename T>
@@ -51,22 +68,22 @@ namespace YimMenu::Lua
 		if (equals)
 		{
 			lua_pop(state, 1);
-			return *reinterpret_cast<T*>(data);
+			return GetAlignedObject<T>(state, idx, data, alignof(T));
 		}
 
 		const auto& subclasses = Metatable<T>::GetSubclasses();
 		if (!equals && subclasses.size())
 		{
-			for (const auto subclass : subclasses)
+			for (const auto& subclass : subclasses)
 			{
-				lua_rawgeti(state, LUA_REGISTRYINDEX, subclass);
+				lua_rawgeti(state, LUA_REGISTRYINDEX, subclass.m_Index);
 				auto equals = lua_rawequal(state, -1, -2);
 				lua_pop(state, 1);
 
 				if (equals)
 				{
 					lua_pop(state, 1);
-					return *reinterpret_cast<T*>(data);
+					return GetAlignedObject<T>(state, idx, data, subclass.m_Alignment);
 				}
 			}
 		}
@@ -136,11 +153,13 @@ namespace YimMenu::Lua
 	template<typename T, class... Args>
 	inline T* CreateObject(lua_State* state, Args&&... args)
 	{
-		void* data = lua_newuserdata(state, sizeof(T));
-		new (data) T(std::forward<Args>(args)...); // construct in-place
+		auto size = sizeof(T) + alignof(T) - 1;
+		void* data = lua_newuserdata(state, size);
+		std::align(alignof(T), sizeof(T), data, size);
+		auto object = new (data) T(std::forward<Args>(args)...);
 		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
 		lua_setmetatable(state, -2);
-		return reinterpret_cast<T*>(data);
+		return object;
 	}
 
 	// Copies an existing object and pushes it on the stack
@@ -148,21 +167,13 @@ namespace YimMenu::Lua
 	template<typename T, class... Args>
 	inline T* CopyObject(lua_State* state, const T& existing)
 	{
-		void* data = lua_newuserdata(state, sizeof(T));
-		*reinterpret_cast<T*>(data) = existing;
-		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
-		lua_setmetatable(state, -2);
-		return reinterpret_cast<T*>(data);
+		return CreateObject<T>(state, existing);
 	}
 
 	template<typename T, typename U>
 	static T* PushObject(lua_State* state, U&& source)
 	{
-		void* data = lua_newuserdata(state, sizeof(T));
-		new (data) T(std::forward<U>(source));
-		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
-		lua_setmetatable(state, -2);
-		return reinterpret_cast<T*>(data);
+		return CreateObject<T>(state, std::forward<U>(source));
 	}
 
 	// Moves an existing object and pushes it on the stack
@@ -170,11 +181,7 @@ namespace YimMenu::Lua
 	template<typename T, class... Args>
 	inline T* MoveObject(lua_State* state, T&& existing)
 	{
-		void* data = lua_newuserdata(state, sizeof(T));
-		*reinterpret_cast<T*>(data) = std::move(existing);
-		lua_rawgeti(state, LUA_REGISTRYINDEX, Metatable<T>::Get());
-		lua_setmetatable(state, -2);
-		return reinterpret_cast<T*>(data);
+		return CreateObject<T>(state, std::move(existing));
 	}
 
 	inline std::uint32_t GetHashArgument(lua_State* state, int index)

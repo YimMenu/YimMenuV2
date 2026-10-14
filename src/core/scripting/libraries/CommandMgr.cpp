@@ -1,3 +1,4 @@
+#include "core/backend/FiberPool.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/commands/ColorCommand.hpp"
 #include "core/commands/Commands.hpp"
@@ -73,6 +74,19 @@ namespace YimMenu::Lua
 		const auto& desc = cmd->GetDescription();
 		lua_pushlstring(state, desc.data(), desc.size());
 		return 1;
+	}
+
+	static int CmdHandleCall(lua_State* state)
+	{
+		auto& h   = GetObject<LuaCommandHandle>(state, 1);
+		auto* cmd = Commands::GetCommand(h.hash);
+		if (cmd)
+		{
+			FiberPool::Push([cmd] {
+				cmd->Call();
+			});
+		}
+		return 0;
 	}
 
 	static int CmdHandleGetValue(lua_State* state)
@@ -348,6 +362,7 @@ namespace YimMenu::Lua
 			SetFunction(state, CmdHandleSetValue, "set_value");
 			SetFunction(state, CmdHandleGetName, "get_name");
 			SetFunction(state, CmdHandleGetDesc, "get_desc");
+			SetFunction(state, CmdHandleCall, "call");
 
 			lua_newtable(state);
 			lua_pushvalue(state, -2);

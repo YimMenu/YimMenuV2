@@ -40,9 +40,26 @@ namespace YimMenu
 			return GetInstance().m_Onboarding;
 		}
 
+		static bool IsMouseOverridden()
+		{
+			return GetInstance().m_MouseOverrideCount.load() != 0;
+		}
+
 		static void ToggleMouse();
 
 	private:
+		friend class LuaUserInterface;
+
+		static void AcquireMouseOverride()
+		{
+			GetInstance().m_MouseOverrideCount.fetch_add(1);
+		}
+
+		static void ReleaseMouseOverride()
+		{
+			GetInstance().m_MouseOverrideCount.fetch_sub(1);
+		}
+
 		void WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 		void InitImpl();
@@ -58,5 +75,6 @@ namespace YimMenu
 
 		bool m_IsOpen;
 		bool m_Onboarding;
+		std::atomic<std::uint32_t> m_MouseOverrideCount{0};
 	};
 }

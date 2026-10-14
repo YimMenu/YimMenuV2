@@ -18,6 +18,10 @@ namespace YimMenu
 				OnPlayerJoin(netPlayer);
 			}
 		}
+
+		LuaManager::DispatchEvent(MenuEvent::PlayerMgrInit, [](lua_State*){
+			return 0;
+		});
 	}
 
 	void Players::ShutdownImpl()
@@ -25,6 +29,10 @@ namespace YimMenu
 		m_SelectedPlayer = nullptr;
 		m_Players.clear();
 		m_PlayerDatas.clear();
+
+		LuaManager::DispatchEvent(MenuEvent::PlayerMgrShutdown, [](lua_State*){
+			return 0;
+		});
 	}
 
 	void Players::OnPlayerJoinImpl(CNetGamePlayer* player)

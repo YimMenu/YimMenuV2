@@ -8,11 +8,14 @@ namespace YimMenu
 {
 	enum class MenuEvent
 	{
+		PlayerMgrInit,
+		PlayerMgrShutdown,
 		PlayerLeave,
 		PlayerJoin,
 		ScriptedGameEventReceived,
 		ChatMessageReceived,
-		Unload
+		Unload,
+		WndProc
 	};
 
 	class LuaScript
@@ -54,6 +57,7 @@ namespace YimMenu
 		std::vector<ScriptCallback> m_ScriptCallbacks;
 		std::vector<ScriptCallback> m_QueuedScriptCallbacks;
 		bool m_RunningScriptCallbacks = false;
+		bool m_RunningRenderCallback = false;
 		ScriptCallback* m_CurrentlyExecutingCallback = nullptr;
 		std::unordered_map<MenuEvent, std::vector<int>> m_EventHandlers;
 		std::vector<std::vector<std::shared_ptr<LuaResource>>> m_Resources; // yes, it's a shared pointer stored in a vector of resources stored in a vector of resource types TODO: can we just use raw pointers or even store the resource directly in that array?
@@ -129,6 +133,16 @@ namespace YimMenu
 		ScriptCallback* GetRunningCallback()
 		{
 			return m_CurrentlyExecutingCallback;
+		}
+
+		bool IsInsideRenderCallback(lua_State* state) const
+		{
+			return m_RunningRenderCallback && state == m_State;
+		}
+
+		bool IsInsideScriptCallback(lua_State* state) const
+		{
+			return m_CurrentlyExecutingCallback && state == m_CurrentlyExecutingCallback->m_CoroState;
 		}
 		
 		bool CallFunction(int n_args, int n_results, lua_State* override_state = nullptr);

@@ -68,8 +68,12 @@ namespace YimMenu
 		std::chrono::system_clock::time_point m_LastThrotlledCoroutinePush;
 
 		bool m_ShutdownCalled = false;
+		bool m_MouseOverrideRequested = false;
+		bool m_MouseOverrideActive = false;
+		bool m_MouseOverrideSuspended = false;
 
 		void RunImGuiCallbacks(const std::vector<int>& callbacks);
+		void UpdateMouseOverride();
 
 	public:
 		LuaUserInterface();
@@ -87,6 +91,8 @@ namespace YimMenu
 		void SetMenuName(std::string_view name);
 		void SetMenuIcon(std::string_view icon);
 		const std::string& GetMenuName() const { return m_MenuName; }
+		void SetMouseOverride(bool enabled);
+		void SuspendMouseOverride(bool suspended);
 
 		std::shared_ptr<Submenu> GetOrCreateSubmenu(std::string_view name);
 

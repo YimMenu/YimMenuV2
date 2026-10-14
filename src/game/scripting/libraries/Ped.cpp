@@ -63,7 +63,7 @@ namespace YimMenu::Lua
 		static int GetBonePosition(lua_State* state)
 		{
 			MoveObject<rage::fvector3>(state, GetObject<YimMenu::Ped>(state, 1).GetBonePosition(luaL_checkinteger(state, 2)));
-			return 0;
+			return 1;
 		}
 
 		// GetConfigFlag

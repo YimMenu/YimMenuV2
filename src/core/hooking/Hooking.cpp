@@ -28,6 +28,7 @@ namespace YimMenu
 		BaseHook::Add<Hooks::Script::ScriptVM>(new DetourHook("ScriptVM", reinterpret_cast<void*>(Pointers.ScriptVM), Hooks::Script::ScriptVM));
 
 		BaseHook::Add<Hooks::Info::AssignPhysicalIndex>(new DetourHook("AssignPhysicalIndex", Pointers.AssignPhysicalIndex, Hooks::Info::AssignPhysicalIndex));
+		BaseHook::Add<Hooks::Info::NetworkPlayerMgrInit>(new DetourHook("NetworkPlayerMgrInit", Pointers.NetworkPlayerMgrInit, Hooks::Info::NetworkPlayerMgrInit));
 		BaseHook::Add<Hooks::Info::NetworkPlayerMgrShutdown>(new DetourHook("NetworkPlayerMgrShutdown", Pointers.NetworkPlayerMgrShutdown, Hooks::Info::NetworkPlayerMgrShutdown));
 
 		BaseHook::Add<Hooks::Network::ReceiveNetMessage>(new DetourHook("ReceiveNetMessage", Pointers.ReceiveNetMessage, Hooks::Network::ReceiveNetMessage));

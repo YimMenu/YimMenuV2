@@ -92,6 +92,11 @@ namespace YimMenu
 			AssignPhysicalIndex = ptr.Sub(0x13).As<PVOID>();
 		});
 
+		constexpr auto networkPlayerManagerInitPtrn = Pattern<"41 56 56 57 55 53 48 83 EC 30 4C 89 CF 45 89 C6 48 89 D3">("NetworkPlayerMgrInit");
+		scanner.Add(networkPlayerManagerInitPtrn, [this](PointerCalculator ptr) {
+			NetworkPlayerMgrInit = ptr.As<PVOID>();
+		});
+
 		constexpr auto networkPlayerManagerShutdownPtrn = Pattern<"84 C0 0F 84 88 00 00 00 4C 89 F9 E8">("NetworkPlayerMgrShutdown");
 		scanner.Add(networkPlayerManagerShutdownPtrn, [this](PointerCalculator ptr) {
 			NetworkPlayerMgrShutdown = ptr.Sub(0x1B).As<PVOID>();

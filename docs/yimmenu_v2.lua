@@ -39,6 +39,92 @@ function package.searchpath(name, path, sep, rep) end
 function package.loadlib(filename, symbol) end
 
 ------------------------------------------------------------------------------
+-- os (restricted standard LuaJIT library; timestamps use seconds)
+------------------------------------------------------------------------------
+
+---@class OsDateInput
+---@field year integer
+---@field month integer # 1..12
+---@field day integer # day of the month
+---@field hour? integer # default 12
+---@field min? integer # default 0
+---@field sec? integer # default 0
+---@field isdst? boolean # omitted/nil: detect daylight saving time
+---@field wday? integer # ignored by os.time
+---@field yday? integer # ignored by os.time
+
+---@class OsDateTable: OsDateInput
+---@field hour integer
+---@field min integer
+---@field sec integer
+---@field wday integer # 1..7; Sunday=1
+---@field yday integer # 1..366
+---@field isdst? boolean # daylight saving time flag
+
+---Approximate process CPU time in seconds; normal LuaJIT behavior.
+---@return number
+function os.clock() end
+
+---Normal LuaJIT date formatting; defaults to current local time and format "%c".
+---"*t" returns a local date table; "!*t" returns a UTC date table.
+---Unsupported timestamps return nil. Available through require("os") too.
+---@overload fun(format: '"*t"', timestamp?: integer): OsDateTable?
+---@overload fun(format: '"!*t"', timestamp?: integer): OsDateTable?
+---@param format? string
+---@param timestamp? integer # Unix seconds
+---@return string|OsDateTable|nil
+function os.date(format, timestamp) end
+
+---Returns t2-t1 in seconds; normal LuaJIT behavior.
+---@param t2 number
+---@param t1 number
+---@return number
+function os.difftime(t2, t1) end
+
+---Unix seconds; omitted/nil table selects current time. Normal LuaJIT local-time behavior.
+---Calendar fields are normalized; unsupported dates return nil.
+---@param date_table? OsDateInput
+---@return integer?
+function os.time(date_table) end
+
+---Disabled: raises a not-supported error.
+---@param command? string
+---@return never
+function os.execute(command) end
+
+---Disabled: raises a not-supported error.
+---@param code? integer|boolean
+---@param close? boolean
+---@return never
+function os.exit(code, close) end
+
+---Disabled: raises a not-supported error.
+---@param name string
+---@return never
+function os.getenv(name) end
+
+---Disabled: raises a not-supported error.
+---@param locale string|nil
+---@param category? string
+---@return never
+function os.setlocale(locale, category) end
+
+---Disabled: raises a not-supported error.
+---@return never
+function os.tmpname() end
+
+---Disabled: raises an error directing callers to FileMgr.RenameFile.
+---@param source string
+---@param destination string
+---@return never
+function os.rename(source, destination) end
+
+---Disabled: raises an error directing callers to FileMgr.DeleteFile.
+---@param path string
+---@return never
+function os.remove(path) end
+
+------------------------------------------------------------------------------
 -- Vector3
 ------------------------------------------------------------------------------
 
@@ -50,9 +136,10 @@ function package.loadlib(filename, symbol) end
 ---@overload fun(): Vector3
 Vector3 = {}
 
----@param x? number
----@param y? number
----@param z? number
+---@overload fun(): Vector3
+---@param x number
+---@param y number
+---@param z number
 ---@return Vector3
 function Vector3.new(x, y, z) end
 
@@ -147,12 +234,19 @@ script = {}
 ---@param fn fun()
 function script.run_in_callback(fn) end
 
----Yield the current callback for at least `ms` milliseconds (default 0 = one frame).
----@param ms? integer
+---Yield a managed callback; omitting ms selects 0 (one frame). Explicit nil is rejected.
+---@overload fun()
+---@param ms integer
 function script.yield(ms) end
 
+---True while executing a registered ImGui render callback. This callback must not yield.
 ---@return boolean
-function script.is_inside_callback() end
+function script.is_inside_render_callback() end
+
+---True only in the active managed script coroutine; includes command/tick callbacks.
+---Top-level code and coroutines created directly with coroutine.create return false.
+---@return boolean
+function script.is_inside_script_callback() end
 
 ---Require exact version string matches; raises a Lua error on a mismatch.
 ---Omit game_build or pass nil to check only the online version.
@@ -165,17 +259,30 @@ function script.require_game_build(online_version, game_build) end
 ------------------------------------------------------------------------------
 
 ---@class menu_event
----@field PlayerLeave integer
----@field PlayerJoin integer
----@field ScriptedGameEventReceived integer
----@field ChatMessageReceived integer
----@field Unload integer
+---@field PlayerMgrInit 0 # handler(); tracked player list populated during manager initialization.
+---@field PlayerMgrShutdown 1 # handler(); tracked players, data and selection cleared.
+---@field PlayerLeave 2 # handler(name: string).
+---@field PlayerJoin 3 # handler(player_id: integer, name: string).
+---@field ScriptedGameEventReceived 4 # handler(player: Player, args: integer[]); false blocks handling.
+---@field ChatMessageReceived 5 # handler(player_id: integer, message: string); false blocks handling.
+---@field Unload 6 # handler(); script unload or reload.
+---@field WndProc 7 # handler(hwnd: integer, message: integer, wparam: integer, lparam: integer); observational.
 menu_event = {}
 
 event = {}
 
+---Runs synchronously on the event's dispatch thread; handlers must not yield.
+---Use script.run_in_callback for work that needs a script coroutine.
+---Return false to block scripted-event/chat handling; other return values are ignored.
+---Paused scripts do not receive events. Use enum constants rather than hardcoded IDs.
+---@overload fun(menu_event: 0|1|6, handler: fun())
+---@overload fun(menu_event: 2, handler: fun(name: string))
+---@overload fun(menu_event: 3, handler: fun(player_id: integer, name: string))
+---@overload fun(menu_event: 4, handler: fun(player: Player, args: integer[]): boolean?)
+---@overload fun(menu_event: 5, handler: fun(player_id: integer, message: string): boolean?)
+---@overload fun(menu_event: 7, handler: fun(hwnd: integer, message: integer, wparam: integer, lparam: integer))
 ---@param menu_event integer # a `menu_event.*` constant
----@param handler fun(...)
+---@param handler fun(...): boolean?
 function event.register_handler(menu_event, handler) end
 
 ------------------------------------------------------------------------------
@@ -222,6 +329,16 @@ function menu.create_group(name, per_row) end
 function menu.is_open() end
 ---Toggle the menu open/closed and update mouse input and cursor visibility.
 function menu.toggle() end
+---Set this script's mouse override request; repeated calls are idempotent.
+---Enables ImGui cursor/mouse input with the menu closed and suppresses game controls.
+---Applied on the next render frame. False releases only this script's request.
+---Pause suspends it, Resume restores it; unload/reload/malfunction/destruction release it.
+---@param enabled boolean
+function menu.set_mouse_override(enabled) end
+---True when any script has an active mouse override request.
+---Menu/onboarding visibility alone does not count; another owner may keep this true.
+---@return boolean
+function menu.is_mouse_overridden() end
 ---Register a raw ImGui draw callback rendered every frame while the menu is open.
 ---@param fn fun()
 function menu.add_imgui(fn) end
@@ -437,15 +554,20 @@ function CollapsingHeaderItem:imgui(fn) end
 ---@class CommandHandle
 local CommandHandle = {}
 
+---Returns the value or selected list-entry key; nil for one-shot/missing commands.
 ---@return boolean|integer|number|nil
 function CommandHandle:get_value() end
+---Schedules change callbacks. One-shot and missing commands are no-ops.
 ---@param value boolean|integer|number
 function CommandHandle:set_value(value) end
----Return the registered command name/ID.
----@return string
+---Return the registered name/ID, or nil if the command no longer exists.
+---@return string?
 function CommandHandle:get_name() end
----@return string
+---@return string?
 function CommandHandle:get_desc() end
+---Activates the command's normal action; missing commands are a no-op. Returns no values.
+---Lua one-shot callbacks are queued; Lua bool/looped commands toggle their enabled state.
+function CommandHandle:call() end
 ---Draw the command (call from inside an ImGui callback).
 function CommandHandle:draw() end
 
@@ -495,8 +617,8 @@ function commandmgr.add_float_command(name, label, desc, min, max, default, on_c
 ---@param label string
 ---@param desc string
 ---@param entries table<integer, [integer, string]> # array of { key, label } pairs
----@param default? integer
----@param on_change? fun(value: integer)
+---@param default? integer # selected entry key
+---@param on_change? fun(value: integer) # receives the selected entry key
 ---@return CommandHandle
 function commandmgr.add_list_command(name, label, desc, entries, default, on_change) end
 ---@param name string|integer
@@ -566,15 +688,19 @@ function pointer:set_float(value) end
 ---@param value string
 function pointer:set_string(value) end
 
+---Captures original bytes and creates an unapplied patch; call apply() to write it.
 ---@param value integer
 ---@return patch
 function pointer:patch_byte(value) end
+---Captures original bytes and creates an unapplied patch; call apply() to write it.
 ---@param value integer
 ---@return patch
 function pointer:patch_word(value) end
+---Captures original bytes and creates an unapplied patch; call apply() to write it.
 ---@param value integer
 ---@return patch
 function pointer:patch_dword(value) end
+---Captures original bytes and creates an unapplied patch; call apply() to write it.
 ---@param value integer
 ---@return patch
 function pointer:patch_qword(value) end
@@ -598,6 +724,8 @@ function memory.ptr_to_handle(ptr) end
 ---@param size integer
 ---@return pointer
 function memory.allocate(size) end
+---Frees only a block allocated by this script; a null pointer is a no-op.
+---Foreign or already-freed non-null addresses raise an error.
 ---@param ptr pointer
 function memory.free(ptr) end
 
@@ -634,11 +762,13 @@ function Entity:get_model() end
 function Entity:get_position() end
 ---@param pos Vector3
 function Entity:set_position(pos) end
----@param order? integer # default 2
+---@overload fun(self: Entity): Vector3
+---@param order integer # omitted default 2; nil rejected
 ---@return Vector3
 function Entity:get_rotation(order) end
 ---@param rot Vector3
----@param order? integer # default 2
+---@overload fun(self: Entity, rot: Vector3)
+---@param order integer # omitted default 2; nil rejected
 function Entity:set_rotation(rot, order) end
 ---@return Vector3
 function Entity:get_velocity() end
@@ -668,7 +798,8 @@ function Entity:get_network_object_id() end
 function Entity:prevent_migration() end
 function Entity:force_control() end
 ---Latent: requests control of the entity.
----@param timeout? integer # milliseconds, default 100
+---@overload fun(self: Entity)
+---@param timeout integer # milliseconds, omitted default 100; nil rejected
 function Entity:request_control(timeout) end
 
 ---@return boolean
@@ -708,9 +839,10 @@ Ped = {}
 function Ped.new(handle) end
 
 ---Latent: spawns a ped.
+---@overload fun(model: integer|string, pos: Vector3): Ped
 ---@param model integer|string
 ---@param pos Vector3
----@param heading? number # default 0
+---@param heading number # omitted default 0; nil rejected
 ---@return Ped
 function Ped.create(model, pos, heading) end
 
@@ -721,7 +853,8 @@ function Ped:get_last_vehicle() end
 ---@return integer
 function Ped:get_vehicle_object_id() end
 ---@param vehicle Vehicle
----@param seat? integer # default 0
+---@overload fun(self: Ped, vehicle: Vehicle)
+---@param seat integer # omitted default 0; nil rejected
 function Ped:set_in_vehicle(vehicle, seat) end
 ---@return boolean
 function Ped:get_ragdoll() end
@@ -737,7 +870,8 @@ function Ped:get_accuracy() end
 ---@param accuracy integer
 function Ped:set_accuracy(accuracy) end
 ---@param weapon integer|string
----@param equip? boolean # default false
+---@overload fun(self: Ped, weapon: integer|string)
+---@param equip boolean # omitted default false; nil rejected
 function Ped:give_weapon(weapon, equip) end
 ---@param weapon integer|string
 function Ped:remove_weapon(weapon) end
@@ -768,8 +902,10 @@ function Ped:remove_from_group() end
 function Ped:is_member_of_group(group) end
 function Ped:randomize_outfit() end
 ---@param name string
----@param duration? integer # default -1
----@param play_anim? boolean # default true
+---@overload fun(self: Ped, name: string)
+---@overload fun(self: Ped, name: string, duration: integer)
+---@param duration integer # omitted default -1; nil rejected
+---@param play_anim boolean # omitted default true; nil rejected
 function Ped:start_scenario(name, duration, play_anim) end
 ---@param enabled boolean
 function Ped:set_keep_task(enabled) end
@@ -791,9 +927,10 @@ Vehicle = {}
 function Vehicle.new(handle) end
 
 ---Latent: spawns a vehicle.
+---@overload fun(model: integer|string, pos: Vector3): Vehicle
 ---@param model integer|string
 ---@param pos Vector3
----@param heading? number # default 0
+---@param heading number # omitted default 0; nil rejected
 ---@return Vehicle
 function Vehicle.create(model, pos, heading) end
 
@@ -816,7 +953,8 @@ function Vehicle:is_seat_free(seat) end
 function Vehicle:supports_boost() end
 ---@return boolean
 function Vehicle:is_boost_active() end
----@param charge? integer # default 100
+---@overload fun(self: Vehicle)
+---@param charge integer # omitted: 100; nil is rejected
 function Vehicle:set_boost_charge(charge) end
 ---@param enabled boolean
 function Vehicle:lower_stance(enabled) end
@@ -930,12 +1068,15 @@ function players.get_random() end
 ---@overload fun(index: integer): ScriptGlobal
 ScriptGlobal = {}
 
+---Inaccessible slots read as 0/zero vector/nil string; writes are ignored.
 ---@param index integer
 ---@return ScriptGlobal
 function ScriptGlobal.new(index) end
 
+---size=0/omitted: base+offset; nonzero size: base+1+offset*size.
+---@overload fun(self: ScriptGlobal, offset: integer): ScriptGlobal
 ---@param offset integer
----@param size? integer # array stride multiplier
+---@param size integer # omitted: 0; nil is rejected
 ---@return ScriptGlobal
 function ScriptGlobal:at(offset, size) end
 ---@return boolean
@@ -948,6 +1089,10 @@ function ScriptGlobal:get_float() end
 function ScriptGlobal:get_string() end
 ---@return Vector3
 function ScriptGlobal:get_vector3() end
+---Address of the global slot, not its stored value; null pointer userdata if inaccessible.
+---Borrows game memory. Check can_access()/is_null() and resolve again if globals change.
+---@return pointer
+function ScriptGlobal:get_pointer() end
 ---@param value integer
 function ScriptGlobal:set_int(value) end
 ---@param value number
@@ -963,6 +1108,7 @@ function ScriptGlobal:set_vector3(value) end
 ------------------------------------------------------------------------------
 
 ---@class ScriptLocal
+---@overload fun(script: string|integer, index: integer): ScriptLocal?
 ScriptLocal = {}
 
 ---@param script string|integer # script name or hash
@@ -970,8 +1116,10 @@ ScriptLocal = {}
 ---@return ScriptLocal?
 function ScriptLocal.new(script, index) end
 
+---size=0/omitted: base+offset; nonzero size: base+1+offset*size.
+---@overload fun(self: ScriptLocal, offset: integer): ScriptLocal
 ---@param offset integer
----@param size? integer
+---@param size integer # omitted: 0; nil is rejected
 ---@return ScriptLocal
 function ScriptLocal:at(offset, size) end
 ---@return integer
@@ -980,6 +1128,11 @@ function ScriptLocal:get_int() end
 function ScriptLocal:get_float() end
 ---@return Vector3
 function ScriptLocal:get_vector3() end
+---Address of the local slot on the captured thread's stack, not its stored value.
+---Borrows memory; does not validate the stack or keep the thread alive.
+---Recreate the handle and resolve again after the script stops or restarts.
+---@return pointer
+function ScriptLocal:get_pointer() end
 ---@param value integer
 function ScriptLocal:set_int(value) end
 ---@param value number
@@ -999,22 +1152,27 @@ ScriptPointer = {}
 ---@param pattern string # IDA-format signature
 ---@param offset? integer
 ---@param rip? boolean
----@param address? integer
+---@param address? integer # 32-bit script bytecode offset, not a process-memory address
 ---@return ScriptPointer
 function ScriptPointer.new(name, pattern, offset, rip, address) end
 
+---Returns a copy with a new future scan offset; preserves the resolved address.
 ---@param offset integer
 ---@return ScriptPointer
 function ScriptPointer:add(offset) end
+---Returns a copy with a new future scan offset; preserves the resolved address.
 ---@param offset integer
 ---@return ScriptPointer
 function ScriptPointer:sub(offset) end
+---Enables three-byte script address operand decoding on a future scan.
+---Preserves the resolved address until scanning again.
 ---@return ScriptPointer
 function ScriptPointer:rip() end
+---No loaded target: nil. Pattern not found: handle with address 0.
 ---@param target string|integer
 ---@return ScriptPointer?
 function ScriptPointer:scan(target) end
----@return integer
+---@return integer # 32-bit script bytecode offset, not a process-memory address
 function ScriptPointer:get_address() end
 ---@return string
 function ScriptPointer:get_name() end
@@ -1024,14 +1182,14 @@ function ScriptPointer:get_name() end
 ------------------------------------------------------------------------------
 
 ---@class ScriptPatch
----@overload fun(script: string|integer, name: string, pattern: string, offset: integer|integer[], patch_bytes?: integer[]): ScriptPatch
+---@overload fun(script: string|integer, name: string, pattern: string, offset: integer|nil, patch_bytes: integer[]): ScriptPatch
 ScriptPatch = {}
 
 ---@param script string|integer
 ---@param name string
 ---@param pattern string
----@param offset integer|integer[] # offset, or patch_bytes if omitted
----@param patch_bytes? integer[] # bytes 0-255
+---@param offset integer|nil # pass nil or 0 for no offset; retain this positional slot
+---@param patch_bytes integer[] # nonempty array of bytes 0-255, always argument 5
 ---@return ScriptPatch
 function ScriptPatch.new(script, name, pattern, offset, patch_bytes) end
 
@@ -1053,10 +1211,14 @@ ScriptFunction = {}
 function ScriptFunction.new(script, script_pointer) end
 
 ---Invoke the script function.
----`param_string` arg chars: `i` int32, `f` float, `h` hash, `b` bool; optional `=<r>` return type (`n`/`i`/`f`/`b`/`h`). Example: `fn:call("ii=i", 5, 10)`.
+---`param_string` arg chars: `i` int32, `f` float, `h` hash, `b` bool, `s` string; optional `=<r>` return type (`n`/`i`/`f`/`b`/`h`/`s`).
+---String arguments are borrowed read-only C strings, valid during the call; nil/omitted strings pass NULL.
+---Embedded NUL bytes terminate the text. The GTA function must not retain or modify argument strings.
+---`=s` copies the returned C string into Lua, or returns nil for NULL.
+---Examples: `fn:call("ii=i", 5, 10)`, `fn:call("s=s", "example")`.
 ---@param param_string string
----@param ... any
----@return any
+---@param ... number|boolean|string|nil
+---@return any # Determined by the format: number, boolean, string, nil, or no return value.
 function ScriptFunction:call(param_string, ...) end
 
 ------------------------------------------------------------------------------
@@ -1079,6 +1241,7 @@ function scripts.run_as_script(script, callback) end
 natives = {}
 
 ---Load every native namespace table (PLAYER, ENTITY, VEHICLE, ...) as globals.
+---Raises an error if already loaded; guard with are_natives_loaded().
 function natives.load_natives() end
 ---@return boolean
 function natives.are_natives_loaded() end
@@ -1103,6 +1266,7 @@ session_types = {
     solo = 10,
 }
 
+---Transmits { hash, local_player_id, bits, ...formatted_args }.
 ---@param hash integer|string
 ---@param bits integer # target player bitset
 ---@param format string # chars: i/f/l/h (max 36 args)
@@ -1242,22 +1406,30 @@ function transactions.run_service(category, action, item, value) end
 function transactions.can_use_transactions() end
 
 ------------------------------------------------------------------------------
--- FileMgr (sandboxed to %appdata%/YimMenuV2/scripts)
+-- FileMgr (all paths relative to <MenuRoot>/scripts)
 ------------------------------------------------------------------------------
 
 FileMgr = {}
 
----@return string
-function FileMgr.GetMenuRootPath() end
----@param path string
+---Every path is relative to scripts; use "." for the root.
+---Absolute/drive/UNC/stream/NUL paths and paths escaping through .. or links are rejected.
+---@param path string # relative directory path
 ---@return boolean
 function FileMgr.CreateDir(path) end
 ---@param path string
 function FileMgr.DeleteFile(path) end
+---Rename/move a regular file; destination parent must exist. Never overwrites another file.
+---Returns false for filesystem failures/destination collisions; same-file rename succeeds.
+---@param source string # relative source file path
+---@param destination string # relative destination file path
+---@return boolean
+function FileMgr.RenameFile(source, destination) end
 ---@param path string
 ---@return boolean
 function FileMgr.DoesFileExist(path) end
----@param path string
+---Results are relative to scripts and usable directly with other FileMgr functions.
+---Empty extension matches all files. Recursive enumeration skips linked directories.
+---@param path string # relative directory path; "." lists the scripts root
 ---@param extension string
 ---@param recursive? boolean
 ---@return string[]
@@ -1283,102 +1455,739 @@ function internal.spawn_vehicle(model) end
 ------------------------------------------------------------------------------
 -- ImGui (used inside category:imgui / group:imgui callbacks)
 --
--- Value-editing widgets return the (possibly updated) value plus a changed
--- flag, e.g. `value, changed = ImGui.Checkbox("Label", value)`. Only the most
--- commonly used functions are typed here; the full set is listed in
--- docs/lua-api.md. Flag/cond/col arguments use the ImGui* enum tables.
+-- Most value-editing widgets return the updated value plus a changed flag.
+-- Selectable returns only selected state. Overloaded widgets may change their
+-- return arity. Flag/cond/col arguments use the ImGui* enum tables.
 ------------------------------------------------------------------------------
 
 ImGui = {}
 
--- Windows & layout
----@param name string
----@param open? boolean
+---Borrowed ImGui draw-list handle; acquire a new one each render frame.
+---Screen-space coordinates in pixels. RGBA components must be integers in [0, 255].
+---@class DrawList
+local DrawList = {}
+
+---Current window's clipped draw list. Call inside an ImGui render callback.
+---@return DrawList
+function ImGui.GetWindowDrawList() end
+---Main viewport's foreground draw list, rendered above windows.
+---@return DrawList
+function ImGui.GetForegroundDrawList() end
+---Uses the current font; omitted/nil font_size uses its current size.
+---Omitted/nil wrap_width defaults to 0 (no wrapping); positive widths wrap in pixels.
+---@param x number
+---@param y number
+---@param text string
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param font_size? number # positive size in pixels
+---@param wrap_width? number # non-negative finite pixel width; default 0
+function DrawList:AddText(x, y, text, r, g, b, a, font_size, wrap_width) end
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param thickness? number # default 1 pixel
+function DrawList:AddLine(x1, y1, x2, y2, r, g, b, a, thickness) end
+---Draws a rectangle outline on this handle's window or foreground draw list.
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param rounding? number # default 0 pixels
+---@param flags? integer # default 0; ImGui draw flags
+---@param thickness? number # default 1 pixel
+function DrawList:AddRect(x1, y1, x2, y2, r, g, b, a, rounding, flags, thickness) end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param rounding? number # default 0 pixels
+---@param flags? integer # ImGui draw flags; default 0 (all corners when rounding > 0)
+function DrawList:AddRectFilled(x1, y1, x2, y2, r, g, b, a, rounding, flags) end
+
+---Interpolates four packed U32 corner colors across a filled rectangle.
+---Create colors with ImGui.ColorConvertRGBAToU32({r, g, b, a}).
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param upper_left integer # packed U32 color
+---@param upper_right integer # packed U32 color
+---@param bottom_right integer # packed U32 color
+---@param bottom_left integer # packed U32 color
+function DrawList:AddRectFilledMultiColor(x1, y1, x2, y2, upper_left, upper_right, bottom_right, bottom_left) end
+
+---Draws a triangle outline on this handle's window or foreground draw list.
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param x3 number
+---@param y3 number
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param thickness? number # default 1 pixel
+function DrawList:AddTriangle(x1, y1, x2, y2, x3, y3, r, g, b, a, thickness) end
+
+---Draws a filled triangle; supply vertices in clockwise screen-space order.
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param x3 number
+---@param y3 number
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+function DrawList:AddTriangleFilled(x1, y1, x2, y2, x3, y3, r, g, b, a) end
+
+---Draws a circle outline on this handle's window or foreground draw list.
+---@param x number
+---@param y number
+---@param radius number # pixels
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param num_segments? integer # default 0: automatic tessellation
+---@param thickness? number # default 1 pixel
+function DrawList:AddCircle(x, y, radius, r, g, b, a, num_segments, thickness) end
+
+---Draws a filled circle on this handle's window or foreground draw list.
+---@param x number
+---@param y number
+---@param radius number # pixels
+---@param r integer # 0..255
+---@param g integer # 0..255
+---@param b integer # 0..255
+---@param a integer # 0..255
+---@param num_segments? integer # default 0: automatic tessellation
+function DrawList:AddCircleFilled(x, y, radius, r, g, b, a, num_segments) end
+
+---@class ImGuiVec2
+---@field x number
+---@field y number
+
+---@class ImGuiStyleSnapshot
+---@field Alpha number
+---@field DisabledAlpha number
+---@field WindowPadding ImGuiVec2
+---@field WindowRounding number
+---@field WindowBorderSize number
+---@field WindowMinSize ImGuiVec2
+---@field WindowTitleAlign ImGuiVec2
+---@field ChildRounding number
+---@field ChildBorderSize number
+---@field PopupRounding number
+---@field PopupBorderSize number
+---@field FramePadding ImGuiVec2
+---@field FrameRounding number
+---@field FrameBorderSize number
+---@field ItemSpacing ImGuiVec2
+---@field ItemInnerSpacing ImGuiVec2
+---@field CellPadding ImGuiVec2
+---@field IndentSpacing number
+---@field ScrollbarSize number
+---@field ScrollbarRounding number
+---@field GrabMinSize number
+---@field GrabRounding number
+---@field ButtonTextAlign ImGuiVec2
+---@field SelectableTextAlign ImGuiVec2
+
+
+-- Internal / drawing
+---Draws on the current window; integer RGBA components use 0..255.
+---@param x number
+---@param y number
+---@param radius number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param segments? integer
+---@param thickness? number
+function ImGui.AddCircle(x, y, radius, r, g, b, a, segments, thickness) end
+
+---@param x number
+---@param y number
+---@param radius number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param segments? integer
+function ImGui.AddCircleFilled(x, y, radius, r, g, b, a, segments) end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param thickness? number
+function ImGui.AddLine(x1, y1, x2, y2, r, g, b, a, thickness) end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param rounding? number
 ---@param flags? integer
----@return boolean, boolean
+---@param thickness? number
+function ImGui.AddRect(x1, y1, x2, y2, r, g, b, a, rounding, flags, thickness) end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param rounding? number
+---@param flags? integer
+function ImGui.AddRectFilled(x1, y1, x2, y2, r, g, b, a, rounding, flags) end
+
+---Corner colors are packed U32 values, e.g. ColorConvertRGBAToU32({r,g,b,a}).
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param upper_left integer
+---@param upper_right integer
+---@param bottom_right integer
+---@param bottom_left integer
+function ImGui.AddRectFilledMultiColor(x1, y1, x2, y2, upper_left, upper_right, bottom_right, bottom_left) end
+
+---@param x number
+---@param y number
+---@param text string
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param font_size? number # positive finite pixels; omitted/nil: current font size
+---@param wrap_width? number # non-negative finite pixels; omitted/nil/0: no wrapping
+function ImGui.AddText(x, y, text, r, g, b, a, font_size, wrap_width) end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param x3 number
+---@param y3 number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param thickness? number
+function ImGui.AddTriangle(x1, y1, x2, y2, x3, y3, r, g, b, a, thickness) end
+
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param x3 number
+---@param y3 number
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+function ImGui.AddTriangleFilled(x1, y1, x2, y2, x3, y3, r, g, b, a) end
+
+
+-- Tables
+---@param id string
+---@param columns integer
+---@param flags? ImGuiTableFlags # omitted/nil: None
+---@param outer_size_x? number # outer width in pixels; omitted/nil: 0 (available width)
+---@param outer_size_y? number # outer height in pixels; omitted/nil: 0 (ImGui default sizing)
+---@param inner_width? number # content width for horizontal scrolling; omitted/nil: 0
+---@return boolean visible
+function ImGui.BeginTable(id, columns, flags, outer_size_x, outer_size_y, inner_width) end
+
+function ImGui.EndTable() end
+
+function ImGui.TableNextColumn() end
+
+---@param row_flags? ImGuiTableRowFlags # omitted/nil: None
+---@param min_row_height? number # minimum height in pixels; omitted/nil: 0
+function ImGui.TableNextRow(row_flags, min_row_height) end
+
+---@param column integer
+---@return boolean visible
+function ImGui.TableSetColumnIndex(column) end
+
+---Sets a column label, flags, initial width or stretch weight and user ID before submitting rows.
+---Omitted/nil optional arguments default to 0; fractional sizing is supported.
+---@param label string
+---@param flags? ImGuiTableColumnFlags # default 0
+---@param init_width_or_weight? number # WidthFixed: pixels; WidthStretch: relative weight; default 0
+---@param user_id? integer # application-defined column ID; default 0
+function ImGui.TableSetupColumn(label, flags, init_width_or_weight, user_id) end
+
+function ImGui.TableHeadersRow() end
+
+
+-- Color conversions
+---Four float components in 0..1.
+---@param color number[]
+---@return integer
+function ImGui.ColorConvertFloat4ToU32(color) end
+
+---Four integer components in 0..255.
+---@param color integer[]
+---@return integer
+function ImGui.ColorConvertRGBAToU32(color) end
+
+---Returns four float components in 0..1.
+---@param color integer
+---@return number[]
+function ImGui.ColorConvertU32ToFloat4(color) end
+
+---@param r number
+---@param g number
+---@param b number
+---@return number h, number s, number v
+function ImGui.ColorConvertRGBtoHSV(r, g, b) end
+
+---@param h number
+---@param s number
+---@param v number
+---@return number r, number g, number b
+function ImGui.ColorConvertHSVtoRGB(h, s, v) end
+
+
+-- Display
+---@return number width, number height
+function ImGui.GetDisplaySize() end
+
+---@return number
+function ImGui.GetFrameRate() end
+
+
+-- Windows
+---With an open boolean, returns open, draw. Without it, returns draw only; flags stay in slot 3.
+---@overload fun(name: string, open?: nil, flags?: integer): boolean
+---@param name string
+---@param open boolean
+---@param flags? integer
+---@return boolean open, boolean draw
 function ImGui.Begin(name, open, flags) end
+
 function ImGui.End() end
+
 ---@param name string
 ---@param size_x? number
 ---@param size_y? number
 ---@param border? boolean
 ---@param flags? integer
----@return boolean
+---@return boolean visible
 function ImGui.BeginChild(name, size_x, size_y, border, flags) end
----@param name string
----@param id integer  explicit ImGuiID (e.g. from ImGui.GetID)
----@param size_x? number
----@param size_y? number
----@param child_flags? integer  ImGuiChildFlags
----@param window_flags? integer  ImGuiWindowFlags
----@return boolean
-function ImGui.BeginChildEx(name, id, size_x, size_y, child_flags, window_flags) end
+
 function ImGui.EndChild() end
-function ImGui.BeginGroup() end
-function ImGui.EndGroup() end
+
+
+-- Window utilities
+---@return boolean
+function ImGui.IsWindowAppearing() end
+
+---@return boolean
+function ImGui.IsWindowCollapsed() end
+
+---@param flags? integer
+---@return boolean
+function ImGui.IsWindowFocused(flags) end
+
+---@param flags? integer
+---@return boolean
+function ImGui.IsWindowHovered(flags) end
+
+---@return number x, number y
+function ImGui.GetWindowPos() end
+
+---@return number width, number height
+function ImGui.GetWindowSize() end
+
+---@return number
+function ImGui.GetWindowWidth() end
+
+---@return number
+function ImGui.GetWindowHeight() end
+
+---@param x number
+---@param y number
+---@param cond? integer
+---@param pivot_x? number
+---@param pivot_y? number
+function ImGui.SetNextWindowPos(x, y, cond, pivot_x, pivot_y) end
+
+---@param width number
+---@param height number
+---@param cond? integer
+function ImGui.SetNextWindowSize(width, height, cond) end
+
+---@param min_x number
+---@param min_y number
+---@param max_x number
+---@param max_y number
+function ImGui.SetNextWindowSizeConstraints(min_x, min_y, max_x, max_y) end
+
+---@param width number
+---@param height number
+function ImGui.SetNextWindowContentSize(width, height) end
+
+---@param collapsed boolean
+---@param cond? integer
+function ImGui.SetNextWindowCollapsed(collapsed, cond) end
+
+function ImGui.SetNextWindowFocus() end
+
+---@param alpha number
+function ImGui.SetNextWindowBgAlpha(alpha) end
+
+---@overload fun(name: string, x: number, y: number, cond?: integer)
+---@param x number
+---@param y number
+---@param cond? integer
+function ImGui.SetWindowPos(x, y, cond) end
+
+---@overload fun(name: string, width: number, height: number, cond?: integer)
+---@param width number
+---@param height number
+---@param cond? integer
+function ImGui.SetWindowSize(width, height, cond) end
+
+---@overload fun(name: string, collapsed: boolean, cond?: integer)
+---@param collapsed boolean
+---@param cond? integer
+function ImGui.SetWindowCollapsed(collapsed, cond) end
+
+---@param name? string
+function ImGui.SetWindowFocus(name) end
+
+---@param scale number
+function ImGui.SetWindowFontScale(scale) end
+
+
+-- Content region
+---@return number x, number y
+function ImGui.GetContentRegionMax() end
+
+---@return number x, number y
+function ImGui.GetContentRegionAvail() end
+
+---@return number x, number y
+function ImGui.GetWindowContentRegionMin() end
+
+---@return number x, number y
+function ImGui.GetWindowContentRegionMax() end
+
+
+-- Scrolling
+---@return number
+function ImGui.GetScrollX() end
+
+---@return number
+function ImGui.GetScrollY() end
+
+---@return number
+function ImGui.GetScrollMaxX() end
+
+---@return number
+function ImGui.GetScrollMaxY() end
+
+---@param scroll number
+function ImGui.SetScrollX(scroll) end
+
+---@param scroll number
+function ImGui.SetScrollY(scroll) end
+
+---center_ratio defaults to 0.5.
+---@param center_ratio? number
+function ImGui.SetScrollHereX(center_ratio) end
+
+---center_ratio defaults to 0.5.
+---@param center_ratio? number
+function ImGui.SetScrollHereY(center_ratio) end
+
+---center_ratio defaults to 0.5.
+---@param local_pos number
+---@param center_ratio? number
+function ImGui.SetScrollFromPosX(local_pos, center_ratio) end
+
+---center_ratio defaults to 0.5.
+---@param local_pos number
+---@param center_ratio? number
+function ImGui.SetScrollFromPosY(local_pos, center_ratio) end
+
+
+-- Parameter stacks (shared)
+---Float RGBA components use 0..1.
+---@param index integer
+---@param r number
+---@param g number
+---@param b number
+---@param a number
+function ImGui.PushStyleColor(index, r, g, b, a) end
+
+---count defaults to 1.
+---@param count? integer
+function ImGui.PopStyleColor(count) end
+
+---@overload fun(index: integer, x: number, y: number)
+---@param index integer
+---@param value number
+function ImGui.PushStyleVar(index, value) end
+
+---count defaults to 1.
+---@param count? integer
+function ImGui.PopStyleVar(count) end
+
+---@param index integer
+---@return number r, number g, number b, number a
+function ImGui.GetStyleColorVec4(index) end
+
+---@return number
+function ImGui.GetFontSize() end
+
+---@return number x, number y
+function ImGui.GetFontTexUvWhitePixel() end
+
+
+-- Parameter stacks (current window)
+---@param width number
+function ImGui.PushItemWidth(width) end
+
+function ImGui.PopItemWidth() end
+
+---@param width number
+function ImGui.SetNextItemWidth(width) end
+
+---@return number
+function ImGui.CalcItemWidth() end
+
+---wrap_pos defaults to 0.
+---@param wrap_pos? number
+function ImGui.PushTextWrapPos(wrap_pos) end
+
+function ImGui.PopTextWrapPos() end
+
+---@param repeat_buttons boolean
+function ImGui.PushButtonRepeat(repeat_buttons) end
+
+function ImGui.PopButtonRepeat() end
+
+
+-- Cursor / layout
 function ImGui.Separator() end
+
 ---@param text string
 function ImGui.SeparatorText(text) end
+
+---disabled defaults to true.
+---@param disabled? boolean
+function ImGui.BeginDisabled(disabled) end
+
+function ImGui.EndDisabled() end
+
+---Detached snapshot of the exposed style fields; modifying it does not change ImGui.
+---@return ImGuiStyleSnapshot
+function ImGui.GetStyle() end
+
+---Defaults: offset=0, spacing=-1.
 ---@param offset? number
 ---@param spacing? number
 function ImGui.SameLine(offset, spacing) end
+
 function ImGui.NewLine() end
+
 function ImGui.Spacing() end
----@param x number
----@param y number
-function ImGui.Dummy(x, y) end
+
+---@param width number
+---@param height number
+function ImGui.Dummy(width, height) end
+
+---width defaults to 0 (style indent spacing).
 ---@param width? number
 function ImGui.Indent(width) end
+
+---width defaults to 0 (style indent spacing).
 ---@param width? number
 function ImGui.Unindent(width) end
----@param disabled? boolean
-function ImGui.BeginDisabled(disabled) end
-function ImGui.EndDisabled() end
 
--- Text
+function ImGui.BeginGroup() end
+
+function ImGui.EndGroup() end
+
+---@return number x, number y
+function ImGui.GetCursorPos() end
+
+---@return number
+function ImGui.GetCursorPosX() end
+
+---@return number
+function ImGui.GetCursorPosY() end
+
+---@param x number
+---@param y number
+function ImGui.SetCursorPos(x, y) end
+
+---@param x number
+function ImGui.SetCursorPosX(x) end
+
+---@param y number
+function ImGui.SetCursorPosY(y) end
+
+---@return number x, number y
+function ImGui.GetCursorStartPos() end
+
+---@return number x, number y
+function ImGui.GetCursorScreenPos() end
+
+---@param x number
+---@param y number
+function ImGui.SetCursorScreenPos(x, y) end
+
+function ImGui.AlignTextToFramePadding() end
+
+---@return number
+function ImGui.GetTextLineHeight() end
+
+---@return number
+function ImGui.GetTextLineHeightWithSpacing() end
+
+---@return number
+function ImGui.GetFrameHeight() end
+
+---@return number
+function ImGui.GetFrameHeightWithSpacing() end
+
+
+-- ID stack
+---Pushes one whole string or integer onto the ID stack.
+---@param id string|integer
+function ImGui.PushID(id) end
+
+function ImGui.PopID() end
+
+---Hashes one whole string in the current ID stack.
+---@param id string
+---@return integer
+function ImGui.GetID(id) end
+
+
+-- Text widgets
+---Renders one whole string without format substitution.
+---@param text string
+function ImGui.TextUnformatted(text) end
+
 ---@param text string
 function ImGui.Text(text) end
+
+---Float RGBA components use 0..1.
 ---@param r number
 ---@param g number
 ---@param b number
 ---@param a number
 ---@param text string
 function ImGui.TextColored(r, g, b, a, text) end
+
 ---@param text string
 function ImGui.TextDisabled(text) end
+
 ---@param text string
 function ImGui.TextWrapped(text) end
+
 ---@param label string
 ---@param text string
 function ImGui.LabelText(label, text) end
+
 ---@param text string
 function ImGui.BulletText(text) end
 
--- Buttons & toggles
+
+-- Main widgets
 ---@param label string
 ---@param size_x? number
 ---@param size_y? number
----@return boolean
+---@return boolean pressed
 function ImGui.Button(label, size_x, size_y) end
+
 ---@param label string
----@return boolean
+---@return boolean pressed
 function ImGui.SmallButton(label) end
+
+---@param id string
+---@param size_x number
+---@param size_y number
+---@param flags? ImGuiButtonFlags # omitted/nil: None (left mouse button)
+---@return boolean pressed
+function ImGui.InvisibleButton(id, size_x, size_y, flags) end
+
+---@param id string
+---@param direction integer
+---@return boolean pressed
+function ImGui.ArrowButton(id, direction) end
+
 ---@param label string
 ---@param value boolean
----@return boolean value, boolean pressed
+---@return boolean value, boolean changed
 function ImGui.Checkbox(label, value) end
----@param label string
----@param active boolean
----@return boolean
-function ImGui.RadioButton(label, active) end
 
--- Combo / list
+---@overload fun(label: string, active: boolean): boolean
+---@param label string
+---@param value integer
+---@param button_value integer
+---@return integer value, boolean pressed
+function ImGui.RadioButton(label, value, button_value) end
+
+---Defaults: size_x=-FLT_MIN, size_y=0, overlay=nil.
+---@param fraction number
+---@param size_x? number
+---@param size_y? number
+---@param overlay? string
+function ImGui.ProgressBar(fraction, size_x, size_y, overlay) end
+
+function ImGui.Bullet() end
+
+
+-- Combo
 ---@param label string
 ---@param preview string
 ---@param flags? integer
----@return boolean
+---@return boolean open
 function ImGui.BeginCombo(label, preview, flags) end
+
 function ImGui.EndCombo() end
+
+---current uses a zero-based index. String form uses NUL-separated items, ending with two NUL bytes.
+---@overload fun(label: string, current: integer, items: string, popup_max?: integer): integer, boolean
 ---@param label string
 ---@param current integer
 ---@param items string[]
@@ -1386,161 +2195,793 @@ function ImGui.EndCombo() end
 ---@param popup_max? integer
 ---@return integer current, boolean changed
 function ImGui.Combo(label, current, items, items_count, popup_max) end
----@param label string
----@param selected? boolean
----@param flags? integer
----@param size_x? number
----@param size_y? number
----@return boolean
-function ImGui.Selectable(label, selected, flags, size_x, size_y) end
 
--- Sliders
----@param label string
----@param value number
----@param min number
----@param max number
----@param format? string
----@return number value, boolean used
-function ImGui.SliderFloat(label, value, min, max, format) end
----@param label string
----@param value integer
----@param min integer
----@param max integer
----@param format? string
----@return integer value, boolean used
-function ImGui.SliderInt(label, value, min, max, format) end
 
--- Drags
+-- Drag
+---Defaults: speed=1, min=0, max=0, format="%.3f".
 ---@param label string
 ---@param value number
 ---@param speed? number
 ---@param min? number
 ---@param max? number
 ---@param format? string
----@return number value, boolean used
-function ImGui.DragFloat(label, value, speed, min, max, format) end
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number value, boolean changed
+function ImGui.DragFloat(label, value, speed, min, max, format, flags) end
+
+---2 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%.3f".
+---@param label string
+---@param value number[]
+---@param speed? number
+---@param min? number
+---@param max? number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number[] value, boolean changed
+function ImGui.DragFloat2(label, value, speed, min, max, format, flags) end
+
+---3 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%.3f".
+---@param label string
+---@param value number[]
+---@param speed? number
+---@param min? number
+---@param max? number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number[] value, boolean changed
+function ImGui.DragFloat3(label, value, speed, min, max, format, flags) end
+
+---4 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%.3f".
+---@param label string
+---@param value number[]
+---@param speed? number
+---@param min? number
+---@param max? number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number[] value, boolean changed
+function ImGui.DragFloat4(label, value, speed, min, max, format, flags) end
+
+---Defaults: speed=1, min=0, max=0, format="%d".
 ---@param label string
 ---@param value integer
 ---@param speed? number
 ---@param min? integer
 ---@param max? integer
 ---@param format? string
----@return integer value, boolean used
-function ImGui.DragInt(label, value, speed, min, max, format) end
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer value, boolean changed
+function ImGui.DragInt(label, value, speed, min, max, format, flags) end
 
--- Inputs
+---2 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%d".
+---@param label string
+---@param value integer[]
+---@param speed? number
+---@param min? integer
+---@param max? integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer[] value, boolean changed
+function ImGui.DragInt2(label, value, speed, min, max, format, flags) end
+
+---3 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%d".
+---@param label string
+---@param value integer[]
+---@param speed? number
+---@param min? integer
+---@param max? integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer[] value, boolean changed
+function ImGui.DragInt3(label, value, speed, min, max, format, flags) end
+
+---4 components; returns a new array. Defaults: speed=1, min=0, max=0, format="%d".
+---@param label string
+---@param value integer[]
+---@param speed? number
+---@param min? integer
+---@param max? integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer[] value, boolean changed
+function ImGui.DragInt4(label, value, speed, min, max, format, flags) end
+
+
+-- Sliders
+---Default format: "%.3f".
+---@param label string
+---@param value number
+---@param min number
+---@param max number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number value, boolean changed
+function ImGui.SliderFloat(label, value, min, max, format, flags) end
+
+---2 components; returns a new array. Default format: "%.3f".
+---@param label string
+---@param value number[]
+---@param min number
+---@param max number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number[] value, boolean changed
+function ImGui.SliderFloat2(label, value, min, max, format, flags) end
+
+---3 components; returns a new array. Default format: "%.3f".
+---@param label string
+---@param value number[]
+---@param min number
+---@param max number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number[] value, boolean changed
+function ImGui.SliderFloat3(label, value, min, max, format, flags) end
+
+---4 components; returns a new array. Default format: "%.3f".
+---@param label string
+---@param value number[]
+---@param min number
+---@param max number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number[] value, boolean changed
+function ImGui.SliderFloat4(label, value, min, max, format, flags) end
+
+---Defaults: min_degrees=-360, max_degrees=360, format="%.0f deg".
+---@param label string
+---@param radians number
+---@param min_degrees? number
+---@param max_degrees? number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number radians, boolean changed
+function ImGui.SliderAngle(label, radians, min_degrees, max_degrees, format, flags) end
+
+---Default format: "%d".
+---@param label string
+---@param value integer
+---@param min integer
+---@param max integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer value, boolean changed
+function ImGui.SliderInt(label, value, min, max, format, flags) end
+
+---2 components; returns a new array. Default format: "%d".
+---@param label string
+---@param value integer[]
+---@param min integer
+---@param max integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer[] value, boolean changed
+function ImGui.SliderInt2(label, value, min, max, format, flags) end
+
+---3 components; returns a new array. Default format: "%d".
+---@param label string
+---@param value integer[]
+---@param min integer
+---@param max integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer[] value, boolean changed
+function ImGui.SliderInt3(label, value, min, max, format, flags) end
+
+---4 components; returns a new array. Default format: "%d".
+---@param label string
+---@param value integer[]
+---@param min integer
+---@param max integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer[] value, boolean changed
+function ImGui.SliderInt4(label, value, min, max, format, flags) end
+
+---@param label string
+---@param size_x number
+---@param size_y number
+---@param value number
+---@param min number
+---@param max number
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return number value, boolean changed
+function ImGui.VSliderFloat(label, size_x, size_y, value, min, max, format, flags) end
+
+---@param label string
+---@param size_x number
+---@param size_y number
+---@param value integer
+---@param min integer
+---@param max integer
+---@param format? string
+---@param flags? ImGuiSliderFlags # omitted/nil: None
+---@return integer value, boolean changed
+function ImGui.VSliderInt(label, size_x, size_y, value, min, max, format, flags) end
+
+
+-- Input with keyboard
 ---@param label string
 ---@param text string
 ---@param flags? integer
 ---@return string text, boolean changed
 function ImGui.InputText(label, text, flags) end
+
+---@param label string
+---@param text string
+---@param size_x? number
+---@param size_y? number
+---@param flags? integer
+---@return string text, boolean changed
+function ImGui.InputTextMultiline(label, text, size_x, size_y, flags) end
+
 ---@param label string
 ---@param hint string
 ---@param text string
 ---@param flags? integer
 ---@return string text, boolean changed
 function ImGui.InputTextWithHint(label, hint, text, flags) end
+
+---Defaults: step=0, step_fast=0.
 ---@param label string
 ---@param value number
 ---@param step? number
 ---@param step_fast? number
 ---@param format? string
 ---@param flags? integer
----@return number value, boolean used
+---@return number value, boolean changed
 function ImGui.InputFloat(label, value, step, step_fast, format, flags) end
+
+---2 components; returns a new array.
+---@param label string
+---@param value number[]
+---@param format? string
+---@param flags? integer
+---@return number[] value, boolean changed
+function ImGui.InputFloat2(label, value, format, flags) end
+
+---3 components; returns a new array.
+---@param label string
+---@param value number[]
+---@param format? string
+---@param flags? integer
+---@return number[] value, boolean changed
+function ImGui.InputFloat3(label, value, format, flags) end
+
+---4 components; returns a new array.
+---@param label string
+---@param value number[]
+---@param format? string
+---@param flags? integer
+---@return number[] value, boolean changed
+function ImGui.InputFloat4(label, value, format, flags) end
+
+---Defaults: step=1, step_fast=100.
 ---@param label string
 ---@param value integer
 ---@param step? integer
 ---@param step_fast? integer
 ---@param flags? integer
----@return integer value, boolean used
+---@return integer value, boolean changed
 function ImGui.InputInt(label, value, step, step_fast, flags) end
 
--- Colors
+---2 components; returns a new array.
+---@param label string
+---@param value integer[]
+---@param flags? integer
+---@return integer[] value, boolean changed
+function ImGui.InputInt2(label, value, flags) end
+
+---3 components; returns a new array.
+---@param label string
+---@param value integer[]
+---@param flags? integer
+---@return integer[] value, boolean changed
+function ImGui.InputInt3(label, value, flags) end
+
+---4 components; returns a new array.
+---@param label string
+---@param value integer[]
+---@param flags? integer
+---@return integer[] value, boolean changed
+function ImGui.InputInt4(label, value, flags) end
+
+---Defaults: step=0, step_fast=0, format="%.6f".
+---@param label string
+---@param value number
+---@param step? number
+---@param step_fast? number
+---@param format? string
+---@param flags? integer
+---@return number value, boolean changed
+function ImGui.InputDouble(label, value, step, step_fast, format, flags) end
+
+
+-- Color editor / picker
+---3 float color components in 0..1; returns a new array.
 ---@param label string
 ---@param color number[]
 ---@param flags? integer
----@return number[] color, boolean used
+---@return number[] color, boolean changed
 function ImGui.ColorEdit3(label, color, flags) end
+
+---4 float color components in 0..1; returns a new array.
 ---@param label string
 ---@param color number[]
 ---@param flags? integer
----@return number[] color, boolean used
+---@return number[] color, boolean changed
 function ImGui.ColorEdit4(label, color, flags) end
+
+---3 float color components in 0..1; returns a new array.
 ---@param label string
 ---@param color number[]
 ---@param flags? integer
----@return number[] color, boolean used
+---@return number[] color, boolean changed
 function ImGui.ColorPicker3(label, color, flags) end
+
+---4 float color components in 0..1; returns a new array.
 ---@param label string
 ---@param color number[]
 ---@param flags? integer
----@return number[] color, boolean used
-function ImGui.ColorPicker4(label, color, flags) end
+---@param reference_color? number[] # four float components in 0..1 for the original-color preview; omitted/nil: no reference
+---@return number[] color, boolean changed
+function ImGui.ColorPicker4(label, color, flags, reference_color) end
+
+---Four float color components in 0..1.
+---@param id string
+---@param color number[]
+---@param flags? integer
+---@param size_x? number
+---@param size_y? number
+---@return boolean pressed
+function ImGui.ColorButton(id, color, flags, size_x, size_y) end
+
+---@param flags integer
+function ImGui.SetColorEditOptions(flags) end
+
 
 -- Trees
 ---@param label string
 ---@param text? string
----@return boolean
+---@return boolean open
 function ImGui.TreeNode(label, text) end
-function ImGui.TreePop() end
+
 ---@param label string
 ---@param flags? integer
----@return boolean
-function ImGui.CollapsingHeader(label, flags) end
+---@param text? string
+---@return boolean open
+function ImGui.TreeNodeEx(label, flags, text) end
 
--- Tabs
 ---@param id string
----@param flags? integer
----@return boolean
-function ImGui.BeginTabBar(id, flags) end
-function ImGui.EndTabBar() end
----@param label string
----@return boolean
-function ImGui.BeginTabItem(label) end
-function ImGui.EndTabItem() end
+function ImGui.TreePush(id) end
 
--- Tooltips & popups
+function ImGui.TreePop() end
+
+---@return number
+function ImGui.GetTreeNodeToLabelSpacing() end
+
+---@overload fun(label: string, flags?: integer): boolean
+---@param label string
+---@param open boolean
+---@param flags? integer
+---@return boolean open, boolean expanded
+function ImGui.CollapsingHeader(label, open, flags) end
+
+---@param open boolean
+---@param cond? integer
+function ImGui.SetNextItemOpen(open, cond) end
+
+
+-- Selectables
+---Returns the updated selected state only. Use IsItemClicked() to query the click.
+---@param label string
+---@param selected? boolean
+---@param flags? integer
+---@param size_x? number
+---@param size_y? number
+---@return boolean selected
+function ImGui.Selectable(label, selected, flags, size_x, size_y) end
+
+
+-- List boxes
+---current uses a zero-based index; height_in_items defaults to -1.
+---@param label string
+---@param current integer
+---@param items string[]
+---@param items_count integer
+---@param height_in_items? integer
+---@return integer current, boolean changed
+function ImGui.ListBox(label, current, items, items_count, height_in_items) end
+
+---Pixel-size form requires both dimensions. The two-argument form auto-sizes from an item count.
+---@overload fun(label: string, items_count: integer): boolean
+---@param label string
+---@param size_x number
+---@param size_y number
+---@return boolean visible
+function ImGui.BeginListBox(label, size_x, size_y) end
+
+function ImGui.EndListBox() end
+
+
+-- Value()
+---A nil prefix does nothing. Numeric values use the float overload.
+---@param prefix string|nil
+---@param value number|boolean
+---@param float_format? string
+function ImGui.Value(prefix, value, float_format) end
+
+
+-- Menus
+---@return boolean open
+function ImGui.BeginMenuBar() end
+
+function ImGui.EndMenuBar() end
+
+---@return boolean open
+function ImGui.BeginMainMenuBar() end
+
+function ImGui.EndMainMenuBar() end
+
+---enabled defaults to true.
+---@param label string
+---@param enabled? boolean
+---@return boolean open
+function ImGui.BeginMenu(label, enabled) end
+
+function ImGui.EndMenu() end
+
+---@overload fun(label: string, shortcut?: string): boolean
+---@param label string
+---@param shortcut string|nil
+---@param selected boolean
+---@return boolean selected, boolean pressed
+function ImGui.MenuItem(label, shortcut, selected) end
+
+
+-- Tooltips
 function ImGui.BeginTooltip() end
+
 function ImGui.EndTooltip() end
+
 ---@param text string
 function ImGui.SetTooltip(text) end
+
+
+-- Popups / modals
 ---@param id string
 ---@param flags? integer
----@return boolean
+---@return boolean open
 function ImGui.BeginPopup(id, flags) end
+
+---Without an open boolean, returns draw only; flags stay in slot 3.
+---@overload fun(name: string, open?: nil, flags?: integer): boolean
+---@param name string
+---@param open boolean
+---@param flags? integer
+---@return boolean open, boolean draw
+function ImGui.BeginPopupModal(name, open, flags) end
+
 function ImGui.EndPopup() end
+
 ---@param id string
 ---@param flags? integer
 function ImGui.OpenPopup(id, flags) end
+
+---Requests opening on an item click; always returns true. flags defaults to 1.
+---@param id? string
+---@param flags? integer
+---@return boolean
+function ImGui.OpenPopupContextItem(id, flags) end
+
 function ImGui.CloseCurrentPopup() end
 
--- Item queries
+---flags defaults to 1 (right mouse button).
+---@param id? string
+---@param flags? integer
+---@return boolean open
+function ImGui.BeginPopupContextItem(id, flags) end
+
+---flags defaults to 1 (right mouse button).
+---@param id? string
+---@param flags? integer
+---@return boolean open
+function ImGui.BeginPopupContextWindow(id, flags) end
+
+---flags defaults to 1 (right mouse button).
+---@param id? string
+---@param flags? integer
+---@return boolean open
+function ImGui.BeginPopupContextVoid(id, flags) end
+
+---@param id string
+---@param flags? integer
+---@return boolean
+function ImGui.IsPopupOpen(id, flags) end
+
+
+-- Columns
+---Defaults: count=1, id=nil, border=true.
+---@param count? integer
+---@param id? string
+---@param border? boolean
+function ImGui.Columns(count, id, border) end
+
+function ImGui.NextColumn() end
+
+---@return integer
+function ImGui.GetColumnIndex() end
+
+---index defaults to -1 (current column).
+---@param index? integer
+---@return number
+function ImGui.GetColumnWidth(index) end
+
+---@param index integer
+---@param width number
+function ImGui.SetColumnWidth(index, width) end
+
+---index defaults to -1 (current column).
+---@param index? integer
+---@return number
+function ImGui.GetColumnOffset(index) end
+
+---@param index integer
+---@param offset number
+function ImGui.SetColumnOffset(index, offset) end
+
+---@return integer
+function ImGui.GetColumnsCount() end
+
+
+-- Tab bars
+---@param id string
+---@param flags? integer
+---@return boolean open
+function ImGui.BeginTabBar(id, flags) end
+
+function ImGui.EndTabBar() end
+
+---@overload fun(label: string): boolean
+---@param label string
+---@param open boolean
+---@param flags? integer
+---@return boolean open, boolean selected
+function ImGui.BeginTabItem(label, open, flags) end
+
+function ImGui.EndTabItem() end
+
+---@param label string
+function ImGui.SetTabItemClosed(label) end
+
+
+-- Logging
+---depth defaults to -1.
+---@param depth? integer
+function ImGui.LogToTTY(depth) end
+
+---Defaults: depth=-1, filename=nil.
+---@param depth? integer
+---@param filename? string
+function ImGui.LogToFile(depth, filename) end
+
+---depth defaults to -1.
+---@param depth? integer
+function ImGui.LogToClipboard(depth) end
+
+function ImGui.LogFinish() end
+
+function ImGui.LogButtons() end
+
+---@param text string
+function ImGui.LogText(text) end
+
+
+-- Clipping
+---@param min_x number
+---@param min_y number
+---@param max_x number
+---@param max_y number
+---@param intersect boolean
+function ImGui.PushClipRect(min_x, min_y, max_x, max_y, intersect) end
+
+function ImGui.PopClipRect() end
+
+
+-- Focus / activation
+function ImGui.SetItemDefaultFocus() end
+
+---offset defaults to 0.
+---@param offset? integer
+function ImGui.SetKeyboardFocusHere(offset) end
+
+
+-- Item utilities
 ---@param flags? integer
 ---@return boolean
 function ImGui.IsItemHovered(flags) end
+
 ---@return boolean
 function ImGui.IsItemActive() end
+
+---@return boolean
+function ImGui.IsItemFocused() end
+
+---button defaults to 0 (left).
 ---@param button? integer
 ---@return boolean
 function ImGui.IsItemClicked(button) end
 
--- Misc
----@param width number
-function ImGui.PushItemWidth(width) end
-function ImGui.PopItemWidth() end
----@param width number
-function ImGui.SetNextItemWidth(width) end
----@param id integer|string
-function ImGui.PushID(id) end
-function ImGui.PopID() end
+---@return boolean
+function ImGui.IsItemVisible() end
+
+---@return boolean
+function ImGui.IsItemEdited() end
+
+---@return boolean
+function ImGui.IsItemActivated() end
+
+---@return boolean
+function ImGui.IsItemDeactivated() end
+
+---@return boolean
+function ImGui.IsItemDeactivatedAfterEdit() end
+
+---@return boolean
+function ImGui.IsItemToggledOpen() end
+
+---@return boolean
+function ImGui.IsAnyItemHovered() end
+
+---@return boolean
+function ImGui.IsAnyItemActive() end
+
+---@return boolean
+function ImGui.IsAnyItemFocused() end
+
 ---@return number x, number y
-function ImGui.GetContentRegionAvail() end
----@param text string
+function ImGui.GetItemRectMin() end
+
 ---@return number x, number y
-function ImGui.CalcTextSize(text) end
+function ImGui.GetItemRectMax() end
+
+---@return number x, number y
+function ImGui.GetItemRectSize() end
+
+
+-- Miscellaneous utilities
+---@overload fun(min_x: number, min_y: number, max_x: number, max_y: number): boolean
+---@param size_x number
+---@param size_y number
+---@return boolean
+function ImGui.IsRectVisible(size_x, size_y) end
+
 ---@return number
-function ImGui.GetFrameRate() end
+function ImGui.GetTime() end
+
+---@return integer
+function ImGui.GetFrameCount() end
+
+---@param index integer
+---@return string
+function ImGui.GetStyleColorName(index) end
+
+---@param id integer
+---@param size_x number
+---@param size_y number
+---@param flags? integer
+---@return boolean visible
+function ImGui.BeginChildFrame(id, size_x, size_y, flags) end
+
+function ImGui.EndChildFrame() end
+
+
+-- Text utilities
+---Measures the whole string; use string.sub beforehand to measure a substring.
+---@param text string
+---@param hide_text_after_double_hash? boolean # default false
+---@param wrap_width? number # default -1
+---@return number width, number height
+function ImGui.CalcTextSize(text, hide_text_after_double_hash, wrap_width) end
+
+
+-- Keyboard inputs
+---@param key integer
+---@return boolean
+function ImGui.IsKeyDown(key) end
+
+---repeat_key defaults to true.
+---@param key integer
+---@param repeat_key? boolean
+---@return boolean
+function ImGui.IsKeyPressed(key, repeat_key) end
+
+---@param key integer
+---@return boolean
+function ImGui.IsKeyReleased(key) end
+
+---@param key integer
+---@param repeat_delay number
+---@param repeat_rate number
+---@return integer
+function ImGui.GetKeyPressedAmount(key, repeat_delay, repeat_rate) end
+
+---want_capture defaults to true.
+---@param want_capture? boolean
+function ImGui.SetNextFrameWantCaptureKeyboard(want_capture) end
+
+
+-- Mouse inputs
+---@param button integer
+---@return boolean
+function ImGui.IsMouseDown(button) end
+
+---repeat_click defaults to false.
+---@param button integer
+---@param repeat_click? boolean
+---@return boolean
+function ImGui.IsMouseClicked(button, repeat_click) end
+
+---@param button integer
+---@return boolean
+function ImGui.IsMouseReleased(button) end
+
+---@param button integer
+---@return boolean
+function ImGui.IsMouseDoubleClicked(button) end
+
+---clip defaults to true.
+---@param min_x number
+---@param min_y number
+---@param max_x number
+---@param max_y number
+---@param clip? boolean
+---@return boolean
+function ImGui.IsMouseHoveringRect(min_x, min_y, max_x, max_y, clip) end
+
+---@return boolean
+function ImGui.IsAnyMouseDown() end
+
+---@return number x, number y
+function ImGui.GetMousePos() end
+
+---@return number x, number y
+function ImGui.GetMousePosOnOpeningCurrentPopup() end
+
+---lock_threshold defaults to -1 (style threshold).
+---@param button integer
+---@param lock_threshold? number
+---@return boolean
+function ImGui.IsMouseDragging(button, lock_threshold) end
+
+---Defaults: button=0, lock_threshold=-1.
+---@param button? integer
+---@param lock_threshold? number
+---@return number x, number y
+function ImGui.GetMouseDragDelta(button, lock_threshold) end
+
+---button defaults to 0 (left).
+---@param button? integer
+function ImGui.ResetMouseDragDelta(button) end
+
+---@return integer
+function ImGui.GetMouseCursor() end
+
+---@param cursor integer
+function ImGui.SetMouseCursor(cursor) end
+
+---want_capture defaults to true.
+---@param want_capture? boolean
+function ImGui.SetNextFrameWantCaptureMouse(want_capture) end
+
+
+-- Clipboard
+---@return string?
+function ImGui.GetClipboardText() end
+
+---@param text string
+function ImGui.SetClipboardText(text) end
 
 -- Enum tables (name -> integer). Values mirror the entries registered in
 -- src/core/scripting/libraries/ImGui.cpp using the bundled ImGui header.
@@ -1688,6 +3129,30 @@ ImGuiInputTextFlags = {
     CallbackCharFilter = 2097152, CallbackResize = 4194304, CallbackEdit = 8388608,
 }
 
+---@enum ImGuiSliderFlags
+ImGuiSliderFlags = {
+    None = 0,
+    Logarithmic = 32,
+    NoRoundToFormat = 64,
+    NoInput = 128,
+    WrapAround = 256,
+    ClampOnInput = 512,
+    ClampZeroRange = 1024,
+    NoSpeedTweaks = 2048,
+    AlwaysClamp = 1536,
+    InvalidMask_ = 0x7000000F,
+}
+
+---@enum ImGuiButtonFlags
+ImGuiButtonFlags = {
+    None = 0,
+    MouseButtonLeft = 1,
+    MouseButtonRight = 2,
+    MouseButtonMiddle = 4,
+    MouseButtonMask_ = 7,
+    EnableNav = 8,
+}
+
 ---@enum ImGuiColorEditFlags
 ImGuiColorEditFlags = {
     None = 0, NoAlpha = 2, NoPicker = 4, NoOptions = 8, NoSmallPreview = 16, NoInputs = 32,
@@ -1749,6 +3214,12 @@ ImGuiTableFlags = {
     NoPadOuterX = 4194304, NoPadInnerX = 8388608, ScrollX = 16777216, ScrollY = 33554432,
     SortMulti = 67108864, SortTristate = 134217728, HighlightHoveredColumn = 268435456,
     SizingMask_ = 57344,
+}
+
+---@enum ImGuiTableRowFlags
+ImGuiTableRowFlags = {
+    None = 0,
+    Headers = 1,
 }
 
 ---@enum ImGuiTableColumnFlags

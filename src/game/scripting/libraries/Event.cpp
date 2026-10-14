@@ -27,11 +27,14 @@ namespace YimMenu::Lua
 			lua_setglobal(state, "event");
 
 			static constexpr auto menu_events = std::to_array<EnumEntry>({
+				{"PlayerMgrInit", static_cast<int>(MenuEvent::PlayerMgrInit)},
+				{"PlayerMgrShutdown", static_cast<int>(MenuEvent::PlayerMgrShutdown)},
 				{"PlayerLeave", static_cast<int>(MenuEvent::PlayerLeave)},
 				{"PlayerJoin", static_cast<int>(MenuEvent::PlayerJoin)},
 				{"ScriptedGameEventReceived", static_cast<int>(MenuEvent::ScriptedGameEventReceived)},
 				{"ChatMessageReceived", static_cast<int>(MenuEvent::ChatMessageReceived)},
 				{"Unload", static_cast<int>(MenuEvent::Unload)},
+				{"WndProc", static_cast<int>(MenuEvent::WndProc)},
 			});
 			RegisterEnum(state, "menu_event", menu_events.data(), menu_events.size());
 		}

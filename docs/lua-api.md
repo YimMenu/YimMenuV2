@@ -6,7 +6,7 @@ Scripts live in `%appdata%/YimMenuV2/scripts`. Each script runs in its own sandb
 
 In **Settings > Lua Scripts**, click **Open Lua Scripts Folder** to open this directory in Windows Explorer.
 
-At startup, the menu recursively loads `.lua` files beneath the scripts directory. A script is skipped when its immediate parent folder's name contains the case-sensitive substring `include`; it is also hidden from the Lua Scripts menu. Use these folders for modules loaded through `require`.
+At startup, the menu recursively loads `.lua` files beneath the scripts directory. Every descendant of a folder whose name contains the case-sensitive substring `include` (such as `include`, `includes`, or `include_helpers`) is excluded from standalone loading and hidden from the Lua Scripts menu. This includes nested subfolders. These files remain available as modules loaded through `require`.
 
 Scripts in directory paths containing the case-sensitive substring `disabled` are discovered but not automatically loaded. They appear in the Disabled list; clicking an entry loads it. Files under `scripts/disabled` are restored to the same relative path under `scripts`. Files in other folders whose names contain `disabled` are moved to the scripts root when enabled. The leading `disabled/` folder is omitted from displayed names.
 
@@ -16,6 +16,7 @@ The Lua Scripts menu shows loaded scripts in the **Enabled** listbox and unloade
 
 - [Conventions](#conventions)
 - [Standard libraries](#standard-libraries)
+- [os](#os)
 - [require](#require)
 - **Core / UI**: [notify](#notify) · [log](#log) · [util](#util) · [script](#script) · [event](#event) · [menu](#menu) · [commandmgr](#commandmgr) · [ImGui](#imgui)
 - **Memory**: [memory](#memory) · [pointer](#pointer)
@@ -38,13 +39,52 @@ The Lua Scripts menu shows loaded scripts in the **Enabled** listbox and unloade
 - A **hash** argument accepts either an integer hash or a string name (it's hashed with Joaat automatically).
 - A **latent** call yields the current script coroutine until it finishes, so it may only be used inside a script callback.
 
+For the following optional trailing parameters, omit the argument to select the default; an explicit `nil` is not accepted:
+
+| Call | Omitted parameter defaults |
+| --- | --- |
+| `script.yield()` | `ms = 0` |
+| `Entity:get_rotation()` / `Entity:set_rotation(rot)` | `order = 2` |
+| `Entity:request_control()` | `timeout = 100` milliseconds |
+| `Ped:set_in_vehicle(vehicle)` | `seat = 0` |
+| `Ped:give_weapon(weapon)` | `equip = false` |
+| `Ped:start_scenario(name)` | `duration = -1`, `play_anim = true`; supplying `play_anim` also requires an integer duration |
+| `Ped.create(model, pos)` / `Vehicle.create(model, pos)` | `heading = 0` |
+| `ScriptGlobal:at(offset)` / `ScriptLocal:at(offset)` | `size = 0` |
+| `Vehicle:set_boost_charge()` | `charge = 100` |
+
 ---
 
 ## Standard libraries
 
-Scripts get a whitelisted subset of LuaJIT's standard library: `base`, `table`, `string`, `math`, `debug`, `bit`, `jit`.
+Scripts get LuaJIT's `base`, `coroutine`, `package`, `table`, `string`, `math`, `debug`, `bit`, and `jit` libraries, plus the restricted [os](#os) library.
 
-The `package` library supports sandboxed module loading. Direct loaders (`load`, `loadstring`, `loadfile`, `dofile`) and `package.loadlib` raise an unsupported-function error. `io`, `os`, and `ffi` are unavailable. Use [FileMgr](#filemgr) for file access and [util.time](#util) for time.
+The `package` library supports sandboxed module loading. Direct loaders (`load`, `loadstring`, `loadfile`, `dofile`) and `package.loadlib` raise an unsupported-function error. `io` and `ffi` are unavailable. Use [FileMgr](#filemgr) for file access.
+
+## os
+
+Available as the global `os` table and through `require("os")`. These functions retain their normal LuaJIT behavior:
+
+| Function | Description |
+| --- | --- |
+| `os.clock() -> number` | Approximate CPU time used by the process, in seconds. |
+| `os.date([format], [timestamp]) -> string \| table \| nil` | Formats a Unix timestamp in seconds; defaults to the current time and format `%c`. `*t` returns a date table; prefix the format with `!` for UTC. Unsupported timestamps return nil. |
+| `os.difftime(t2, t1) -> number` | Difference between two timestamps, in seconds. |
+| `os.time([date_table]) -> number \| nil` | Returns Unix seconds for the current time or a local date table; unrepresentable dates return nil. |
+
+Date tables contain `year`, `month`, `day`, `hour`, `min`, `sec`, `wday`, `yday`, and `isdst`. Months are 1–12, weekdays are 1–7 with Sunday = 1, and days of the year are 1–366. For `os.time`, `year`, `month`, and `day` are required; `hour`, `min`, and `sec` default to 12, 0, and 0. Omitted `isdst` lets the platform detect daylight saving time. `wday` and `yday` are ignored, and calendar fields are normalized according to LuaJIT/platform behavior.
+
+`os.execute`, `os.exit`, `os.getenv`, `os.setlocale`, and `os.tmpname` raise a not-supported error. `os.rename` and `os.remove` raise an error directing scripts to [FileMgr](#filemgr); use `FileMgr.RenameFile` and `FileMgr.DeleteFile` instead.
+
+`os` timestamps use **seconds**. `util.time()` continues to return **milliseconds**.
+
+```lua
+local timestamp = os.time()
+local local_date = os.date("*t", timestamp)
+local utc_date = os.date("!*t", timestamp)
+local formatted = os.date("%Y-%m-%d %H:%M:%S", timestamp)
+local noon = os.time({year = local_date.year, month = local_date.month, day = local_date.day})
+```
 
 ## require
 
@@ -100,7 +140,7 @@ Writes to the menu log file (`cout.log`), prefixed with the script name.
 | `log.verbose(message)` | Log at verbose severity. |
 | `log.info(message)` | Log at info severity. |
 | `log.warn(message)` | Log at warning severity. |
-| `log.error(message)` | Log at error severity. |
+| `log.error(message)` | Log at FATAL severity. |
 | `log.trace(message)` | Log a message together with a Lua stack traceback. |
 
 ---
@@ -128,10 +168,13 @@ Controls script execution and coroutines.
 | --- | --- |
 | `script.run_in_callback(fn)` | Registers `fn` to run as a script callback (its own coroutine). |
 | `script.yield([ms])` | Yields the current callback for at least `ms` milliseconds (default 0 = one frame). Must be called from inside a callback. |
-| `script.is_inside_callback() -> boolean` | Returns true if called from inside a script callback coroutine. |
+| `script.is_inside_render_callback() -> boolean` | Returns true in a registered ImGui render callback, including container `imgui` callbacks and `menu.add_imgui`/`menu.add_always_draw_imgui`. |
+| `script.is_inside_script_callback() -> boolean` | Returns true in the active managed script coroutine, including `script.run_in_callback` and queued command/tick callbacks. |
 | `script.require_game_build(online_version, [game_build])` | Requires an exact online version string match and, if supplied, an exact game build string match. Raises a Lua error on a mismatch; returns no value on success. |
 
 Call `script.require_game_build` at the top of scripts that depend on a specific version's globals, offsets, or bytecode. Both arguments are strings; omitting `game_build` or passing `nil` checks only the online version. Use `util.get_game_version()` to inspect the current versions when choosing the versions your script supports.
+
+Use `script.run_in_callback` for managed game work. Top-level script code and coroutines created directly with `coroutine.create` return false for both checks. Render callbacks must not yield or call latent functions; `script.yield` and latent calls require a managed script callback.
 
 ---
 
@@ -140,17 +183,22 @@ Call `script.require_game_build` at the top of scripts that depend on a specific
 Register callbacks for menu/game events.
 
 #### `event.register_handler(menu_event, handler)`
-Calls `handler` (a function) whenever `menu_event` fires.
+Calls `handler` synchronously whenever `menu_event` fires. Handlers run on the thread that dispatches the event and must not yield. Queue work that needs a script coroutine with `script.run_in_callback`.
 
-The `menu_event` enum table holds the event ids:
+The `menu_event` enum table holds the event IDs. Use these constants rather than hardcoded numbers.
 
-| Event | Fires when |
-| --- | --- |
-| `menu_event.PlayerLeave` | A player leaves the session. |
-| `menu_event.PlayerJoin` | A player joins the session. |
-| `menu_event.ScriptedGameEventReceived` | A scripted game event is received. |
-| `menu_event.ChatMessageReceived` | A chat message is received. |
-| `menu_event.Unload` | The script is being unloaded. |
+| Event | ID | Handler arguments | Fires when |
+| --- | --- | --- | --- |
+| `menu_event.PlayerMgrInit` | 0 | None | The menu has populated its tracked player list during player-manager initialization. |
+| `menu_event.PlayerMgrShutdown` | 1 | None | The tracked players, player data, and selection have been cleared during player-manager shutdown. |
+| `menu_event.PlayerLeave` | 2 | `name: string` | A player leaves the session. |
+| `menu_event.PlayerJoin` | 3 | `player_id: integer, name: string` | A player joins the session. |
+| `menu_event.ScriptedGameEventReceived` | 4 | `player: Player, args: integer[]` | A scripted game event is received. |
+| `menu_event.ChatMessageReceived` | 5 | `player_id: integer, message: string` | A chat message is received. |
+| `menu_event.Unload` | 6 | None | The script is being unloaded or reloaded. |
+| `menu_event.WndProc` | 7 | `hwnd: integer, message: integer, wparam: integer, lparam: integer` | The game window receives a Windows message. The handle and parameters are passed as integers. |
+
+Returning `false` blocks handling of `ScriptedGameEventReceived` or `ChatMessageReceived`. Other events are notifications: return values do not block them. In particular, `WndProc` observes messages without consuming them or replacing the window procedure's result. Paused scripts do not receive events.
 
 ---
 
@@ -169,8 +217,38 @@ Build menu UI with submenus, categories, groups, tab bars, tabs, and collapsing 
 | `menu.create_group(name, [per_row]) -> Group` | Creates a standalone group (drawn manually via `group:draw()`). `per_row` default 7. |
 | `menu.is_open() -> boolean` | Returns true if the menu is open. |
 | `menu.toggle()` | Toggles the menu open/closed and updates mouse input and cursor visibility. |
+| `menu.set_mouse_override(enabled)` | Enables or releases this script's mouse override request. `enabled` must be a boolean. |
+| `menu.is_mouse_overridden() -> boolean` | Returns true if any script has an active mouse override request. Opening the menu or onboarding alone does not count as an override. |
 | `menu.add_imgui(fn)` | Registers a raw ImGui draw callback rendered every frame while the menu is open. |
 | `menu.add_always_draw_imgui(fn)` | Registers a raw ImGui draw callback rendered every frame regardless of whether the menu is open. |
+
+#### Mouse override ownership
+
+An active override enables ImGui mouse input and the cursor even while the main menu is closed, and suppresses the same game controls as interacting with menu content. Cursor/input changes are applied on the next render frame. Use it for interactive windows drawn with `menu.add_always_draw_imgui`.
+
+Each script owns one request: repeated `true` calls do not acquire additional requests, and `false` releases only the caller's request. Another script's request keeps the override active. Pause suspends a request; Resume restores it. Unload, Reload, malfunction cleanup, and script destruction release it automatically, including when another reference keeps the unloaded script object alive. Releasing the last override still leaves normal menu/onboarding mouse behavior intact.
+
+For example, toggle an independent panel with F6:
+
+```lua
+local panel_open = false
+event.register_handler(menu_event.WndProc, function(hwnd, message, wparam, lparam)
+    if message == 0x0101 and wparam == 0x75 then -- WM_KEYUP, VK_F6
+        panel_open = not panel_open
+        menu.set_mouse_override(panel_open)
+    end
+end)
+menu.add_always_draw_imgui(function()
+    if not panel_open then return end
+    local visible
+    panel_open, visible = ImGui.Begin("My Lua panel", panel_open)
+    if visible then ImGui.Text("Press F6 or close this window to release its mouse request.") end
+    ImGui.End()
+    menu.set_mouse_override(panel_open)
+end)
+```
+
+Keep the panel's own state in a local variable: `menu.is_mouse_overridden()` reports the combined state of all scripts.
 
 #### Submenu
 | Method | Description |
@@ -271,6 +349,8 @@ end)
 
 Create commands directly (without placing them in a group). Each returns a **CommandHandle**.
 
+For list commands, `entries` contains `{ key, label }` pairs. The default value, `get_value()`, `set_value()`, and `on_change` use the selected key, not its position in the entries array. Keys such as 10 and 20 are valid.
+
 | Function | Description |
 | --- | --- |
 | `commandmgr.add_command(name, label, desc, on_call) -> CommandHandle` | Creates a one-shot command. |
@@ -284,19 +364,46 @@ Create commands directly (without placing them in a group). Each returns a **Com
 #### CommandHandle
 | Method | Description |
 | --- | --- |
-| `cmd:get_value() -> value` | Returns the command's current value (bool/int/float/list index; nil for one-shot). |
-| `cmd:set_value(value)` | Sets the command's value, firing its callbacks. |
-| `cmd:get_name() -> string` | Returns the registered command name/ID. |
-| `cmd:get_desc() -> string` | Returns the command's description. |
+| `cmd:get_value() -> value` | Returns the current bool/int/float or selected list-entry key; nil for one-shot or missing commands. |
+| `cmd:set_value(value)` | Sets the value and schedules callbacks. One-shot and missing commands are no-ops. |
+| `cmd:get_name() -> string \| nil` | Returns the registered name/ID, or nil if the command no longer exists. |
+| `cmd:get_desc() -> string \| nil` | Returns the description, or nil if the command no longer exists. |
+| `cmd:call()` | Activates the underlying command's normal action; no-op if the command no longer exists. Returns no value. |
 | `cmd:draw()` | Draws the command (call from inside an ImGui callback). |
+
+For Lua one-shot commands, `call()` queues the callback on the script thread; it need not finish before `call()` returns. For Lua bool and looped commands, it toggles the enabled state. Use `set_value(value)` to change an int, float, or list value.
 
 ---
 
 ## ImGui
 
-Full immediate-mode GUI bindings, used inside `category:imgui` / `group:imgui` callbacks. Widgets that edit a value take the current value and return the (possibly updated) value plus a `changed`/`pressed` boolean — e.g. `value, changed = ImGui.Checkbox("Label", value)`.
+Immediate-mode GUI bindings, used inside ImGui draw callbacks. Most value-editing widgets return the updated value and a `changed`/`pressed` boolean, e.g. `value, changed = ImGui.Checkbox("Label", value)`. `Selectable` returns only the updated selected state; it can return true without a click when already selected. Use `IsItemClicked()` to test clicks separately.
 
 Colors are passed as separate `r, g, b, a` numbers or as a Lua table depending on the function. Flag/condition arguments use the enum tables listed at the end.
+
+### Overloads and return values
+
+| Call | Returns |
+| --- | --- |
+| `Begin(name, [nil], [flags])` / `BeginPopupModal(name, [nil], [flags])` | `draw`; flags occupy argument 3. |
+| `Begin(name, open, [flags])` / `BeginPopupModal(name, open, [flags])` | `open, draw` when `open` is a boolean. |
+| `RadioButton(label, active)` | `pressed` when `active` is a boolean. |
+| `RadioButton(label, value, button_value)` | `value, pressed` for integer values. |
+| `CollapsingHeader(label, [flags])` | `expanded`. |
+| `CollapsingHeader(label, open, [flags])` | `open, expanded` when `open` is a boolean. |
+| `BeginTabItem(label)` | `selected`. |
+| `BeginTabItem(label, open, [flags])` | `open, selected` when `open` is a boolean. |
+| `MenuItem(label, [shortcut])` | `pressed`. |
+| `MenuItem(label, shortcut, selected)` | `selected, pressed`; use `nil` for no shortcut. |
+| `Combo(label, current, items, items_count, [popup_max])` | `current, changed` for a string array. |
+| `Combo(label, current, items_string, [popup_max])` | `current, changed` for NUL-separated strings ending in two NUL bytes. |
+| `CalcTextSize(text, [hide_text_after_double_hash], [wrap_width])` | `width, height` for the whole string; defaults are false and -1. |
+
+`TextUnformatted(text)` and `GetID(text)` take one whole string. `PushID(id)` takes one whole string or integer. To use part of a string, create it with `string.sub` before calling these functions. For wrapped sizing, use `CalcTextSize(text, false, wrap_width)` or `CalcTextSize(text, nil, wrap_width)`.
+
+Combo and ListBox selection indices start at 0. `BeginListBox(label, size_x, size_y)` takes both dimensions in pixels; `BeginListBox(label, items_count)` auto-sizes its height from the count. Match each successful begin call with its end call; `Begin`/`BeginChild` always require `End`/`EndChild`, even when they return false. `GetStyle()` returns a detached table of the exposed fields; editing it does not change the active style.
+
+See [yimmenu_v2.lua](yimmenu_v2.lua) for every registered signature, including array widgets and their return types.
 
 #### Windows & layout
 `Begin`, `End`, `BeginChild`, `EndChild`, `BeginChildFrame`, `EndChildFrame`, `BeginGroup`, `EndGroup`, `Separator`, `SeparatorText`, `SameLine`, `NewLine`, `Spacing`, `Dummy`, `Indent`, `Unindent`, `BeginDisabled`, `EndDisabled`, `Columns`, `NextColumn`, `GetColumnIndex`, `GetColumnWidth`, `SetColumnWidth`, `GetColumnOffset`, `SetColumnOffset`, `GetColumnsCount`.
@@ -305,7 +412,7 @@ Colors are passed as separate `r, g, b, a` numbers or as a Lua table depending o
 `IsWindowAppearing`, `IsWindowCollapsed`, `IsWindowFocused`, `IsWindowHovered`, `GetWindowPos`, `GetWindowSize`, `GetWindowWidth`, `GetWindowHeight`, `SetNextWindowPos`, `SetNextWindowSize`, `SetNextWindowSizeConstraints`, `SetNextWindowContentSize`, `SetNextWindowCollapsed`, `SetNextWindowFocus`, `SetNextWindowBgAlpha`, `SetWindowPos`, `SetWindowSize`, `SetWindowCollapsed`, `SetWindowFocus`, `SetWindowFontScale`.
 
 #### Cursor & content region
-`GetContentRegionMax`, `GetContentRegionAvail`, `GetWindowContentRegionMin/Max/Width`, `GetCursorPos`, `GetCursorPosX/Y`, `SetCursorPos`, `SetCursorPosX/Y`, `GetCursorStartPos`, `GetCursorScreenPos`, `SetCursorScreenPos`, `AlignTextToFramePadding`, `GetTextLineHeight`, `GetTextLineHeightWithSpacing`, `GetFrameHeight`, `GetFrameHeightWithSpacing`.
+`GetContentRegionMax`, `GetContentRegionAvail`, `GetWindowContentRegionMin/Max`, `GetCursorPos`, `GetCursorPosX/Y`, `SetCursorPos`, `SetCursorPosX/Y`, `GetCursorStartPos`, `GetCursorScreenPos`, `SetCursorScreenPos`, `AlignTextToFramePadding`, `GetTextLineHeight`, `GetTextLineHeightWithSpacing`, `GetFrameHeight`, `GetFrameHeightWithSpacing`.
 
 #### Scrolling
 `GetScrollX/Y`, `GetScrollMaxX/Y`, `SetScrollX/Y`, `SetScrollHereX/Y`, `SetScrollFromPosX/Y`.
@@ -320,7 +427,7 @@ Colors are passed as separate `r, g, b, a` numbers or as a Lua table depending o
 `Button`, `SmallButton`, `InvisibleButton`, `ArrowButton`, `Checkbox`, `RadioButton`, `ProgressBar`.
 
 #### Combo & lists
-`BeginCombo`, `EndCombo`, `Combo`, `Selectable`, `ListBox`, `ListBoxHeader`, `ListBoxFooter`, `Value`.
+`BeginCombo`, `EndCombo`, `Combo`, `Selectable`, `ListBox`, `BeginListBox`, `EndListBox`, `Value`.
 
 #### Drags
 `DragFloat`, `DragFloat2/3/4`, `DragInt`, `DragInt2/3/4`.
@@ -352,15 +459,60 @@ Colors are passed as separate `r, g, b, a` numbers or as a Lua table depending o
 #### Draw list
 `AddLine`, `AddRect`, `AddRectFilled`, `AddRectFilledMultiColor`, `AddCircle`, `AddCircleFilled`, `AddTriangle`, `AddTriangleFilled`, `AddText`.
 
+These existing `ImGui.Add*` helpers draw into the current window. For explicit targets, use borrowed `DrawList` handles:
+
+| Function | Description |
+| --- | --- |
+| `ImGui.GetWindowDrawList() -> DrawList` | Returns the current window's draw list, subject to its clipping. |
+| `ImGui.GetForegroundDrawList() -> DrawList` | Returns the main viewport's foreground draw list, rendered above windows. |
+
+| DrawList method | Description |
+| --- | --- |
+| `list:AddText(x, y, text, r, g, b, a, [font_size], [wrap_width])` | Draws text using the current font. Omitted/nil `font_size` uses its current size; otherwise pass a positive finite pixel size. `wrap_width` is a non-negative finite pixel width; omitted/nil or 0 disables wrapping. |
+| `list:AddLine(x1, y1, x2, y2, r, g, b, a, [thickness])` | Draws a line; thickness defaults to 1 pixel. |
+| `list:AddRect(x1, y1, x2, y2, r, g, b, a, [rounding], [flags], [thickness])` | Draws a rectangle outline. Defaults: corner rounding 0 pixels, draw flags 0, thickness 1 pixel. |
+| `list:AddRectFilled(x1, y1, x2, y2, r, g, b, a, [rounding], [flags])` | Draws a filled rectangle. Defaults: corner rounding 0 pixels, draw flags 0. With positive rounding, flags select the rounded corners. |
+| `list:AddRectFilledMultiColor(x1, y1, x2, y2, upper_left, upper_right, bottom_right, bottom_left)` | Draws a filled rectangle with four packed U32 corner colors, interpolated across the rectangle. |
+| `list:AddTriangle(x1, y1, x2, y2, x3, y3, r, g, b, a, [thickness])` | Draws a triangle outline; thickness defaults to 1 pixel. |
+| `list:AddTriangleFilled(x1, y1, x2, y2, x3, y3, r, g, b, a)` | Draws a filled triangle; supply vertices in clockwise screen-space order. |
+| `list:AddCircle(x, y, radius, r, g, b, a, [num_segments], [thickness])` | Draws a circle outline with a pixel radius. Defaults: segments 0 (automatic tessellation), thickness 1 pixel. |
+| `list:AddCircleFilled(x, y, radius, r, g, b, a, [num_segments])` | Draws a filled circle with a pixel radius. Omitted/nil `num_segments` defaults to 0 for automatic tessellation. |
+
+Coordinates are screen-space pixels. Color components must be integers from 0 to 255, including alpha. Optional draw parameters accept `nil` to select their defaults. Acquire handles inside an ImGui draw callback and obtain new ones each frame; using a handle outside its render frame raises an error. ImGui owns the draw lists; Lua does not delete them.
+
+`AddRectFilledMultiColor` takes one packed integer per corner. Create these colors with `ImGui.ColorConvertRGBAToU32({r, g, b, a})`; the corner order is upper-left, upper-right, bottom-right, bottom-left.
+
+To wrap text using the current font size, pass `nil` before the wrap width: `list:AddText(x, y, text, r, g, b, a, nil, 200)`.
+
+For `AddRect` and `AddRectFilled`, corner flag bits are top-left = 16, top-right = 32, bottom-left = 64, and bottom-right = 128. Combine them with `bit.bor`. With positive rounding, flags 0 round all corners; 256 disables rounding. Omitted/nil flags use 0.
+
+```lua
+menu.add_always_draw_imgui(function()
+    local foreground = ImGui.GetForegroundDrawList()
+    foreground:AddRectFilled(20, 20, 260, 70, 0, 0, 0, 180, 6)
+    foreground:AddRect(20, 20, 260, 70, 100, 180, 255, 255, 6, 0, 2)
+    foreground:AddText(30, 30, "Overlay text", 255, 255, 255, 255, 24)
+    foreground:AddLine(20, 75, 260, 75, 100, 180, 255, 255, 2)
+    foreground:AddCircleFilled(280, 45, 12, 100, 180, 255, 255)
+    foreground:AddCircle(280, 45, 16, 100, 180, 255, 255, 0, 2)
+    foreground:AddTriangleFilled(280, 85, 296, 110, 264, 110, 100, 180, 255, 255)
+    foreground:AddTriangle(315, 85, 331, 110, 299, 110, 100, 180, 255, 255, 2)
+    local left = ImGui.ColorConvertRGBAToU32({100, 180, 255, 255})
+    local right = ImGui.ColorConvertRGBAToU32({255, 100, 180, 255})
+    foreground:AddRectFilledMultiColor(20, 85, 260, 110, left, right, right, left)
+    foreground:AddText(30, 120, "This overlay text wraps to fit its width.", 255, 255, 255, 255, nil, 220)
+end)
+```
+
 #### Item & input queries
-`IsItemHovered`, `IsItemActive`, `IsItemFocused`, `IsItemClicked`, `IsItemVisible`, `IsItemEdited`, `IsItemActivated`, `IsItemDeactivated`, `IsItemDeactivatedAfterEdit`, `IsItemToggledOpen`, `IsAnyItemHovered/Active/Focused`, `GetItemRectMin/Max/Size`, `IsKeyDown`, `IsKeyPressed`, `IsKeyReleased`, `GetKeyIndex`, `GetKeyPressedAmount`, `IsMouseDown`, `IsMouseClicked`, `IsMouseReleased`, `IsMouseDoubleClicked`, `IsMouseHoveringRect`, `IsAnyMouseDown`, `GetMousePos`, `IsMouseDragging`, `GetMouseDragDelta`, `ResetMouseDragDelta`, `GetMouseCursor`, `SetMouseCursor`.
+`IsItemHovered`, `IsItemActive`, `IsItemFocused`, `IsItemClicked`, `IsItemVisible`, `IsItemEdited`, `IsItemActivated`, `IsItemDeactivated`, `IsItemDeactivatedAfterEdit`, `IsItemToggledOpen`, `IsAnyItemHovered/Active/Focused`, `GetItemRectMin/Max/Size`, `IsKeyDown`, `IsKeyPressed`, `IsKeyReleased`, `GetKeyPressedAmount`, `SetNextFrameWantCaptureKeyboard`, `IsMouseDown`, `IsMouseClicked`, `IsMouseReleased`, `IsMouseDoubleClicked`, `IsMouseHoveringRect`, `IsAnyMouseDown`, `GetMousePos`, `GetMousePosOnOpeningCurrentPopup`, `IsMouseDragging`, `GetMouseDragDelta`, `ResetMouseDragDelta`, `GetMouseCursor`, `SetMouseCursor`, `SetNextFrameWantCaptureMouse`.
 
 #### Misc
 `GetDisplaySize`, `GetFrameRate`, `GetTime`, `GetFrameCount`, `CalcTextSize`, `IsRectVisible`, `GetStyleColorName`, `SetItemDefaultFocus`, `SetKeyboardFocusHere`, `PushClipRect`, `PopClipRect`, `GetClipboardText`, `SetClipboardText`, `LogToTTY/File/Clipboard`, `LogFinish`, `LogButtons`, `LogText`.
 
 #### Enum tables
 Use these global tables for `flags`/`cond`/`col`/`idx` arguments (each maps a name to an integer):
-`ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`.
+`ImGuiWindowFlags`, `ImGuiChildFlags`, `ImGuiCond`, `ImGuiCol`, `ImGuiStyleVar`, `ImGuiDir`, `ImGuiKey`, `ImGuiMouseButton`, `ImGuiMouseCursor`, `ImGuiHoveredFlags`, `ImGuiFocusedFlags`, `ImGuiComboFlags`, `ImGuiInputTextFlags`, `ImGuiSliderFlags`, `ImGuiButtonFlags`, `ImGuiColorEditFlags`, `ImGuiTreeNodeFlags`, `ImGuiSelectableFlags`, `ImGuiPopupFlags`, `ImGuiTabBarFlags`, `ImGuiTabItemFlags`, `ImGuiTableFlags`, `ImGuiTableColumnFlags`, `ImGuiTableRowFlags`.
 
 Members match the bundled ImGui definitions. `ImGuiKey` includes keyboard, gamepad, mouse, and modifier values such as `Mod_Ctrl`; digit keys use string indexing, e.g. `ImGuiKey["0"]`. Existing names such as `KeyPadEnter`, `IndentDisabled`, `HeightMask`, and the prefixed mouse-button names remain compatibility aliases of the current names.
 
@@ -377,6 +529,8 @@ Pattern scanning and heap allocation. Returns [pointer](#pointer) objects.
 | `memory.ptr_to_handle(ptr) -> integer` | Resolves a game pointer back to an entity handle. |
 | `memory.allocate(size) -> pointer` | Allocates `size` zeroed bytes (auto-freed on unload). |
 | `memory.free(ptr)` | Frees a block returned by `memory.allocate`. |
+
+`memory.free` accepts only non-null allocations owned by the calling script. A foreign or already-freed non-null address raises an error. A null pointer is a no-op.
 
 ---
 
@@ -410,7 +564,7 @@ A calculator over a raw memory address. Construct with `pointer(address)`. All r
 | `ptr:get_string() -> string` / `ptr:set_string(value)` | Reads/writes a C string. |
 
 #### Patches
-`ptr:patch_byte/word/dword/qword(value) -> patch` writes a value and returns a patch handle. The patch is reversible:
+`ptr:patch_byte/word/dword/qword(value) -> patch` creates an unapplied patch handle and captures the original bytes. Call `patch:apply()` to write the replacement. The patch is reversible:
 
 | Method | Description |
 | --- | --- |
@@ -421,7 +575,7 @@ A calculator over a raw memory address. Construct with `pointer(address)`. All r
 
 ## Vector3
 
-A 3D float vector. Construct with `Vector3()` (zero) or `Vector3(x, y, z)`. Fields `x`, `y`, `z` are directly readable and writable (`v.x = 1.0`).
+A 3D float vector. Construct with `Vector3()` (zero) or `Vector3(x, y, z)` with exactly three numbers; partial or nil-filled constructors are rejected. Fields `x`, `y`, `z` are directly readable and writable (`v.x = 1.0`). Setters return no values.
 
 | Method | Description |
 | --- | --- |
@@ -612,14 +766,19 @@ Reads/writes a GTA script global variable. Construct with `ScriptGlobal(index)`.
 | Method | Description |
 | --- | --- |
 | `ScriptGlobal(index) -> ScriptGlobal` | Handle to a global by index. |
-| `sg:at(offset, [size]) -> ScriptGlobal` | Offset handle (`size` multiplies for array stride). |
+| `sg:at(offset, [size]) -> ScriptGlobal` | With omitted/zero size: `base + offset`. With nonzero size: `base + 1 + offset * size`. |
 | `sg:can_access() -> boolean` | True if currently mapped and safe to use. |
 | `sg:get_int/get_float() -> number` | Reads an int/float. |
 | `sg:get_string() -> string \| nil` | Reads a string. |
 | `sg:get_vector3() -> Vector3` | Reads three slots as a vector. |
+| `sg:get_pointer() -> pointer` | Returns the address of the global slot, not the value stored in it. If inaccessible, returns a null `pointer` userdata rather than `nil`. |
 | `sg:set_int/set_float(value)` | Writes an int/float. |
 | `sg:set_string(value, [max_length])` | Writes a string. |
 | `sg:set_vector3(v)` | Writes a vector into three slots. |
+
+The returned pointer borrows game memory and does not keep the global mapped. Check `sg:can_access()` or `ptr:is_null()` before accessing it, and resolve it again if global memory changes.
+
+For inaccessible globals, int/float reads return 0, vector reads return a zero vector, string reads return nil, and writes do nothing.
 
 ---
 
@@ -630,32 +789,35 @@ Reads/writes a local variable in a running script thread. Construct with `Script
 | Method | Description |
 | --- | --- |
 | `ScriptLocal(script, index) -> ScriptLocal \| nil` | Handle to a local in a script thread. |
-| `sl:at(offset, [size]) -> ScriptLocal` | Offset handle (`size` multiplies for array stride). |
+| `sl:at(offset, [size]) -> ScriptLocal` | With omitted/zero size: `base + offset`. With nonzero size: `base + 1 + offset * size`. |
 | `sl:get_int/get_float() -> number` | Reads an int/float. |
 | `sl:get_vector3() -> Vector3` | Reads three slots as a vector. |
+| `sl:get_pointer() -> pointer` | Returns the address of the local slot on the captured thread's stack, not the value stored in it. |
 | `sl:set_int/set_float(value)` | Writes an int/float. |
 | `sl:set_vector3(v)` | Writes a vector into three slots. |
+
+The returned pointer borrows the thread's stack and does not keep the thread alive. Recreate the `ScriptLocal` handle and resolve its pointer again after the script stops or restarts; `get_pointer()` does not check whether the captured stack is still valid.
 
 ---
 
 ## ScriptPointer
 
-A pattern-based pointer into a script's bytecode. Construct with `ScriptPointer(name, pattern, [offset], [rip], [address])`.
+A pattern-based address within a script's bytecode. Construct with `ScriptPointer(name, pattern, [offset], [rip], [address])`. `address` is a 32-bit bytecode offset/instruction address, not an absolute process-memory address.
 
 | Method | Description |
 | --- | --- |
-| `sp:add(offset) -> ScriptPointer` | Advances by `offset` bytes. |
-| `sp:sub(offset) -> ScriptPointer` | Moves back by `offset` bytes. |
-| `sp:rip() -> ScriptPointer` | Resolves a RIP-relative reference. |
-| `sp:scan(target) -> ScriptPointer \| nil` | Scans for the pattern (`target` = script hash). |
-| `sp:get_address() -> integer` | Resolved address. |
+| `sp:add(offset) -> ScriptPointer` | Adds to the offset used by a future scan; preserves the currently resolved address. |
+| `sp:sub(offset) -> ScriptPointer` | Subtracts from the offset used by a future scan; preserves the currently resolved address. |
+| `sp:rip() -> ScriptPointer` | Enables decoding a three-byte GTA bytecode address operand during the next scan; preserves the current address. |
+| `sp:scan(target) -> ScriptPointer \| nil` | Scans a running script program (`target` = name/hash). No program returns nil; no pattern match returns a handle with address 0. |
+| `sp:get_address() -> integer` | Resolved 32-bit bytecode offset/instruction address. |
 | `sp:get_name() -> string` | Pointer name. |
 
 ---
 
 ## ScriptPatch
 
-Patches a script's bytecode; auto-restored on script unload. Construct with `ScriptPatch(script, name, pattern, [offset], patch_bytes)` — created and enabled immediately. `patch_bytes` is an array of integers (0–255).
+Patches a script's bytecode; auto-restored on script unload. Construct with `ScriptPatch(script, name, pattern, offset, patch_bytes)` — created and enabled immediately. Use `nil` or `0` in the offset slot for the default offset; the bytes table must be the fifth argument. `patch_bytes` is a nonempty array of integers (0–255).
 
 | Method | Description |
 | --- | --- |
@@ -670,7 +832,15 @@ Patches a script's bytecode; auto-restored on script unload. Construct with `Scr
 Calls a function inside a GTA script. Construct with `ScriptFunction(script, script_pointer)`.
 
 #### `fn:call(param_string, ...) -> any`
-Invokes the function. `param_string` describes arg types (`i` int32, `f` float, `h` hash, `b` bool) plus an optional `=<r>` return type (`n` none, `i`, `f`, `b`, `h`). Following arguments map to the type chars. Example: `fn:call("ii=i", 5, 10)`.
+Invokes the function. `param_string` describes arg types (`i` int32, `f` float, `h` hash, `b` bool, `s` string) plus an optional `=<r>` return type (`n` none, `i`, `f`, `b`, `h`, `s`). Following arguments map to the type chars. Example: `fn:call("ii=i", 5, 10)`.
+
+`s` passes a read-only, NUL-terminated string pointer that remains valid during the call; `nil` or an omitted string argument passes a null pointer. Other argument types are not converted to strings. Embedded NUL bytes terminate the text seen by the GTA function. The function must not retain or modify an argument's Lua string. `=s` copies a returned C string into Lua, or returns `nil` for a null pointer.
+
+```lua
+local text = fn:call("s=s", "example") -- String argument and string/nil result.
+local label = fn:call("is=s", 5, "example") -- Mixed argument types.
+fn:call("s", nil) -- Null string argument, no return value.
+```
 
 ---
 
@@ -689,12 +859,14 @@ Loads the auto-generated GTA native bindings into your script.
 
 | Function | Description |
 | --- | --- |
-| `natives.load_natives()` | Loads every native namespace table (`PLAYER`, `ENTITY`, `VEHICLE`, …) as globals. |
+| `natives.load_natives()` | Loads every native namespace table (`PLAYER`, `ENTITY`, `VEHICLE`, …) as globals. Raises an error if already loaded. |
 | `natives.are_natives_loaded() -> boolean` | True if natives have already been loaded. |
 
 After loading, call natives as `NAMESPACE.NATIVE_NAME(args)`, e.g. `PLAYER.PLAYER_ID()`. The full native list mirrors the standard GTA V natives — see [`natives.lua`](natives.lua) for every signature.
 
-> Internally each native wraps the global `_I(hash, format, ...)` invoker. You normally never call `_I` directly.
+Check `natives.are_natives_loaded()` before loading again. Internally each generated wrapper calls `_I(index, format, ...)` with a native registration index, not a raw native hash; use the named native wrappers.
+
+Native argument formats also accept booleans in integer slots, numbers in boolean slots, and nil/omitted values in string slots (passed as null pointers). A null native C-string result becomes Lua nil; whether a particular native can return null depends on its game contract.
 
 ---
 
@@ -707,6 +879,8 @@ After loading, call natives as `NAMESPACE.NATIVE_NAME(args)`, e.g. `PLAYER.PLAYE
 | `network.force_script_on_player(script_hash, bits)` | Forces a script to run on the players in `bits`. |
 | `network.is_session_started() -> boolean` | True if in a multiplayer session. |
 | `network.join_session(session_type)` | Requests a session transition using a value from the global `session_types` table. Returns no value or completion status. |
+
+`trigger_script_event` prepends the event hash, local player ID, and target bitset to the formatted arguments. Received argument arrays include this prefix.
 
 #### session_types
 
@@ -786,17 +960,28 @@ GTA Online network-shop (money) transactions.
 
 ## FileMgr
 
-Sandboxed file access, rooted at `%appdata%/YimMenuV2/scripts`. Paths outside the sandbox raise an error.
+Sandboxed file access, rooted at `%appdata%/YimMenuV2/scripts`. Every path argument is relative to this folder, regardless of the script's location or the process's working directory. Use `"."` for the scripts root. Absolute, drive-relative, UNC, alternate-stream, embedded-NUL, and escaping paths raise an error; links must resolve inside the sandbox.
+
+Pass paths such as `"config/settings.txt"` directly.
 
 | Function | Description |
 | --- | --- |
-| `FileMgr.GetMenuRootPath() -> string` | Absolute path of the sandbox root. |
 | `FileMgr.CreateDir(path) -> boolean` | Creates a directory (and parents). |
 | `FileMgr.DeleteFile(path)` | Deletes a file. |
+| `FileMgr.RenameFile(source, destination) -> boolean` | Renames or moves a regular file between two relative paths. Returns false on filesystem failure or if the destination exists; its parent directory must already exist. Renaming an existing file to itself succeeds. |
 | `FileMgr.DoesFileExist(path) -> boolean` | True if the path exists. |
-| `FileMgr.FindFiles(path, extension, [recursive]) -> string[]` | Lists files, optionally filtered/recursive. |
+| `FileMgr.FindFiles(path, extension, [recursive]) -> string[]` | Lists regular files as paths relative to the scripts root, usable directly in other FileMgr calls. An empty extension matches every file; `lua` and `.lua` are equivalent. Recursive listing skips linked directory aliases. |
 | `FileMgr.ReadFileContent(path) -> string` | Reads raw bytes ("" on failure). |
 | `FileMgr.WriteFileContent(path, content, [append]) -> boolean` | Writes (or appends) to a file. |
+
+```lua
+FileMgr.CreateDir("config")
+FileMgr.WriteFileContent("config/settings.txt", "saved settings")
+local renamed = FileMgr.RenameFile("config/settings.txt", "config/settings.old.txt")
+for _, path in ipairs(FileMgr.FindFiles("config", ".txt", true)) do
+    log.info(path .. ": " .. FileMgr.ReadFileContent(path))
+end
+```
 
 ---
 

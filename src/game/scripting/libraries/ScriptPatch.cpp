@@ -43,7 +43,7 @@ namespace YimMenu::Lua
 
 		static int New(lua_State* state)
 		{
-			int base = (lua_type(state, 1) == LUA_TSTRING) ? 0 : 1;
+			int base = lua_type(state, 1) == LUA_TTABLE ? 1 : 0;
 
 			auto script  = GetHashArgument(state, base + 1);
 			auto name    = CheckStringSafe(state, base + 2);

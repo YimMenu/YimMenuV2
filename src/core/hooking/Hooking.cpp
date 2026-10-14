@@ -10,6 +10,8 @@ namespace YimMenu
 {
 	Hooking::Hooking()
 	{
+		BaseHook::Add<Hooks::Window::WndProc>(new DetourHook("WndProc", Pointers.WndProc, Hooks::Window::WndProc));
+
 		BaseHook::Add<Hooks::RawInput::GetRawInputData>(new DetourHook("GetRawInputData", reinterpret_cast<void*>(GetProcAddress(LoadLibraryA("user32.dll"), "GetRawInputData")), Hooks::RawInput::GetRawInputData));
 
 		// BaseHook::Add<Hooks::Anticheat::QueueDependency>(new DetourHook("QueueDependency", Pointers.QueueDependency, Hooks::Anticheat::QueueDependency));

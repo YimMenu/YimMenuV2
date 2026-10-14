@@ -2,12 +2,15 @@
 
 namespace YimMenu
 {
-    static thread_local bool g_InsideD3d12Hook = false;
+    static thread_local bool g_InsideCreateSwapchain = false;
 
     bool D3D12Hook::RawVtablePatch::Install(void** vtable, size_t index, void* newFn)
     {
         if (!vtable)
             return false;
+
+        if (Installed)
+            return true;
 
         Slot = &vtable[index];
         OriginalFn = *Slot;
@@ -43,259 +46,50 @@ namespace YimMenu
 
     bool D3D12Hook::InitImpl()
     {
-		std::scoped_lock hookLock{m_HookMutex};
+        std::scoped_lock hookLock{m_HookMutex};
 
-        g_InsideD3d12Hook = true;
-        struct Restore
+        // SocialClubD3D12Renderer.dll's detours only fire on CreateSwapChain calls, not on
+        // factory creation, so this shouldn't break SC's swapchain
+        if (!m_FactoryVtable)
         {
-            ~Restore()
+            auto dxgiModule = LoadLibraryA("dxgi.dll");
+            if (!dxgiModule)
             {
-                g_InsideD3d12Hook = false;
+                LOGF(FATAL, "Failed to load dxgi.dll.");
+                return false;
             }
-        } restore{};
 
-        // if this is a rehook after a swapchain recreation
-        if (m_CommandQueueOffset != 0 && m_SwapchainVtable && m_FactoryVtable)
-        {
-            LOGF(INFO, "Re-initializing via previously discovered vtables.");
+            auto createDxgiFactory = reinterpret_cast<decltype(CreateDXGIFactory)*>(GetProcAddress(dxgiModule, "CreateDXGIFactory"));
+            if (!createDxgiFactory)
+            {
+                LOGF(FATAL, "Failed to resolve CreateDXGIFactory.");
+                return false;
+            }
 
-            InstallHooks();
-            return m_Hooked;
-        }
+            IDXGIFactory4* factory = nullptr;
+            if (FAILED(createDxgiFactory(IID_PPV_ARGS(&factory))))
+            {
+                LOGF(FATAL, "Failed to create DXGI factory.");
+                return false;
+            }
 
-        IDXGISwapChain1* swapChain1 = nullptr;
-        IDXGISwapChain3* swapChain = nullptr;
-        ID3D12Device* device = nullptr;
-
-        const D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc1{};
-        swapChainDesc1.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        swapChainDesc1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-        swapChainDesc1.BufferCount = 2;
-        swapChainDesc1.SampleDesc.Count = 1;
-        swapChainDesc1.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
-        swapChainDesc1.Width = 1;
-        swapChainDesc1.Height = 1;
-
-        auto d3d12Module = LoadLibraryA("d3d12.dll");
-        if (!d3d12Module)
-        {
-            LOGF(FATAL, "Failed to load d3d12.dll.");
-            return false;
-        }
-
-        auto d3d12CreateDevice = reinterpret_cast<decltype(D3D12CreateDevice)*>(GetProcAddress(d3d12Module, "D3D12CreateDevice"));
-        if (!d3d12CreateDevice)
-        {
-            LOGF(FATAL, "Failed to resolve D3D12CreateDevice.");
-            return false;
-        }
-
-        bool deviceCreated = !FAILED(d3d12CreateDevice(nullptr, featureLevel, IID_PPV_ARGS(&device)));
-        if (!deviceCreated)
-        {
-            LOGF(FATAL, "Failed to create dummy D3D12 device.");
-            return false;
-        }
-
-        auto dxgiModule = LoadLibraryA("dxgi.dll");
-        if (!dxgiModule)
-        {
-            LOGF(FATAL, "Failed to load dxgi.dll.");
-            device->Release();
-            return false;
-        }
-
-        auto createDxgiFactory = reinterpret_cast<decltype(CreateDXGIFactory)*>(GetProcAddress(dxgiModule, "CreateDXGIFactory"));
-        if (!createDxgiFactory)
-        {
-            LOGF(FATAL, "Failed to resolve CreateDXGIFactory.");
-            device->Release();
-            return false;
-        }
-
-        IDXGIFactory4* factory = nullptr;
-        if (FAILED(createDxgiFactory(IID_PPV_ARGS(&factory))))
-        {
-            LOGF(FATAL, "Failed to create the dummy DXGI factory.");
-            device->Release();
-            return false;
-        }
-
-        D3D12_COMMAND_QUEUE_DESC queueDesc{};
-        queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-
-        ID3D12CommandQueue* commandQueue = nullptr;
-        if (FAILED(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue))))
-        {
-            LOGF(FATAL, "Failed to create the dummy command queue.");
+            m_FactoryVtable = *reinterpret_cast<void***>(factory);
             factory->Release();
-            device->Release();
-            return false;
         }
 
-        HWND hwnd = nullptr;
-        WNDCLASSEXA wc{};
-
-        auto initDummyWindow = [&]() {
-            wc.cbSize = sizeof(WNDCLASSEXA);
-            wc.style = CS_HREDRAW | CS_VREDRAW;
-            wc.lpfnWndProc = DefWindowProcA;
-            wc.hInstance = GetModuleHandleA(nullptr);
-            wc.lpszClassName = "YimMenuDummyWindow";
-
-            RegisterClassExA(&wc);
-            hwnd = CreateWindowA(wc.lpszClassName, "YimMenu Dummy Window", WS_OVERLAPPEDWINDOW, 0, 0, 100, 100, nullptr, nullptr, wc.hInstance, nullptr);
-
-            swapChainDesc1.BufferCount = 3;
-            swapChainDesc1.Width = 0;
-            swapChainDesc1.Height = 0;
-            swapChainDesc1.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-            swapChainDesc1.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-            swapChainDesc1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-            swapChainDesc1.SampleDesc.Count = 1;
-            swapChainDesc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-            swapChainDesc1.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-            swapChainDesc1.Scaling = DXGI_SCALING_STRETCH;
-        };
-
-        const std::vector<std::function<bool()>> swapchainAttempts{
-            [&]() {
-                return !FAILED(factory->CreateSwapChainForComposition(commandQueue, &swapChainDesc1, nullptr, &swapChain1));
-            },
-            [&]() {
-                initDummyWindow();
-                return !FAILED(factory->CreateSwapChainForHwnd(commandQueue, hwnd, &swapChainDesc1, nullptr, nullptr, &swapChain1));
-            },
-            [&]() {
-                return !FAILED(factory->CreateSwapChainForHwnd(commandQueue, GetDesktopWindow(), &swapChainDesc1, nullptr, nullptr, &swapChain1));
-            },
-        };
-
-        bool anySucceeded = false;
-        for (size_t i = 0; i < swapchainAttempts.size(); i++)
+        // no dummy swapchain created, so SC's detour never fires
+        if (!m_SwapchainVtable)
         {
-            try
+            if (!Pointers.SwapChain || !*Pointers.SwapChain)
             {
-                if (swapchainAttempts[i]())
-                {
-                    LOGF(INFO, "Created dummy swapchain via attempt {}.", i);
-                    anySucceeded = true;
-                    break;
-                }
+                LOGF(FATAL, "SwapChain pointer is not yet valid.");
+                return false;
             }
-            catch (const std::exception& e)
-            {
-                LOGF(FATAL, "Dummy swapchain attempt {} threw: {}", i, e.what());
-            }
-            catch (...)
-            {
-                LOGF(FATAL, "Dummy swapchain attempt {} threw an unknown exception.", i);
-            }
+
+            m_SwapchainVtable = *reinterpret_cast<void***>(*Pointers.SwapChain);
         }
 
-        auto cleanupDummyWindow = [&]() {
-            if (hwnd)
-                DestroyWindow(hwnd);
-            if (wc.lpszClassName)
-                UnregisterClassA(wc.lpszClassName, wc.hInstance);
-        };
-
-        if (!anySucceeded)
-        {
-            LOGF(FATAL, "Failed to create a dummy swapchain via any method.");
-            cleanupDummyWindow();
-            commandQueue->Release();
-            factory->Release();
-            device->Release();
-            return false;
-        }
-
-        if (FAILED(swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain))))
-        {
-            LOGF(FATAL, "Failed to query IDXGISwapChain3 from the dummy swapchain.");
-            cleanupDummyWindow();
-            swapChain1->Release();
-            commandQueue->Release();
-            factory->Release();
-            device->Release();
-            return false;
-        }
-
-        m_CommandQueueOffset = 0;
-
-        for (uint32_t i = 0; i < 512 * sizeof(void*); i += sizeof(void*))
-        {
-            auto base = reinterpret_cast<uintptr_t>(swapChain1) + i;
-            if (IsBadReadPtr(reinterpret_cast<void*>(base), sizeof(void*)))
-                break;
-
-            if (*reinterpret_cast<ID3D12CommandQueue**>(base) == commandQueue)
-            {
-                m_CommandQueueOffset = i;
-                LOGF(INFO, "Found command queue offset at {:#x}.", i);
-                break;
-            }
-        }
-
-        auto targetSwapchain = swapChain;
-
-        if (m_CommandQueueOffset == 0)
-		{
-			bool shouldBreak = false;
-			for (uint32_t base = 0; base < 512 * sizeof(void*) && !shouldBreak; base += sizeof(void*))
-			{
-				auto preScanBase = reinterpret_cast<uintptr_t>(swapChain1) + base;
-				if (IsBadReadPtr(reinterpret_cast<void*>(preScanBase), sizeof(void*)))
-					break;
-
-				auto scanBase = *reinterpret_cast<uintptr_t*>(preScanBase);
-				if (scanBase == 0 || IsBadReadPtr(reinterpret_cast<void*>(scanBase), sizeof(void*)))
-					continue;
-
-				for (uint32_t i = 0; i < 512 * sizeof(void*); i += sizeof(void*))
-				{
-					auto preData = scanBase + i;
-					if (IsBadReadPtr(reinterpret_cast<void*>(preData), sizeof(void*)))
-						break;
-
-					if (*reinterpret_cast<ID3D12CommandQueue**>(preData) == commandQueue)
-					{
-						targetSwapchain = reinterpret_cast<IDXGISwapChain3*>(scanBase);
-						m_CommandQueueOffset = i;
-						shouldBreak = true;
-
-						LOGF(INFO, "Found nested command queue offset at {:#x}.", i);
-						break;
-					}
-				}
-			}
-		}
-
-        if (m_CommandQueueOffset == 0)
-        {
-            LOGF(FATAL, "Failed to find the command queue offset.");
-            cleanupDummyWindow();
-            swapChain->Release();
-            swapChain1->Release();
-            commandQueue->Release();
-            factory->Release();
-            device->Release();
-            return false;
-        }
-
-        m_SwapchainVtable = *reinterpret_cast<void***>(targetSwapchain);
-        m_FactoryVtable = *reinterpret_cast<void***>(factory);
         InstallHooks();
-
-        commandQueue->Release();
-        swapChain1->Release();
-        swapChain->Release();
-        device->Release();
-        factory->Release();
-        cleanupDummyWindow();
 
         if (!m_Hooked)
             return false;
@@ -304,31 +98,35 @@ namespace YimMenu
         return true;
     }
 
-    bool D3D12Hook::DestroyImpl(bool unloading)
+    void D3D12Hook::DestroyImpl(bool unloading)
     {
         std::scoped_lock hookLock{m_HookMutex};
 
-        if (!m_Hooked)
-            return true;
+        if (unloading)
+        {
+            if (m_SwapchainVmt && m_SwapChain)
+                m_SwapchainVmt->Disable();
 
-        m_PresentPatch.Uninstall();
-        m_SwapchainVmt.reset();
+            m_CreateSwapchainForHwndPatch.Uninstall();
+        }
 
-		if (unloading)
-			m_CreateSwapchainPatch.Uninstall();
-
+        // Without unloading the factory patch stays installed on purpose
+        TeardownSwapchainHook();
         m_Hooked = false;
-        m_IsPhase1 = true;
+    }
 
-        return true;
+    void D3D12Hook::TeardownSwapchainHook()
+    {
+        m_PresentPatch.Uninstall();
+        m_CommandQueue.Reset();
+        m_SwapChain = nullptr;
+        m_Window = nullptr;
+        m_IsPhase1 = true;
     }
 
     void D3D12Hook::InstallHooks()
     {
-        m_PresentPatch.Uninstall();
-        m_SwapchainVmt.reset();
-
-        m_IsPhase1 = true;
+        TeardownSwapchainHook();
 
         if (!m_PresentPatch.Install(m_SwapchainVtable, 8, reinterpret_cast<void*>(&D3D12Hook::Present)))
         {
@@ -337,57 +135,123 @@ namespace YimMenu
             return;
         }
 
-        if (!m_CreateSwapchainPatch.Installed)
+        if (!m_CreateSwapchainForHwndPatch.Installed)
         {
-            if (!m_CreateSwapchainPatch.Install(m_FactoryVtable, 15, reinterpret_cast<void*>(&D3D12Hook::CreateSwapchain)))
-                LOGF(FATAL, "Failed to install the CreateSwapChain patch.");
+            if (!m_CreateSwapchainForHwndPatch.Install(m_FactoryVtable, 15, reinterpret_cast<void*>(&D3D12Hook::CreateSwapChainForHwnd)))
+                LOGF(FATAL, "Failed to install the CreateSwapChainForHwnd patch.");
         }
 
         m_Hooked = true;
     }
 
+    void D3D12Hook::HookSwapchain(IDXGISwapChain3* swapChain)
+    {
+        m_PresentPatch.Uninstall();
+
+        // The previous hook is intentionally never destroyed, VMTHook dtor would write the original vptr back into a
+        // swapchain that FFX may have already freed, which would corrupt whatever is now at that address
+        m_SwapchainVmt = new VMTHook("D3D12SwapChain", swapChain, 64); // should be enough
+        m_SwapchainVmt->Hook(8, reinterpret_cast<void*>(&D3D12Hook::Present));
+        m_SwapchainVmt->Hook(13, reinterpret_cast<void*>(&D3D12Hook::ResizeBuffers));
+        m_SwapchainVmt->Enable();
+
+        m_SwapChain = swapChain;
+        m_IsPhase1 = false;
+        m_Hooked = true;
+    }
+
+    bool D3D12Hook::PrepareForSwapchainCreation()
+    {
+        std::scoped_lock hookLock{m_HookMutex};
+
+        if (!m_Hooked)
+            return false;
+
+        if (m_OnDeviceReset)
+            m_OnDeviceReset();
+
+        TeardownSwapchainHook();
+        m_Hooked = false;
+        return true;
+    }
+
+    void D3D12Hook::FinishSwapchainCreation(IUnknown* device, IUnknown* newSwapchain, HRESULT hr)
+    {
+        std::scoped_lock hookLock{m_HookMutex};
+
+        Microsoft::WRL::ComPtr<ID3D12CommandQueue> queue{};
+        Microsoft::WRL::ComPtr<IDXGISwapChain3> swapChain3{};
+
+        if (SUCCEEDED(hr))
+        {
+            if (device)
+                device->QueryInterface(IID_PPV_ARGS(&queue));
+            if (newSwapchain)
+                newSwapchain->QueryInterface(IID_PPV_ARGS(&swapChain3));
+        }
+
+        if (queue && swapChain3)
+        {
+            m_CommandQueue = queue;
+            HookSwapchain(swapChain3.Get());
+            LOGF(INFO, "New swapchain hooked.");
+        }
+        else
+        {
+            // Creation failed, or this was not a D3D12 swapchain, fall back to phase 1
+            LOGF(INFO, "CreateSwapChain finished without a usable D3D12 swapchain, falling back to phase 1.");
+            InstallHooks();
+        }
+    }
+
     HRESULT D3D12Hook::Present(IDXGISwapChain3* swapChain, UINT syncInterval, UINT flags, void* r9)
     {
-        std::scoped_lock hookLock{GetInstance().m_HookMutex};
-
-        auto presentFn = GetInstance().m_IsPhase1 ? GetInstance().m_PresentPatch.Original<decltype(&D3D12Hook::Present)>() : GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::Present)>(8);
-
-        HWND swapchainWnd = nullptr;
-        {
-            DXGI_SWAP_CHAIN_DESC swapchainDesc{};
-            if (SUCCEEDED(swapChain->GetDesc(&swapchainDesc)))
-                swapchainWnd = swapchainDesc.OutputWindow;
-        }
-
-        if (!GetInstance().m_IsPhase1 && swapChain != GetInstance().m_SwapChain)
-            return presentFn(swapChain, syncInterval, flags, r9);
-
-        if (GetInstance().m_IsPhase1) // caught the real present, switch to per instance vmt hook
-        {
-            GetInstance().m_PresentPatch.Uninstall();
-
-            GetInstance().m_SwapchainVmt = std::make_unique<VMTHook>("D3D12SwapChain", swapChain, 64); // should be enough
-			GetInstance().m_SwapchainVmt->Hook(8, reinterpret_cast<void*>(&D3D12Hook::Present));
-			GetInstance().m_SwapchainVmt->Hook(13, reinterpret_cast<void*>(&D3D12Hook::ResizeBuffers));
-			GetInstance().m_SwapchainVmt->Enable();
-
-            GetInstance().m_IsPhase1 = false;
-			presentFn = GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::Present)>(8);
-        }
-
-        GetInstance().m_Window = swapchainWnd;
-        GetInstance().m_SwapChain = swapChain;
+        decltype(&D3D12Hook::Present) presentFn = nullptr;
+        bool ours = true;
 
         {
-            Microsoft::WRL::ComPtr<ID3D12Device4> tempDevice{};
-            swapChain->GetDevice(IID_PPV_ARGS(&tempDevice));
-            GetInstance().m_Device = tempDevice.Get();
+            std::scoped_lock hookLock{GetInstance().m_HookMutex};
+
+            if (GetInstance().m_IsPhase1)
+            {
+                presentFn = GetInstance().m_PresentPatch.Original<decltype(&D3D12Hook::Present)>();
+                if (!presentFn)
+                    return DXGI_ERROR_INVALID_CALL;
+
+                // the shared vtable can be hit by swapchains that aren't d3d12 ones
+                Microsoft::WRL::ComPtr<ID3D12Device> probe{};
+                if (FAILED(swapChain->GetDevice(IID_PPV_ARGS(&probe))))
+                {
+                    ours = false;
+                }
+                else
+                {
+                    LOGF(INFO, "Phase 1 caught swapchain {}, switching to per-instance hook.", static_cast<void*>(swapChain));
+                    GetInstance().HookSwapchain(swapChain);
+                    presentFn = GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::Present)>(8);
+                }
+            }
+            else
+            {
+                presentFn = GetInstance().m_SwapchainVmt ? GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::Present)>(8) : nullptr;
+                if (!presentFn)
+                    return DXGI_ERROR_INVALID_CALL;
+
+                ours = (swapChain == GetInstance().m_SwapChain);
+            }
+
+            if (ours)
+            {
+                DXGI_SWAP_CHAIN_DESC swapchainDesc{};
+                if (SUCCEEDED(swapChain->GetDesc(&swapchainDesc)))
+                    GetInstance().m_Window = swapchainDesc.OutputWindow;
+
+                GetInstance().m_SwapChain = swapChain;
+
+                if (GetInstance().m_OnPresent)
+                    GetInstance().m_OnPresent();
+            }
         }
-
-        GetInstance().m_CommandQueue = *reinterpret_cast<ID3D12CommandQueue**>(reinterpret_cast<uintptr_t>(swapChain) + GetInstance().m_CommandQueueOffset);
-
-        if (GetInstance().m_OnPresent)
-            GetInstance().m_OnPresent();
 
         return presentFn(swapChain, syncInterval, flags, r9);
     }
@@ -396,38 +260,33 @@ namespace YimMenu
     {
         std::scoped_lock hookLock{GetInstance().m_HookMutex};
 
-        auto resizeBuffersFn = GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::ResizeBuffers)>(13);
+        auto resizeBuffersFn = GetInstance().m_SwapchainVmt ? GetInstance().m_SwapchainVmt->Original<decltype(&D3D12Hook::ResizeBuffers)>(13) : nullptr;
+        if (!resizeBuffersFn)
+            return DXGI_ERROR_INVALID_CALL;
 
-        if (GetInstance().m_OnResizeBuffers)
+        if (swapChain == GetInstance().m_SwapChain && GetInstance().m_OnResizeBuffers)
             GetInstance().m_OnResizeBuffers();
 
         return resizeBuffersFn(swapChain, bufferCount, width, height, newFormat, swapChainFlags);
     }
 
-    HRESULT D3D12Hook::CreateSwapchain(IDXGIFactory4* factory, IUnknown* device, HWND hwnd, const DXGI_SWAP_CHAIN_DESC* desc, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC* pFullscreenDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain** swapChain)
+    HRESULT D3D12Hook::CreateSwapChainForHwnd(IDXGIFactory2* factory, IUnknown* device, HWND hwnd, const DXGI_SWAP_CHAIN_DESC1* desc, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC* pFullscreenDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** swapChain)
     {
-        auto createSwapChainFn = GetInstance().m_CreateSwapchainPatch.Original<decltype(&D3D12Hook::CreateSwapchain)>();
+        auto createSwapChainFn = GetInstance().m_CreateSwapchainForHwndPatch.Original<decltype(&D3D12Hook::CreateSwapChainForHwnd)>();
 
-        if (g_InsideD3d12Hook)
+        if (g_InsideCreateSwapchain)
             return createSwapChainFn(factory, device, hwnd, desc, pFullscreenDesc, pRestrictToOutput, swapChain);
 
-        LOGF(INFO, "CreateSwapChain called, a new swapchain is being created.");
+        g_InsideCreateSwapchain = true;
 
-        std::scoped_lock hookLock{GetInstance().m_HookMutex};
+        bool wasHooked = GetInstance().PrepareForSwapchainCreation();
 
-        bool wasHooked = GetInstance().m_Hooked;
-
-        if (wasHooked)
-        {
-            if (GetInstance().m_OnDeviceReset)
-                GetInstance().m_OnDeviceReset();
-
-            GetInstance().Destroy();
-        }
+        HRESULT hr = createSwapChainFn(factory, device, hwnd, desc, pFullscreenDesc, pRestrictToOutput, swapChain);
 
         if (wasHooked)
-            GetInstance().Init();
+            GetInstance().FinishSwapchainCreation(device, (SUCCEEDED(hr) && swapChain) ? *swapChain : nullptr, hr);
 
-        return createSwapChainFn(factory, device, hwnd, desc, pFullscreenDesc, pRestrictToOutput, swapChain);
+        g_InsideCreateSwapchain = false;
+        return hr;
     }
 }

@@ -8,8 +8,8 @@ namespace YimMenu
     class Renderer
     {
     public:
-	    using RendererCallback = std::function<void()>;
-	    using WindowProcedureCallback = std::function<void(HWND, UINT, WPARAM, LPARAM)>;
+        using RendererCallback = std::function<void()>;
+        using WindowProcedureCallback = std::function<void(HWND, UINT, WPARAM, LPARAM)>;
 
         static void Init()
         {
@@ -21,7 +21,7 @@ namespace YimMenu
             GetInstance().DestroyImpl();
         }
 
-	    static void AddRendererCallback(RendererCallback&& callback, uint32_t priority)
+        static void AddRendererCallback(RendererCallback&& callback, uint32_t priority)
         {
             GetInstance().m_RendererCallbacks.insert({priority, callback});
         }
@@ -31,20 +31,22 @@ namespace YimMenu
             GetInstance().m_WindowProcedureCallbacks.push_back(callback);
         }
 
-		static bool IsInitialized()
-		{
-			return GetInstance().m_Initialized;
-		}
+        static bool IsInitialized()
+        {
+            return GetInstance().m_Initialized;
+        }
 
-		static void SetSafeToRender()
-		{
-			GetInstance().m_SafeToRender = true;
-		}
+        static void SetSafeToRender()
+        {
+            GetInstance().m_SafeToRender = true;
+        }
 
-		static void SetFontsUpdated()
-		{
-			GetInstance().m_FontsUpdated = true;
-		}
+        static void SetFontsUpdated()
+        {
+            GetInstance().m_FontsUpdated = true;
+        }
+
+        static void WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
     private:
         template <typename T>
@@ -56,7 +58,6 @@ namespace YimMenu
             void Alloc(D3D12_CPU_DESCRIPTOR_HANDLE* outCpu, D3D12_GPU_DESCRIPTOR_HANDLE* outGpu);
             void Free(D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
 
-            ID3D12DescriptorHeap* Heap = nullptr;
             UINT DescriptorSize = 0;
             D3D12_CPU_DESCRIPTOR_HANDLE HeapStartCpu = {};
             D3D12_GPU_DESCRIPTOR_HANDLE HeapStartGpu = {};
@@ -80,19 +81,20 @@ namespace YimMenu
         bool InitInternal();
         void Render();
         void Resize();
-        bool CreateDeviceObjects(ID3D12Device* device, ID3D12CommandQueue* queue, UINT bufferCount);
+        bool CreateDeviceObjects(ID3D12Device* device, UINT bufferCount);
+        void ReleaseDeviceObjects();
         void CreateRenderTargets(IDXGISwapChain3* swapChain);
         void ReleaseRenderTargets();
-        void InvalidateDeviceObjects();
-
-        static LRESULT WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+        void WaitForGpu(DWORD timeoutMs);
 
         bool m_Initialized = false;
         bool m_DeviceObjectsValid = false;
-		bool m_SafeToRender = false;
-		bool m_FontsUpdated = false;
-        HWND m_Window = nullptr;
-        WNDPROC m_OriginalWndProc = nullptr;
+        bool m_SafeToRender = false;
+        bool m_FontsUpdated = false;
+        std::recursive_mutex m_WndProcMutex = {};
+        ComPtr<ID3D12Device> m_Device = {};
+        ComPtr<ID3D12CommandQueue> m_Queue = {};
+		DXGI_FORMAT m_RtvFormat = {};
         ComPtr<ID3D12DescriptorHeap> m_RtvHeap = {};
         ComPtr<ID3D12DescriptorHeap> m_SrvHeap = {};
         SrvHeapAllocator m_SrvAllocator = {};

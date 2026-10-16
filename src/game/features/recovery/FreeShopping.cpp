@@ -2,7 +2,7 @@
 #include "game/backend/NativeHooks.hpp"
 #include "game/gta/Natives.hpp"
 #include "types/netshop/netCatalog.hpp"
-#include "game/gta/Entity.hpp"
+
 namespace YimMenu::Features
 {
 	struct BASKET_ITEM_DATA

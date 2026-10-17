@@ -2,6 +2,7 @@
 #include "game/backend/NativeHooks.hpp"
 #include "game/gta/Natives.hpp"
 #include "types/netshop/netCatalog.hpp"
+#include "game/backend/ScriptPatches.hpp"
 
 namespace YimMenu::Features
 {
@@ -127,6 +128,9 @@ namespace YimMenu::Features
 	{
 		using BoolCommand::BoolCommand;
 
+		ScriptPatch m_PenthouseScriptPatch{};
+		ScriptPatch m_CasinoScriptPatch{};
+
 		virtual void OnEnable() override
 		{
 			static auto initHooks = []() {
@@ -147,8 +151,36 @@ namespace YimMenu::Features
 				    &ChangeFakeMPCashHook);
 				return true;
 			}();
+
+			if (!m_PenthouseScriptPatch)
+			{
+				m_PenthouseScriptPatch = ScriptPatches::AddPatch(
+				    "am_mp_casino_apartment"_J,
+				    ScriptPointer("PenthouseDecorCashOnly", "37 03 41 0C 71 5C 81 00 38 00 25 11 2C 08 00 EA"),
+				    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+			}
+
+			m_PenthouseScriptPatch->Enable();
+
+			if (!m_CasinoScriptPatch)
+			{
+				m_CasinoScriptPatch = ScriptPatches::AddPatch(
+				    "am_mp_casino"_J,
+				    ScriptPointer("SkipChipTransaction", "38 00 2F 74 82 06 56 3C 00 38 00 78 5D 7E F3 24"),
+				    {0x72, 0x00, 0x00, 0x00, 0x00});
+			}
+
+			m_CasinoScriptPatch->Enable();
+		}
+		virtual void OnDisable() override
+		{
+			if (m_PenthouseScriptPatch)
+				m_PenthouseScriptPatch->Disable();
+			if (m_CasinoScriptPatch)
+				m_CasinoScriptPatch->Disable();
 		}
 	};
+
 
 	static FreeShopping _FreeShopping{
 	    "freeshopping",
@@ -202,7 +234,7 @@ namespace YimMenu::Features
 		const bool freeShopping = _FreeShopping.GetState();
 
 
-        if (CurrentBasketAction == "CATEGORY_CASINO_CHIPS"_J)
+        if (CurrentBasketCategory == "CATEGORY_CASINO_CHIPS"_J)
 		{
 			ctx->SetReturnValue(callOriginal(itemData));
 			return;
@@ -211,8 +243,7 @@ namespace YimMenu::Features
 
         if (freeShopping && IsPropertyAction(CurrentBasketAction) && originalPrice > 0)
 		{
-			const int statValue =
-			    GetStatValueFromHash(static_cast<joaat_t>(itemData->Item));
+			const int statValue = GetStatValueFromHash(static_cast<joaat_t>(itemData->Item));
 
 			if (statValue >= 0)
 			{
@@ -222,15 +253,47 @@ namespace YimMenu::Features
 
 				if (catalog != nullptr)
 				{
-					catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
-						if (entry.m_StatValue != statValue || entry.m_Price < 0 || entry.m_Price >= bestPrice)
-						{
-							return;
-						}
+					const bool isWarehouseAction =
+					    CurrentBasketAction == "NET_SHOP_ACTION_BUY_WAREHOUSE"_J;
 
-						bestHash = entry.m_Hash;
-						bestPrice = entry.m_Price;
-					});
+					if (isWarehouseAction)
+					{
+						catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
+							if (entry.m_StatValue != statValue)
+								return;
+							if (entry.m_Price < 0 || entry.m_Price >= bestPrice)
+								return;
+
+							const auto cat = entry.m_CategoryHash;
+							const bool isWarehouse =
+							    cat == "CATEGORY_WAREHOUSE"_J
+							    || cat == "CATEGORY_INVENTORY_WAREHOUSE"_J
+							    || cat == "CATEGORY_WAREHOUSE_INTERIOR"_J
+							    || cat == "CATEGORY_INVENTORY_WAREHOUSE_INTERIOR"_J;
+
+							if (!isWarehouse)
+								return;
+
+							bestHash = entry.m_Hash;
+							bestPrice = entry.m_Price;
+						});
+					}
+
+					if (bestHash == 0 || bestPrice >= originalPrice)
+					{
+						bestHash = 0;
+						bestPrice = INT_MAX;
+
+						catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
+							if (entry.m_StatValue != statValue)
+								return;
+							if (entry.m_Price < 0 || entry.m_Price >= bestPrice)
+								return;
+
+							bestHash = entry.m_Hash;
+							bestPrice = entry.m_Price;
+						});
+					}
 				}
 
 				if (bestHash != 0)
@@ -254,7 +317,8 @@ namespace YimMenu::Features
 
 	   const bool isCasinoClothing = CurrentBasketCategory == "CATEGORY_CLOTH"_J && IsPlayerInCasino();
 
-		const bool applyCoupon = originalPrice > 0 || isCasinoClothing;
+	   const bool applyCoupon = freeShopping && (originalPrice > 0 || isCasinoClothing);
+
 
 
         if (applyCoupon)

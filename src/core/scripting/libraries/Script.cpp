@@ -7,13 +7,6 @@
 
 namespace YimMenu::Lua
 {
-	static bool IsCoroutine(lua_State* state)
-	{
-		bool result = lua_pushthread(state);
-		lua_pop(state, 1); 
-		return !result; // this is dumb af. Why do you need to push a value to the stack to figure out if you're in the main thread?
-	}
-
 	class Script : LuaLibrary
 	{
 		using LuaLibrary::LuaLibrary;
@@ -35,7 +28,7 @@ namespace YimMenu::Lua
 		{
 			auto& script = LuaScript::GetScript(state);
 
-			if (!IsCoroutine(state))
+			if (!script.IsInsideScriptCallback(state))
 			{
 				luaL_error(state, "Attempting to yield outside a script callback");
 			}
@@ -45,9 +38,15 @@ namespace YimMenu::Lua
 			return -1;
 		}
 
-		static int IsInsideCallback(lua_State* state)
+		static int IsInsideRenderCallback(lua_State* state)
 		{
-			lua_pushboolean(state, IsCoroutine(state));
+			lua_pushboolean(state, LuaScript::GetScript(state).IsInsideRenderCallback(state));
+			return 1;
+		}
+
+		static int IsInsideScriptCallback(lua_State* state)
+		{
+			lua_pushboolean(state, LuaScript::GetScript(state).IsInsideScriptCallback(state));
 			return 1;
 		}
 
@@ -70,7 +69,8 @@ namespace YimMenu::Lua
 			lua_newtable(state);
 			SetFunction(state, RunInCallback, "run_in_callback");
 			SetFunction(state, Yield, "yield");
-			SetFunction(state, IsInsideCallback, "is_inside_callback");
+			SetFunction(state, IsInsideRenderCallback, "is_inside_render_callback");
+			SetFunction(state, IsInsideScriptCallback, "is_inside_script_callback");
 			SetFunction(state, RequireGameBuild, "require_game_build");
 			lua_setglobal(state, "script");
 		}

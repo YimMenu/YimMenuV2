@@ -6,6 +6,7 @@
 #include "core/frontend/manager/Submenu.hpp"
 #include "core/frontend/manager/UIManager.hpp"
 #include "game/frontend/items/Items.hpp"
+#include "game/frontend/GUI.hpp"
 
 namespace YimMenu
 {
@@ -27,9 +28,16 @@ namespace YimMenu
 
 	void LuaUserInterface::Shutdown()
 	{
-		if (m_ShutdownCalled)
-			return;
-		m_ShutdownCalled = true;
+		{
+			std::unique_lock<std::recursive_mutex> lock;
+			if (m_Script)
+				lock = std::unique_lock(m_Script->GetExecutionLock());
+			if (m_ShutdownCalled)
+				return;
+			m_ShutdownCalled = true;
+			m_MouseOverrideRequested = false;
+			UpdateMouseOverride();
+		}
 
 		for (auto& [group, item] : m_AttachedGroupItems)
 			if (group)
@@ -172,6 +180,38 @@ namespace YimMenu
 	void LuaUserInterface::SetMenuIcon(std::string_view icon)
 	{
 		m_MenuIcon.assign(icon);
+	}
+
+	void LuaUserInterface::UpdateMouseOverride()
+	{
+		const bool active = m_MouseOverrideRequested && !m_MouseOverrideSuspended && !m_ShutdownCalled;
+		if (active == m_MouseOverrideActive)
+			return;
+		m_MouseOverrideActive = active;
+		if (active)
+			GUI::AcquireMouseOverride();
+		else
+			GUI::ReleaseMouseOverride();
+	}
+
+	void LuaUserInterface::SetMouseOverride(bool enabled)
+	{
+		std::unique_lock<std::recursive_mutex> lock;
+		if (m_Script)
+			lock = std::unique_lock(m_Script->GetExecutionLock());
+		if (m_ShutdownCalled)
+			return;
+		m_MouseOverrideRequested = enabled;
+		UpdateMouseOverride();
+	}
+
+	void LuaUserInterface::SuspendMouseOverride(bool suspended)
+	{
+		std::unique_lock<std::recursive_mutex> lock;
+		if (m_Script)
+			lock = std::unique_lock(m_Script->GetExecutionLock());
+		m_MouseOverrideSuspended = suspended;
+		UpdateMouseOverride();
 	}
 
 	std::shared_ptr<Submenu> LuaUserInterface::GetOrCreateSubmenu(std::string_view name)

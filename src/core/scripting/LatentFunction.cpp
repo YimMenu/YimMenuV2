@@ -14,7 +14,7 @@ namespace YimMenu::Lua
 		auto& script = LuaScript::GetScript(state);
 		auto callback = script.GetRunningCallback();
 
-		if (!callback)
+		if (!script.IsInsideScriptCallback(state))
 			luaL_error(state, "Attempted to call a latent function outside a script callback");
 
 		// destroy remnants from a previous latent function call

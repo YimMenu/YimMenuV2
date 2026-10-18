@@ -84,6 +84,10 @@ namespace YimMenu::Lua
 				case 'b':
 					slot = PackSlot<std::uint32_t>(GetBool(state, lua_arg++));
 					break;
+				case 's':
+					slot = PackSlot<const char*>(lua_isnoneornil(state, lua_arg) ? nullptr : CheckStringSafe(state, lua_arg));
+					++lua_arg;
+					break;
 				default:
 					luaL_error(state, "unknown ScriptFunction param type '%c'", *p);
 					return 0;
@@ -122,6 +126,13 @@ namespace YimMenu::Lua
 				std::uint32_t ret = 0;
 				self.Invoke(args, &ret, sizeof(ret));
 				lua_pushboolean(state, ret != 0);
+				return 1;
+			}
+			case 's':
+			{
+				const char* ret = nullptr;
+				self.Invoke(args, &ret, sizeof(ret));
+				lua_pushstring(state, ret);
 				return 1;
 			}
 			default:

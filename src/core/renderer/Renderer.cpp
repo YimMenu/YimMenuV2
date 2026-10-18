@@ -197,6 +197,7 @@ namespace YimMenu
         ID3D12DescriptorHeap* heaps[] = {m_SrvHeap.Get()};
         m_CommandList->SetDescriptorHeaps(1, heaps);
 
+		GUI::ToggleMouse();
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();

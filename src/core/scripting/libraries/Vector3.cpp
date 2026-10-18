@@ -51,19 +51,19 @@ namespace YimMenu::Lua
 		static int SetX(lua_State* state)
 		{
 			GetObject<rage::fvector3>(state, 1).x = luaL_checknumber(state, 2);
-			return 1;
+			return 0;
 		}
 
 		static int SetY(lua_State* state)
 		{
 			GetObject<rage::fvector3>(state, 1).y = luaL_checknumber(state, 2);
-			return 1;
+			return 0;
 		}
 
 		static int SetZ(lua_State* state)
 		{
 			GetObject<rage::fvector3>(state, 1).z = luaL_checknumber(state, 2);
-			return 1;
+			return 0;
 		}
 
 		static int GetDistance(lua_State* state)

@@ -21,25 +21,19 @@ namespace YimMenu::Lua
 
 	static bool ResolveInSandbox(std::string_view input, fs::path& out)
 	{
-		if (input.empty())
+		if (input.empty() || input.find('\0') != std::string_view::npos || input.find(':') != std::string_view::npos)
 			return false;
 
 		fs::path p(std::string{input});
+		if (p.has_root_path())
+			return false;
 		std::error_code ec;
-		auto canon = fs::weakly_canonical(p, ec);
+		auto canon = fs::weakly_canonical(ScriptsRoot() / p, ec);
 		if (ec)
 			return false;
 
 		auto rel = canon.lexically_relative(ScriptsRoot());
-		auto rel_str = rel.generic_string();
-		if (rel_str.empty())
-			return false;
-		if (rel_str == ".")
-		{
-			out = canon;
-			return true;
-		}
-		if (rel_str.starts_with(".."))
+		if (rel.empty() || rel.has_root_path() || *rel.begin() == "..")
 			return false;
 
 		out = canon;
@@ -48,11 +42,12 @@ namespace YimMenu::Lua
 
 	static fs::path CheckSandboxedPath(lua_State* state, int idx)
 	{
-		auto raw = CheckStringSafe(state, idx);
+		std::size_t length = 0;
+		auto raw = CheckStringSafe(state, idx, &length);
 		fs::path out;
-		if (!ResolveInSandbox(raw, out))
+		if (!ResolveInSandbox(std::string_view(raw, length), out))
 		{
-			luaL_argerror(state, idx, "path is outside the script sandbox");
+			luaL_argerror(state, idx, "expected a relative path inside the scripts directory");
 			return {};
 		}
 		return out;
@@ -61,13 +56,6 @@ namespace YimMenu::Lua
 	class FileMgr : LuaLibrary
 	{
 		using LuaLibrary::LuaLibrary;
-
-		static int GetMenuRootPath(lua_State* state)
-		{
-			auto s = ScriptsRoot().generic_string();
-			lua_pushlstring(state, s.data(), s.size());
-			return 1;
-		}
 
 		static int CreateDir(lua_State* state)
 		{
@@ -81,9 +69,23 @@ namespace YimMenu::Lua
 		static int DeleteFile(lua_State* state)
 		{
 			auto path = CheckSandboxedPath(state, 1);
+			if (path == ScriptsRoot())
+				return 0;
 			std::error_code ec;
 			fs::remove(path, ec);
 			return 0;
+		}
+
+		static int RenameFile(lua_State* state)
+		{
+			auto source = CheckSandboxedPath(state, 1);
+			auto destination = CheckSandboxedPath(state, 2);
+			std::error_code ec;
+			bool success = fs::is_regular_file(source, ec) && !ec;
+			if (success && source != destination)
+				success = MoveFileW(source.c_str(), destination.c_str()) != FALSE;
+			lua_pushboolean(state, success);
+			return 1;
 		}
 
 		static int DoesFileExist(lua_State* state)
@@ -111,21 +113,37 @@ namespace YimMenu::Lua
 
 			int idx = 1;
 			auto emit = [&](const fs::directory_entry& entry) {
-				if (!entry.is_regular_file())
+				if (!entry.is_regular_file(ec))
 					return;
 				if (!ext.empty() && entry.path().extension() != ext)
 					return;
-				auto s = entry.path().generic_string();
-				lua_pushlstring(state, s.data(), s.size());
+				auto relative = entry.path().lexically_relative(ScriptsRoot()).generic_string();
+				fs::path resolved;
+				if (!ResolveInSandbox(relative, resolved))
+					return;
+				lua_pushlstring(state, relative.data(), relative.size());
 				lua_rawseti(state, -2, idx++);
 			};
 
 			if (recursive)
-				for (auto& e : fs::recursive_directory_iterator(path, fs::directory_options::skip_permission_denied, ec))
-					emit(e);
+			{
+				for (fs::recursive_directory_iterator entry(path, fs::directory_options::skip_permission_denied, ec), end; entry != end; entry.increment(ec))
+				{
+					if (entry->is_directory(ec))
+					{
+						auto directory = fs::canonical(entry->path(), ec);
+						if (ec || directory != entry->path())
+							entry.disable_recursion_pending();
+					}
+					else
+					{
+						emit(*entry);
+					}
+				}
+			}
 			else
-				for (auto& e : fs::directory_iterator(path, fs::directory_options::skip_permission_denied, ec))
-					emit(e);
+				for (fs::directory_iterator entry(path, fs::directory_options::skip_permission_denied, ec), end; entry != end; entry.increment(ec))
+					emit(*entry);
 
 			return 1;
 		}
@@ -170,9 +188,9 @@ namespace YimMenu::Lua
 		virtual void Register(lua_State* state) override
 		{
 			lua_newtable(state);
-			SetFunction(state, GetMenuRootPath, "GetMenuRootPath");
 			SetFunction(state, CreateDir, "CreateDir");
 			SetFunction(state, DeleteFile, "DeleteFile");
+			SetFunction(state, RenameFile, "RenameFile");
 			SetFunction(state, DoesFileExist, "DoesFileExist");
 			SetFunction(state, FindFiles, "FindFiles");
 			SetFunction(state, ReadFileContent, "ReadFileContent");

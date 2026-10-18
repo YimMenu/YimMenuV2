@@ -3,13 +3,23 @@
 #include "core/scripting/LuaUtils.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <cmath>
 #include <string>
 #include <vector>
 
 namespace YimMenu::Lua
 {
+	struct DrawListHandle
+	{
+		ImGuiContext* m_Context;
+		int m_Frame;
+		ImGuiID m_Window;
+		bool m_Foreground;
+	};
+
 	// Lua-facing ImGui binding. The class is intentionally named "ImGuiBind"
 	// to avoid a name clash with the global ::ImGui namespace; the table is
 	// still exposed to Lua under the global name "ImGui".
@@ -80,6 +90,188 @@ namespace YimMenu::Lua
 		static ImU32 PackColor(int r, int g, int b, int a)
 		{
 			return IM_COL32(r, g, b, a);
+		}
+
+		static ImGuiContext* GetRenderContext(lua_State* state)
+		{
+			auto* context = ImGui::GetCurrentContext();
+			if (!context || !context->WithinFrameScope)
+				luaL_error(state, "DrawList functions must be called during an ImGui render callback");
+			return context;
+		}
+
+		static int GetWindowDrawList(lua_State* state)
+		{
+			auto* context = GetRenderContext(state);
+			if (!context->CurrentWindow)
+				return luaL_error(state, "GetWindowDrawList requires an active ImGui window");
+			CreateObject<DrawListHandle>(state, DrawListHandle{context, context->FrameCount, context->CurrentWindow->ID, false});
+			return 1;
+		}
+
+		static int GetForegroundDrawList(lua_State* state)
+		{
+			auto* context = GetRenderContext(state);
+			CreateObject<DrawListHandle>(state, DrawListHandle{context, context->FrameCount, 0, true});
+			return 1;
+		}
+
+		static ImDrawList* GetDrawList(lua_State* state)
+		{
+			auto& handle = GetObject<DrawListHandle>(state, 1);
+			auto* context = GetRenderContext(state);
+			if (context != handle.m_Context || context->FrameCount != handle.m_Frame)
+				luaL_argerror(state, 1, "DrawList handle has expired; acquire a new handle for this frame");
+			if (handle.m_Foreground)
+				return ImGui::GetForegroundDrawList();
+			auto* window = ImGui::FindWindowByID(handle.m_Window);
+			if (!window)
+				luaL_argerror(state, 1, "DrawList window no longer exists");
+			return window->DrawList;
+		}
+
+		static int CheckColorComponent(lua_State* state, int index)
+		{
+			luaL_checktype(state, index, LUA_TNUMBER);
+			auto value = lua_tonumber(state, index);
+			if (!(value >= 0 && value <= 255) || value != static_cast<int>(value))
+				luaL_argerror(state, index, "color components must be integers from 0 to 255");
+			return static_cast<int>(value);
+		}
+
+		static ImU32 GetDrawColor(lua_State* state, int index)
+		{
+			const int r = CheckColorComponent(state, index);
+			const int g = CheckColorComponent(state, index + 1);
+			const int b = CheckColorComponent(state, index + 2);
+			const int a = CheckColorComponent(state, index + 3);
+			return PackColor(r, g, b, a);
+		}
+
+		static int DrawListAddText(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x = static_cast<float>(luaL_checknumber(state, 2));
+			const float y = static_cast<float>(luaL_checknumber(state, 3));
+			auto text = CheckStringSafe(state, 4);
+			auto color = GetDrawColor(state, 5);
+			const float size = static_cast<float>(luaL_optnumber(state, 9, ImGui::GetFontSize()));
+			luaL_argcheck(state, size > 0 && std::isfinite(size), 9, "font_size must be a positive finite number");
+			const float wrap_width = static_cast<float>(luaL_optnumber(state, 10, 0));
+			luaL_argcheck(state, wrap_width >= 0 && std::isfinite(wrap_width), 10, "wrap_width must be a non-negative finite number");
+			list->AddText(ImGui::GetFont(), size, ImVec2(x, y), color, text, nullptr, wrap_width);
+			return 0;
+		}
+
+		static int DrawListAddLine(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x1 = static_cast<float>(luaL_checknumber(state, 2));
+			const float y1 = static_cast<float>(luaL_checknumber(state, 3));
+			const float x2 = static_cast<float>(luaL_checknumber(state, 4));
+			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
+			auto color = GetDrawColor(state, 6);
+			const float thickness = static_cast<float>(luaL_optnumber(state, 10, 1));
+			list->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
+			return 0;
+		}
+
+		static int DrawListAddRect(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x1 = static_cast<float>(luaL_checknumber(state, 2));
+			const float y1 = static_cast<float>(luaL_checknumber(state, 3));
+			const float x2 = static_cast<float>(luaL_checknumber(state, 4));
+			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
+			auto color = GetDrawColor(state, 6);
+			const float rounding = static_cast<float>(luaL_optnumber(state, 10, 0));
+			const int flags = static_cast<int>(luaL_optinteger(state, 11, 0));
+			const float thickness = static_cast<float>(luaL_optnumber(state, 12, 1));
+			list->AddRect(ImVec2(x1, y1), ImVec2(x2, y2), color, rounding, flags, thickness);
+			return 0;
+		}
+
+		static int DrawListAddRectFilled(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x1 = static_cast<float>(luaL_checknumber(state, 2));
+			const float y1 = static_cast<float>(luaL_checknumber(state, 3));
+			const float x2 = static_cast<float>(luaL_checknumber(state, 4));
+			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
+			auto color = GetDrawColor(state, 6);
+			const float rounding = static_cast<float>(luaL_optnumber(state, 10, 0));
+			const ImDrawFlags flags = static_cast<ImDrawFlags>(luaL_optinteger(state, 11, 0));
+			list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), color, rounding, flags);
+			return 0;
+		}
+
+		static int DrawListAddRectFilledMultiColor(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x1 = static_cast<float>(luaL_checknumber(state, 2));
+			const float y1 = static_cast<float>(luaL_checknumber(state, 3));
+			const float x2 = static_cast<float>(luaL_checknumber(state, 4));
+			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
+			const auto upperLeft = static_cast<ImU32>(luaL_checkinteger(state, 6));
+			const auto upperRight = static_cast<ImU32>(luaL_checkinteger(state, 7));
+			const auto bottomRight = static_cast<ImU32>(luaL_checkinteger(state, 8));
+			const auto bottomLeft = static_cast<ImU32>(luaL_checkinteger(state, 9));
+			list->AddRectFilledMultiColor(ImVec2(x1, y1), ImVec2(x2, y2), upperLeft, upperRight, bottomRight, bottomLeft);
+			return 0;
+		}
+
+		static int DrawListAddTriangle(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x1 = static_cast<float>(luaL_checknumber(state, 2));
+			const float y1 = static_cast<float>(luaL_checknumber(state, 3));
+			const float x2 = static_cast<float>(luaL_checknumber(state, 4));
+			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
+			const float x3 = static_cast<float>(luaL_checknumber(state, 6));
+			const float y3 = static_cast<float>(luaL_checknumber(state, 7));
+			auto color = GetDrawColor(state, 8);
+			const float thickness = static_cast<float>(luaL_optnumber(state, 12, 1));
+			list->AddTriangle(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(x3, y3), color, thickness);
+			return 0;
+		}
+
+		static int DrawListAddTriangleFilled(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x1 = static_cast<float>(luaL_checknumber(state, 2));
+			const float y1 = static_cast<float>(luaL_checknumber(state, 3));
+			const float x2 = static_cast<float>(luaL_checknumber(state, 4));
+			const float y2 = static_cast<float>(luaL_checknumber(state, 5));
+			const float x3 = static_cast<float>(luaL_checknumber(state, 6));
+			const float y3 = static_cast<float>(luaL_checknumber(state, 7));
+			auto color = GetDrawColor(state, 8);
+			list->AddTriangleFilled(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(x3, y3), color);
+			return 0;
+		}
+
+		static int DrawListAddCircle(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x = static_cast<float>(luaL_checknumber(state, 2));
+			const float y = static_cast<float>(luaL_checknumber(state, 3));
+			const float radius = static_cast<float>(luaL_checknumber(state, 4));
+			auto color = GetDrawColor(state, 5);
+			const int segments = static_cast<int>(luaL_optinteger(state, 9, 0));
+			const float thickness = static_cast<float>(luaL_optnumber(state, 10, 1));
+			list->AddCircle(ImVec2(x, y), radius, color, segments, thickness);
+			return 0;
+		}
+
+		static int DrawListAddCircleFilled(lua_State* state)
+		{
+			auto* list = GetDrawList(state);
+			const float x = static_cast<float>(luaL_checknumber(state, 2));
+			const float y = static_cast<float>(luaL_checknumber(state, 3));
+			const float radius = static_cast<float>(luaL_checknumber(state, 4));
+			auto color = GetDrawColor(state, 5);
+			const int segments = static_cast<int>(luaL_optinteger(state, 9, 0));
+			list->AddCircleFilled(ImVec2(x, y), radius, color, segments);
+			return 0;
 		}
 
 		static int AddCircle(lua_State* state)
@@ -182,7 +374,11 @@ namespace YimMenu::Lua
 			int g            = (int)luaL_checkinteger(state, 5);
 			int b            = (int)luaL_checkinteger(state, 6);
 			int a            = (int)luaL_checkinteger(state, 7);
-			ImGui::GetWindowDrawList()->AddText(ImVec2(x, y), PackColor(r, g, b, a), text);
+			const float size = static_cast<float>(luaL_optnumber(state, 8, ImGui::GetFontSize()));
+			luaL_argcheck(state, size > 0 && std::isfinite(size), 8, "font_size must be a positive finite number");
+			const float wrap_width = static_cast<float>(luaL_optnumber(state, 9, 0));
+			luaL_argcheck(state, wrap_width >= 0 && std::isfinite(wrap_width), 9, "wrap_width must be a non-negative finite number");
+			ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), size, ImVec2(x, y), PackColor(r, g, b, a), text, nullptr, wrap_width);
 			return 0;
 		}
 
@@ -228,7 +424,10 @@ namespace YimMenu::Lua
 			const char* str_id = CheckStringSafe(state, 1);
 			int columns        = (int)luaL_checkinteger(state, 2);
 			int flags          = (int)luaL_optinteger(state, 3, 0);
-			lua_pushboolean(state, ImGui::BeginTable(str_id, columns, flags));
+			const float outer_size_x = static_cast<float>(luaL_optnumber(state, 4, 0));
+			const float outer_size_y = static_cast<float>(luaL_optnumber(state, 5, 0));
+			const float inner_width = static_cast<float>(luaL_optnumber(state, 6, 0));
+			lua_pushboolean(state, ImGui::BeginTable(str_id, columns, flags, ImVec2(outer_size_x, outer_size_y), inner_width));
 			return 1;
 		}
 
@@ -244,9 +443,11 @@ namespace YimMenu::Lua
 			return 0;
 		}
 
-		static int TableNextRow(lua_State*)
+		static int TableNextRow(lua_State* state)
 		{
-			ImGui::TableNextRow();
+			const ImGuiTableRowFlags flags = static_cast<ImGuiTableRowFlags>(luaL_optinteger(state, 1, ImGuiTableRowFlags_None));
+			const float min_row_height = static_cast<float>(luaL_optnumber(state, 2, 0));
+			ImGui::TableNextRow(flags, min_row_height);
 			return 0;
 		}
 
@@ -259,9 +460,11 @@ namespace YimMenu::Lua
 
 		static int TableSetupColumn(lua_State* state)
 		{
-			const char* str_id = CheckStringSafe(state, 1);
-			int flags          = (int)luaL_checkinteger(state, 2);
-			ImGui::TableSetupColumn(str_id, flags);
+			const char* label = CheckStringSafe(state, 1);
+			const ImGuiTableColumnFlags flags = static_cast<ImGuiTableColumnFlags>(luaL_optinteger(state, 2, ImGuiTableColumnFlags_None));
+			const float init_width_or_weight = static_cast<float>(luaL_optnumber(state, 3, 0));
+			const ImGuiID user_id = static_cast<ImGuiID>(luaL_optinteger(state, 4, 0));
+			ImGui::TableSetupColumn(label, flags, init_width_or_weight, user_id);
 			return 0;
 		}
 
@@ -956,35 +1159,31 @@ namespace YimMenu::Lua
 		// ID stack
 		// ----------------------------------------------------------------
 
-		// Overload: PushID(int) | PushID(str) | PushID(str_begin, str_end)
+		// Overload: PushID(int) | PushID(str)
 		static int PushID(lua_State* state)
 		{
-			int top = lua_gettop(state);
-			if (top >= 2 && lua_type(state, 1) == LUA_TSTRING && lua_type(state, 2) == LUA_TSTRING)
-			{
-				ImGui::PushID(lua_tostring(state, 1), lua_tostring(state, 2));
-			}
-			else if (lua_type(state, 1) == LUA_TSTRING)
+			if (lua_gettop(state) > 1)
+				return luaL_error(state, "ImGui.PushID expects one string or integer argument");
+
+			if (lua_type(state, 1) == LUA_TSTRING)
 			{
 				ImGui::PushID(lua_tostring(state, 1));
 			}
 			else
 			{
-				ImGui::PushID((int)luaL_checkinteger(state, 1));
+				ImGui::PushID(static_cast<int>(luaL_checkinteger(state, 1)));
 			}
 			return 0;
 		}
 
 		static int PopID(lua_State*) { ImGui::PopID(); return 0; }
 
-		// Overload: GetID(str) | GetID(str_begin, str_end)
 		static int GetID(lua_State* state)
 		{
-			ImGuiID id;
-			if (lua_gettop(state) >= 2)
-				id = ImGui::GetID(CheckStringSafe(state, 1), CheckStringSafe(state, 2));
-			else
-				id = ImGui::GetID(CheckStringSafe(state, 1));
+			if (lua_gettop(state) > 1)
+				return luaL_error(state, "ImGui.GetID expects one string argument");
+
+			ImGuiID id = ImGui::GetID(CheckStringSafe(state, 1));
 			lua_pushinteger(state, id);
 			return 1;
 		}
@@ -995,9 +1194,11 @@ namespace YimMenu::Lua
 
 		static int TextUnformatted(lua_State* state)
 		{
+			if (lua_gettop(state) > 1)
+				return luaL_error(state, "ImGui.TextUnformatted expects one string argument");
+
 			const char* text = CheckStringSafe(state, 1);
-			const char* end  = lua_isnoneornil(state, 2) ? nullptr : luaL_checkstring(state, 2);
-			ImGui::TextUnformatted(text, end);
+			ImGui::TextUnformatted(text);
 			return 0;
 		}
 
@@ -1070,7 +1271,8 @@ namespace YimMenu::Lua
 			const char* label = CheckStringSafe(state, 1);
 			float sx          = (float)luaL_checknumber(state, 2);
 			float sy          = (float)luaL_checknumber(state, 3);
-			lua_pushboolean(state, ImGui::InvisibleButton(label, ImVec2(sx, sy)));
+			const ImGuiButtonFlags flags = static_cast<ImGuiButtonFlags>(luaL_optinteger(state, 4, ImGuiButtonFlags_None));
+			lua_pushboolean(state, ImGui::InvisibleButton(label, ImVec2(sx, sy), flags));
 			return 1;
 		}
 
@@ -1183,8 +1385,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_optnumber(state, 4, 0.0);
 			float vmax        = (float)luaL_optnumber(state, 5, 0.0);
 			const char* fmt   = lua_isnoneornil(state, 6) ? "%.3f" : luaL_checkstring(state, 6);
-			// `power` is deprecated in modern ImGui; flags are used instead. We accept and ignore it.
-			bool used = ImGui::DragFloat(label, &value, speed, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
+			bool used = ImGui::DragFloat(label, &value, speed, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1200,10 +1402,11 @@ namespace YimMenu::Lua
 			float vmin      = (float)luaL_optnumber(state, 4, 0.0);
 			float vmax      = (float)luaL_optnumber(state, 5, 0.0);
 			const char* fmt = lua_isnoneornil(state, 6) ? "%.3f" : luaL_checkstring(state, 6);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::DragFloat2(label, v, speed, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::DragFloat3(label, v, speed, vmin, vmax, fmt, 0);
-			else used = ImGui::DragFloat4(label, v, speed, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::DragFloat2(label, v, speed, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::DragFloat3(label, v, speed, vmin, vmax, fmt, flags);
+			else used = ImGui::DragFloat4(label, v, speed, vmin, vmax, fmt, flags);
 			PushFloatArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1221,7 +1424,8 @@ namespace YimMenu::Lua
 			int vmin          = (int)luaL_optinteger(state, 4, 0);
 			int vmax          = (int)luaL_optinteger(state, 5, 0);
 			const char* fmt   = lua_isnoneornil(state, 6) ? "%d" : luaL_checkstring(state, 6);
-			bool used = ImGui::DragInt(label, &value, speed, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
+			bool used = ImGui::DragInt(label, &value, speed, vmin, vmax, fmt, flags);
 			lua_pushinteger(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1237,10 +1441,11 @@ namespace YimMenu::Lua
 			int vmin        = (int)luaL_optinteger(state, 4, 0);
 			int vmax        = (int)luaL_optinteger(state, 5, 0);
 			const char* fmt = lua_isnoneornil(state, 6) ? "%d" : luaL_checkstring(state, 6);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 7, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::DragInt2(label, v, speed, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::DragInt3(label, v, speed, vmin, vmax, fmt, 0);
-			else used = ImGui::DragInt4(label, v, speed, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::DragInt2(label, v, speed, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::DragInt3(label, v, speed, vmin, vmax, fmt, flags);
+			else used = ImGui::DragInt4(label, v, speed, vmin, vmax, fmt, flags);
 			PushIntArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1261,7 +1466,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_checknumber(state, 3);
 			float vmax        = (float)luaL_checknumber(state, 4);
 			const char* fmt   = lua_isnoneornil(state, 5) ? "%.3f" : luaL_checkstring(state, 5);
-			bool used         = ImGui::SliderFloat(label, &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
+			bool used         = ImGui::SliderFloat(label, &value, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1276,10 +1482,11 @@ namespace YimMenu::Lua
 			float vmin      = (float)luaL_checknumber(state, 3);
 			float vmax      = (float)luaL_checknumber(state, 4);
 			const char* fmt = lua_isnoneornil(state, 5) ? "%.3f" : luaL_checkstring(state, 5);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::SliderFloat2(label, v, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::SliderFloat3(label, v, vmin, vmax, fmt, 0);
-			else used = ImGui::SliderFloat4(label, v, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::SliderFloat2(label, v, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::SliderFloat3(label, v, vmin, vmax, fmt, flags);
+			else used = ImGui::SliderFloat4(label, v, vmin, vmax, fmt, flags);
 			PushFloatArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1296,7 +1503,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_optnumber(state, 3, -360.0);
 			float vmax        = (float)luaL_optnumber(state, 4, 360.0);
 			const char* fmt   = lua_isnoneornil(state, 5) ? "%.0f deg" : luaL_checkstring(state, 5);
-			bool used         = ImGui::SliderAngle(label, &v_rad, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
+			bool used         = ImGui::SliderAngle(label, &v_rad, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, v_rad);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1309,7 +1517,8 @@ namespace YimMenu::Lua
 			int vmin          = (int)luaL_checkinteger(state, 3);
 			int vmax          = (int)luaL_checkinteger(state, 4);
 			const char* fmt   = lua_isnoneornil(state, 5) ? "%d" : luaL_checkstring(state, 5);
-			bool used         = ImGui::SliderInt(label, &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
+			bool used         = ImGui::SliderInt(label, &value, vmin, vmax, fmt, flags);
 			lua_pushinteger(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1324,10 +1533,11 @@ namespace YimMenu::Lua
 			int vmin        = (int)luaL_checkinteger(state, 3);
 			int vmax        = (int)luaL_checkinteger(state, 4);
 			const char* fmt = lua_isnoneornil(state, 5) ? "%d" : luaL_checkstring(state, 5);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 6, ImGuiSliderFlags_None));
 			bool used;
-			if constexpr (N == 2) used = ImGui::SliderInt2(label, v, vmin, vmax, fmt, 0);
-			else if constexpr (N == 3) used = ImGui::SliderInt3(label, v, vmin, vmax, fmt, 0);
-			else used = ImGui::SliderInt4(label, v, vmin, vmax, fmt, 0);
+			if constexpr (N == 2) used = ImGui::SliderInt2(label, v, vmin, vmax, fmt, flags);
+			else if constexpr (N == 3) used = ImGui::SliderInt3(label, v, vmin, vmax, fmt, flags);
+			else used = ImGui::SliderInt4(label, v, vmin, vmax, fmt, flags);
 			PushIntArray(state, v, N);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1346,7 +1556,8 @@ namespace YimMenu::Lua
 			float vmin        = (float)luaL_checknumber(state, 5);
 			float vmax        = (float)luaL_checknumber(state, 6);
 			const char* fmt   = lua_isnoneornil(state, 7) ? "%.3f" : luaL_checkstring(state, 7);
-			bool used = ImGui::VSliderFloat(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 8, ImGuiSliderFlags_None));
+			bool used = ImGui::VSliderFloat(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, flags);
 			lua_pushnumber(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1361,7 +1572,8 @@ namespace YimMenu::Lua
 			int vmin          = (int)luaL_checkinteger(state, 5);
 			int vmax          = (int)luaL_checkinteger(state, 6);
 			const char* fmt   = lua_isnoneornil(state, 7) ? "%d" : luaL_checkstring(state, 7);
-			bool used = ImGui::VSliderInt(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, 0);
+			const ImGuiSliderFlags flags = static_cast<ImGuiSliderFlags>(luaL_optinteger(state, 8, ImGuiSliderFlags_None));
+			bool used = ImGui::VSliderInt(label, ImVec2(sx, sy), &value, vmin, vmax, fmt, flags);
 			lua_pushinteger(state, value);
 			lua_pushboolean(state, used);
 			return 2;
@@ -1535,7 +1747,14 @@ namespace YimMenu::Lua
 			float c[4];
 			ReadFloatArray(state, 2, c, 4);
 			int flags = (int)luaL_optinteger(state, 3, 0);
-			bool used = ImGui::ColorPicker4(label, c, flags);
+			float reference_color[4];
+			const float* reference = nullptr;
+			if (!lua_isnoneornil(state, 4))
+			{
+				ReadFloatArray(state, 4, reference_color, 4);
+				reference = reference_color;
+			}
+			bool used = ImGui::ColorPicker4(label, c, flags, reference);
 			PushFloatArray(state, c, 4);
 			lua_pushboolean(state, used);
 			return 2;
@@ -2108,11 +2327,13 @@ namespace YimMenu::Lua
 
 		static int CalcTextSize(lua_State* state)
 		{
+			if (lua_gettop(state) > 3)
+				return luaL_error(state, "ImGui.CalcTextSize expects text, optional hide_text_after_double_hash and optional wrap_width");
+
 			const char* text   = CheckStringSafe(state, 1);
-			const char* tend   = lua_isnoneornil(state, 2) ? nullptr : luaL_checkstring(state, 2);
-			bool hide_after_dh = lua_isnoneornil(state, 3) ? false : lua_toboolean(state, 3);
-			float wrap         = (float)luaL_optnumber(state, 4, -1.0);
-			ImVec2 sz = ImGui::CalcTextSize(text, tend, hide_after_dh, wrap);
+			bool hide_after_dh = lua_isnoneornil(state, 2) ? false : CheckBooleanSafe(state, 2);
+			float wrap         = static_cast<float>(luaL_optnumber(state, 3, -1.0));
+			ImVec2 sz = ImGui::CalcTextSize(text, nullptr, hide_after_dh, wrap);
 			lua_pushnumber(state, sz.x);
 			lua_pushnumber(state, sz.y);
 			return 2;
@@ -2289,7 +2510,23 @@ namespace YimMenu::Lua
 
 		virtual void Register(lua_State* state) override
 		{
+			luaL_newmetatable(state, "DrawList");
 			lua_newtable(state);
+			SetFunction(state, DrawListAddText, "AddText");
+			SetFunction(state, DrawListAddLine, "AddLine");
+			SetFunction(state, DrawListAddRect, "AddRect");
+			SetFunction(state, DrawListAddRectFilled, "AddRectFilled");
+			SetFunction(state, DrawListAddRectFilledMultiColor, "AddRectFilledMultiColor");
+			SetFunction(state, DrawListAddTriangle, "AddTriangle");
+			SetFunction(state, DrawListAddTriangleFilled, "AddTriangleFilled");
+			SetFunction(state, DrawListAddCircle, "AddCircle");
+			SetFunction(state, DrawListAddCircleFilled, "AddCircleFilled");
+			lua_setfield(state, -2, "__index");
+			Metatable<DrawListHandle>::Register(state);
+
+			lua_newtable(state);
+			SetFunction(state, GetWindowDrawList, "GetWindowDrawList");
+			SetFunction(state, GetForegroundDrawList, "GetForegroundDrawList");
 
 			// Internal / drawing
 			SetFunction(state, AddCircle, "AddCircle");
@@ -3002,6 +3239,16 @@ namespace YimMenu::Lua
 			});
 			RegisterEnum(state, "ImGuiDir", dir.data(), dir.size());
 
+			static constexpr auto buttonFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiButtonFlags_None},
+			    {"MouseButtonLeft", ImGuiButtonFlags_MouseButtonLeft},
+			    {"MouseButtonRight", ImGuiButtonFlags_MouseButtonRight},
+			    {"MouseButtonMiddle", ImGuiButtonFlags_MouseButtonMiddle},
+			    {"MouseButtonMask_", ImGuiButtonFlags_MouseButtonMask_},
+			    {"EnableNav", ImGuiButtonFlags_EnableNav},
+			});
+			RegisterEnum(state, "ImGuiButtonFlags", buttonFlags.data(), buttonFlags.size());
+
 			static constexpr auto comboFlags = std::to_array<EnumEntry>({
 			    {"None", ImGuiComboFlags_None},
 			    {"PopupAlignLeft", ImGuiComboFlags_PopupAlignLeft},
@@ -3045,6 +3292,20 @@ namespace YimMenu::Lua
 			    {"CallbackEdit", ImGuiInputTextFlags_CallbackEdit},
 			});
 			RegisterEnum(state, "ImGuiInputTextFlags", inputFlags.data(), inputFlags.size());
+
+			static constexpr auto sliderFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiSliderFlags_None},
+			    {"Logarithmic", ImGuiSliderFlags_Logarithmic},
+			    {"NoRoundToFormat", ImGuiSliderFlags_NoRoundToFormat},
+			    {"NoInput", ImGuiSliderFlags_NoInput},
+			    {"WrapAround", ImGuiSliderFlags_WrapAround},
+			    {"ClampOnInput", ImGuiSliderFlags_ClampOnInput},
+			    {"ClampZeroRange", ImGuiSliderFlags_ClampZeroRange},
+			    {"NoSpeedTweaks", ImGuiSliderFlags_NoSpeedTweaks},
+			    {"AlwaysClamp", ImGuiSliderFlags_AlwaysClamp},
+			    {"InvalidMask_", ImGuiSliderFlags_InvalidMask_},
+			});
+			RegisterEnum(state, "ImGuiSliderFlags", sliderFlags.data(), sliderFlags.size());
 
 			static constexpr auto colorEdit = std::to_array<EnumEntry>({
 			    {"None", ImGuiColorEditFlags_None},
@@ -3229,6 +3490,12 @@ namespace YimMenu::Lua
 			    {"SizingMask_", ImGuiTableFlags_SizingMask_},
 			});
 			RegisterEnum(state, "ImGuiTableFlags", tableFlags.data(), tableFlags.size());
+
+			static constexpr auto tableRowFlags = std::to_array<EnumEntry>({
+			    {"None", ImGuiTableRowFlags_None},
+			    {"Headers", ImGuiTableRowFlags_Headers},
+			});
+			RegisterEnum(state, "ImGuiTableRowFlags", tableRowFlags.data(), tableRowFlags.size());
 
 			static constexpr auto styleVar = std::to_array<EnumEntry>({
 			    {"Alpha", ImGuiStyleVar_Alpha},

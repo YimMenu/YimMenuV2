@@ -1,4 +1,5 @@
 #pragma once
+#include "core/filemgr/FileMgr.hpp"
 #include "LuaScript.hpp"
 #include "LuaLibrary.hpp"
 #include "LuaResource.hpp"
@@ -62,9 +63,16 @@ namespace YimMenu
 		}
 
 	public:
-		static bool IsIncludeScript(const std::filesystem::path& path)
+		static bool IsIncludeScript(const std::filesystem::path& path, const std::filesystem::path& scripts_folder = FileMgr::GetProjectFolder("./scripts").Path())
 		{
-			return path.parent_path().filename().string().contains("include");
+			auto root = scripts_folder.lexically_normal();
+			auto file = (path.is_absolute() ? path : root / path).lexically_normal();
+			auto relative = file.lexically_relative(root);
+			if (relative.empty() || relative.has_root_path() || *relative.begin() == "..")
+				return false;
+			return std::ranges::any_of(relative.parent_path(), [](const std::filesystem::path& folder) {
+				return folder.string().contains("include");
+			});
 		}
 
 		static std::filesystem::path MoveScriptFile(const std::filesystem::path& path, const std::filesystem::path& scripts_folder, bool enable)
@@ -73,7 +81,7 @@ namespace YimMenu
 			auto root = fs::canonical(scripts_folder);
 			auto source = fs::canonical(path);
 			auto relative = source.lexically_relative(root);
-			if (relative.empty() || relative.has_root_path() || *relative.begin() == ".." || source.extension() != ".lua" || IsIncludeScript(source) || !fs::is_regular_file(source))
+			if (relative.empty() || relative.has_root_path() || *relative.begin() == ".." || source.extension() != ".lua" || IsIncludeScript(source, root) || !fs::is_regular_file(source))
 				throw fs::filesystem_error("script is outside the scripts directory or is an include file", source, std::make_error_code(std::errc::invalid_argument));
 			if (*relative.begin() == "disabled")
 				relative = relative.lexically_relative("disabled");
@@ -113,15 +121,15 @@ namespace YimMenu
 				if (entry->is_directory(ec))
 				{
 					auto folder = fs::canonical(entry->path(), ec);
-					if (ec || folder != entry->path() || (!include_disabled && disabled_folder(folder)))
+					if (ec || folder != entry->path() || folder.filename().string().contains("include") || (!include_disabled && disabled_folder(folder)))
 						entry.disable_recursion_pending();
 					continue;
 				}
-				if (entry->path().extension() != ".lua" || IsIncludeScript(entry->path()) || !entry->is_regular_file(ec))
+				if (entry->path().extension() != ".lua" || IsIncludeScript(entry->path(), root) || !entry->is_regular_file(ec))
 					continue;
 
 				auto file = fs::canonical(entry->path(), ec);
-				if (ec || IsIncludeScript(file) || (!include_disabled && disabled_folder(file.parent_path())))
+				if (ec || IsIncludeScript(file, root) || (!include_disabled && disabled_folder(file.parent_path())))
 					continue;
 				auto relative = file.lexically_relative(root);
 				if (relative.empty() || relative.has_root_path() || *relative.begin() == "..")

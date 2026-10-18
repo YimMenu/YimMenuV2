@@ -176,46 +176,56 @@ namespace YimMenu
 
 	void LuaScript::Unload()
 	{
+		std::lock_guard lock(m_ExecutionLock);
 		if (m_LoadState == LoadState::RUNNING)
 		{
 			DispatchEvent(MenuEvent::Unload, [](lua_State* state){
 				return 0;
 			});
 			m_LoadState = LoadState::WANT_UNLOAD;
+			m_Interface.SetMouseOverride(false);
 		}
 	}
 
 	void LuaScript::Reload()
 	{
+		std::lock_guard lock(m_ExecutionLock);
 		if (m_LoadState == LoadState::RUNNING)
 		{
 			DispatchEvent(MenuEvent::Unload, [](lua_State* state){
 				return 0;
 			});
 			m_LoadState = LoadState::WANT_RELOAD;
+			m_Interface.SetMouseOverride(false);
 		}
 	}
 
 	void LuaScript::Pause()
 	{
+		std::lock_guard lock(m_ExecutionLock);
 		if (m_LoadState == LoadState::RUNNING)
 		{
 			DisableResources();
 			m_LoadState = LoadState::PAUSED;
+			m_Interface.SuspendMouseOverride(true);
 		}
 	}
 
 	void LuaScript::Resume()
 	{
+		std::lock_guard lock(m_ExecutionLock);
 		if (m_LoadState == LoadState::PAUSED)
 		{
 			EnableResources();
 			m_LoadState = LoadState::RUNNING;
+			m_Interface.SuspendMouseOverride(false);
 		}
 	}
 
 	void LuaScript::MarkUnloaded()
 	{
+		std::lock_guard lock(m_ExecutionLock);
+		m_Interface.SetMouseOverride(false);
 		DisableResources();
 		m_LoadState = LoadState::UNLOADED;
 	}
@@ -305,7 +315,11 @@ namespace YimMenu
 		int handler = lua_gettop(m_State) - 1;
 		lua_insert(m_State, handler); // move handler before the function
 
-		if (lua_pcall(m_State, 0, 0, handler) != LUA_OK)
+		const bool was_rendering = std::exchange(m_RunningRenderCallback, true);
+		const auto result = lua_pcall(m_State, 0, 0, handler);
+		m_RunningRenderCallback = was_rendering;
+
+		if (result != LUA_OK)
 		{
 			LOGF(FATAL, "{}: {}", m_ModuleName, lua_tostring(m_State, -1));
 			lua_pop(m_State, 1); // pop the stack trace
@@ -329,6 +343,7 @@ namespace YimMenu
 			lua_rawgeti(m_State, LUA_REGISTRYINDEX, callback.m_Coroutine);
 			lua_State* coro_state = lua_tothread(m_State, -1);
 			lua_pop(m_State, 1);
+			callback.m_CoroState = coro_state;
 
 			int num_args = callback.m_InitialArgs;
 			callback.m_InitialArgs = 0;

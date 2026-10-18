@@ -123,6 +123,7 @@ namespace YimMenu::Features
 	static void NetGameServerBasketAddItemHook(rage::scrNativeCallContext* ctx);
 	static void UseFakeMPCashHook(rage::scrNativeCallContext* ctx);
 	static void ChangeFakeMPCashHook(rage::scrNativeCallContext* ctx);
+	static void NetworkCanSpendMoneyHook(rage::scrNativeCallContext* ctx);
 
 	class FreeShopping : public BoolCommand
 	{
@@ -134,6 +135,9 @@ namespace YimMenu::Features
 		virtual void OnEnable() override
 		{
 			static auto initHooks = []() {
+				NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS,
+				    NativeIndex::NETWORK_CAN_SPEND_MONEY,
+				    &NetworkCanSpendMoneyHook);
 				NativeHooks::AddHook(NativeHooks::ALL_SCRIPTS,
 				    NativeIndex::NET_GAMESERVER_GET_PRICE,
 				    &NetGameServerGetPriceHook);
@@ -358,5 +362,17 @@ namespace YimMenu::Features
 			return;
 
 		HUD::CHANGE_FAKE_MP_CASH(ctx->GetArg<int>(0), ctx->GetArg<int>(1));
+	}
+	
+	static void NetworkCanSpendMoneyHook(rage::scrNativeCallContext* ctx)
+	{
+		if (_FreeShopping.GetState())
+		{
+			ctx->SetReturnValue(TRUE);
+			return;
+		}
+
+		NativeInvoker::GetNativeHandler(
+		    NativeIndex::NETWORK_CAN_SPEND_MONEY)(ctx);
 	}
 }

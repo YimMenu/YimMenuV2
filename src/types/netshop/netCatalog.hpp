@@ -4,24 +4,13 @@ namespace rage
 {
 	struct netCatalogNode
 	{
-		std::uint32_t m_KeyHash;        // 0x00
-		std::uint32_t m_Unknown04;      // 0x04
-		void* m_Unknown08;              // 0x08
-		netCatalogNode* m_Next;         // 0x10
-		std::uint8_t m_Unknown18[0x08]; // 0x18
-		netCatalogBaseItem m_Item;      // 0x20
-
-		netCatalogBaseItem* Item()
-		{
-			return &m_Item;
-		}
-		const netCatalogBaseItem* Item() const
-		{
-			return &m_Item;
-		}
+		std::uint32_t m_KeyHash;    // 0x00
+		std::uint32_t m_Unknown04;  // 0x04
+		netCatalogBaseItem* m_Item; // 0x08
+		netCatalogNode* m_Next;     // 0x10
 	};
-	static_assert(offsetof(netCatalogNode, m_Next) == 0x10);
-	static_assert(offsetof(netCatalogNode, m_Item) == 0x20);
+	static_assert(sizeof(netCatalogNode) == 0x18);
+
 
 	class netCatalog
 	{
@@ -35,14 +24,20 @@ namespace rage
 		std::uint32_t m_CatalogVersion;             // 0x58
 		std::uint32_t m_CatalogLatestVersion; // 0x5C
 
-		template<typename Fn>
+        template<typename Fn>
 		void ForEachItem(Fn&& fn) const
 		{
-			for (std::uint16_t i = 0; i < m_BucketCount; ++i)
+			if (!m_BucketArray || !m_BucketCount)
+				return;
+
+			for (std::uint32_t i = 0; i < m_BucketCount; ++i)
 			{
-				for (auto* node = m_BucketArray[i]; node; node = node->m_Next)
+				for (auto* node = m_BucketArray[i];
+				    node;
+				    node = node->m_Next)
 				{
-					fn(*node->Item());
+					if (node->m_Item)
+						fn(*node->m_Item);
 				}
 			}
 		}

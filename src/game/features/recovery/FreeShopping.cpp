@@ -247,11 +247,6 @@ namespace YimMenu::Features
 		}
 
 
-		if (itemId == "SERVICE_SPEND_STYLIST_FEE"_J)
-		{
-			ctx->SetReturnValue(TRUE); 
-			return;
-		}
 
 
         if (freeShopping && IsPropertyAction(CurrentBasketAction) && originalPrice > 0)

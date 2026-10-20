@@ -241,6 +241,13 @@ namespace YimMenu::Features
 		}
 
 
+		if (itemId == "SERVICE_SPEND_STYLIST_FEE"_J)
+		{
+			ctx->SetReturnValue(TRUE); 
+			return;
+		}
+
+
         if (freeShopping && IsPropertyAction(CurrentBasketAction) && originalPrice > 0)
 		{
 			const int statValue = GetStatValueFromHash(static_cast<joaat_t>(itemData->Item));

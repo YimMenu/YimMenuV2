@@ -240,6 +240,12 @@ namespace YimMenu::Features
 			return;
 		}
 
+		if (itemId == "SERVICE_SPEND_STYLIST_FEE"_J)
+		{
+			ctx->SetReturnValue(TRUE);
+			return;
+		}
+
 
 		if (itemId == "SERVICE_SPEND_STYLIST_FEE"_J)
 		{

@@ -308,6 +308,9 @@ namespace YimMenu::Features
 		}
 
 		if (originalPrice > 0 && IsPropertyAction(_BasketContext.Action))
+
+
+        if (_FreeShopping.GetState() && IsPropertyAction(_BasketContext.Action) && originalPrice > 0)
 		{
 			PropertyReplacement(*item, originalPrice);
 			forward(item);

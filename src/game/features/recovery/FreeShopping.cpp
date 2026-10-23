@@ -17,38 +17,7 @@ namespace YimMenu::Features
 
 
 	constexpr joaat_t FreePurchaseCoupon = "PO_COUPON_CAR_XMAS2017"_J;
-
-
-	static bool IsPropertyAction(joaat_t action)
-	{
-		return action == "NET_SHOP_ACTION_BUY_PROPERTY"_J
-		    || action == "NET_SHOP_ACTION_BUY_WAREHOUSE"_J;
-	}
-
-    static int GetStatValueFromHash(joaat_t itemHash)
-	{
-		auto* catalog = Pointers.NetCatalog;
-		if (!catalog)
-			return -1;
-
-		int result = -1;
-
-		catalog->ForEachItem([&](const rage::netCatalogBaseItem& item) {
-			if (result != -1)
-				return;
-			if (item.m_Hash == itemHash)
-				result = item.m_StatValue;
-		});
-
-		return result;
-	}
-
-    static bool IsPlayerInCasino()
-	{
-		const auto interior = INTERIOR::GET_INTERIOR_FROM_ENTITY(PLAYER::PLAYER_PED_ID());
-
-		return interior == 275201;
-	}
+	constexpr int CasinoInteriorId = 275201;
 
 
 	constexpr joaat_t DiscountModifiers[] = {
@@ -106,16 +75,108 @@ namespace YimMenu::Features
 	    "PM_WEAPON_DISCOUNT_SILVER_HEADSHOT"_J,
 	    "PM_WEAPON_DISCOUNT_SILVER_KILLS"_J,
 	    "PM_WEAPON_DISCOUNT_SILVER_MEDAL"_J,
-	    "PM_WEAPON_PIM_AMMO_INCREASE"_J};
+	    "PM_WEAPON_PIM_AMMO_INCREASE"_J
+	};
+
+	struct BasketContext
+	{
+		joaat_t Category = 0;
+		joaat_t Action = 0;
+	};
+
+	BasketContext _BasketContext{};
+
+
+	struct CatalogCandidate
+	{
+		joaat_t Hash{};
+		int Price{};
+	};
+
+	static bool IsPropertyAction(joaat_t action)
+	{
+		return action == "NET_SHOP_ACTION_BUY_PROPERTY"_J
+		    || action == "NET_SHOP_ACTION_BUY_WAREHOUSE"_J;
+	}
+
+
+	static bool IsWarehouseCategory(joaat_t category)
+	{
+		return category == "CATEGORY_WAREHOUSE"_J
+		    || category == "CATEGORY_INVENTORY_WAREHOUSE"_J
+		    || category == "CATEGORY_WAREHOUSE_INTERIOR"_J
+		    || category == "CATEGORY_INVENTORY_WAREHOUSE_INTERIOR"_J;
+	}
 
 	static bool IsDiscountModifier(joaat_t itemId)
 	{
 		return std::ranges::contains(DiscountModifiers, itemId);
 	}
 
+	static bool IsPlayerInCasino()
+	{
+		return INTERIOR::GET_INTERIOR_FROM_ENTITY(
+		           PLAYER::PLAYER_PED_ID())
+		    == CasinoInteriorId;
+	}
 
-	static joaat_t CurrentBasketAction = 0;
-	static joaat_t CurrentBasketCategory = 0;
+	static std::optional<std::int32_t> GetStatValue(joaat_t hash)
+	{
+		auto* catalog = Pointers.NetCatalog;
+		if (!catalog)
+			return std::nullopt;
+
+		std::optional<std::int32_t> result;
+		catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
+			if (!result && entry.m_Hash == hash)
+				result = entry.m_StatValue;
+		});
+		return result;
+	}
+
+	static std::optional<CatalogCandidate> FindCheapestEntry(
+	    std::int32_t statValue, bool warehouseOnly)
+	{
+		auto* catalog = Pointers.NetCatalog;
+		if (!catalog)
+			return std::nullopt;
+
+		std::optional<CatalogCandidate> best;
+		catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
+			if (entry.m_Hash == 0 || entry.m_StatValue != statValue || entry.m_Price < 0)
+				return;
+
+			if (warehouseOnly && !IsWarehouseCategory(entry.m_CategoryHash))
+				return;
+
+			if (!best || entry.m_Price < best->Price)
+				best = CatalogCandidate{entry.m_Hash, entry.m_Price};
+		});
+		return best;
+	}
+
+
+	static void PropertyReplacement(BASKET_ITEM_DATA& item, int originalPrice)
+	{
+		const auto statValue = GetStatValue(
+		    static_cast<joaat_t>(item.Item));
+		if (!statValue)
+			return;
+
+		std::optional<CatalogCandidate> candidate;
+		if (_BasketContext.Action == "NET_SHOP_ACTION_BUY_WAREHOUSE"_J)
+			candidate = FindCheapestEntry(*statValue, true);
+
+		if (!candidate || candidate->Price >= originalPrice)
+			candidate = FindCheapestEntry(*statValue, false);
+
+		if (candidate)
+		{
+			item.Item = candidate->Hash;
+			item.Price = candidate->Price;
+		}
+	}
+
 
 
 	static void NetGameServerGetPriceHook(rage::scrNativeCallContext* ctx);
@@ -208,8 +269,8 @@ namespace YimMenu::Features
 
 	static void NetGameServerBasketStartHook(rage::scrNativeCallContext* ctx)
 	{
-		CurrentBasketCategory = ctx->GetArg<joaat_t>(1);
-		CurrentBasketAction = ctx->GetArg<joaat_t>(2);
+		_BasketContext.Category = ctx->GetArg<joaat_t>(1);
+		_BasketContext.Action = ctx->GetArg<joaat_t>(2);
 
 		NativeInvoker::GetNativeHandler(
 		    NativeIndex::NET_GAMESERVER_BASKET_START)(ctx);
@@ -218,133 +279,78 @@ namespace YimMenu::Features
 
 	static void NetGameServerBasketAddItemHook(rage::scrNativeCallContext* ctx)
 	{
-		auto* itemData = ctx->GetArg<BASKET_ITEM_DATA*>(0);
+		auto* item = ctx->GetArg<BASKET_ITEM_DATA*>(0);
 		const int quantity = ctx->GetArg<int>(1);
 
-		if (itemData == nullptr)
+		if (!item)
 		{
 			ctx->SetReturnValue(FALSE);
 			return;
 		}
 
-        const joaat_t itemId = static_cast<joaat_t>(itemData->Key);
-		const int originalPrice = itemData->Price;
-
-
-        const auto callOriginal = [quantity](BASKET_ITEM_DATA* entry) -> BOOL {
+		const auto addItem = [quantity](BASKET_ITEM_DATA* entry) -> BOOL {
 			return NETSHOPPING::NET_GAMESERVER_BASKET_ADD_ITEM(entry, quantity);
 		};
 
-		const bool freeShopping = _FreeShopping.GetState();
+		const auto forward = [&](BASKET_ITEM_DATA* entry) {
+			ctx->SetReturnValue(addItem(entry));
+		};
 
-
-        if (CurrentBasketCategory == "CATEGORY_CASINO_CHIPS"_J)
+		if (!_FreeShopping.GetState() || _BasketContext.Category == "CATEGORY_CASINO_CHIPS"_J)
 		{
-			ctx->SetReturnValue(callOriginal(itemData));
+			forward(item);
 			return;
 		}
 
+		const joaat_t itemId = static_cast<joaat_t>(item->Key);
+		const int originalPrice = item->Price;
 
-        if (freeShopping && IsPropertyAction(CurrentBasketAction) && originalPrice > 0)
-		{
-			const int statValue = GetStatValueFromHash(static_cast<joaat_t>(itemData->Item));
-
-			if (statValue >= 0)
-			{
-				joaat_t bestHash = 0;
-				int bestPrice = INT_MAX;
-				auto* catalog = Pointers.NetCatalog;
-
-				if (catalog != nullptr)
-				{
-					const bool isWarehouseAction =
-					    CurrentBasketAction == "NET_SHOP_ACTION_BUY_WAREHOUSE"_J;
-
-					if (isWarehouseAction)
-					{
-						catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
-							if (entry.m_StatValue != statValue)
-								return;
-							if (entry.m_Price < 0 || entry.m_Price >= bestPrice)
-								return;
-
-							const auto cat = entry.m_CategoryHash;
-							const bool isWarehouse =
-							    cat == "CATEGORY_WAREHOUSE"_J
-							    || cat == "CATEGORY_INVENTORY_WAREHOUSE"_J
-							    || cat == "CATEGORY_WAREHOUSE_INTERIOR"_J
-							    || cat == "CATEGORY_INVENTORY_WAREHOUSE_INTERIOR"_J;
-
-							if (!isWarehouse)
-								return;
-
-							bestHash = entry.m_Hash;
-							bestPrice = entry.m_Price;
-						});
-					}
-
-					if (bestHash == 0 || bestPrice >= originalPrice)
-					{
-						bestHash = 0;
-						bestPrice = INT_MAX;
-
-						catalog->ForEachItem([&](const rage::netCatalogBaseItem& entry) {
-							if (entry.m_StatValue != statValue)
-								return;
-							if (entry.m_Price < 0 || entry.m_Price >= bestPrice)
-								return;
-
-							bestHash = entry.m_Hash;
-							bestPrice = entry.m_Price;
-						});
-					}
-				}
-
-				if (bestHash != 0)
-				{
-					itemData->Item = bestHash;
-					itemData->Price = bestPrice;
-				}
-			}
-
-			ctx->SetReturnValue(callOriginal(itemData));
-			return;
-		}
-
-
-		if (freeShopping && IsDiscountModifier(itemId))
+		if (itemId == "SERVICE_SPEND_STYLIST_FEE"_J)
 		{
 			ctx->SetReturnValue(TRUE);
 			return;
 		}
 
-
-	   const bool isCasinoClothing = CurrentBasketCategory == "CATEGORY_CLOTH"_J && IsPlayerInCasino();
-
-	   const bool applyCoupon = freeShopping && (originalPrice > 0 || isCasinoClothing);
+		if (originalPrice > 0 && IsPropertyAction(_BasketContext.Action))
 
 
-
-        if (applyCoupon)
+        if (_FreeShopping.GetState() && IsPropertyAction(_BasketContext.Action) && originalPrice > 0)
 		{
-			itemData->Price = 0;
-		}
-
-		const BOOL itemAdded = callOriginal(itemData);
-
-		if (applyCoupon && itemAdded)
-		{
-			BASKET_ITEM_DATA couponData{};
-			couponData.Key = FreePurchaseCoupon;
-			couponData.Item = itemId;
-			couponData.Price = 0;
-			couponData.StatValue = itemData->StatValue;
-
-			ctx->SetReturnValue(callOriginal(&couponData));
+			PropertyReplacement(*item, originalPrice);
+			forward(item);
 			return;
 		}
 
-		ctx->SetReturnValue(itemAdded);
+		if (IsDiscountModifier(itemId))
+		{
+			ctx->SetReturnValue(TRUE);
+			return;
+		}
+
+		const bool isCasinoClothing =
+		    _BasketContext.Category == "CATEGORY_CLOTH"_J && IsPlayerInCasino();
+
+		const bool applyCoupon = originalPrice > 0 || isCasinoClothing;
+
+		if (applyCoupon)
+			item->Price = 0;
+
+		const BOOL itemAdded = addItem(item);
+
+		if (!applyCoupon || !itemAdded)
+		{
+			ctx->SetReturnValue(itemAdded);
+			return;
+		}
+
+		BASKET_ITEM_DATA coupon{};
+		coupon.Key = FreePurchaseCoupon;
+		coupon.Item = itemId;
+		coupon.Price = 0;
+		coupon.StatValue = item->StatValue;
+
+		ctx->SetReturnValue(addItem(&coupon));
+
 	}
 
 

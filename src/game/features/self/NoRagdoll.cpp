@@ -22,7 +22,7 @@ namespace YimMenu::Features
 				return;
 
 			Self::GetPed().SetRagdoll(true);
-			Self::GetPlayer().SetFallDistanceOverride(0.0f);
+			Self::GetPlayer().SetFallDistanceOverride(-1.0f);
 		}
 	};
 

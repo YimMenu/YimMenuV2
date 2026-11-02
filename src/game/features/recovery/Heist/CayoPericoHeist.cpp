@@ -276,6 +276,33 @@ namespace YimMenu::Features
 			}
 		};
 
+		class TakeSecondaryTarget : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_2020"_J))
+					*ScriptLocal(thread, 29373).At(11).As<int*>() = 3;
+					PAD::SET_CONTROL_VALUE_NEXT_FRAME(0, 219, 1.0);
+			}
+		};
+
+		class SoloMantrap : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_2020"_J))
+				{
+					*ScriptLocal(thread, 69374).At(0, 293).At(236).As<int*>() = 7;
+					ScriptMgr::Yield(200ms);
+					*ScriptLocal(thread, 21215).As<int*>() = 1;
+				}
+			}
+		};
+
 		class InstantFinish : public Command
 		{
 			using Command::Command;
@@ -301,7 +328,9 @@ namespace YimMenu::Features
 		static SkipHacking _CayoPericoHeistSkipHacking{"cayopericoheistskiphacking", "Skip Hacking", "Skips hacking process"};
 		static CutSewer _CayoPericoHeistCutSewer{"cayopericoheistcutsewer", "Cut Sewer", "Cuts the sewer"};
 		static CutGlass _CayoPericoHeistCutGlass{"cayopericoheistcutglass", "Cut Glass", "Cuts the glass"};
+		static SoloMantrap _CayoPericoHeistSoloMantrap{"cayopericoheistsolomantrap", "Solo Mantrap", "Skips card swiping process"};
 		static TakePrimaryTarget _CayoPericoHeistTakePrimaryTarget{"cayopericoheisttakeprimarytarget", "Take Primary Target", "Takes primary target"};
+		static TakeSecondaryTarget _CayoPericoHeistTakeSecondaryTarget{"cayopericoheisttakesecondarytarget", "Take Secondary Target", "Takes secondary target"};
 		static InstantFinish _CayoPericoHeistInstantFinish{"cayopericoheistinstantfinish", "Instant Finish", "Instantly passes the heist"};
 	}
 }

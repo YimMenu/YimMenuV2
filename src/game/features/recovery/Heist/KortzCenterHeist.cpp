@@ -45,13 +45,13 @@ namespace YimMenu::Features
 		};
 		static ListCommand _KortzCenterPrimaryTarget{"kortzcenterheistprimarytarget", "Primary Target", "Primary target", kortzCenterTargets, 0};
 
-		// --- General Purchases (MPX_K26_GENERAL_BS bits 5-8) ---
-		static BoolCommand _KortzCenterGuardRoutes{"kortzcenterheistguardroutes", "Guard Routes", "Guard routes purchased", true};
-		static BoolCommand _KortzCenterGlassCutter{"kortzcenterheistglasscutter", "Glass Cutter", "Glass cutter purchased", true};
-		static BoolCommand _KortzCenterPowerDrills{"kortzcenterheistpowerdrills", "Power Drills", "Power drills purchased", true};
-		static BoolCommand _KortzCenterEMPCharges{"kortzcenterheistempcharges", "EMP Charges", "EMP charges purchased", true};
+		static BoolCommand _KortzCenterHardMode{"kortzcenterheisthardmode", "Hard Mode", "Enables hard mode", true};
 
-		// --- Prep Work Items ---
+		// --- Preps ---
+		static BoolCommand _KortzCenterGuardRoutes{"kortzcenterheistguardroutes", "Guard Routes", "Guard routes", true};
+		static BoolCommand _KortzCenterGlassCutter{"kortzcenterheistglasscutter", "Glass Cutter", "Glass cutter", true};
+		static BoolCommand _KortzCenterPowerDrills{"kortzcenterheistpowerdrills", "Power Drills", "Power drills", true};
+		static BoolCommand _KortzCenterEMPCharges{"kortzcenterheistempcharges", "EMP Charges", "EMP charges", true};
 		static BoolCommand _KortzCenterScopeOut{"kortzcenterheistscopeout", "Scope Out", "Scope out Kortz Center", true};
 		static BoolCommand _KortzCenterAlphaMail{"kortzcenterheistalphamail", "Alpha Mail Disguise", "Alpha mail disguise", true};
 		static BoolCommand _KortzCenterHazmat{"kortzcenterheisthazmat", "Hazmat Suit", "Hazmat suit", true};
@@ -63,15 +63,7 @@ namespace YimMenu::Features
 		static BoolCommand _KortzCenterCaracara{"kortzcenterheistcaracara", "Armored Caracara", "Armored Caracara", true};
 		static BoolCommand _KortzCenterAnnihilator{"kortzcenterheistannihilator", "Annihilator Stealth", "Annihilator stealth", true};
 		static BoolCommand _KortzCenterManchez{"kortzcenterheistmanchez", "Manchez", "Manchez", true};
-		static BoolCommand _KortzCenterPrepEMP{"kortzcenterheistprepemp", "EMP Charges (Prep)", "EMP charges prep", true};
 		static BoolCommand _KortzCenterGuardShipments{"kortzcenterheistguardshipments", "Guard Shipments", "Guard shipments", true};
-		static BoolCommand _KortzCenterGuardRoutesPrep{"kortzcenterheistguardroutesprep", "Guard Routes (Prep)", "Guard routes prep", true};
-		static BoolCommand _KortzCenterGlassCutterPrep{"kortzcenterheistglasscutterprep", "Glass Cutter (Prep)", "Glass cutter prep", true};
-		static BoolCommand _KortzCenterPowerDrillsPrep{"kortzcenterheistpowerdrillsprep", "Power Drills (Prep)", "Power drills prep", true};
-		static BoolCommand _KortzCenterEMPChargesPrep{"kortzcenterheistempchargesprep", "EMP Charges (Prep)", "EMP charges prep", true};
-		static BoolCommand _KortzCenterCaracaraPrep{"kortzcenterheistcaracaraprep", "Caracara (Prep)", "Armored Caracara prep", true};
-		static BoolCommand _KortzCenterAnnihilatorPrep{"kortzcenterheistannihilatorprep", "Annihilator (Prep)", "Annihilator stealth prep", true};
-		static BoolCommand _KortzCenterManchezPrep{"kortzcenterheistmanchezprep", "Manchez (Prep)", "Manchez prep", true};
 
 		// --- Scoping ---
 		static BoolCommand _KortzCenterScopeSecondary{"kortzcenterheistscopesecondary", "Secondary Targets", "Scope secondary targets", true};
@@ -121,7 +113,10 @@ namespace YimMenu::Features
 			virtual void OnCall() override
 			{
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
-					*ScriptLocal(thread, 32855).At(4, 13).At(3).As<float*>() = 100.0f;
+				{
+					for (int i = 0; i <= 4; i++)
+						*ScriptLocal(thread, 32855).At(i, 13).At(3).As<float*>() = 100.0f;
+				}
 			}
 		};
 
@@ -133,7 +128,7 @@ namespace YimMenu::Features
 			{
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
 				{
-					*ScriptLocal(thread, 70416).As<int*>() = 4294784;
+					*ScriptLocal(thread, 70416).As<int*>() = *ScriptLocal(thread, 70416).As<int*>() | (1 << 22);
 					*ScriptGlobal(1935711).As<int*>() |= 1;
 				}
 			}
@@ -157,7 +152,10 @@ namespace YimMenu::Features
 			virtual void OnCall() override
 			{
 				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+				{
 					*ScriptLocal(thread, 29355).At(11).As<int*>() = 3;
+					PAD::SET_CONTROL_VALUE_NEXT_FRAME(0, 219, 1.0);
+				}
 			}
 		};
 
@@ -179,6 +177,17 @@ namespace YimMenu::Features
 			}
 		};
 
+		class DisableCameras : public Command
+		{
+			using Command::Command;
+
+			virtual void OnCall() override
+			{
+				if (auto thread = Scripts::FindScriptThread("fm_mission_controller_v3"_J))
+					*ScriptLocal(thread, 70176).At(0, 295).At(237).At(0, 1).As<int*>() = *ScriptLocal(thread, 70176).At(0, 295).At(237).At(0, 1).As<int*>() | (1 << 21);
+			}
+		};
+
 		// --- Setup ---
 		class Setup : public Command
 		{
@@ -186,13 +195,45 @@ namespace YimMenu::Features
 
 			virtual void OnCall() override
 			{
-				int generalBits = -1;
-				if (!_KortzCenterGuardRoutes.GetState()) generalBits &= ~(1 << 5);
-				if (!_KortzCenterGlassCutter.GetState()) generalBits &= ~(1 << 6);
-				if (!_KortzCenterPowerDrills.GetState()) generalBits &= ~(1 << 7);
-				if (!_KortzCenterEMPCharges.GetState()) generalBits &= ~(1 << 8);
-
 				int robberyProg = -1;
+				int generalBits = -1;
+
+				if (!_KortzCenterGuardRoutes.GetState())
+				{
+					robberyProg &= ~(1 << 11);
+					generalBits &= ~(1 << 5);
+				}
+
+				if (!_KortzCenterGlassCutter.GetState())
+				{
+					robberyProg &= ~(1 << 13);
+					generalBits &= ~(1 << 6);
+				}
+
+				if (!_KortzCenterPowerDrills.GetState())
+				{
+					robberyProg &= ~(1 << 14);
+					generalBits &= ~(1 << 7);
+				}
+
+				if (!_KortzCenterEMPCharges.GetState())
+				{
+					robberyProg &= ~(1 << 15);
+					generalBits &= ~(1 << 8);
+				}
+
+				if (!_KortzCenterUnmarkedWeapons.GetState())
+				{
+					robberyProg &= ~(1 << 7);
+					generalBits &= ~((1 << 9) | (1 << 10) | (1 << 11));
+				}
+
+				if (!_KortzCenterManchez.GetState())
+				{
+					robberyProg &= ~(1 << 10);
+					generalBits &= ~((1 << 17) | (1 << 18) | (1 << 19) | (1 << 20));
+				}
+
 				if (!_KortzCenterScopeOut.GetState()) robberyProg &= ~(1 << 0);
 				if (!_KortzCenterAlphaMail.GetState()) robberyProg &= ~(1 << 1);
 				if (!_KortzCenterHazmat.GetState()) robberyProg &= ~(1 << 2);
@@ -200,28 +241,20 @@ namespace YimMenu::Features
 				if (!_KortzCenterTacticalEquip.GetState()) robberyProg &= ~(1 << 4);
 				if (!_KortzCenterHackingDevice.GetState()) robberyProg &= ~(1 << 5);
 				if (!_KortzCenterAccessCode.GetState()) robberyProg &= ~(1 << 6);
-				if (!_KortzCenterUnmarkedWeapons.GetState()) robberyProg &= ~(1 << 7);
 				if (!_KortzCenterCaracara.GetState()) robberyProg &= ~(1 << 8);
 				if (!_KortzCenterAnnihilator.GetState()) robberyProg &= ~(1 << 9);
-				if (!_KortzCenterManchez.GetState()) robberyProg &= ~(1 << 10);
-				if (!_KortzCenterPrepEMP.GetState()) robberyProg &= ~(1 << 11);
-				if (!_KortzCenterGuardShipments.GetState()) robberyProg &= ~(1 << 12);
-				if (!_KortzCenterGuardRoutesPrep.GetState()) robberyProg &= ~(1 << 13);
-				if (!_KortzCenterGlassCutterPrep.GetState()) robberyProg &= ~(1 << 14);
-				if (!_KortzCenterPowerDrillsPrep.GetState()) robberyProg &= ~(1 << 15);
+				if (!_KortzCenterHardMode.GetState()) generalBits &= ~(1 << 28);
+				if (!_KortzCenterGuardShipments.GetState()) robberyProg &= ~((1 << 12) | (1 << 31));
 
 				int scopingBS = _KortzCenterScopeSecondary.GetState() ? -1 : 0;
 				int poiBS = _KortzCenterScopePOI.GetState() ? -1 : 0;
-				int caracaraPrepBS = _KortzCenterCaracaraPrep.GetState() ? -1 : 0;
-				int annihilatorPrepBS = _KortzCenterAnnihilatorPrep.GetState() ? -1 : 0;
-				int manchezPrepBS = _KortzCenterManchezPrep.GetState() ? -1 : 0;
-				int empChargesPrepBS = _KortzCenterEMPChargesPrep.GetState() ? -1 : 0;
 
 				Stats::SetInt("MPX_K26_GENERAL_BS", generalBits);
 				Stats::SetInt("MPX_K26_GENERAL_BS2", -1);
 				Stats::SetInt("MPX_K26_ROBBERY_PROG", robberyProg);
 				Stats::SetInt("MPX_K26_SCOPING_BS", scopingBS);
 				Stats::SetInt("MPX_K26_POI_BS", poiBS);
+				Stats::SetInt("MPX_K26_STOLENLAST_BS", 0);
 				Stats::SetInt("MPX_K26_HEIST_TARGET", _KortzCenterPrimaryTarget.GetState());
 			}
 		};
@@ -235,5 +268,6 @@ namespace YimMenu::Features
 		static TakeSecondaryTarget _KortzCenterTakeSecondary{"kortzcenterheisttakesecondary", "Take Secondary Target", "Takes secondary loot (stand near it)"};
 		static Setup _KortzCenterSetup{"kortzcenterheistsetup", "Setup", "Sets up Kortz Center heist"};
 		static AutoEnterPcAccessCode _KortzCenterAutoEnterPcAccessCode{"kortzcenterheistautoenterpcaccesscode", "Auto-Enter PC Access Code", "Automatically enters the PC access code"};
+		static DisableCameras _KortzCenterDisableCameras{"kortzcenterheistdisablecameras", "Disable Cameras", "Disables interior cameras"};
 	}
 }

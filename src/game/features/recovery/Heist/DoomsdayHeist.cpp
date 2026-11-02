@@ -50,7 +50,7 @@ namespace YimMenu::Features
 		static std::vector<std::pair<int, const char*>> doomsdayHeistCategory = {
 			{0, "The Data Breaches"},
 			{1, "The Bogdan Problem"},
-			{2, "The Doomsday Senario"}
+			{2, "The Doomsday Scenario"}
 		};
 		static ListCommand _DoomsdayHeistCategory{"doomsdayheistcategory", "Select Heist", "Heist categories", doomsdayHeistCategory, 0};
 

@@ -483,7 +483,7 @@ namespace YimMenu
 			GetPresenceAttributes = ptr.As<Functions::GetPresenceAttributes>();
 		});
 
-		constexpr auto numHandlesPatchPtrn = Pattern<"83 FD 20 0F 87 38 02 00 00">("NumHandlesPatch");
+		constexpr auto numHandlesPatchPtrn = Pattern<"83 FD 20 0F 87">("NumHandlesPatch");
 		scanner.Add(numHandlesPatchPtrn, [this](PointerCalculator ptr) {
 			BytePatches::Add(ptr.Add(2).As<std::uint8_t*>(), 100)->Apply(); // change handle limit to 100
 		});

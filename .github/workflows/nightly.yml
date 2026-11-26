@@ -29,7 +29,7 @@ jobs:
           fi
 
   build_nightly:
-    runs-on: windows-latest
+    runs-on: windows-2022
     name: Build Nightly
     needs: check_recent_commit
     if: needs.check_recent_commit.outputs.should_run == 'true'

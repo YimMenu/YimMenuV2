@@ -72,6 +72,8 @@ namespace YimMenu
 		FontCfg.MergeMode = true;
 		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "arial.ttf").string().c_str(), size, &FontCfg, GetGlyphRangesCyrillicOnly());
 		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "meiryo.ttc").string().c_str(), size, &FontCfg, io.Fonts->GetGlyphRangesJapanese());
+		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "msyh.ttc").string().c_str(), size, &FontCfg, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "malgun.ttf").string().c_str(), size, &FontCfg, io.Fonts->GetGlyphRangesKorean());
 
 		io.Fonts->Build();
 

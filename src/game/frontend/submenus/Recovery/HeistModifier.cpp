@@ -16,7 +16,7 @@ namespace YimMenu::Submenus
 		heistTabBar->AddItem(RenderDiamondCasinoHeistMenu());
 		heistTabBar->AddItem(RenderCayoPericoHeistMenu());
 		heistTabBar->AddItem(RenderDoomsdayHeistMenu());
-	heistTabBar->AddItem(RenderKortzCenterHeistMenu());
+		heistTabBar->AddItem(RenderKortzCenterHeistMenu());
 
 		menu->AddItem(std::move(heistTabBar));
 

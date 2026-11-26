@@ -4,7 +4,7 @@ on: [ push, pull_request ]
 
 jobs:
   native-compilation:
-    runs-on: windows-latest
+    runs-on: windows-2022
     name: Native Compilation
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
             build/YimMenuV2-dev-*.pdb
 
   cross-compilation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Cross-compilation
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +55,8 @@ jobs:
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
+        with:
+          version: 0.17.0
 
       - name: Generate CMake project
         run: cmake -DUSE_CROSSCOMPILER=Zig -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja

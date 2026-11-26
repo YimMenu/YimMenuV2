@@ -43,7 +43,7 @@ jobs:
             build/YimMenuV2-dev-*.pdb
 
   cross-compilation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Cross-compilation
     steps:
       - uses: actions/checkout@v4

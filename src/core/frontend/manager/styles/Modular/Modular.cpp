@@ -2,6 +2,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/frontend/Menu.hpp"
 #include "core/frontend/manager/UIManager.hpp"
+#include "core/translation/Translation.hpp"
 #include "game/frontend/submenus/Settings/GUISettings.hpp"
 
 namespace YimMenu
@@ -79,9 +80,10 @@ namespace YimMenu
 				ImGui::PopFont();
 
 				// Label below button
-				ImVec2 labelSize = ImGui::CalcTextSize(submenu->m_Name.c_str());
+				const auto label = Translation::Tr(submenu->m_Name);
+				ImVec2 labelSize = ImGui::CalcTextSize(label.c_str());
 				ImVec2 labelPos(center.x - labelSize.x / 2, bubblePos.y + bubbleSize.y + 6);
-				drawList->AddText(labelPos, textColor, submenu->m_Name.c_str());
+				drawList->AddText(labelPos, textColor, label.c_str());
 			}
 			ImGui::End();
 		}

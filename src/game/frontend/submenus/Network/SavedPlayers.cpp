@@ -1,4 +1,5 @@
 #include "SavedPlayers.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "core/frontend/widgets/imgui_colors.h"
 #include "core/frontend/Notifications.hpp"
@@ -71,7 +72,7 @@ namespace YimMenu::Submenus
 	static void RenderPlayerList()
 	{
 		ImGui::SetNextItemWidth(200.f);
-		ImGui::InputTextWithHint("Search", "Search", g_NameToSearch, sizeof(g_NameToSearch));
+		ImGui::InputTextWithHint(Translation::TrLabel("Search").c_str(), Translation::Tr("Search").c_str(), g_NameToSearch, sizeof(g_NameToSearch));
 
 		if (ImGui::BeginListBox("###player-list", {180, -100 /* static_cast<float>(*Pointers.ScreenResY - 700 - 38 * 4) */}))
 		{
@@ -79,7 +80,7 @@ namespace YimMenu::Submenus
 
 			if (players.size() == 0)
 			{
-				ImGui::TextDisabled("No saved players");
+				ImGui::TextDisabled("%s", Translation::Tr("No saved players").c_str());
 				ImGui::EndListBox();
 				return;
 			}
@@ -112,56 +113,56 @@ namespace YimMenu::Submenus
 		if (ImGui::BeginChild("##player-editor", {500, -100 /* static_cast<float>(*Pointers.ScreenResY - 688 - 38 * 4) */}, 0, ImGuiWindowFlags_NoBackground))
 		{
 			ImGui::SetNextItemWidth(180.f);
-			if (ImGui::InputText("Name", g_SelectedPlayerName, sizeof(g_SelectedPlayerName)))
+			if (ImGui::InputText(Translation::TrLabel("Name").c_str(), g_SelectedPlayerName, sizeof(g_SelectedPlayerName)))
 			{
 				g_SelectedPlayer->m_Name = g_SelectedPlayerName;
 			}
 
 			int old_rid = g_SelectedRid;
 			ImGui::SetNextItemWidth(180.0f);
-			if (ImGui::InputScalar("Rockstar Id", ImGuiDataType_U64, &g_SelectedRid))
+			if (ImGui::InputScalar(Translation::TrLabel("Rockstar Id").c_str(), ImGuiDataType_U64, &g_SelectedRid))
 			{
 				SavedPlayers::UpdateRockstarId(old_rid, g_SelectedRid);
 				g_SelectedPlayer = SavedPlayers::GetPlayerData(g_SelectedRid);
 			}
 
-			ImGui::Checkbox("Track Player", &g_SelectedPlayer->m_TrackPlayer);
+			ImGui::Checkbox(Translation::TrLabel("Track Player").c_str(), &g_SelectedPlayer->m_TrackPlayer);
 
 			if (g_SelectedPlayer->m_FetchedData)
 			{
 				auto& data = *g_SelectedPlayer->m_FetchedData;
-				ImGui::Text("Session Type: %s", FetchedPlayerData::GameStateToString(data.m_GameState).data());
-				ImGui::Text("Host of Session: %s", data.m_HostOfSession ? "Yes" : "No");
-				ImGui::Text("Is Spectating: %s", data.m_Spectating ? "Yes" : "No");
-				ImGui::Text("Is Job Lobby: %s", data.m_InTransition ? "Yes" : "No");
-				ImGui::Text("Host of Job Lobby: %s", data.m_HostOfTransition ? "Yes" : "No");
+				ImGui::Text(Translation::Tr("Session Type: %s").c_str(), FetchedPlayerData::GameStateToString(data.m_GameState).data());
+				ImGui::Text(Translation::Tr("Host of Session: %s").c_str(), data.m_HostOfSession ? "Yes" : "No");
+				ImGui::Text(Translation::Tr("Is Spectating: %s").c_str(), data.m_Spectating ? "Yes" : "No");
+				ImGui::Text(Translation::Tr("Is Job Lobby: %s").c_str(), data.m_InTransition ? "Yes" : "No");
+				ImGui::Text(Translation::Tr("Host of Job Lobby: %s").c_str(), data.m_HostOfTransition ? "Yes" : "No");
 				if (data.m_MissionType != FetchedPlayerData::MissionType::NONE)
 				{
-					ImGui::Text("Mission Type: %s", FetchedPlayerData::MissionTypeToString(data.m_MissionType).data());
+					ImGui::Text(Translation::Tr("Mission Type: %s").c_str(), FetchedPlayerData::MissionTypeToString(data.m_MissionType).data());
 					if (data.m_MissionName)
-						ImGui::Text("Mission Name: %s", data.m_MissionName->data());
+						ImGui::Text(Translation::Tr("Mission Name: %s").c_str(), data.m_MissionName->data());
 					else
 						; // TODO: add fetch mission name
 				}
 			}
 			else
 			{
-				ImGui::TextDisabled("Data not fetched yet");
+				ImGui::TextDisabled("%s", Translation::Tr("Data not fetched yet").c_str());
 			}
 
-			if (ImGui::Button("Join"))
+			if (ImGui::Button(Translation::TrLabel("Join").c_str()))
 			{
 				FiberPool::Push([] {
 					Network::JoinRockstarId(g_SelectedRid);
 				});
 			}
 
-			if (ImGui::Button("Save"))
+			if (ImGui::Button(Translation::TrLabel("Save").c_str()))
 			{
 				SavedPlayers::Save();
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("Remove"))
+			if (ImGui::Button(Translation::TrLabel("Remove").c_str()))
 			{
 				SavedPlayers::RemovePlayerData(g_SelectedRid);
 				g_SelectedPlayer = nullptr;
@@ -183,9 +184,9 @@ namespace YimMenu::Submenus
 		static char name_buf[24]{};
 
 		ImGui::SetNextItemWidth(180.0f);
-		ImGui::InputText("Username", name_buf, sizeof(name_buf));
+		ImGui::InputText(Translation::TrLabel("Username").c_str(), name_buf, sizeof(name_buf));
 		ImGui::SameLine();
-		if (ImGui::Button("Add"))
+		if (ImGui::Button(Translation::TrLabel("Add").c_str()))
 			FiberPool::Push([] {
 				auto rid = YimMenu::Network::ResolveRockstarId(name_buf);
 				if (rid)

@@ -1,4 +1,5 @@
 #include "Weapons.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "game/backend/Self.hpp"
@@ -93,7 +94,7 @@ namespace YimMenu::Submenus
 			return true;
 		}();
 
-		ImGui::BeginCombo("Weapons", selectedWeapon.c_str());
+		ImGui::BeginCombo(Translation::TrLabel("Weapons").c_str(), selectedWeapon.c_str());
 		if (ImGui::IsItemActive() && !ImGui::IsPopupOpen("##weaponspopup"))
 		{
 			ImGui::OpenPopup("##weaponspopup");
@@ -101,7 +102,7 @@ namespace YimMenu::Submenus
 		}
 		if (ImGui::BeginPopup("##weaponspopup", ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
 		{
-			ImGui::Text("Search:");
+			ImGui::Text("%s", Translation::Tr("Search:").c_str());
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(250.f);
 			ImGui::InputText("##searchweapon", searchWeapon, sizeof(searchWeapon));
@@ -141,14 +142,14 @@ namespace YimMenu::Submenus
 			ImGui::EndPopup();
 		}
 
-		if (ImGui::Button("Give Weapon"))
+		if (ImGui::Button(Translation::TrLabel("Give Weapon").c_str()))
 		{
 			FiberPool::Push([] {
 				Self::GetPed().GiveWeapon(selectedWeaponHash, true);
 			});
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Remove Weapon"))
+		if (ImGui::Button(Translation::TrLabel("Remove Weapon").c_str()))
 		{
 			FiberPool::Push([] {
 				Self::GetPed().RemoveWeapon(selectedWeaponHash);
@@ -157,11 +158,11 @@ namespace YimMenu::Submenus
 
 		if (*Pointers.IsSessionStarted && selectedWeaponHash != 0)
 		{
-			ImGui::Text("Kills With: %d", kills);
-			ImGui::Text("Deaths By: %d", deaths);
-			ImGui::Text("K/D Ratio: %.2f", kdRatio);
-			ImGui::Text("Headshots: %d", headshots);
-			ImGui::Text("Accuracy: %d%%", accuracy);
+			ImGui::Text(Translation::Tr("Kills With: %d").c_str(), kills);
+			ImGui::Text(Translation::Tr("Deaths By: %d").c_str(), deaths);
+			ImGui::Text(Translation::Tr("K/D Ratio: %.2f").c_str(), kdRatio);
+			ImGui::Text(Translation::Tr("Headshots: %d").c_str(), headshots);
+			ImGui::Text(Translation::Tr("Accuracy: %d%%").c_str(), accuracy);
 		}
 	}
 

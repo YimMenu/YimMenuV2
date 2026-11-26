@@ -1,4 +1,5 @@
 #include "DrawHotkey.hpp"
+#include "core/translation/Translation.hpp"
 
 namespace YimMenu
 {
@@ -22,9 +23,9 @@ namespace YimMenu
 		if (link->m_Chain.empty())
 		{
 			if (active)
-				ImGui::Text("Press any button...");
+				ImGui::Text("%s", Translation::Tr("Press any button...").c_str());
 			else
-				ImGui::Text("No hotkey assigned");
+				ImGui::Text("%s", Translation::Tr("No hotkey assigned").c_str());
 		}
 		else
 		{
@@ -52,7 +53,7 @@ namespace YimMenu
 			ImGui::PopItemWidth();
 
 			ImGui::SameLine();
-			if (ImGui::Button("Clear"))
+			if (ImGui::Button(Translation::TrLabel("Clear").c_str()))
 			{
 				link->m_Chain.clear();
 				g_HotkeySystem.MarkStateDirty();

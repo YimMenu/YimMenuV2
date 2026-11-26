@@ -1,4 +1,5 @@
 #include "Network.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "core/frontend/Notifications.hpp"
 #include "game/frontend/items/Items.hpp"
@@ -32,9 +33,9 @@ namespace YimMenu::Submenus
 			static char name_buf[24]{};
 
 			ImGui::SetNextItemWidth(150.0f);
-			ImGui::InputText("Username", name_buf, sizeof(name_buf));
+			ImGui::InputText(Translation::TrLabel("Username").c_str(), name_buf, sizeof(name_buf));
 			ImGui::SameLine();
-			if (ImGui::Button("Join##username"))
+			if (ImGui::Button(Translation::TrLabel("Join##username").c_str()))
 				FiberPool::Push([] {
 					auto rid = YimMenu::Network::ResolveRockstarId(name_buf);
 					if (rid)
@@ -48,9 +49,9 @@ namespace YimMenu::Submenus
 				});
 
 			ImGui::SetNextItemWidth(150.0f);
-			ImGui::InputScalar("Rockstar Id", ImGuiDataType_U64, &rockstar_id);
+			ImGui::InputScalar(Translation::TrLabel("Rockstar Id").c_str(), ImGuiDataType_U64, &rockstar_id);
 			ImGui::SameLine();
-			if (ImGui::Button("Join##rid"))
+			if (ImGui::Button(Translation::TrLabel("Join##rid").c_str()))
 				FiberPool::Push([] {
 					YimMenu::Network::JoinRockstarId(rockstar_id);
 				});

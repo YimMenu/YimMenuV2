@@ -1,4 +1,5 @@
 #include "SpawnVehicle.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/BoolCommand.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
@@ -62,12 +63,12 @@ namespace YimMenu::Submenus
 
 			static char search[64];
 			ImGui::SetNextItemWidth(300.f);
-			ImGui::InputTextWithHint("Name", "Search", search, sizeof(search));
+			ImGui::InputTextWithHint(Translation::TrLabel("Name").c_str(), Translation::Tr("Search").c_str(), search, sizeof(search));
 
 			ImGui::SetNextItemWidth(300.f);
-			if (ImGui::BeginCombo("Class", selectedClass == -1 ? "All" : g_VehicleClassNames[selectedClass]))
+			if (ImGui::BeginCombo(Translation::TrLabel("Class").c_str(), selectedClass == -1 ? Translation::Tr("All").c_str() : g_VehicleClassNames[selectedClass]))
 			{
-				if (ImGui::Selectable("All", selectedClass == -1))
+				if (ImGui::Selectable(Translation::TrLabel("All").c_str(), selectedClass == -1))
 				{
 					selectedClass = -1;
 				}
@@ -89,7 +90,7 @@ namespace YimMenu::Submenus
 			{
 				if (vehicleNames.empty())
 				{
-					ImGui::Text("Natives not cached yet.");
+					ImGui::Text("%s", Translation::Tr("Natives not cached yet.").c_str());
 				}
 				else
 				{
@@ -147,18 +148,18 @@ namespace YimMenu::Submenus
 
 		spawn->AddItem(std::make_unique<ImGuiItem>([] {
 			if (!*Pointers.IsSessionStarted)
-				return ImGui::TextDisabled("Join GTA Online.");
+				return ImGui::TextDisabled("%s", Translation::Tr("Join GTA Online.").c_str());
 
 			PersonalVehicles::Update();
 
 			static char search[64];
 			ImGui::SetNextItemWidth(300.f);
-			ImGui::InputTextWithHint("Name", "Search", search, sizeof(search));
+			ImGui::InputTextWithHint(Translation::TrLabel("Name").c_str(), Translation::Tr("Search").c_str(), search, sizeof(search));
 
 			ImGui::SetNextItemWidth(300.f);
-			if (ImGui::BeginCombo("Garage", selectedGarageStr.empty() ? "All" : selectedGarageStr.c_str()))
+			if (ImGui::BeginCombo(Translation::TrLabel("Garage").c_str(), selectedGarageStr.empty() ? Translation::Tr("All").c_str() : selectedGarageStr.c_str()))
 			{
-				if (ImGui::Selectable("All", selectedGarageStr.empty()))
+				if (ImGui::Selectable(Translation::TrLabel("All").c_str(), selectedGarageStr.empty()))
 				{
 					selectedGarageStr.clear();
 				}
@@ -179,7 +180,7 @@ namespace YimMenu::Submenus
 			{
 				if (PersonalVehicles::GetPersonalVehicles().empty())
 				{
-					ImGui::Text("Stats not loaded yet.");
+					ImGui::Text("%s", Translation::Tr("Stats not loaded yet.").c_str());
 				}
 				else
 				{

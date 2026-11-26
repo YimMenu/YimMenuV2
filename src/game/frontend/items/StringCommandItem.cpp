@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/StringCommand.hpp"
 #include "imgui.h"
@@ -7,7 +8,7 @@ namespace YimMenu
 {
 	StringCommandItem::StringCommandItem(joaat_t id, std::optional<std::string> label_override) :
 	    m_Command(Commands::GetCommand<StringCommand>(id)),
-	    m_LabelOverride(label_override)
+	    m_LabelOverride(Translation::TrOptionalLabel(label_override))
 	{
 	}
 
@@ -15,7 +16,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown string command!");
+			ImGui::Text("%s", Translation::Tr("Unknown string command!").c_str());
 			return;
 		}
 

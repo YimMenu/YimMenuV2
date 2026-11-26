@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/Command.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/ListCommand.hpp"
@@ -8,7 +9,7 @@ namespace YimMenu
 {
 	ListCommandItem::ListCommandItem(joaat_t id, std::optional<std::string> label_override) :
 	    m_Command(Commands::GetCommand<ListCommand>(id)),
-	    m_LabelOverride(label_override)
+	    m_LabelOverride(Translation::TrOptionalLabel(label_override))
 	{
 	}
 
@@ -16,7 +17,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown list!");
+			ImGui::Text("%s", Translation::Tr("Unknown list!").c_str());
 			return;
 		}
 
@@ -45,16 +46,17 @@ namespace YimMenu
 			if (!m_SelectedItem.has_value())
 				m_SelectedItem = "";
 
-			auto size = ImGui::CalcTextSize(largest_string);
+			auto size = ImGui::CalcTextSize(Translation::Tr(largest_string).c_str());
 			m_ItemWidth = size.x + 40.0f;
 		}
 
 		ImGui::SetNextItemWidth(m_ItemWidth.value());
-		if (ImGui::BeginCombo(m_LabelOverride.value_or(m_Command->GetLabel()).c_str(), m_SelectedItem.value().c_str()))
+		const auto label = Translation::TrLabel(m_LabelOverride.value_or(m_Command->GetLabel()));
+		if (ImGui::BeginCombo(label.c_str(), Translation::Tr(m_SelectedItem.value()).c_str()))
 		{
 			for (auto& el : list)
 			{
-				if (ImGui::Selectable(el.second, el.first == current_val))
+				if (ImGui::Selectable(Translation::TrLabel(el.second).c_str(), el.first == current_val))
 				{
 					current_val = el.first;
 					m_Command->SetState(el.first);

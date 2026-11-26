@@ -1,6 +1,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/frontend/Menu.hpp"
 #include "core/frontend/manager/UIManager.hpp"
+#include "core/translation/Translation.hpp"
 #include "game/frontend/submenus/Settings/GUISettings.hpp"
 
 namespace YimMenu
@@ -79,13 +80,14 @@ namespace YimMenu
 			ImGui::PopFont();
 
 			// Draw label below bubble
-			ImVec2 labelSize = ImGui::CalcTextSize(submenu->m_Name.c_str());
+			const auto label = Translation::Tr(submenu->m_Name);
+			ImVec2 labelSize = ImGui::CalcTextSize(label.c_str());
 			ImVec2 labelPos(center.x - labelSize.x / 2, bubblePos.y + bubbleSize + 15.0f);
 			ImVec2 bgMin = labelPos - ImVec2(6, 2);
 			ImVec2 bgMax = labelPos + labelSize + ImVec2(6, 2);
 			drawList->AddRectFilled(bgMin, bgMax, ImGui::GetColorU32(ImGuiCol_ChildBg));
 			drawList->AddRect(bgMin, bgMax, borderColor, 4.0f);
-			drawList->AddText(labelPos, iconColor, submenu->m_Name.c_str());
+			drawList->AddText(labelPos, iconColor, label.c_str());
 
 			ImGui::PopID();
 		}

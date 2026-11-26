@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "misc/cpp/imgui_stdlib.h"
 
 
@@ -16,7 +17,9 @@ namespace YimMenu
 
 	void InputTextWithHint::Draw()
 	{
-		if (ImGui::InputTextWithHint(m_Id.data(), m_Hint.data(), m_Buf, m_Flags, m_ImGuiInputTextCallback))
+		const auto label = Translation::TrLabel(m_Id);
+		const auto hint = Translation::Tr(m_Hint);
+		if (ImGui::InputTextWithHint(label.c_str(), hint.c_str(), m_Buf, m_Flags, m_ImGuiInputTextCallback))
 			;
 		{
 			if (m_Callback != nullptr)

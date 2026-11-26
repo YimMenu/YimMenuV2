@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 
 namespace YimMenu
 {
@@ -9,7 +10,7 @@ namespace YimMenu
 
 	void TabItem::Draw()
 	{
-		if (ImGui::BeginTabItem(m_Name.c_str()))
+		if (ImGui::BeginTabItem(Translation::TrLabel(m_Name).c_str()))
 		{
 			for (auto& item : m_Items)
 			{

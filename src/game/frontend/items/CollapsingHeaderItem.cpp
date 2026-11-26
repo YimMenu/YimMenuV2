@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 
 namespace YimMenu
 {
@@ -9,7 +10,7 @@ namespace YimMenu
 
 	void CollapsingHeaderItem::Draw()
 	{
-		if (ImGui::CollapsingHeader(m_Name.c_str()))
+		if (ImGui::CollapsingHeader(Translation::TrLabel(m_Name).c_str()))
 		{
 			for (auto& item : m_Items)
 			{

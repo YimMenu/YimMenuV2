@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/Command.hpp"
 #include "core/commands/HotkeySystem.hpp"
@@ -9,7 +10,7 @@ namespace YimMenu
 {
 	CommandItem::CommandItem(joaat_t id, std::optional<std::string> label_override) :
 	    m_Command(Commands::GetCommand<Command>(id)),
-	    m_LabelOverride(label_override)
+	    m_LabelOverride(Translation::TrOptionalLabel(label_override))
 	{
 	}
 
@@ -17,7 +18,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown!");
+			ImGui::Text("%s", Translation::Tr("Unknown!").c_str());
 			return;
 		}
 
@@ -33,19 +34,19 @@ namespace YimMenu
 
 		// TODO: refactor this
 
-		auto windowLabel = std::format("{} Hotkey", m_Command->GetLabel());
+		auto windowLabel = std::format("{} {}", m_Command->GetLabel(), Translation::Tr("Hotkey"));
 
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::SetTooltip("%s", m_Command->GetDescription().data());
 			if (GetAsyncKeyState(VK_CAPITAL) & 0x8000)
-				ImGui::OpenPopup(std::format("{} Hotkey", m_Command->GetLabel()).data());
+				ImGui::OpenPopup(std::format("{} {}", m_Command->GetLabel(), Translation::Tr("Hotkey")).data());
 		}
 
 		ImGui::SetNextWindowSize(ImVec2(500, 120));
 		if (ImGui::BeginPopupModal(windowLabel.data(), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
 		{
-			ImGui::BulletText("Enter a keystroke");
+			ImGui::BulletText("%s", Translation::Tr("Enter a keystroke").c_str());
 
 			ImGui::Separator();
 
@@ -55,7 +56,7 @@ namespace YimMenu
 				DrawHotkey(&it->second, m_Command->GetLabel());
 
 			ImGui::Spacing();
-			if (ImGui::Button("Close") || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
+			if (ImGui::Button(Translation::TrLabel("Close").c_str()) || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
 			{
 				HotkeySystem::SetBeingModifed(false);
 				ImGui::CloseCurrentPopup();

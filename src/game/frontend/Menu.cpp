@@ -60,17 +60,39 @@ namespace YimMenu
 		return &ranges[0];
 	}
 
-	static ImFont* CreateFontWithCyrillicSupport(ImGuiIO& io, float size)
+	static const ImWchar* GetGlyphRangesArabicOnly()
+	{
+		static const ImWchar ranges[] =
+		    {
+		        0x0600,
+		        0x06FF, // Arabic
+		        0x0750,
+		        0x077F, // Arabic Supplement
+		        0x08A0,
+		        0x08FF, // Arabic Extended-A
+		        0xFB50,
+		        0xFDFF, // Arabic Presentation Forms-A
+		        0xFE70,
+		        0xFEFF, // Arabic Presentation Forms-B
+		        0,
+		    };
+		return &ranges[0];
+	}
+
+	static ImFont* CreateFontWithUnicodeSupport(ImGuiIO& io, float size)
 	{
 		ImFontConfig FontCfg{};
 		FontCfg.FontDataOwnedByAtlas = false;
 
 		auto font = io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Fonts::MainFont), sizeof(Fonts::MainFont), size, &FontCfg, io.Fonts->GetGlyphRangesDefault());
 
-		// just use Arial for Cyrillic
+		// just use Arial for Cyrillic and Arabic
 
 		FontCfg.MergeMode = true;
 		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "arial.ttf").string().c_str(), size, &FontCfg, GetGlyphRangesCyrillicOnly());
+		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "arial.ttf").string().c_str(), size, &FontCfg, GetGlyphRangesArabicOnly());
+		// Tahoma is used as a fallback for Arabic glyphs that Arial does not cover.
+		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "tahoma.ttf").string().c_str(), size, &FontCfg, GetGlyphRangesArabicOnly());
 		io.Fonts->AddFontFromFileTTF((std::filesystem::path(std::getenv("SYSTEMROOT")) / "Fonts" / "meiryo.ttc").string().c_str(), size, &FontCfg, io.Fonts->GetGlyphRangesJapanese());
 
 		io.Fonts->Build();
@@ -89,11 +111,11 @@ namespace YimMenu
 		FontCfg.FontDataOwnedByAtlas = false;
 
 		IO.Fonts->Clear();
-		Menu::Font::g_DefaultFont = CreateFontWithCyrillicSupport(IO, Menu::Font::g_DefaultFontSize);
-		Menu::Font::g_OptionsFont = CreateFontWithCyrillicSupport(IO, Menu::Font::g_OptionsFontSize);
-		Menu::Font::g_ChildTitleFont = CreateFontWithCyrillicSupport(IO, Menu::Font::g_ChildTitleFontSize);
-		Menu::Font::g_ChatFont = CreateFontWithCyrillicSupport(IO, Menu::Font::g_ChatFontSize);
-		Menu::Font::g_OverlayFont = CreateFontWithCyrillicSupport(IO, Menu::Font::g_OverlayFontSize);
+		Menu::Font::g_DefaultFont = CreateFontWithUnicodeSupport(IO, Menu::Font::g_DefaultFontSize);
+		Menu::Font::g_OptionsFont = CreateFontWithUnicodeSupport(IO, Menu::Font::g_OptionsFontSize);
+		Menu::Font::g_ChildTitleFont = CreateFontWithUnicodeSupport(IO, Menu::Font::g_ChildTitleFontSize);
+		Menu::Font::g_ChatFont = CreateFontWithUnicodeSupport(IO, Menu::Font::g_ChatFontSize);
+		Menu::Font::g_OverlayFont = CreateFontWithUnicodeSupport(IO, Menu::Font::g_OverlayFontSize);
 		static const ImWchar full_range[] = {0x0020, 0xFFFF, 0};
 		Menu::Font::g_AwesomeFont = IO.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Fonts::IconFont), sizeof(Fonts::IconFont), Menu::Font::g_AwesomeFontSize, &FontCfg, full_range);
 

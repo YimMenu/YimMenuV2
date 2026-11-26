@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/Command.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/IntCommand.hpp"
@@ -9,7 +10,7 @@ namespace YimMenu
 	IntCommandItem::IntCommandItem(joaat_t id, std::optional<std::string> label_override, bool use_slider) :
 	    m_useSlider(use_slider),
 	    m_Command(Commands::GetCommand<IntCommand>(id)),
-	    m_LabelOverride(label_override)
+	    m_LabelOverride(Translation::TrOptionalLabel(label_override))
 	{
 	}
 
@@ -17,7 +18,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown!");
+			ImGui::Text("%s", Translation::Tr("Unknown!").c_str());
 			return;
 		}
 

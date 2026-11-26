@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/ColorCommand.hpp"
 #include "core/commands/Command.hpp"
 #include "core/commands/Commands.hpp"
@@ -8,7 +9,7 @@ namespace YimMenu
 {
 	ColorCommandItem::ColorCommandItem(joaat_t id, std::optional<std::string> labelOverride) :
 	    m_Command(Commands::GetCommand<ColorCommand>(id)),
-	    m_LabelOverride(labelOverride)
+	    m_LabelOverride(Translation::TrOptionalLabel(labelOverride))
 	{
 	}
 
@@ -16,7 +17,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown color picker!");
+			ImGui::Text("%s", Translation::Tr("Unknown color picker!").c_str());
 			return;
 		}
 

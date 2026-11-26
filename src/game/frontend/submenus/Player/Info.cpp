@@ -1,4 +1,5 @@
 #include "Info.hpp"
+#include "core/translation/Translation.hpp"
 
 #include "core/frontend/Notifications.hpp"
 #include "core/backend/FiberPool.hpp"
@@ -33,8 +34,8 @@ namespace YimMenu::Submenus
 		playerOptionsGroup->AddItem(std::make_shared<ImGuiItem>([] {
 			if (Players::GetSelected().IsValid())
 			{
-				ImGui::Text("Rank: %d (%d RP)", Players::GetSelected().GetRank(), Players::GetSelected().GetRP());
-				ImGui::Text("Money: %d", Players::GetSelected().GetMoney());
+				ImGui::Text(Translation::Tr("Rank: %d (%d RP)").c_str(), Players::GetSelected().GetRank(), Players::GetSelected().GetRP());
+				ImGui::Text(Translation::Tr("Money: %d").c_str(), Players::GetSelected().GetMoney());
 
 				if (Players::GetSelected().GetPed())
 				{
@@ -44,21 +45,21 @@ namespace YimMenu::Submenus
 					ImGui::Text("%s", healthStr.c_str());
 
 					auto coords = Players::GetSelected().GetPed().GetPosition();
-					ImGui::Text("Coords: %.2f, %.2f, %.2f", coords.x, coords.y, coords.z);
+					ImGui::Text(Translation::Tr("Coords: %.2f, %.2f, %.2f").c_str(), coords.x, coords.y, coords.z);
 
 					auto distance = Players::GetSelected().GetPed().GetPosition().GetDistance(Self::GetPed().GetPosition());
-					ImGui::Text("Distance: %.2f", distance);
+					ImGui::Text(Translation::Tr("Distance: %.2f").c_str(), distance);
 				}
 				else
 				{
-					ImGui::Text("Ped missing or deleted");
+					ImGui::Text("%s", Translation::Tr("Ped missing or deleted").c_str());
 				}
 
 				auto rid1 = Players::GetSelected().GetRID();
 
 				std::string ridStr = std::to_string(rid1);
 
-				ImGui::Text("RID:");
+				ImGui::Text("%s", Translation::Tr("RID:").c_str());
 				ImGui::SameLine();
 				if (ImGui::SmallButton(std::to_string(rid1).c_str()))
 				{
@@ -69,7 +70,7 @@ namespace YimMenu::Submenus
 				switch (platformAccountId.m_Platform)
 				{
 				case PlatformAccountId::PLATFORM_XBOX:
-					ImGui::Text("Xbox User ID:");
+					ImGui::Text("%s", Translation::Tr("Xbox User ID:").c_str());
 					ImGui::SameLine();
 					if (ImGui::SmallButton(std::to_string(platformAccountId.m_XboxUserId).c_str()))
 					{
@@ -77,7 +78,7 @@ namespace YimMenu::Submenus
 					}
 					break;
 				case PlatformAccountId::PLATFORM_STEAM:
-					ImGui::Text("Steam ID:");
+					ImGui::Text("%s", Translation::Tr("Steam ID:").c_str());
 					ImGui::SameLine();
 					if (ImGui::SmallButton(std::to_string(platformAccountId.m_SteamId).c_str()))
 					{
@@ -85,7 +86,7 @@ namespace YimMenu::Submenus
 					}
 					break;
 				case PlatformAccountId::PLATFORM_EPIC:
-					ImGui::Text("Epic Account ID:");
+					ImGui::Text("%s", Translation::Tr("Epic Account ID:").c_str());
 					ImGui::SameLine();
 					if (ImGui::SmallButton(platformAccountId.m_EpicAccountId))
 					{
@@ -101,42 +102,42 @@ namespace YimMenu::Submenus
 
 				auto addr2 = BuildIPStr(ip.m_IpAddress.m_Field1, ip.m_IpAddress.m_Field2, ip.m_IpAddress.m_Field3, ip.m_IpAddress.m_Field4);
 
-				ImGui::Text("IP Address:");
+				ImGui::Text("%s", Translation::Tr("IP Address:").c_str());
 				ImGui::SameLine();
 				if (ImGui::SmallButton(addr2.c_str()))
 				{
 					ImGui::SetClipboardText(addr2.c_str());
 				}
 
-				if (ImGui::Button("Add to Saved"))
+				if (ImGui::Button(Translation::TrLabel("Add to Saved").c_str()))
 					SavedPlayers::GetPlayerData(Players::GetSelected());
 				ImGui::SameLine();
-				if (ImGui::Button("View SC Profile"))
+				if (ImGui::Button(Translation::TrLabel("View SC Profile").c_str()))
 					FiberPool::Push([] {
 						uint64_t handle[13];
 						NETWORK::NETWORK_HANDLE_FROM_PLAYER(Players::GetSelected().GetId(), handle, std::size(handle));
 						NETWORK::NETWORK_SHOW_PROFILE_UI(handle);
 					});
 				ImGui::SameLine();
-				if (ImGui::Button("Add Friend"))
+				if (ImGui::Button(Translation::TrLabel("Add Friend").c_str()))
 					FiberPool::Push([] {
 						uint64_t handle[13];
 						NETWORK::NETWORK_HANDLE_FROM_PLAYER(Players::GetSelected().GetId(), handle, std::size(handle));
 						NETWORK::NETWORK_ADD_FRIEND(handle, "");
 					});
 
-				if (ImGui::Button("More Info"))
-					ImGui::OpenPopup("More Info");
+				if (ImGui::Button(Translation::TrLabel("More Info").c_str()))
+					ImGui::OpenPopup(Translation::Tr("More Info").c_str());
 
 				ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-				if (ImGui::BeginPopupModal("More Info", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_Modal | ImGuiWindowFlags_AlwaysAutoResize))
+				if (ImGui::BeginPopupModal(Translation::Tr("More Info").c_str(), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_Modal | ImGuiWindowFlags_AlwaysAutoResize))
 				{
-					ImGui::Text("Average Latency: %.2f", Players::GetSelected().GetAverageLatency());
-					ImGui::Text("Packet Loss: %.2f", Players::GetSelected().GetAveragePacketLoss());
+					ImGui::Text(Translation::Tr("Average Latency: %.2f").c_str(), Players::GetSelected().GetAverageLatency());
+					ImGui::Text(Translation::Tr("Packet Loss: %.2f").c_str(), Players::GetSelected().GetAveragePacketLoss());
 
 					ImGui::Spacing();
 
-					if (ImGui::Button("Close") || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
+					if (ImGui::Button(Translation::TrLabel("Close").c_str()) || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
 						ImGui::CloseCurrentPopup();
 
 					ImGui::EndPopup();
@@ -145,7 +146,7 @@ namespace YimMenu::Submenus
 			else
 			{
 				Players::SetSelected(Self::GetPlayer());
-				ImGui::Text("No players yet!");
+				ImGui::Text("%s", Translation::Tr("No players yet!").c_str());
 			}
 		}));
 

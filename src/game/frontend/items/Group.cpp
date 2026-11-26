@@ -2,6 +2,7 @@
 #include "core/commands/Command.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/backend/FiberPool.hpp"
+#include "core/translation/Translation.hpp"
 #include "game/frontend/Menu.hpp"
 
 namespace YimMenu
@@ -16,8 +17,10 @@ namespace YimMenu
 	{
 		if (!m_Name.empty())
 		{
+			const auto label = Translation::Tr(m_Name);
+
 			ImGui::PushFont(Menu::Font::g_ChildTitleFont);
-			ImGui::Text("%s", m_Name.c_str());
+			ImGui::Text("%s", label.c_str());
 			ImGui::PopFont();
 			ImGui::Separator();
 			ImGui::Spacing();

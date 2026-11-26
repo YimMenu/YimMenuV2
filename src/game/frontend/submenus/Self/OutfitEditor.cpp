@@ -1,4 +1,5 @@
 #include "OutfitEditor.hpp"
+#include "core/translation/Translation.hpp"
 #include "game/frontend/items/Items.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "game/backend/Outfit.hpp"
@@ -123,9 +124,9 @@ namespace YimMenu
 			{
 				// folders
 				ImGui::SetNextItemWidth(300.f);
-				if (ImGui::BeginCombo("", folder.empty() ? "Root" : folder.c_str()))
+				if (ImGui::BeginCombo("", folder.empty() ? Translation::Tr("Root").c_str() : folder.c_str()))
 				{
-					if (ImGui::Selectable("Root", folder == ""))
+					if (ImGui::Selectable(Translation::TrLabel("Root").c_str(), folder == ""))
 					{
 						folder.clear();
 						FiberPool::Push([this] {
@@ -148,7 +149,7 @@ namespace YimMenu
 				// files
 				static std::string search;
 				ImGui::SetNextItemWidth(300);
-				if (ImGui::InputTextWithHint("###outfitname", "Search", &search))
+				if (ImGui::InputTextWithHint("###outfitname", Translation::Tr("Search").c_str(), &search))
 					std::transform(search.begin(), search.end(), search.begin(), tolower);
 				if (ImGui::BeginListBox("##saved_outfits", ImVec2(300, 300)))
 				{
@@ -171,7 +172,7 @@ namespace YimMenu
 
 		void RenderSaveButton(bool saveToNewFolder)
 		{
-			if (ImGui::Button("Save Outfit"))
+			if (ImGui::Button(Translation::TrLabel("Save Outfit").c_str()))
 				FiberPool::Push([saveToNewFolder, this] {
 					std::string fileName = TrimString(outfitName);
 					strcpy(outfitName, "");
@@ -198,15 +199,15 @@ namespace YimMenu
 		{
 			ImGui::BeginGroup();
 			{
-				if (ImGui::Button("Refresh list"))
+				if (ImGui::Button(Translation::TrLabel("Refresh list").c_str()))
 					FiberPool::Push([this] {
 						Outfit::OutfitEditor::RefreshList(folder, folders, files);
 					});
 				ImGui::Spacing();
 				static bool applyHair = false;
-				ImGui::Checkbox("Apply hair", &applyHair);
+				ImGui::Checkbox(Translation::TrLabel("Apply hair").c_str(), &applyHair);
 				ImGui::Spacing();
-				if (ImGui::Button("Apply Selected Outfit"))
+				if (ImGui::Button(Translation::TrLabel("Apply Selected Outfit").c_str()))
 					FiberPool::Push([this] {
 						Outfit::OutfitEditor::ApplyOutfitFromJson(folder, file, applyHair);
 						applyHair = false; // reset everytime
@@ -216,14 +217,14 @@ namespace YimMenu
 				ImGui::Spacing();
 
 				// save outfit
-				ImGui::Text("Outfit Name");
+				ImGui::Text("%s", Translation::Tr("Outfit Name").c_str());
 				ImGui::SameLine();
 				ImGui::SetNextItemWidth(250);
 				ImGui::InputText("##filename", outfitName, IM_ARRAYSIZE(outfitName));
 
 				if (folder.empty())
 				{
-					ImGui::Text("Folder Name");
+					ImGui::Text("%s", Translation::Tr("Folder Name").c_str());
 					ImGui::SameLine();
 					ImGui::SetNextItemWidth(250);
 					ImGui::InputText("##foldername", newFolder, IM_ARRAYSIZE(newFolder));
@@ -242,12 +243,12 @@ namespace YimMenu
 		auto category = std::make_shared<Category>("Outfit Editor");
 
 		category->AddItem(std::make_shared<ImGuiItem>([] {
-			if (ImGui::Button("Refresh Stats"))
+			if (ImGui::Button(Translation::TrLabel("Refresh Stats").c_str()))
 				FiberPool::Push([] {
 					editor.RefreshStats();
 				});
 			ImGui::SameLine();
-			if (ImGui::Button("Randomize Outfit"))
+			if (ImGui::Button(Translation::TrLabel("Randomize Outfit").c_str()))
 				FiberPool::Push([] {
 					Self::GetPed().RandomizeOutfit2();
 				});

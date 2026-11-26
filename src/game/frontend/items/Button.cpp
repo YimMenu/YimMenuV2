@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/backend/FiberPool.hpp"
 
 namespace YimMenu
@@ -13,7 +14,7 @@ namespace YimMenu
 
 	void Button::Draw()
 	{
-		if (ImGui::Button(m_Name.data(), m_Size))
+		if (ImGui::Button(Translation::TrLabel(m_Name).c_str(), m_Size))
 		{
 			if (m_OnClick != nullptr)
 			{

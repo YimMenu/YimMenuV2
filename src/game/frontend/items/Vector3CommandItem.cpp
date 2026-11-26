@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/Command.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/Vector3Command.hpp"
@@ -10,7 +11,7 @@ namespace YimMenu
 {
 	Vector3CommandItem::Vector3CommandItem(joaat_t id, std::optional<std::string> label_override) :
 	    m_Command(Commands::GetCommand<Vector3Command>(id)),
-	    m_LabelOverride(label_override)
+	    m_LabelOverride(Translation::TrOptionalLabel(label_override))
 	{
 	}
 
@@ -18,7 +19,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown!");
+			ImGui::Text("%s", Translation::Tr("Unknown!").c_str());
 			return;
 		}
 
@@ -31,23 +32,23 @@ namespace YimMenu
 		if (Self::GetPed())
 		{
 			ImGui::SameLine();
-			if (ImGui::Button("Current"))
+			if (ImGui::Button(Translation::TrLabel("Current").c_str()))
 				m_Command->SetState(Self::GetPed().GetPosition());
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Saved..."))
+		if (ImGui::Button(Translation::TrLabel("Saved...").c_str()))
 			ImGui::OpenPopup("##saved");
 
 		if (ImGui::BeginPopup("##saved", ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
 		{
-			ImGui::Text("Click on a location to select it. Add more at Teleport > Saved");
+			ImGui::Text("%s", Translation::Tr("Click on a location to select it. Add more at Teleport > Saved").c_str());
 			InputTextWithHint("##filter", "Search", &m_CurrentFilter).Draw();
 
 			const float max_length = *Pointers.ScreenResY / 3.2;
 
 			// TODO: duplicated code
 			ImGui::BeginGroup();
-			ImGui::Text("Categories");
+			ImGui::Text("%s", Translation::Tr("Categories").c_str());
 
 			if (ImGui::BeginListBox("##categories", {200, max_length}))
 			{
@@ -68,7 +69,7 @@ namespace YimMenu
 			ImGui::EndGroup();
 			ImGui::SameLine();
 			ImGui::BeginGroup();
-			ImGui::Text("Locations");
+			ImGui::Text("%s", Translation::Tr("Locations").c_str());
 			if (ImGui::BeginListBox("##saved_locs", {200, max_length}))
 			{
 				if (SavedLocations::GetAllSavedLocations().find(m_CurrentCategory) != SavedLocations::GetAllSavedLocations().end())
@@ -102,7 +103,7 @@ namespace YimMenu
 
 			ImGui::EndGroup();
 
-			if (ImGui::Button("Close"))
+			if (ImGui::Button(Translation::TrLabel("Close").c_str()))
 			{
 				ImGui::CloseCurrentPopup();
 			}

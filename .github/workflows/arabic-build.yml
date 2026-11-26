@@ -1,0 +1,51 @@
+name: Arabic Build
+
+on:
+  push:
+    branches: [ arabic ]
+  workflow_dispatch:
+
+jobs:
+  build-arabic:
+    runs-on: windows-latest
+    name: Arabic DLL (Clang, RelWithDebInfo)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Generate CMake project
+        run: cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B build -G Ninja
+
+      - name: Build 64bit RelWithDebInfo DLL
+        run: cmake --build ./build --config RelWithDebInfo --target YimMenuV2 --
+
+      - name: Check if DLL got built
+        run: if (-Not (Test-Path -path "build/YimMenuV2.dll")) {throw 1}
+
+      - name: Rename DLL
+        run: |
+          del YimMenuV2-arabic-*.dll
+          del YimMenuV2-arabic-*.pdb
+          ren YimMenuV2.dll YimMenuV2-arabic-${{ github.sha }}.dll
+          ren YimMenuV2.pdb YimMenuV2-arabic-${{ github.sha }}.pdb
+        working-directory: build/
+
+      - name: Compute SHA-256
+        run: |
+          $hash = (Get-FileHash "build/YimMenuV2-arabic-${{ github.sha }}.dll" -Algorithm SHA256).Hash.ToLower()
+          "SHA256=$hash" | Out-File -FilePath build/SHA256.txt -Encoding ascii
+          Get-Content build/SHA256.txt
+        shell: pwsh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YimMenuV2-arabic-${{ github.sha }}
+          path: |
+            build/YimMenuV2-arabic-*.dll
+            build/YimMenuV2-arabic-*.pdb
+            build/SHA256.txt

@@ -1,4 +1,5 @@
 #include "Items.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/commands/Commands.hpp"
 #include "core/commands/Command.hpp"
 #include "core/commands/LoopedCommand.hpp"
@@ -8,7 +9,7 @@ namespace YimMenu
 {
 	BoolCommandItem::BoolCommandItem(joaat_t id, std::optional<std::string> label_override) :
 	    m_Command(Commands::GetCommand<BoolCommand>(id)),
-	    m_LabelOverride(label_override)
+	    m_LabelOverride(Translation::TrOptionalLabel(label_override))
 	{
 	}
 
@@ -16,7 +17,7 @@ namespace YimMenu
 	{
 		if (!m_Command)
 		{
-			ImGui::Text("Unknown!");
+			ImGui::Text("%s", Translation::Tr("Unknown!").c_str());
 			return;
 		}
 
@@ -26,25 +27,25 @@ namespace YimMenu
 
 		// TODO: refactor this
 
-		auto windowLabel = std::format("{} Hotkey", m_Command->GetLabel());
+		auto windowLabel = std::format("{} {}", m_Command->GetLabel(), Translation::Tr("Hotkey"));
 
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::SetTooltip("%s", m_Command->GetDescription().data());
 			if (GetAsyncKeyState(VK_OEM_3) & 0x8000)
-				ImGui::OpenPopup(std::format("{} Hotkey", m_Command->GetLabel()).data());
+				ImGui::OpenPopup(std::format("{} {}", m_Command->GetLabel(), Translation::Tr("Hotkey")).data());
 		}
 
 		ImGui::SetNextWindowSize(ImVec2(500, 120));
 		if (ImGui::BeginPopupModal(windowLabel.data(), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
 		{
-			ImGui::BulletText("Hover over the command name to change its hotkey");
-			ImGui::BulletText("Press any registered key to remove");
+			ImGui::BulletText("%s", Translation::Tr("Hover over the command name to change its hotkey").c_str());
+			ImGui::BulletText("%s", Translation::Tr("Press any registered key to remove").c_str());
 			ImGui::Separator();
 
 
 			ImGui::Spacing();
-			if (ImGui::Button("Close") || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
+			if (ImGui::Button(Translation::TrLabel("Close").c_str()) || ((!ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)))
 				ImGui::CloseCurrentPopup();
 
 			ImGui::EndPopup();

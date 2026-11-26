@@ -1,0 +1,10 @@
+{
+  "name": "yimmenu-arabic-tools",
+  "private": true,
+  "type": "module",
+  "description": "Generates the embedded Arabic translation table for the Arabic YimMenuV2 build.",
+  "dependencies": {
+    "arabic-reshaper": "^1.1.0",
+    "bidi-js": "^1.0.3"
+  }
+}

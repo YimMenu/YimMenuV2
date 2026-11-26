@@ -2,3 +2,8 @@ build/
 .cache
 .vs
 out/
+tools/node_modules/
+tools/extracted.json
+tools/phase1_strings.json
+tools/untranslated.json
+tools/keys_*.txt

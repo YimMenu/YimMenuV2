@@ -1,4 +1,5 @@
 #include "LuaScripts.hpp"
+#include "core/translation/Translation.hpp"
 #include "core/backend/ScriptMgr.hpp"
 #include "core/backend/FiberPool.hpp"
 #include "core/scripting/LuaManager.hpp"
@@ -24,13 +25,13 @@ namespace YimMenu::Submenus
 	{
 		auto label = GetScriptLabel(script->GetPath());
 		if (script->GetLoadState() == LuaScript::LoadState::PAUSED)
-			label += " (Paused)";
+			label += Translation::Tr(" (Paused)");
 		ImGui::PushID(script->GetPath().data());
 		if (ImGui::Selectable(label.c_str(), script == selected_script))
 			selected_script = script;
 		ImGui::PopID();
 		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip("%s", script->GetLoadState() == LuaScript::LoadState::PAUSED ? "Paused. Select this script to resume it." : script->GetPath().data());
+			ImGui::SetTooltip("%s", script->GetLoadState() == LuaScript::LoadState::PAUSED ? Translation::Tr("Paused. Select this script to resume it.").c_str() : script->GetPath().data());
 	}
 
 	std::shared_ptr<Category> BuildLuaScriptsMenu()
@@ -42,7 +43,7 @@ namespace YimMenu::Submenus
 		menu->AddItem(std::make_unique<ImGuiItem>([] {
 			ImGui::BeginGroup();
 			const float height = 15 * ImGui::GetTextLineHeightWithSpacing();
-			ImGui::TextUnformatted("Enabled");
+			ImGui::TextUnformatted(Translation::Tr("Enabled").c_str());
 			if (ImGui::BeginListBox("##enabledluascripts", {300.f, height}))
 			{
 				LuaManager::ForAllLoadedScripts([](std::shared_ptr<LuaScript>& script) {
@@ -54,7 +55,7 @@ namespace YimMenu::Submenus
 			ImGui::EndGroup();
 			ImGui::SameLine();
 			ImGui::BeginGroup();
-			ImGui::TextUnformatted("Disabled");
+			ImGui::TextUnformatted(Translation::Tr("Disabled").c_str());
 			if (ImGui::BeginListBox("##disabledluascripts", {300.f, height}))
 			{
 				static std::optional<std::string> loadingScript;
@@ -73,7 +74,7 @@ namespace YimMenu::Submenus
 
 					if (ImGui::IsItemHovered())
 					{
-						ImGui::SetTooltip("Click to enable this script");
+						ImGui::SetTooltip("%s", Translation::Tr("Click to enable this script").c_str());
 					}
 				});
 				ImGui::PopStyleColor();
@@ -88,7 +89,7 @@ namespace YimMenu::Submenus
 			}
 			ImGui::EndGroup();
 
-			if (ImGui::Button("Open Lua Scripts Folder"))
+			if (ImGui::Button(Translation::TrLabel("Open Lua Scripts Folder").c_str()))
 			{
 				auto folder = std::filesystem::canonical(FileMgr::GetProjectFolder("./scripts").Path());
 				auto result = ShellExecuteW(nullptr, L"open", folder.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
@@ -120,14 +121,14 @@ namespace YimMenu::Submenus
 				ImGui::EndDisabled();
 				ImGui::SameLine();
 				ImGui::BeginDisabled(!running);
-				if (ImGui::Button("Reload"))
+				if (ImGui::Button(Translation::TrLabel("Reload").c_str()))
 				{
 					FiberPool::Push([script = selectedScript] {
 						script->Reload();
 					});
 				}
 				ImGui::SameLine();
-				if (ImGui::Button("Disable"))
+				if (ImGui::Button(Translation::TrLabel("Disable").c_str()))
 				{
 					LuaManager::DisableScript(std::string(selectedScript->GetPath()));
 				}

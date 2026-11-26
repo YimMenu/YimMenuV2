@@ -1,4 +1,5 @@
 #include "Settings.hpp"
+#include "core/translation/Translation.hpp"
 
 #include "core/commands/Commands.hpp"
 #include "core/commands/HotkeySystem.hpp"
@@ -14,8 +15,8 @@ namespace YimMenu::Submenus
 	// TODO: refactor this
 	static void Hotkeys()
 	{
-		ImGui::BulletText("Hold the button with the command name and enter a keystroke to change its hotkey");
-		ImGui::BulletText("If a command has an existing hotkey, clicking the button will remove it");
+		ImGui::BulletText("%s", Translation::Tr("Hold the button with the command name and enter a keystroke to change its hotkey").c_str());
+		ImGui::BulletText("%s", Translation::Tr("If a command has an existing hotkey, clicking the button will remove it").c_str());
 
 		ImGui::Spacing();
 		ImGui::Separator();

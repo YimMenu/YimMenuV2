@@ -1,6 +1,7 @@
 #include "game/pointers/Pointers.hpp"
 #include "game/frontend/Menu.hpp"
 #include "core/frontend/manager/UIManager.hpp"
+#include "core/translation/Translation.hpp"
 #include "game/frontend/submenus/Settings/GUISettings.hpp"
 
 namespace YimMenu
@@ -28,7 +29,9 @@ namespace YimMenu
 
 				for (auto& submenu : submenus)
 				{
-					if (ImGui::Selectable(submenu->m_Name.data(), (submenu == activeSubmenu)))
+					const auto label = Translation::Tr(submenu->m_Name) + "##submenu_" + submenu->m_Name;
+
+					if (ImGui::Selectable(label.c_str(), (submenu == activeSubmenu)))
 					{
 						YimMenu::UIManager::SetActiveSubmenu(submenu);
 						YimMenu::UIManager::SetShowContentWindow(true);

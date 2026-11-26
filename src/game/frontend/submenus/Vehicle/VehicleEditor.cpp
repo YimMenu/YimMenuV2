@@ -199,10 +199,16 @@ namespace YimMenu::Submenus
 				}
 				ImGui::SeparatorText("Mod Options");
 				{
-					if (ImGui::Checkbox("Burstible tires", (bool*)&owned_mods[(int)CustomVehicleModType::MOD_TIRE_CAN_BURST]))
+					bool bulletproof_tires = !owned_mods[(int)CustomVehicleModType::MOD_TIRE_CAN_BURST];
+
+					if (ImGui::Checkbox("Bulletproof Tires", &bulletproof_tires))
+					{
+						owned_mods[(int)CustomVehicleModType::MOD_TIRE_CAN_BURST] = !bulletproof_tires;
+
 						FiberPool::Push([] {
 							VEHICLE::SET_VEHICLE_TYRES_CAN_BURST(currentVeh, owned_mods[(int)CustomVehicleModType::MOD_TIRE_CAN_BURST]);
 						});
+					}
 					ImGui::SameLine();
 					if (ImGui::Checkbox("Low Grip Tires", (bool*)&owned_mods[(int)CustomVehicleModType::MOD_DRIFT_TIRE]))
 
@@ -353,24 +359,45 @@ namespace YimMenu::Submenus
 						}
 					}
 				}
-				ImGui::SeparatorText("Extras");
+
+				bool has_extras = false;
+
+				for (int extra = (int)CustomVehicleModType::MOD_EXTRA_1; extra >= (int)CustomVehicleModType::MOD_EXTRA_14; extra--)
 				{
+					if (owned_mods.find(extra) != owned_mods.end())
+					{
+						has_extras = true;
+						break;
+					}
+				}
+
+				if (has_extras)
+				{
+					ImGui::SeparatorText("Extras");
+
 					for (int extra = (int)CustomVehicleModType::MOD_EXTRA_1; extra >= (int)CustomVehicleModType::MOD_EXTRA_14; extra--)
+					{
 						if (owned_mods.find(extra) != owned_mods.end())
 						{
 							int id = (extra - (int)CustomVehicleModType::MOD_EXTRA_1) * -1;
 							bool is_extra_enabled = owned_mods[extra] == 1;
+
 							if (ImGui::Checkbox(std::format("{}###extra{}", id, id).c_str(), &is_extra_enabled))
 							{
 								owned_mods[extra] = is_extra_enabled;
+
 								FiberPool::Push([id, is_extra_enabled] {
 									VEHICLE::SET_VEHICLE_EXTRA(currentVeh, id, !is_extra_enabled);
 								});
 							}
+
 							ImGui::SameLine();
 						}
+					}
+
 					ImGui::NewLine();
 				}
+
 				ImGui::SeparatorText("Neon Light Options");
 				{
 					ImGui::PushID("##headlight_en");
@@ -598,7 +625,7 @@ namespace YimMenu::Submenus
 
 						ImGui::SameLine();
 						ImGui::SetNextItemWidth(214);
-						if (ImGui::ColorPicker3("Custom Vehicle Color", color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHSV | ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHex))
+						if (ImGui::ColorPicker3("Custom Vehicle Color", color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex))
 						{
 							*color_r = (int)(color[0] * 255);
 							*color_g = (int)(color[1] * 255);

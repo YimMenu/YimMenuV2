@@ -34,7 +34,7 @@ ImGui لا يدعم تشكيل الحروف العربية ولا اتجاه RTL
    - `YimMenuV2-arabic-<sha>.pdb`
    - `SHA256.txt`
 
-البناء يستخدم نفس إعدادات البناء الرسمي: Clang + MSVC environment + Ninja + RelWithDebInfo.
+البناء يستخدم نفس إعدادات البناء الرسمي: Clang + MSVC environment + Ninja + RelWithDebInfo، مع تثبيت العامل على `windows-2022` لأن `windows-latest` أصبح يوفّر MSVC 14.52 الذي يتطلب Clang 22 بينما العامل يوفّر Clang 20.
 
 ## تحديث الترجمات
 

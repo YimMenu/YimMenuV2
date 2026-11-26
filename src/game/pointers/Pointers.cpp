@@ -418,6 +418,11 @@ namespace YimMenu
 			GetAnticheatInitializedHash2 = ptr.Add(0x9).Rip().As<PVOID>();
 		});
 
+		constexpr auto codeTamperReportPatchPtrn = Pattern<"74 ? 80 3D ? ? ? ? 00 75 ? F6 05">("CodeTamperReportPatch");
+		scanner.Add(codeTamperReportPatchPtrn, [this](PointerCalculator ptr) {
+			BytePatches::Add(ptr.As<std::uint8_t*>(), 0xEB)->Apply();
+		});
+
 		constexpr auto abilityBarPatchPtrn = Pattern<"75 39 48 85 F6 74 1A 48 89 F1 E8">("AbilityBarPatch");
 		scanner.Add(abilityBarPatchPtrn, [this](PointerCalculator ptr) {
 			AbilityBarPatch = BytePatches::Add(ptr.As<std::uint16_t*>(), 0x9090);
